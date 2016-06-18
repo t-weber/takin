@@ -1,0 +1,3 @@
+[submodule "tlibs"]
+	path = tlibs
+	url = https://t-weber@github.com/t-weber/tlibs.git
