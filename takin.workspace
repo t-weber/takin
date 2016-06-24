@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="takin" Database="">
+  <Environment>
+    <![CDATA[]]>
+  </Environment>
+  <Project Name="takin" Path="takin.project" Active="Yes"/>
+  <Project Name="scanviewer" Path="scanviewer.project" Active="No"/>
+  <Project Name="montereso" Path="montereso.project" Active="No"/>
+  <Project Name="monteconvo" Path="monteconvo.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Project Name="takin" ConfigName="Debug"/>
+      <Project Name="scanviewer" ConfigName="Debug"/>
+      <Project Name="montereso" ConfigName="Debug"/>
+      <Project Name="monteconvo" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="no">
+      <Project Name="takin" ConfigName="Release"/>
+      <Project Name="scanviewer" ConfigName="Release"/>
+      <Project Name="montereso" ConfigName="Release"/>
+      <Project Name="monteconvo" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

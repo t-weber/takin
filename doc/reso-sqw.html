@@ -1,0 +1,95 @@
+<html>
+<head>
+	<title>Internal S(q,w) Models</title>
+</head>
+
+<body>
+	<h1>Internal S(q,w) Models</h1>
+
+	Internal S(q,w) models include the following:
+
+
+	<h3>Elastic Model</h3>
+		<p>The elastic S(q,w) model consists of a list of elastic peaks which
+		are used to simulate Bragg tails. Each line defines a peak, with the
+		columns of each line being: h, k, l, q width, E width, and S.</p>
+
+		<p>Here's a sample input file defining three Bragg peaks:
+		<code><pre>
+		1 0 0    0.002 0.01    0.5
+		1 1 0    0.002 0.01    1
+		2 2 0    0.002 0.01    5
+		</pre></code> </p>
+
+
+	<h3>Tabulated Model</h3>
+		<p>This model loads a table of S(Q,w) points in the four-dimensional (Q,E)
+		space and constructs a kd-tree out of it. As with the "elastic model"
+		each line defines one point. The columns are h, k, l, E, and S.</p>
+
+		<p>Here's a (very unrealistic) sample input file defining three points.
+		A realistic input file would include tens of thousands of points to cover
+		a fine and large enough grid in (Q,E) space.
+		<code><pre>
+		1 0 0    0    1
+		1 0 0  0.5    0.5
+		1 0 0 -0.5    0.5
+		</pre></code> </p>
+
+
+	<h3>Simple Phonon Model</h3>
+		<p>With the simple phonon model sinusoidal phonon branches can be defined
+		around a given Bragg peak.</p>
+		
+		<p>In the following input file we define a longitudinal [110] and two
+		transverse ([001] and [1-10]) branches around the (440) peak:
+
+		<code><pre>
+		G               = 4,  4, 0
+		TA1             = 0,  0, 1
+		TA2             = 1, -1, 0
+
+		LA_amp          = 25
+		LA_freq         = 0.5*pi
+		LA_E_HWHM       = 0.1
+		LA_q_HWHM       = 0.05
+		LA_S0           = 1
+
+		TA1_amp         = 15
+		TA1_freq        = 0.5*pi/sqrt(2)
+		TA1_E_HWHM      = 0.2
+		TA1_q_HWHM      = 0.025
+		TA1_S0          = 1
+
+		TA2_amp         = 10
+		TA2_freq        = 0.5*pi/sqrt(2)
+		TA2_E_HWHM      = 0.2
+		TA2_q_HWHM      = 0.025
+		TA2_S0          = 1
+		</pre></code> </p>
+
+
+
+	<h3>Simple Magnon Model</h3>
+		<p>The simple magnon model creates quadratic (ferromagnetic) or linear (antiferromagnetic)
+		branches spherically around a given Bragg peak.</p>
+		
+		<p>In the following input file we define magnons with a stiffness of D=20 around the 
+		(110) peak:
+
+		<code><pre>
+		disp            = 0
+		G               = 1,  1, 0
+
+		D               = 20
+		offs            = 0.
+		E_HWHM          = 0.05
+		q_HWHM          = 0.05
+		S0              = 1
+
+		num_points      = 50
+	</pre></code> </p>
+
+</body>
+
+</html>

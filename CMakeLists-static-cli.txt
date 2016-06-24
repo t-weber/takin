@@ -1,0 +1,77 @@
+#
+# Takin, cli client
+# @author tweber
+# @date 2014-2016
+# @license GPLv2
+#
+
+project(takincli)
+cmake_minimum_required(VERSION 3.0)
+
+#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_BUILD_TYPE Release)
+
+
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}" "." "${PROJECT_SOURCE_DIR}/tlibs")
+set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+
+find_package(Boost REQUIRED COMPONENTS iostreams system filesystem regex REQUIRED)
+find_package(Threads REQUIRED)
+
+#message("Project source dir: ${PROJECT_SOURCE_DIR}")
+#message("CMake source dir: ${CMAKE_SOURCE_DIR}")
+#message("Binary dir: ${CMAKE_BINARY_DIR}")
+message("Install path prefix: ${CMAKE_INSTALL_PREFIX}")
+
+add_definitions(-DNDEBUG)
+add_definitions(-DUSE_NET -DUSE_IOSTR -DUSE_BOOST_REX)
+add_definitions(-DNO_LAPACK -DNO_3D -DNO_CLP -DNO_QT)
+add_definitions(-DNO_JPEG -DNO_TIFF -DNO_PNG)
+add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+add_definitions(${Boost_CXX_FLAGS})
+add_definitions(-DTLIBS_INC_HDR_IMPLS)
+
+
+include_directories("${PROJECT_SOURCE_DIR}" ".")
+include_directories("${Boost_INCLUDE_DIRS}/..")
+
+add_definitions(-std=c++11)
+#add_definitions(-march=native -s)
+
+
+# -----------------------------------------------------------------------------
+add_executable(takincli 
+	tools/cli/cli_main.cpp
+
+	tools/res/cn.cpp tools/res/pop.cpp tools/res/eck.cpp tools/res/viol.cpp
+	tools/res/simple.cpp
+	tools/monteconvo/TASReso.cpp
+
+	# statically link to tlibs externals
+	tlibs/log/log.cpp
+	tlibs/math/rand.cpp
+	#tlibs/file/loadinstr.cpp
+	#tlibs/fit/minuit.cpp
+	#libs/globals.cpp
+)
+
+target_link_libraries(takincli
+	Threads::Threads ${Boost_LIBRARIES}
+)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+	add_custom_command(TARGET takincli POST_BUILD
+		COMMAND strip -v $<TARGET_FILE:takincli>
+		MAIN_DEPENDENCY takincli
+	)
+endif()
+# -----------------------------------------------------------------------------
+
+
+
+# -----------------------------------------------------------------------------
+# install
+# -----------------------------------------------------------------------------
+install(TARGETS takincli DESTINATION bin)
+# -----------------------------------------------------------------------------

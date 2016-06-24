@@ -1,0 +1,546 @@
+#CC = gcc
+CC = clang
+
+DO_DEBUG = 0
+NATIVE_OPTS = 1
+IS_UNSTABLE = 0
+QT_VER = 4
+QWT_VER = 6
+USE_LAPACK = 0
+USE_3D = 1
+USE_NET = 1
+USE_IOSTR = 1
+USE_BOOST_REGEX = 0
+USE_GIL = 1
+USE_PY = 1
+USE_PLUGINS = 1
+USE_CPP11_ABI = 1
+
+BOOST_SUFFIX = 
+#BOOST_SUFFIX = -mt
+QWT5_SUFFIX = 
+#QWT5_SUFFIX = -qt4
+
+# -----------------------------------------------------------------------------
+
+
+DEFINES = -DNO_JPEG -DNO_TIFF
+
+ifeq ($(IS_UNSTABLE), 1)
+	DEFINES += -DIS_EXPERIMENTAL_BUILD
+endif
+
+ifeq ($(USE_3D), 1)
+	DEFINES += -DUSE_3D
+else
+	DEFINES += -DNO_3D
+endif
+
+ifeq ($(USE_NET), 1)
+	DEFINES += -DUSE_NET
+else
+	DEFINES += -DNO_NET
+endif
+
+ifeq ($(USE_IOSTR), 1)
+	DEFINES += -DUSE_IOSTR
+else
+	DEFINES += -DNO_IOSTR
+endif
+
+ifeq ($(USE_BOOST_REGEX), 1)
+	DEFINES += -DUSE_BOOST_REX
+endif
+
+ifeq ($(USE_PY), 1)
+	DEFINES += -DUSE_PY
+else
+	DEFINES += -DNO_PY
+endif
+
+ifeq ($(USE_GIL), 1)
+	DEFINES += -DUSE_GIL
+else
+	DEFINES += -DNO_GIL
+endif
+
+ifeq ($(USE_PLUGINS), 1)
+	DEFINES += -DUSE_PLUGINS
+else
+	DEFINES += -DNO_PLUGINS
+endif
+
+DEFINES += -DQWT_VER=$(QWT_VER)
+DEFINES += -DQT_VER=$(QT_VER)
+
+
+# -----------------------------------------------------------------------------
+
+
+ifeq ($(QT_VER), 5)
+	QT_INC = -I/opt/local/libexec/qt5/include -I/opt/local/libexec/qt5/include/QtCore -I/opt/local/libexec/qt5/include/QtGui -I/opt/local/libexec/qt5/include/QtOpenGL \
+		-I/usr/include/qt5 -I/usr/include/qt5/QtCore -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui \
+		-I/usr/include/QtOpenGL
+	QT_LIB = -L/opt/local/libexec/qt5/lib -L/usr/lib64/qt5 -L/usr/lib/qt5/lib \
+		-lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg -lQt5Concurrent
+	ifeq ($(USE_3D), 1)
+		QT_LIB += -lQt5OpenGL
+	endif
+else
+	QT_INC = -I/opt/local/libexec/qt4/include -I/opt/local/libexec/qt4/include/QtCore -I/opt/local/libexec/qt4/include/QtGui -I/opt/local/libexec/qt4/include/QtOpenGL \
+		-I/usr/include/qt4 -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui -I/usr/include/qt4/QtOpenGL \
+		-I/usr/include/QtCore -I/usr/include/QtGui -I/usr/include/QtOpenGL
+	QT_LIB = -L/opt/local/libexec/qt4/lib -L/usr/lib64/qt4 -L/usr/lib/qt4/lib \
+		-lQtCore -lQtGui -lQtSvg
+        ifeq ($(USE_3D), 1)
+                QT_LIB += -lQtOpenGL
+        endif
+endif
+
+ifeq ($(QWT_VER), 6)
+	ifeq ($(QT_VER), 5)
+		QWT_INC = -I/opt/local/libexec/qt5/include/qwt \
+			-I/usr/include/qt5/qwt -I/usr/include/qwt-qt5
+		QWT_LIB = -lqwt-qt5
+	else
+		QWT_INC = -I/opt/local/libexec/qt4/include/qwt \
+			-I/usr/include/qwt6 -I/usr/include/qwt -I/usr/include/qwt-qt4 -I/usr/local/qwt/include
+		QWT_LIB = -L/usr/local/qwt/lib -lqwt
+	endif
+else
+	QWT_INC = -I/usr/include/qwt5 -I/usr/include/qwt-qt4 -I/usr/local/qwt/include
+	QWT_LIB = -L/usr/local/qwt/lib -lqwt${QWT5_SUFFIX}
+endif
+
+
+
+INC = ${QT_INC} ${QWT_INC} -I . -I/opt/local/include -I/usr/local/include \
+	-I/opt/include -I/usr/include/freetype2 -I/usr/include/lapacke \
+	-I/usr/include/python2.7 -I/usr/include/root -I/usr/include
+LIB_DIRS = -L/opt/local/lib -L/opt/lib -L/usr/local/lib -L/usr/local/lib64 \
+	-L/usr/lib64 -L/usr/lib64/root -L/usr/lib/x86_64-linux-gnu
+
+
+STD_LIBS = -lstdc++ -lm
+STD_LIBS += -lpthread
+
+
+ifeq ($(DO_DEBUG), 0)
+	FLAGS = ${INC} -O2 -std=c++11 -DNDEBUG -Wall -Wpedantic -Wextra -fPIC
+	ifeq ($(NATIVE_OPTS), 1)
+		FLAGS += -march=native
+	else
+		FLAGS += -mtune=native
+	endif
+	FLAGS += -ffast-math
+	#FLAGS += -flto -fexpensive-optimizations
+	FLAGS += -DQT_NO_DEBUG
+	FLAGS += ${DEFINES}
+	STRIP = strip -v 
+else
+	FLAGS = ${INC} -std=c++11 -rdynamic -ggdb -DDEBUG -Wall -Wall -Wpedantic -Wextra -Weffc++ -fPIC ${DEFINES}
+	STRIP = echo Retaining debug symbols of 
+endif
+
+
+FLAGS += -D_GLIBCXX_USE_CXX11_ABI=${USE_CPP11_ABI}
+
+
+
+ifeq ($(USE_LAPACK), 1)
+	DEFINES += -DUSE_LAPACK
+	LAPACK_LIBS = -llapacke -llapack
+	#LAPACK_LIBS += -lblas -lgfortran
+else
+	DEFINES += -DNO_LAPACK
+	LAPACK_LIBS = 
+endif
+
+# actually: boost libs...
+BASIC_LIBS = -lboost_system${BOOST_SUFFIX} -lboost_filesystem${BOOST_SUFFIX}
+
+ifeq ($(USE_3D), 1)
+	GL_LIBS = -lX11 -lGL -lGLU -lfreetype -lfontconfig
+else
+	GL_LIBS = 
+endif
+
+ifeq ($(USE_IOSTR), 1)
+	BASIC_LIBS += -lboost_iostreams${BOOST_SUFFIX}
+endif
+
+ifeq ($(USE_BOOST_REGEX), 1)
+	BASIC_LIBS += -lboost_regex${BOOST_SUFFIX}
+endif
+
+ifeq ($(USE_PY), 1)
+	PY_LIBS = -lboost_python${BOOST_SUFFIX} -lpython2.7
+	PY_OBJS = obj/sqw_py.o 
+else
+	PY_LIBS =
+	PY_OBJS =
+endif
+
+ifeq ($(USE_GIL), 1)
+	GIL_LIBS = -lpng #-ljpeg -ltiff
+else
+	GIL_LIBS =
+endif
+
+ifeq ($(USE_PLUGINS), 1)
+	DL_LIBS = -ldl
+else
+	DL_LIBS =
+endif
+
+
+LIBS_TAZ = ${STD_LIBS} ${QT_LIB} ${BASIC_LIBS} ${GL_LIBS} ${PY_LIBS} ${GIL_LIBS} ${DL_LIBS}
+LIBS_RESO = ${QWT_LIB} ${STD_LIBS} ${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS}
+
+
+# -----------------------------------------------------------------------------
+
+
+OBJ_COMMON = obj/log.o obj/debug.o obj/rand.o obj/linalg2.o \
+	obj/spec_char.o obj/EllipseDlg.o
+
+OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
+	obj/taz_file.o obj/taz_export.o \
+	obj/scattering_triangle.o obj/real_lattice.o \
+	obj/proj_lattice.o \
+	obj/tas_layout.o obj/tof_layout.o \
+	obj/RecipParamDlg.o obj/RealParamDlg.o obj/GotoDlg.o obj/PowderDlg.o \
+	obj/DispDlg.o \
+	obj/SettingsDlg.o obj/DWDlg.o obj/DynPlaneDlg.o obj/FormfactorDlg.o \
+	obj/FilePreviewDlg.o obj/AtomsDlg.o \
+	obj/SpurionDlg.o obj/NeutronDlg.o \
+	obj/crystalsys.o obj/formfact.o \
+	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
+	obj/ResoDlg.o obj/loadinstr.o obj/recent.o obj/globals.o \
+	obj/globals_qt.o obj/qthelper.o \
+	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} obj/tasreso.o \
+	obj/ConvoDlg.o obj/SqwParamDlg.o \
+	obj/scanviewer.o obj/x3d.o obj/eval.o \
+	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o
+
+OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
+	obj/qthelper.o obj/globals.o obj/globals_qt.o
+
+OBJ_MONTECONVO = obj/log.o obj/debug.o obj/sqw.o obj/sqwbase.o \
+	obj/sqwfact.o ${PY_OBJS} obj/cn.o obj/pop.o obj/eck.o obj/viol.o \
+	obj/rand.o obj/tasreso.o obj/eval.o \
+	obj/linalg2.o
+
+OBJ_CONVOFIT = obj/convofit.o obj/convo_scan.o obj/convo_model.o \
+	obj/loadinstr.o obj/eval.o obj/gnuplot.o ${OBJ_MONTECONVO} \
+	obj/globals.o
+OBJ_CONVOSERIES = obj/scanseries.o obj/log.o obj/debug.o
+
+OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
+	obj/spec_char.o obj/reso_res_main.o \
+	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o obj/ResoDlg.o \
+	obj/linalg2.o obj/globals.o obj/globals_qt.o
+
+OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
+	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
+	obj/globals.o obj/globals_qt.o
+
+OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o \
+	obj/log.o obj/debug.o obj/globals.o obj/globals_qt.o
+
+OBJ_GENTAB = obj/spacegroup_clp.o obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
+	obj/debug.o
+
+OBJ_SFACT = obj/sfact.o obj/spacegroup_clp.o obj/crystalsys_noqt.o obj/globals.o \
+	obj/formfact.o obj/log.o obj/debug.o
+
+
+ifeq ($(USE_3D), 1)
+	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/EllipseDlg3D.o
+endif
+
+ifeq ($(USE_NET), 1)
+	OBJ_TAZ += obj/tcp.o obj/nicos.o obj/sics.o obj/taz_net.o \
+	obj/SrvDlg.o obj/NetCacheDlg.o
+else
+	OBJ_TAZ += obj/taz_nonet.o
+endif
+
+OBJ_TAZ += obj/SgListDlg.o obj/spacegroup.o
+#LIBS_TAZ += 
+
+
+# -----------------------------------------------------------------------------
+
+
+.PHONY: all clean #doc
+
+all: takin  montereso  monteconvo xmonteconvo posextract \
+	scanviewer  gentab sglist sfact  convofit convoseries reso
+
+
+takin: ${OBJ_COMMON} ${OBJ_TAZ}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/takin $+ ${LIBS_TAZ} ${LIBS_RESO}
+	${STRIP} bin/takin
+
+montereso: ${OBJ_COMMON} ${OBJ_MONTERESO}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/montereso $+ \
+		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} ${LAPACK_LIBS}
+	${STRIP} montereso
+
+monteconvo: ${OBJ_MONTECONVO} obj/globals.o obj/mconv_main.o
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/monteconvo $+ \
+		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS}
+	${STRIP} monteconvo
+
+xmonteconvo: ${OBJ_MONTECONVO} obj/xmconv_main.o obj/ConvoDlg.o obj/qthelper.o \
+	obj/globals.o obj/globals_qt.o obj/SqwParamDlg.o obj/convo_scan.o obj/loadinstr.o
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/xmonteconvo $+ \
+		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} \
+		${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS}
+	${STRIP} xmonteconvo
+
+convofit: ${OBJ_CONVOFIT}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/convofit $+ \
+		-lMinuit2 ${STD_LIBS} ${BASIC_LIBS} ${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS}
+	${STRIP} convofit
+convoseries: ${OBJ_CONVOSERIES}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/convoseries $+ ${BASIC_LIBS} ${STD_LIBS}
+
+posextract: obj/posextract.o obj/loadinstr.o obj/log.o obj/debug.o
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/posextract $+ ${STD_LIBS} ${BASIC_LIBS}
+	${STRIP} posextract
+
+reso: ${OBJ_RESO}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/reso $+ \
+		${STD_LIBS} ${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS} -lX11
+	${STRIP} reso
+
+scanviewer: ${OBJ_SCANVIEWER}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/scanviewer $+ \
+		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB}
+	${STRIP} scanviewer
+
+sglist: ${OBJ_SGLIST}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sglist $+ \
+		${STD_LIBS} ${QT_LIB} ${BASIC_LIBS}
+	${STRIP} sglist
+
+gentab: ${OBJ_GENTAB}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/gentab $+ \
+		${STD_LIBS} ${BASIC_LIBS} -lclipper-core
+
+sfact: ${OBJ_SFACT}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sfact $+ \
+		${STD_LIBS} ${BASIC_LIBS} -lclipper-core
+
+doc: doc/takin.qhcp doc/takin.qhp doc/*.html
+	qcollectiongenerator doc/takin.qhcp -o doc/takin.qhc
+	cp -v doc/takin.qhc res/
+	cp -v doc/takin.qch res/
+
+
+# -----------------------------------------------------------------------------
+
+
+obj/taz_main.o: tools/taz/taz_main.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/taz.o: tools/taz/taz.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/taz_crys.o: tools/taz/taz_crys.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/taz_net.o: tools/taz/taz_net.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/taz_nonet.o: tools/taz/taz_nonet.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/taz_file.o: tools/taz/taz_file.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/taz_export.o: tools/taz/taz_export.cpp tools/taz/taz.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/recip3d.o: tools/taz/recip3d.cpp tools/taz/recip3d.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/scattering_triangle.o: tools/taz/scattering_triangle.cpp tools/taz/scattering_triangle.h tlibs/math/lattice.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/real_lattice.o: tools/taz/real_lattice.cpp tools/taz/real_lattice.h tlibs/math/lattice.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/proj_lattice.o: tools/taz/proj_lattice.cpp tools/taz/proj_lattice.h tlibs/math/lattice.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/tas_layout.o: tools/taz/tas_layout.cpp tools/taz/tas_layout.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/tof_layout.o: tools/taz/tof_layout.cpp tools/taz/tof_layout.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/RecipParamDlg.o: dialogs/RecipParamDlg.cpp dialogs/RecipParamDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/RealParamDlg.o: dialogs/RealParamDlg.cpp dialogs/RealParamDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/GotoDlg.o: dialogs/GotoDlg.cpp dialogs/GotoDlg.h tlibs/math/lattice.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/AtomsDlg.o: dialogs/AtomsDlg.cpp dialogs/AtomsDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/SettingsDlg.o: dialogs/SettingsDlg.cpp dialogs/SettingsDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/globals.o: libs/globals.cpp libs/globals.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/globals_qt.o: libs/globals_qt.cpp libs/globals_qt.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/qthelper.o: libs/qthelper.cpp libs/qthelper.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/PowderDlg.o: dialogs/PowderDlg.cpp dialogs/PowderDlg.h tlibs/math/lattice.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/DispDlg.o: dialogs/DispDlg.cpp dialogs/DispDlg.h tlibs/math/nn.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/SpurionDlg.o: dialogs/SpurionDlg.cpp dialogs/SpurionDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/DWDlg.o: dialogs/DWDlg.cpp dialogs/DWDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/FilePreviewDlg.o: dialogs/FilePreviewDlg.cpp dialogs/FilePreviewDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/DynPlaneDlg.o: dialogs/DynPlaneDlg.cpp dialogs/DynPlaneDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/FormfactorDlg.o: dialogs/FormfactorDlg.cpp dialogs/FormfactorDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/NeutronDlg.o: dialogs/NeutronDlg.cpp dialogs/NeutronDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/SrvDlg.o: dialogs/SrvDlg.cpp dialogs/SrvDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/NetCacheDlg.o: dialogs/NetCacheDlg.cpp dialogs/NetCacheDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/nicos.o: tools/taz/nicos.cpp tools/taz/nicos.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/sics.o: tools/taz/sics.cpp tools/taz/sics.h
+	${CC} ${FLAGS} -c -o $@ $<
+
+obj/tlibs_ver.o: tlibs/version.cpp tlibs/version.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/spec_char.o: tlibs/string/spec_char.cpp tlibs/string/spec_char.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/log.o: tlibs/log/log.cpp tlibs/log/log.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/debug.o: tlibs/log/debug.cpp tlibs/log/debug.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/tcp.o: tlibs/net/tcp.cpp tlibs/net/tcp.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/linalg2.o: tlibs/math/linalg2.cpp tlibs/math/linalg2.h tlibs/math/geo.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/spacegroup_clp.o: libs/spacegroups/spacegroup_clp.cpp libs/spacegroups/spacegroup_clp.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/spacegroup.o: libs/spacegroups/spacegroup.cpp libs/spacegroups/spacegroup.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/crystalsys.o: libs/spacegroups/crystalsys.cpp libs/spacegroups/crystalsys.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/formfact.o: libs/formfactors/formfact.cpp libs/formfactors/formfact.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/rand.o: tlibs/math/rand.cpp tlibs/math/rand.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/plotgl.o: libs/plotgl.cpp libs/plotgl.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/gl.o: tlibs/gfx/gl.cpp tlibs/gfx/gl.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/gnuplot.o: tlibs/gfx/gnuplot.cpp tlibs/gfx/gnuplot.h tlibs/gfx/gnuplot_impl.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/loadinstr.o: tlibs/file/loadinstr.cpp tlibs/file/loadinstr.h
+	${CC} ${FLAGS} -c -o $@ $<
+#obj/loadtxt.o: tlibs/old/loadtxt.cpp tlibs/old/loadtxt.h
+#	${CC} ${FLAGS} -c -o $@ $<
+obj/x3d.o: tlibs/file/x3d.cpp tlibs/file/x3d.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/recent.o: tlibs/file/recent.cpp tlibs/file/recent.h
+	${CC} ${FLAGS} -c -o $@ $<
+#obj/minuit.o: tlibs/fit/minuit.cpp tlibs/fit/minuit.h
+#	${CC} ${FLAGS} -c -o $@ $<
+obj/eval.o: tlibs/string/eval.cpp tlibs/string/eval.h tlibs/string/eval_impl.h
+	${CC} ${FLAGS} -c -o $@ $<
+
+obj/cn.o: tools/res/cn.cpp tools/res/cn.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/pop.o: tools/res/pop.cpp tools/res/pop.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/eck.o: tools/res/eck.cpp tools/res/eck.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/viol.o: tools/res/viol.cpp tools/res/viol.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/simple.o: tools/res/simple.cpp tools/res/simple.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+#obj/ellipse.o: tools/res/ellipse.cpp tools/res/ellipse.h
+#	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/ResoDlg.o: tools/res/ResoDlg.cpp tools/res/ResoDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/ConvoDlg.o: tools/monteconvo/ConvoDlg.cpp tools/monteconvo/ConvoDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/SqwParamDlg.o: tools/monteconvo/SqwParamDlg.cpp tools/monteconvo/SqwParamDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/EllipseDlg.o: dialogs/EllipseDlg.cpp dialogs/EllipseDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/EllipseDlg3D.o: dialogs/EllipseDlg3D.cpp dialogs/EllipseDlg3D.h
+	${CC} ${FLAGS} -c -o $@ $<
+
+obj/montereso_res.o: tools/montereso/res.cpp tools/montereso/res.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/montereso_res_main.o: tools/montereso/res_main.cpp
+	${CC} ${FLAGS} -c -o $@ $<
+obj/reso_res_main.o: tools/res/res_main.cpp
+	${CC} ${FLAGS} -c -o $@ $<
+
+obj/mconv_main.o: tools/monteconvo/mconv_main.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/xmconv_main.o: tools/monteconvo/xmconv_main.cpp
+	${CC} ${FLAGS} -c -o $@ $<
+obj/sqw.o: tools/monteconvo/sqw.cpp tools/monteconvo/sqw.h tlibs/math/kd.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/sqwbase.o: tools/monteconvo/sqwbase.cpp tools/monteconvo/sqwbase.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/sqwfact.o: tools/monteconvo/sqwfactory.cpp tools/monteconvo/sqwfactory.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/sqw_py.o: tools/monteconvo/sqw_py.cpp tools/monteconvo/sqw_py.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/tasreso.o: tools/monteconvo/TASReso.cpp tools/monteconvo/TASReso.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/posextract.o: tools/posextract/posextract.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+
+obj/convofit.o: tools/convofit/convofit.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/convo_scan.o: tools/convofit/scan.cpp tools/convofit/scan.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/convo_model.o: tools/convofit/model.cpp tools/convofit/model.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/scanseries.o: tools/convofit/scanseries.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+
+obj/scanviewer_main.o: tools/scanviewer/main.cpp
+	${CC} ${FLAGS} -c -o $@ $<
+obj/scanviewer.o: tools/scanviewer/scanviewer.cpp tools/scanviewer/scanviewer.h
+	${CC} ${FLAGS} -c -o $@ $<
+
+obj/gentab.o: tools/gentab/gentab.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+
+obj/sglist_main.o: tools/sglist/main.cpp
+	${CC} ${FLAGS} -c -o $@ $<
+obj/SgListDlg.o: tools/sglist/SgListDlg.cpp tools/sglist/SgListDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+
+obj/crystalsys_noqt.o: libs/spacegroups/crystalsys.cpp libs/spacegroups/crystalsys.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/sfact.o: tools/sggen/sfact.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+
+obj/AboutDlg.o: dialogs/AboutDlg.cpp dialogs/AboutDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+
+
+# -----------------------------------------------------------------------------
+
+
+clean:
+	find bin -regex 'bin/[_a-zA-Z0-9]*' | xargs rm -f
+	rm -f bin/*.exe
+	rm -f obj/*.o
+	rm -f ui/*.h
+	rm -f *.moc
+	rm -f tools/taz/*.moc
+	rm -f tools/res/*.moc
+	rm -f tools/scanviewer/*.moc
+	rm -f tools/monteconvo/*.moc
+	rm -f tools/sglist/*.moc
+	rm -f dialogs/*.moc

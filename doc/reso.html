@@ -1,0 +1,40 @@
+<html>
+<head>
+    <title>Resolution Calculation</title>
+</head>
+
+<body>
+	<h1>Resolution Calculation</h1>
+	<h3>Set-up</h3>
+
+	<p>For calculating the instrumental resolution at a given q=(hkl) and E position the instrumental parameters
+	have to be set-up first. This can be done using the option "Resolution" -> "Parameters..." in the menu
+	bar.</p>
+
+	<p>In the "Resolution Parameters" dialog box, an algorithm has to be set first. This is done in the
+	tab "Calculation". Depending on the selected algorithm various settings tabs will be enabled. 
+	These contain -- among other things -- the geometrical description of the instrument.</p>
+
+	<p>Once all parameters are entered, a valid resolution matrix should be displayed in the "Calculation"
+	tab.</p>
+
+	<p>Instrument configurations can either be saved using the "Save..." button in the "Resolution Parameters" 
+	dialog or via the menu bar in the Takin main window. The latter option saves the resolution settings
+	together with the crystal definition.</p>
+
+
+	<h3>Resolution Visualisation</h3>
+	<p>Clicking on "Resolution" -> "Ellipses..." in the menu bar shows a live view of the resolution function
+	at the current instrument position. The blue (green) ellipse is a sliced (projected) view of the
+	four-dimensional ellipsoid using the given projection planes.</p>
+
+	<p>Visualisation of the resolution ellipses can be done in several coordinate systems that are selected
+	using the combo box at the bottom of the dialog: The first option shows the momentum transfers in inverse
+	Angstroms in the standard coordinate system with x along Q and y perpendicular to Q. The second
+	option chooses the crystal's rlu coordinate system with the h axis along x, k along y and l along
+	z. The third option also uses the crystal's rlu system, but with the x and y axis along the
+	Bragg reflexes chosen on the "Recip. Plane" tab in the Takin main window.</p>
+
+</body>
+
+</html>

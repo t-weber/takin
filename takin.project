@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="takin" InternalType="GUI">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
+  "name": "Release",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+  </Plugins>
+  <VirtualDirectory Name="tlibs">
+    <VirtualDirectory Name="file">
+      <File Name="tlibs/file/file.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/file/loadtxt.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/file/file.h" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/file/loadtxt.h" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/file/comp.h" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/file/loadinstr.cpp"/>
+      <File Name="tlibs/file/loadinstr.h"/>
+      <File Name="tlibs/file/recent.cpp"/>
+      <File Name="tlibs/file/recent.h"/>
+      <File Name="tlibs/file/prop.h"/>
+      <File Name="tlibs/file/x3d.cpp"/>
+      <File Name="tlibs/file/x3d.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="gfx">
+      <File Name="tlibs/gfx/gl.cpp"/>
+      <File Name="tlibs/gfx/gl.h"/>
+      <File Name="tlibs/gfx/gnuplot.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/gfx/gnuplot.h" ExcludeProjConfig="Debug;Release"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="helper">
+      <File Name="tlibs/helper/flags.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/helper/flags.h" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/helper/misc.h"/>
+      <File Name="tlibs/helper/exception.h"/>
+      <File Name="tlibs/helper/traits.h"/>
+      <File Name="tlibs/helper/py.h"/>
+      <File Name="tlibs/helper/hash.h"/>
+      <File Name="tlibs/helper/thread.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="math">
+      <File Name="tlibs/math/fourier.h" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/math/rand.h"/>
+      <File Name="tlibs/math/linalg2.h"/>
+      <File Name="tlibs/math/fourier.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/math/linalg2.cpp"/>
+      <File Name="tlibs/math/linalg.h"/>
+      <File Name="tlibs/math/lattice.h"/>
+      <File Name="tlibs/math/rand.cpp"/>
+      <File Name="tlibs/math/bz.h"/>
+      <File Name="tlibs/math/quat.h"/>
+      <File Name="tlibs/math/geo.h"/>
+      <File Name="tlibs/math/neutrons.hpp"/>
+      <File Name="tlibs/math/mieze.hpp"/>
+      <File Name="tlibs/math/funcmod.h"/>
+      <File Name="tlibs/math/math.h"/>
+      <File Name="tlibs/math/dft.h"/>
+      <File Name="tlibs/math/powder.h"/>
+      <File Name="tlibs/math/kd.h"/>
+      <File Name="tlibs/math/atoms.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="net">
+      <File Name="tlibs/net/tcp.h"/>
+      <File Name="tlibs/net/tcp.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="string">
+      <File Name="tlibs/string/spec_char.cpp"/>
+      <File Name="tlibs/string/string.h"/>
+      <File Name="tlibs/string/spec_char.h"/>
+      <File Name="tlibs/string/eval.cpp"/>
+    </VirtualDirectory>
+    <File Name="tlibs/version.cpp"/>
+    <File Name="tlibs/version.h"/>
+    <VirtualDirectory Name="log">
+      <File Name="tlibs/log/debug.cpp"/>
+      <File Name="tlibs/log/debug.h"/>
+      <File Name="tlibs/log/log.cpp"/>
+      <File Name="tlibs/log/log.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="tools">
+    <VirtualDirectory Name="res">
+      <File Name="tools/res/ResoDlg.h"/>
+      <File Name="tools/res/pop.h"/>
+      <File Name="tools/res/pop.cpp"/>
+      <File Name="tools/res/cn.cpp"/>
+      <File Name="tools/res/ellipse.h"/>
+      <File Name="tools/res/ResoDlg.cpp"/>
+      <File Name="tools/res/cn.h"/>
+      <File Name="tools/res/eck.cpp"/>
+      <File Name="tools/res/eck.h"/>
+      <File Name="tools/res/viol.cpp"/>
+      <File Name="tools/res/viol.h"/>
+      <File Name="tools/res/simple.cpp"/>
+      <File Name="tools/res/simple.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="taz">
+      <File Name="tools/taz/taz.h"/>
+      <File Name="tools/taz/recip3d.h"/>
+      <File Name="tools/taz/tas_layout.h"/>
+      <File Name="tools/taz/tasoptions.h"/>
+      <File Name="tools/taz/scattering_triangle.cpp"/>
+      <File Name="tools/taz/nicos.h"/>
+      <File Name="tools/taz/recip3d.cpp"/>
+      <File Name="tools/taz/taz_main.cpp"/>
+      <File Name="tools/taz/taz.cpp"/>
+      <File Name="tools/taz/tas_layout.cpp"/>
+      <File Name="tools/taz/nicos.cpp"/>
+      <File Name="tools/taz/scattering_triangle.h"/>
+      <File Name="tools/taz/taz_net.cpp"/>
+      <File Name="tools/taz/taz_crys.cpp"/>
+      <File Name="tools/taz/taz_file.cpp"/>
+      <File Name="tools/taz/sics.cpp"/>
+      <File Name="tools/taz/sics.h"/>
+      <File Name="tools/taz/taz_export.cpp"/>
+      <File Name="tools/taz/real_lattice.cpp"/>
+      <File Name="tools/taz/real_lattice.h"/>
+      <File Name="tools/taz/net.h"/>
+      <File Name="tools/taz/tof_layout.cpp"/>
+      <File Name="tools/taz/tof_layout.h"/>
+      <File Name="tools/taz/proj_lattice.cpp"/>
+      <File Name="tools/taz/proj_lattice.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="monteconvo">
+      <File Name="tools/monteconvo/sqw.cpp"/>
+      <File Name="tools/monteconvo/sqw.h"/>
+      <File Name="tools/monteconvo/TASReso.cpp"/>
+      <File Name="tools/monteconvo/TASReso.h"/>
+      <File Name="tools/monteconvo/ConvoDlg.cpp"/>
+      <File Name="tools/monteconvo/ConvoDlg.h"/>
+      <File Name="tools/monteconvo/sqw_py.cpp"/>
+      <File Name="tools/monteconvo/sqw_py.h"/>
+      <File Name="tools/monteconvo/SqwParamDlg.cpp"/>
+      <File Name="tools/monteconvo/SqwParamDlg.h"/>
+      <File Name="tools/monteconvo/sqwbase.h"/>
+      <File Name="tools/monteconvo/sqwbase.cpp"/>
+      <File Name="tools/monteconvo/sqwfactory.cpp"/>
+      <File Name="tools/monteconvo/sqwfactory.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="scanviewer">
+      <File Name="tools/scanviewer/scanviewer.cpp"/>
+      <File Name="tools/scanviewer/scanviewer.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="sglist">
+      <File Name="tools/sglist/SgListDlg.cpp"/>
+      <File Name="tools/sglist/SgListDlg.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="convofit">
+      <File Name="tools/convofit/scan.cpp"/>
+      <File Name="tools/convofit/scan.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="dialogs">
+    <File Name="dialogs/SpurionDlg.h"/>
+    <File Name="dialogs/NeutronDlg.h"/>
+    <File Name="dialogs/GotoDlg.cpp"/>
+    <File Name="dialogs/SpurionDlg.cpp"/>
+    <File Name="dialogs/EllipseDlg3D.h"/>
+    <File Name="dialogs/EllipseDlg.h"/>
+    <File Name="dialogs/RealParamDlg.h"/>
+    <File Name="dialogs/SrvDlg.h"/>
+    <File Name="dialogs/GotoDlg.h"/>
+    <File Name="dialogs/EllipseDlg3D.cpp"/>
+    <File Name="dialogs/RecipParamDlg.h"/>
+    <File Name="dialogs/SrvDlg.cpp"/>
+    <File Name="dialogs/RecipParamDlg.cpp"/>
+    <File Name="dialogs/EllipseDlg.cpp"/>
+    <File Name="dialogs/NeutronDlg.cpp"/>
+    <File Name="dialogs/RealParamDlg.cpp"/>
+    <File Name="dialogs/NetCacheDlg.cpp"/>
+    <File Name="dialogs/NetCacheDlg.h"/>
+    <File Name="dialogs/PowderDlg.cpp"/>
+    <File Name="dialogs/PowderDlg.h"/>
+    <File Name="dialogs/SettingsDlg.h"/>
+    <File Name="dialogs/SettingsDlg.cpp"/>
+    <File Name="dialogs/DWDlg.cpp"/>
+    <File Name="dialogs/DWDlg.h"/>
+    <File Name="dialogs/DynPlaneDlg.cpp"/>
+    <File Name="dialogs/DynPlaneDlg.h"/>
+    <File Name="dialogs/FilePreviewDlg.cpp"/>
+    <File Name="dialogs/FilePreviewDlg.h"/>
+    <File Name="dialogs/FormfactorDlg.h"/>
+    <File Name="dialogs/FormfactorDlg.cpp"/>
+    <File Name="dialogs/AtomsDlg.cpp"/>
+    <File Name="dialogs/AtomsDlg.h"/>
+    <File Name="dialogs/AboutDlg.cpp"/>
+    <File Name="dialogs/AboutDlg.h"/>
+    <File Name="dialogs/DispDlg.cpp"/>
+    <File Name="dialogs/DispDlg.h"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
+  <VirtualDirectory Name="libs">
+    <File Name="libs/globals.cpp"/>
+    <File Name="libs/globals.h"/>
+    <File Name="libs/plotgl.cpp"/>
+    <File Name="libs/plotgl.h"/>
+    <File Name="libs/qthelper.cpp"/>
+    <File Name="libs/qthelper.h"/>
+    <File Name="libs/formfactors/formfact.cpp"/>
+    <File Name="libs/formfactors/formfact.h"/>
+    <File Name="libs/spacegroups/crystalsys.cpp"/>
+    <File Name="libs/spacegroups/crystalsys.h"/>
+    <File Name="libs/spacegroups/sghelper.h"/>
+    <File Name="libs/spacegroups/spacegroup.cpp"/>
+    <File Name="libs/spacegroups/spacegroup.h"/>
+    <File Name="libs/globals_qt.cpp"/>
+    <File Name="libs/globals_qt.h"/>
+    <File Name="libs/spacegroups/latticehelper.h"/>
+    <File Name="libs/spacegroups/spacegroup_impl.h"/>
+    <File Name="libs/formfactors/formfact_impl.h"/>
+  </VirtualDirectory>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="clang( tags/RELEASE_34/final )" DebuggerType="" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-W;-std=c++11;-Wall" C_Options="-g;-W" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="/usr/include/qt4"/>
+        <IncludePath Value="/usr/include/qt4/QtGui"/>
+        <IncludePath Value="/usr/include/qt4/QtCore"/>
+        <IncludePath Value="/usr/include/qt4/QtOpenGL"/>
+        <IncludePath Value="/usr/include/qt4/QtXml"/>
+        <IncludePath Value="/usr/include/qt4/QtXmlPatterns"/>
+        <IncludePath Value="/usr/include/QtCore"/>
+        <IncludePath Value="/usr/include/QtGui"/>
+        <IncludePath Value="/usr/include/QtOpenGL"/>
+        <IncludePath Value="/usr/include/QtXml"/>
+        <IncludePath Value="/usr/include/QtXmlPatterns"/>
+        <IncludePath Value="/usr/local/include"/>
+        <IncludePath Value="/usr/include/qwt6"/>
+        <IncludePath Value="/usr/include/qwt"/>
+        <IncludePath Value="/usr/include/qwt-qt4"/>
+        <IncludePath Value="/usr/include/lapacke"/>
+        <IncludePath Value="/usr/include/freetype2"/>
+        <IncludePath Value="/usr/include/python2.7"/>
+        <Preprocessor Value="QWT_VER=6"/>
+        <Preprocessor Value="QT_VER=4"/>
+        <Preprocessor Value="USE_LAPACK"/>
+        <Preprocessor Value="USE_GIL"/>
+        <Preprocessor Value="USE_CLP"/>
+        <Preprocessor Value="DEBUG"/>
+        <Preprocessor Value="NO_TIFF"/>
+        <Preprocessor Value="NO_JPEG"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="/usr/local/lib64"/>
+        <LibraryPath Value="/usr/local/lib"/>
+        <LibraryPath Value="/usr/lib64/qt4"/>
+        <LibraryPath Value="/usr/lib/qt4"/>
+        <LibraryPath Value="/usr/lib/qt4/lib"/>
+        <LibraryPath Value="/usr/lib/x86_64-linux-gnu"/>
+        <LibraryPath Value="/usr/local/lib64"/>
+        <LibraryPath Value="/usr/local/lib"/>
+        <Library Value="QtCore"/>
+        <Library Value="QtGui"/>
+        <Library Value="QtSvg"/>
+        <Library Value="QtOpenGL"/>
+        <Library Value="qwt"/>
+        <Library Value="GL"/>
+        <Library Value="GLU"/>
+        <Library Value="X11"/>
+        <Library Value="pthread"/>
+        <Library Value="boost_system"/>
+        <Library Value="boost_filesystem"/>
+        <Library Value="boost_iostreams"/>
+        <Library Value="boost_python"/>
+        <Library Value="python2.7"/>
+        <Library Value="lapacke"/>
+        <Library Value="lapack"/>
+        <Library Value="blas"/>
+        <Library Value="gfortran"/>
+        <Library Value="freetype"/>
+        <Library Value="fontconfig"/>
+        <Library Value="png"/>
+        <Library Value="jpeg"/>
+        <Library Value="clipper-core"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)/.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild>
+        <Command Enabled="no"># ./prebuild.sh</Command>
+      </PreBuild>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="clang( tags/RELEASE_34/final )" DebuggerType="" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O2;-march=native;-W;-std=c++11;-Wall" C_Options="-O2;-W" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="/usr/include/qt4"/>
+        <IncludePath Value="/usr/include/qt4/QtGui"/>
+        <IncludePath Value="/usr/include/qt4/QtCore"/>
+        <IncludePath Value="/usr/include/qt4/QtOpenGL"/>
+        <IncludePath Value="/usr/include/qt4/QtXml"/>
+        <IncludePath Value="/usr/include/qt4/QtXmlPatterns"/>
+        <IncludePath Value="/usr/include/QtCore"/>
+        <IncludePath Value="/usr/include/QtGui"/>
+        <IncludePath Value="/usr/include/QtOpenGL"/>
+        <IncludePath Value="/usr/include/QtXml"/>
+        <IncludePath Value="/usr/include/QtXmlPatterns"/>
+        <IncludePath Value="/usr/local/include"/>
+        <IncludePath Value="/usr/include/qwt6"/>
+        <IncludePath Value="/usr/include/qwt"/>
+        <IncludePath Value="/usr/include/qwt-qt4"/>
+        <IncludePath Value="/usr/include/lapacke"/>
+        <IncludePath Value="/usr/include/freetype2"/>
+        <IncludePath Value="/usr/include/python2.7"/>
+        <Preprocessor Value="QWT_VER=6"/>
+        <Preprocessor Value="QT_VER=4"/>
+        <Preprocessor Value="USE_LAPACK"/>
+        <Preprocessor Value="USE_GIL"/>
+        <Preprocessor Value="USE_CLP"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="NO_TIFF"/>
+        <Preprocessor Value="NO_JPEG"/>
+      </Compiler>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="/usr/lib64/qt4"/>
+        <LibraryPath Value="/usr/lib/qt4"/>
+        <LibraryPath Value="/usr/lib/qt4/lib"/>
+        <LibraryPath Value="/usr/lib/x86_64-linux-gnu"/>
+        <LibraryPath Value="/usr/local/lib64"/>
+        <LibraryPath Value="/usr/local/lib"/>
+        <Library Value="QtCore"/>
+        <Library Value="QtGui"/>
+        <Library Value="QtSvg"/>
+        <Library Value="QtOpenGL"/>
+        <Library Value="qwt"/>
+        <Library Value="GL"/>
+        <Library Value="GLU"/>
+        <Library Value="X11"/>
+        <Library Value="pthread"/>
+        <Library Value="boost_system"/>
+        <Library Value="boost_filesystem"/>
+        <Library Value="boost_iostreams"/>
+        <Library Value="boost_python"/>
+        <Library Value="python2.7"/>
+        <Library Value="lapacke"/>
+        <Library Value="lapack"/>
+        <Library Value="blas"/>
+        <Library Value="gfortran"/>
+        <Library Value="freetype"/>
+        <Library Value="fontconfig"/>
+        <Library Value="png"/>
+        <Library Value="jpeg"/>
+        <Library Value="clipper-core"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)/.." PauseExecWhenProcTerminates="no" IsGUIProgram="yes" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild>
+        <Command Enabled="yes">./prebuild.sh</Command>
+      </PreBuild>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

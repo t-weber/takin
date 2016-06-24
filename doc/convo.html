@@ -1,0 +1,31 @@
+<html>
+<head>
+    <title>Resolution Convolution</title>
+</head>
+
+<body>
+	<h1>Resolution Convolution</h1>
+
+	<p>In order to plan an experiment or to get an overview before using the more involved
+	convolution fitter, a live Monte-Carlo convolution can be performed by selecting 
+	"Resolution" -> "Convolution..." in the menu bar.</p>
+
+	<p>In the "Convolution" dialog four things have to be defined: (1) a crystal, (2) an instrument,
+	(3) a theoretical model for the dynamical structure factor S(q,w), and (4) a scan direction:</p>
+
+	<p>(1) and (2): The crystal (together with a scattering plane) and the instrument parameter 
+	files are entered in the "Crystal File" and "Resolution File" edit fields, respectively.
+	These files are the same ones that are defined <a href="basics.html">in the Takin main window</a>
+	and <a href="reso.html">in the "Resolution Parameters" dialog</a>.</p>
+
+	<p>(3): The S(q,w) model is a user-provided theoretical formula or algorithm for the physical
+	system to be measured. It can be either provided <a href="reso-sqw-py.html">as a Python script</a>
+	or <a href="reso-sqw-native.html">as a plugin</a>.
+	Several simple S(q,w) models are <a href="reso-sqw.html">included internally</a>.</p>
+
+	<p>(4): The actual scan path is defined in the "Scan Steps" group at the bottom of the dialog.
+	Here, the Q=(hkl) and E coordinates of the start end end position are entered along with the
+	number of subdivisions between these positions ("Steps").</p>
+</body>
+
+</html>

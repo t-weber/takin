@@ -1,0 +1,47 @@
+Preparations before compilation
+-------------------------------
+
+
+Install (developer versions of) all required libraries either from your
+system's package manager or directly from the given URLs:
+	* Boost: http://www.boost.org
+	* Qt 4: http://www.qt.io
+	* Qwt 6: http://qwt.sourceforge.net
+	* Clipper: http://www.ysbl.york.ac.uk/~cowtan/clipper/
+	* Tlibs: 
+		checkout tlibs submodule
+		    OR:
+		use ./setup_tlibs.sh
+		and follow the instructions in the INSTALL file
+		in the ./tlibs/ subfolder
+
+Set up other external dependencies:
+	* ./setup_externals.sh
+
+
+===============================================================================
+
+
+Building Takin
+--------------
+
+
+Takin has to be compiled with a fully C++11 compliant compiler, e.g.:
+	* GCC version 4.8 or above
+	* Clang
+
+Select appropriate Make lists (standard: (1) native, dynamic):
+	* ./setup_makelists.sh
+
+Make using CMake:
+	* mkdir build
+	* cd build
+	* cmake ..
+	* make
+	* optional: make install (as root)
+
+
+Run program with
+	* takin
+	* Or, in case tlibs is not found, 
+	  e.g.: LD_LIBRARY_PATH=/usr/local/lib takin

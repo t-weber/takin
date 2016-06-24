@@ -1,0 +1,41 @@
+<html>
+<head>
+	<title>Python S(q,w) Models</title>
+</head>
+
+<body>
+	<h1>Python S(q,w) Models</h1>	
+
+	<p>A S(q,w) Python module has to define the two functions "TakinInit" and "TakinSqw".</p>
+	
+	<p>"TakinInit" is called after one or several parameters have changed
+	(for example after each minimisation step in the convolution fitter). 
+	It can be used to check if e.g. pre-calculated tables, variables, etc. need 
+	to be recalculated.</p>
+
+	<p>The "TakinSqw" function receives four floating-point parameters h,k,l, and E
+	and returns a single floating-point value S, the dynamical structure factor.
+	The function is called for every Monte-Carlo point.</p>
+
+	<p>All global variables that are defined in an S(q,w) Python module are made
+	available as fit parameters for the convolution fitter.</p>
+
+
+	<p>The interface is defined as follows (a full example can be found in the 
+	subdirectory "examples/sqw_py"):
+
+	<code><pre>
+	def TakinInit():
+	    # reinitialise variables here
+	    pass
+
+	def TakinSqw(h, k, l, E):
+	    S = 0.
+	    # calculate S here
+	    return S
+	</pre></code> </p>
+
+
+</body>
+
+</html>

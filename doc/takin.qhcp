@@ -1,0 +1,30 @@
+<QHelpCollectionProject version="1.0">
+
+	<docFiles>
+		<generate>
+			<file>
+				<input>takin.qhp</input>
+				<output>takin.qch</output>
+			</file>
+		</generate>
+
+		<register> <file>takin.qch</file> </register>
+	</docFiles>
+
+	<assistant>
+
+		<title>Takin</title>
+		<cacheDirectory base="default">tobis_stuff/takin</cacheDirectory>
+
+		<enableDocumentationManager>false</enableDocumentationManager>
+		<enableAddressBar>false</enableAddressBar>
+
+		<startPage>qhelp://tobis_stuff.takin/help/takin.html</startPage>
+		<homePage>about:blank</homePage>
+
+		<aboutMenuText> <text>About Takin...</text> </aboutMenuText>
+		<aboutDialog> <file>takin_info.txt</file> </aboutDialog>
+
+	</assistant>
+
+</QHelpCollectionProject>

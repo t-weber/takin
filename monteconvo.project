@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="monteconvo" InternalType="Console">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
+  "name": "Release",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+  </Plugins>
+  <VirtualDirectory Name="tlibs">
+    <VirtualDirectory Name="helper">
+      <File Name="tlibs/helper/py.h"/>
+      <File Name="tlibs/helper/log.h"/>
+      <File Name="tlibs/helper/flags.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/helper/hash.h"/>
+      <File Name="tlibs/helper/flags.h"/>
+      <File Name="tlibs/helper/misc.h"/>
+      <File Name="tlibs/helper/exception.h"/>
+      <File Name="tlibs/helper/log.cpp"/>
+      <File Name="tlibs/helper/stopwatch.h"/>
+      <File Name="tlibs/helper/traits.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="string">
+      <File Name="tlibs/string/spec_char.cpp"/>
+      <File Name="tlibs/string/string.h"/>
+      <File Name="tlibs/string/spec_char.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="math">
+      <File Name="tlibs/math/fourier.h"/>
+      <File Name="tlibs/math/rand.h" ExcludeProjConfig=""/>
+      <File Name="tlibs/math/linalg2.h"/>
+      <File Name="tlibs/math/fourier.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/math/linalg2.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/math/numint.hpp"/>
+      <File Name="tlibs/math/fftw.h"/>
+      <File Name="tlibs/math/linalg.h"/>
+      <File Name="tlibs/math/dft.h"/>
+      <File Name="tlibs/math/lattice.h"/>
+      <File Name="tlibs/math/minuit.h"/>
+      <File Name="tlibs/math/rand.cpp" ExcludeProjConfig="Release"/>
+      <File Name="tlibs/math/linalg_ops.h"/>
+      <File Name="tlibs/math/powder.h"/>
+      <File Name="tlibs/math/interpolation.h"/>
+      <File Name="tlibs/math/fftw.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/math/bz.h"/>
+      <File Name="tlibs/math/quat.h"/>
+      <File Name="tlibs/math/geo.h"/>
+      <File Name="tlibs/math/neutrons.hpp"/>
+      <File Name="tlibs/math/mieze.hpp"/>
+      <File Name="tlibs/math/funcmod.h"/>
+      <File Name="tlibs/math/math.h"/>
+      <File Name="tlibs/math/minuit.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="tlibs/math/kd.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="file">
+      <File Name="tlibs/file/xml.h"/>
+      <File Name="tlibs/file/xml.cpp"/>
+      <File Name="tlibs/file/loadtxt.h"/>
+      <File Name="tlibs/file/loadtxt.cpp"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="tools">
+    <VirtualDirectory Name="monteconvo">
+      <File Name="tools/monteconvo/mconv_main.cpp"/>
+      <File Name="tools/monteconvo/sqw.cpp"/>
+      <File Name="tools/monteconvo/sqw.h"/>
+      <VirtualDirectory Name="res">
+        <File Name="tools/res/cn.cpp"/>
+        <File Name="tools/res/cn.h"/>
+        <File Name="tools/res/eck.cpp"/>
+        <File Name="tools/res/eck.h"/>
+        <File Name="tools/res/ellipse.cpp"/>
+        <File Name="tools/res/ellipse.h"/>
+        <File Name="tools/res/pop.cpp"/>
+        <File Name="tools/res/pop.h"/>
+      </VirtualDirectory>
+      <File Name="tools/monteconvo/TASReso.h"/>
+      <File Name="tools/monteconvo/TASReso.cpp"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="clang( tags/RELEASE_34/final )" DebuggerType="LLDB Debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0;-std=c++11;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="/usr/include/QtCore"/>
+        <IncludePath Value="/usr/include/QtXml"/>
+        <IncludePath Value="/usr/include/QtXmlPatterns"/>
+        <IncludePath Value="/usr/include/QtGui"/>
+        <Preprocessor Value="NO_LAPACK"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <Library Value="pthread"/>
+        <Library Value="QtCore"/>
+        <Library Value="QtXml"/>
+        <Library Value="QtXmlPatterns"/>
+        <Library Value="QtGui"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="clang( tags/RELEASE_34/final )" DebuggerType="LLDB Debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O2;-Wall" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="/usr/include/QtCore"/>
+        <IncludePath Value="/usr/include/QtXml"/>
+        <IncludePath Value="/usr/include/QtXmlPatterns"/>
+        <IncludePath Value="/usr/include/QtGui"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="NO_LAPACK"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <Library Value="pthread"/>
+        <Library Value="QtCore"/>
+        <Library Value="QtXml"/>
+        <Library Value="QtXmlPatterns"/>
+        <Library Value="QtGui"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

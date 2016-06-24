@@ -1,0 +1,31 @@
+<QtHelpProject version="1.0">
+
+	<namespace>tobis_stuff.takin</namespace>
+	<virtualFolder>help</virtualFolder>
+
+	<filterSection>
+
+		<toc>
+			<section title="Takin" ref="takin.html" />
+			<section title="Basic Usage" ref="basics.html" />
+			<section title="Resolution Calculation" ref="reso.html" />
+			<section title="Resolution Convolution" ref="convo.html" />
+			<section title="Convolution Fitting" ref="fit.html" />
+
+			<section title="S(q,w) Models">
+				<section title="Python S(q,w) Models" ref="reso-sqw-py.html" />
+				<section title="Native S(q,w) Models" ref="reso-sqw-native.html" />
+				<section title="Internal S(q,w) Models" ref="reso-sqw.html" />
+			</section>
+		</toc>
+
+		<keywords>
+		</keywords>
+
+		<files>
+			<file>*.html</file>
+		</files>
+
+	</filterSection>
+
+</QtHelpProject>

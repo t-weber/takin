@@ -1,0 +1,174 @@
+<html>
+<head>
+    <title>Convolution Fitting</title>
+</head>
+
+<body>
+	<h1>Convolution Fitting</h1>
+
+		<p>The convolution fitter finds the best least-squares fit of one or several
+		free parameters in an S(q,w) model using a Monte-Carlo convolution approach.
+		The S(q,w) model is fitted to one or more given measurement data files.</p>
+
+		<p>The fitter is called on the command-line by: "convofit my_fit.job"
+		The input job file "my_fit.job" in this example has the following structure:</p>
+
+		<code><pre>
+		; convofit sample job file
+
+		; input files
+		input
+		{
+		    ; file with the TAS scan
+		    scan_file       "my_measurement.dat"
+
+		    ; temperature column in the scan file
+		    temp_col        "Ts"
+
+		    ; field column in the scan file
+		    field_col        "Bs"
+
+		    ; counter column in the scan file
+		    counts_col      "ctr1"
+
+		    ; monitor counter column in the scan file
+		    monitor_col     "mon2"
+
+
+		    ; the instrument definition created by
+		    ; the Takin resolution parameter dialog
+		    instrument_file "my_instrument.taz"
+
+
+		    ; which S(q,w) model to use?
+		    sqw_model       "py"
+
+		    ; S(q,w) input file. Here, a Python script
+		    sqw_file        "my_sqw.py"
+
+		    ; how is the temperature/field variable named
+		    ; the S(q,w) model? Here, "g_T" and "g_H" are
+		    ; global variables in the "my_sqw.py" script.
+		    sqw_temp_var    "g_T"
+		    sqw_field_var   "g_H"
+
+		    ; fix some variables in the S(q,w) model
+		    sqw_set_params  "g_my_param = 12.3"
+		}
+
+
+		; output files
+		output
+		{
+		    ; a simplified copy of the original scan file for easier reading
+		    ; in an external plot program
+		    scan_file        "my_scan.dat"
+			
+		    ; a file describing the fit results
+		    model_file       "my_model.dat"
+
+		    ; logs
+		    log_file         "my_log.dat"
+
+
+		    ; show a plot at the end of the fit
+		    plot              1
+
+		    ; show plots during fitting (very useful for debugging)
+		    plot_intermediate 1
+		}
+
+
+		; includes a fit settings file (see below)
+		#include "my_settings.job"
+		</pre></code>
+
+
+
+		<hr>
+		The fitting steps are described in the include file "my_settings.job"
+		which is given here:
+
+		<code><pre>
+		; convofit sample fit settings file
+
+
+		; Monte-Carlo settings
+		montecarlo
+		{
+			; number of Monte-Carlo neutrons
+			neutrons    10000
+		}
+
+
+		; Resolution algo settings
+		resolution
+		{
+		    ; which algorithm to use?
+		    algorithm    "eck"    ; "cn", "pop", "eck", or "viol"
+
+		    ; include the "resolution volume" prefactor?
+		    use_r0       1
+
+		    ; use optimum vertical/horizontal monochromator/analyser focusing?
+		    focus_mono_v 1
+		    focus_mono_h 0
+		    focus_ana_v  0
+		    focus_ana_h  1
+		}
+
+
+		; Fitter settings
+		fitter
+		{
+		    ; do a convolution fit or just a plain convolution
+		    ; using the initial values?
+		    do_fit        1
+
+		    ; which minimiser to use?
+		    minimiser    "simplex"    ; "simplex" or "migrad"
+
+		    ; which Minuit strategy?
+		    strategy      1         ; 0 (low), 1 (medium) or 2 (high)
+
+		    ; number of maximum function calls
+		    max_funccalls 100
+
+		    ; Minuit's targeted "estimated distance to minimum"
+		    tolerance     10.
+
+		    sigma         1.
+		}
+
+
+		; which S(q,w) model parameters should be fitted?
+		; don't remove "scale" and "offs"!
+		fit_parameters
+		{
+		    ; the fit parameters: "scale" and "offs" are internal variables,
+		    ; "g_linewidth" is a parameter in the S(q,w) model. In this example,
+		    ; it is a global name in the "my_sqw.py" script.
+		    params  "scale " \
+		            "offs " \
+		            "g_linewidth "
+
+		    ; initial values of the three parameters
+		    values  "1e9 " \
+		            "1e-6 " \
+		            "0.02 "
+
+			; errors of the three parameters
+		    errors  "0.5e9 " \
+		            "0.5e-6 " \
+		            "0.01 "
+
+		    ; which parameters should be fitted?
+		    ; here, the third parameter, i.e. g_linewidth, is the only
+		    ; fit parameter
+		    fixed   "1 1 0 "
+		}
+		</pre></code>
+
+</body>
+
+</html>
