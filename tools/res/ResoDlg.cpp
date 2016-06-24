@@ -41,6 +41,8 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	: QDialog(pParent), m_bDontCalc(1), m_pSettings(pSettings)
 {
 	setupUi(this);
+	spinMCSample->setEnabled(0);	// TODO
+
 	if(m_pSettings)
 	{
 		QFont font;

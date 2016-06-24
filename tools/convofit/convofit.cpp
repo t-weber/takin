@@ -130,6 +130,7 @@ bool run_job(const std::string& strJob)
 
 
 	unsigned iNumNeutrons = prop.Query<unsigned>("montecarlo/neutrons", 1000);
+	unsigned iNumSample = prop.Query<unsigned>("montecarlo/sample_positions", 1);
 
 	std::string strResAlgo = prop.Query<std::string>("resolution/algorithm", "pop");
 	bool bUseR0 = prop.Query<bool>("resolution/use_r0", 0);
@@ -285,6 +286,7 @@ bool run_job(const std::string& strJob)
 		if(bUseR0 && !reso.GetResoParams().bCalcR0)
 			tl::log_warn("Resolution R0 requested, but not calculated, using raw ellipsoid volume.");
 
+		reso.SetRandomSamplePos(iNumSample);
 		vecResos.emplace_back(std::move(reso));
 	}
 

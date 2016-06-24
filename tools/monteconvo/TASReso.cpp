@@ -7,6 +7,7 @@
 
 #include "TASReso.h"
 #include "tlibs/math/lattice.h"
+#include "tlibs/math/rand.h"
 #include "tlibs/file/prop.h"
 #include "tlibs/log/log.h"
 #include "tlibs/helper/thread.h"
@@ -31,6 +32,8 @@ using wavenumber = tl::t_wavenumber_si<t_real>;
 
 TASReso::TASReso()
 {
+	m_res.resize(1);
+	
 	m_opts.bCenter = 0;
 	m_opts.coords = McNeutronCoords::RLU;
 }
@@ -268,14 +271,16 @@ bool TASReso::SetLattice(t_real a, t_real b, t_real c,
 
 bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 {
+	ResoResults& resores = m_res[0];
+	
 	//std::cout << "UB = " << m_opts.matUB << std::endl;
 	//std::cout << h << " " << k << " " << l << ", " << E << std::endl;
 	if(m_opts.matUB.size1() < 3 || m_opts.matUB.size2() < 3)
 	{
 		const char* pcErr = "Invalid UB matrix.";
 		tl::log_err(pcErr);
-		m_res.strErr = pcErr;
-		m_res.bOk = false;
+		resores.strErr = pcErr;
+		resores.bOk = false;
 		return false;
 	}
 
@@ -378,8 +383,8 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		tl::log_err("Position Q = (", h, " ", k, " ", l, "),",
 			" E = ", E, " meV not in scattering plane.");
 
-		m_res.strErr = "Not in scattering plane.";
-		m_res.bOk = false;
+		resores.strErr = "Not in scattering plane.";
+		resores.bOk = false;
 		return false;
 	}
 
@@ -388,78 +393,100 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 	//tl::log_info("angle Q vec0 = ", m_opts.dAngleQVec0);
 	//tl::log_info("calc r0: ", m_reso.bCalcR0);
 
-	// calculate resolution at (hkl) and E
-	if(m_algo == ResoAlgo::CN)
+	for(ResoResults& resores_cur : m_res)
 	{
-		//tl::log_info("Algorithm: Cooper-Nathans (TAS)");
-		m_reso.bCalcR0 = false;
-		m_res = calc_cn(m_reso);
-	}
-	else if(m_algo == ResoAlgo::POP)
-	{
-		//tl::log_info("Algorithm: Popovici (TAS)");
-		//m_reso.bCalcR0 = true;
-		m_res = calc_pop(m_reso);
-	}
-	else if(m_algo == ResoAlgo::ECK)
-	{
-		//tl::log_info("Algorithm: Eckold-Sobolev (TAS)");
-		m_reso.bCalcR0 = true;
-		m_res = calc_eck(m_reso);
-	}
-	else if(m_algo == ResoAlgo::VIOL)
-	{
-		//tl::log_info("Algorithm: Violini (TOF)");
-		m_res = calc_viol(m_tofreso);
-	}
-	else
-	{
-		const char* pcErr = "Unknown algorithm selected.";
-		tl::log_err(pcErr);
-		m_res.strErr = pcErr;
-		m_res.bOk = false;
-		return false;
-	}
+		// if only one sample position is requested, don't randomise
+		if(m_res.size() > 1)
+		{
+			m_reso.pos_x = tl::rand_real(-t_real(m_reso.sample_w_q/cm), t_real(m_reso.sample_w_q/cm)) * cm;
+			m_reso.pos_y = tl::rand_real(-t_real(m_reso.sample_w_perpq/cm), t_real(m_reso.sample_w_perpq/cm)) * cm;
+			m_reso.pos_z = tl::rand_real(-t_real(m_reso.sample_h/cm), t_real(m_reso.sample_h/cm)) * cm;
+		}
 
-	if(!m_res.bOk)
-	{
-		tl::log_err("Error calculating resolution: ", m_res.strErr);
-		tl::log_debug("R0: ", m_res.dR0);
-		tl::log_debug("res: ", m_res.reso);
+		// calculate resolution at (hkl) and E
+		if(m_algo == ResoAlgo::CN)
+		{
+			//tl::log_info("Algorithm: Cooper-Nathans (TAS)");
+			m_reso.bCalcR0 = false;
+			resores_cur = calc_cn(m_reso);
+		}
+		else if(m_algo == ResoAlgo::POP)
+		{
+			//tl::log_info("Algorithm: Popovici (TAS)");
+			//m_reso.bCalcR0 = true;
+			resores_cur = calc_pop(m_reso);
+		}
+		else if(m_algo == ResoAlgo::ECK)
+		{
+			//tl::log_info("Algorithm: Eckold-Sobolev (TAS)");
+			m_reso.bCalcR0 = true;
+			resores_cur = calc_eck(m_reso);
+		}
+		else if(m_algo == ResoAlgo::VIOL)
+		{
+			//tl::log_info("Algorithm: Violini (TOF)");
+			resores_cur = calc_viol(m_tofreso);
+		}
+		else
+		{
+			const char* pcErr = "Unknown algorithm selected.";
+			tl::log_err(pcErr);
+			resores_cur.strErr = pcErr;
+			resores_cur.bOk = false;
+			return false;
+		}
+
+		if(!resores_cur.bOk)
+		{
+			tl::log_err("Error calculating resolution: ", resores_cur.strErr);
+			tl::log_debug("R0: ", resores_cur.dR0);
+			tl::log_debug("res: ", resores_cur.reso);
+		}
 	}
-	//tl::log_info("Resolution matrix: ", m_res.reso);
-	return m_res.bOk;
+	return resores.bOk;
 }
 
 Ellipsoid4d<t_real> TASReso::GenerateMC(std::size_t iNum, std::vector<t_vec>& vecNeutrons) const
 {
-	Ellipsoid4d<t_real> ell4d = calc_res_ellipsoid4d<t_real>(
-		m_res.reso, m_res.reso_v, m_res.reso_s, m_res.Q_avg);
-	if(vecNeutrons.size() != iNum)
-		vecNeutrons.resize(iNum);
+	// number of iterations over random sample positions
+	std::size_t iIter = m_res.size();
+	if(vecNeutrons.size() != iNum*iIter)
+		vecNeutrons.resize(iNum*iIter);
 
-	unsigned int iNumThreads = std::thread::hardware_concurrency();
-	std::size_t iNumPerThread = iNum / iNumThreads;
-	std::size_t iRemaining = iNum % iNumThreads;
-
-	tl::ThreadPool<void()> tp(iNumThreads);
-	for(unsigned iThread=0; iThread<iNumThreads; ++iThread)
+	Ellipsoid4d<t_real> ell4dret;
+	for(std::size_t iCurIter = 0; iCurIter<iIter; ++iCurIter)
 	{
-		std::vector<t_vec>::iterator iterBegin = vecNeutrons.begin() + iNumPerThread*iThread;
-		std::size_t iNumNeutr = iNumPerThread;
-		if(iThread == iNumThreads-1)
-			iNumNeutr = iNumPerThread + iRemaining;
+		const ResoResults& resores = m_res[iCurIter];
 
-		tp.AddTask([iterBegin, iNumNeutr, this, &ell4d]()
-			{ mc_neutrons(ell4d, iNumNeutr, this->m_opts, iterBegin); });
+		Ellipsoid4d<t_real> ell4d = calc_res_ellipsoid4d<t_real>(
+			resores.reso, resores.reso_v, resores.reso_s, resores.Q_avg);
+
+		unsigned int iNumThreads = std::thread::hardware_concurrency();
+		std::size_t iNumPerThread = iNum / iNumThreads;
+		std::size_t iRemaining = iNum % iNumThreads;
+
+		tl::ThreadPool<void()> tp(iNumThreads);
+		for(unsigned iThread=0; iThread<iNumThreads; ++iThread)
+		{
+			std::vector<t_vec>::iterator iterBegin = vecNeutrons.begin() + iNumPerThread*iThread + iCurIter*iNum;
+			std::size_t iNumNeutr = iNumPerThread;
+			if(iThread == iNumThreads-1)
+				iNumNeutr = iNumPerThread + iRemaining;
+
+			tp.AddTask([iterBegin, iNumNeutr, this, &ell4d]()
+				{ mc_neutrons(ell4d, iNumNeutr, this->m_opts, iterBegin); });
+		}
+
+		tp.StartTasks();
+
+		auto& lstFut = tp.GetFutures();
+		for(auto& fut : lstFut)
+			fut.get();
+
+		if(iCurIter == 0)
+			ell4dret = ell4d;
 	}
 
-	tp.StartTasks();
-
-	auto& lstFut = tp.GetFutures();
-	for(auto& fut : lstFut)
-		fut.get();
-
 	//mc_neutrons(ell4d, iNum, m_opts, vecNeutrons.begin());
-	return ell4d;
+	return ell4dret;
 }

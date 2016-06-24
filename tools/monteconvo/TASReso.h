@@ -13,6 +13,8 @@
 #include "../res/ellipse.h"
 #include "../res/mc.h"
 
+#include<vector>
+
 
 enum class ResoFocus : unsigned
 {
@@ -35,7 +37,9 @@ protected:
 	McNeutronOpts<ublas::matrix<t_real_reso>> m_opts;
 	EckParams m_reso;
 	ViolParams m_tofreso;
-	ResoResults m_res;
+
+	// randomly smear out sample position if vector size >= 1
+	std::vector<ResoResults> m_res;
 
 	bool m_bKiFix = 0;
 	t_real_reso m_dKFix = 1.4;
@@ -67,7 +71,9 @@ public:
 	EckParams& GetResoParams() { return m_reso; }
 	ViolParams& GetTofResoParams() { return m_tofreso; }
 
-	const ResoResults& GetResoResults() const { return m_res; }
+	const ResoResults& GetResoResults() const { return m_res[0]; }
+	
+	void SetRandomSamplePos(std::size_t iNum) { m_res.resize(iNum); }
 };
 
 #endif

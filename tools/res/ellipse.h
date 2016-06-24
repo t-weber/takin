@@ -352,12 +352,7 @@ Ellipse2d<t_real> calc_res_ellipse(
 	ell.y_offs = Q_offs[iY];
 
 	// linear part of quadric
-	ublas::vector<t_real> vecTrans = quad.GetPrincipalOffset();
-
-	// matrix from eigenvectors is not necessarily SO(2),
-	// but could contain a reflection
-	if(ell.phi < t_real(0))
-		vecTrans[0] = -vecTrans[0];
+	const ublas::vector<t_real> vecTrans = ublas::prod(matRot, quad.GetPrincipalOffset());
 
 	if(vecTrans.size() == 2)
 	{
@@ -451,7 +446,7 @@ Ellipsoid3d<t_real> calc_res_ellipsoid(
 	ell.z_offs = Q_offs[iZ];
 
 	// linear part of quadric
-	const ublas::vector<t_real> vecTrans = quad.GetPrincipalOffset();
+	const ublas::vector<t_real> vecTrans = ublas::prod(ell.rot, quad.GetPrincipalOffset());
 
 	if(vecTrans.size() == 3)
 	{
@@ -498,7 +493,7 @@ Ellipsoid4d<t_real> calc_res_ellipsoid4d(
 	ell.w_offs = Q_avg[3];
 
 	// linear part of quadric
-	const ublas::vector<t_real> vecTrans = quad.GetPrincipalOffset();
+	const ublas::vector<t_real> vecTrans = ublas::prod(ell.rot, quad.GetPrincipalOffset());
 
 	if(vecTrans.size() == 4)
 	{
