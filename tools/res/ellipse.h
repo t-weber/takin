@@ -4,9 +4,11 @@
  * @date 14-may-2013
  * @license GPLv2
  *
- * @desc This is a reimplementation in C++ of the file rc_projs.m of the
- *	rescal5 package by Zinkin, McMorrow, Tennant, Farhi, and Wildes:
- *	http://www.ill.eu/en/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab/
+ * @desc This is a reimplementation in C++ of the files rc_projs.m and rc_int.m of the
+ *	- rescal5 package by Zinkin, McMorrow, Tennant, Farhi, and Wildes:
+ *	  http://www.ill.eu/en/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab/
+ *  - and the 'mcresplot.pl' program from McStas (www.mcstas.org)
+ *  - see also: [eck14] G. Eckold and O. Sobolev, NIM A 752, pp. 54-64 (2014)
  */
 
 #ifndef __RES_ELLIPSE__
@@ -88,6 +90,7 @@ enum class EllipseCoordSys : int
 
 
 /*
+ * Integration of the quadratic part of the quadric
  * this is a 1:1 C++ reimplementation of 'rc_int' from 'mcresplot' and 'rescal5'
  * (see also [eck14], equ. 57)
  * integrate over row/column iIdx
@@ -108,6 +111,7 @@ ublas::matrix<T> ellipsoid_gauss_int(const ublas::matrix<T>& mat, std::size_t iI
 }
 
 /*
+ * Integration of the linear part of the quadric
  * (see [eck14], equ. 57)
  */
 template<class T = t_real_reso>
@@ -245,7 +249,7 @@ static inline const std::string& ellipse_labels(int iCoord, EllipseCoordSys sys)
 
 
 /*
- * this is a 1:1 C++ reimplementation of 'proj_elip' from 'mcresplot'
+ * this is a 1:1 C++ reimplementation of 'proj_elip' from 'mcresplot' and 'rescal5'
  * iX, iY: dimensions to plot
  * iInt: dimension to integrate
  * iRem1, iRem2: dimensions to remove
