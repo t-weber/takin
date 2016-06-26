@@ -93,7 +93,7 @@ static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 		dQ.resize(4, 0);
 		reso.Q_avg.resize(4, 0);
 		for(int iQ=0; iQ<4; ++iQ)
-			dQ[iQ] = tl::SIGMA2HWHM/sqrt(res(iQ,iQ));
+			dQ[iQ] = tl::get_SIGMA2HWHM<t_real_reso>()/sqrt(res(iQ,iQ));
 
 		std::ostringstream ostrVals;
 		ostrVals << "Gaussian HWHM values: ";

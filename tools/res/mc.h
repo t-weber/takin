@@ -51,11 +51,13 @@ struct McNeutronOpts
  * Uinv * matQVec0: trafo from Q||... system to lab 1/A system
  * Binv * Uinv * matQVec0: trafo from Q||... system to crystal rlu system
  */
-template<class t_vec=ublas::vector<double>, class t_mat=ublas::matrix<double>, 
+template<class t_vec = ublas::vector<double>, class t_mat = ublas::matrix<double>,
 	class t_iter = typename std::vector<t_vec>::iterator>
 void mc_neutrons(const Ellipsoid4d<typename t_vec::value_type>& ell4d,
 	std::size_t iNum, const McNeutronOpts<t_mat>& opts, t_iter iterResult)
 {
+	using t_real = typename t_vec::value_type;
+
 	static bool bInited = 0;
 	if(!bInited)
 	{
@@ -88,8 +90,10 @@ void mc_neutrons(const Ellipsoid4d<typename t_vec::value_type>& ell4d,
 	for(std::size_t iCur=0; iCur<iNum; ++iCur)
 	{
 		t_vec vecMC = tl::rand_norm_nd<t_vec>({0.,0.,0.,0.},
-			{ell4d.x_hwhm*tl::HWHM2SIGMA, ell4d.y_hwhm*tl::HWHM2SIGMA,
-			ell4d.z_hwhm*tl::HWHM2SIGMA, ell4d.w_hwhm*tl::HWHM2SIGMA});
+			{ ell4d.x_hwhm*tl::get_HWHM2SIGMA<t_real>(),
+			ell4d.y_hwhm*tl::get_HWHM2SIGMA<t_real>(),
+			ell4d.z_hwhm*tl::get_HWHM2SIGMA<t_real>(),
+			ell4d.w_hwhm*tl::get_HWHM2SIGMA<t_real>() });
 
 		vecMC = ublas::prod(rot, vecMC);
 		if(!opts.bCenter)

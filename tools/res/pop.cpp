@@ -180,7 +180,7 @@ ResoResults calc_pop(const PopParams& pop)
 		dSiSample[0], dSiSample[1], dSiSample[2],
 		dSiAna[0], dSiAna[1], dSiAna[2],
 		dSiDet[0], dSiDet[1]});
-	SI *= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
+	SI *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 
 	t_mat S;
 	if(!tl::inverse(SI, S))
@@ -326,7 +326,7 @@ ResoResults calc_pop(const PopParams& pop)
 	// -------------------------------------------------------------------------
 
 
-	res.reso *= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
+	res.reso *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 	res.reso_v = ublas::zero_vector<t_real>(4);
 	res.reso_s = 0.;
 
@@ -380,7 +380,7 @@ ResoResults calc_pop(const PopParams& pop)
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::SIGMA2FWHM/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

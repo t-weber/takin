@@ -33,7 +33,7 @@ using wavenumber = tl::t_wavenumber_si<t_real>;
 TASReso::TASReso()
 {
 	m_res.resize(1);
-	
+
 	m_opts.bCenter = 0;
 	m_opts.coords = McNeutronCoords::RLU;
 }
@@ -398,9 +398,19 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		// if only one sample position is requested, don't randomise
 		if(m_res.size() > 1)
 		{
-			m_reso.pos_x = tl::rand_real(-t_real(m_reso.sample_w_q/cm), t_real(m_reso.sample_w_q/cm)) * cm;
-			m_reso.pos_y = tl::rand_real(-t_real(m_reso.sample_w_perpq/cm), t_real(m_reso.sample_w_perpq/cm)) * cm;
-			m_reso.pos_z = tl::rand_real(-t_real(m_reso.sample_h/cm), t_real(m_reso.sample_h/cm)) * cm;
+			/*m_reso.pos_x = tl::rand_real(-t_real(m_reso.sample_w_q*0.5/cm),
+				t_real(m_reso.sample_w_q*0.5/cm)) * cm;
+			m_reso.pos_y = tl::rand_real(-t_real(m_reso.sample_w_perpq*0.5/cm),
+				t_real(m_reso.sample_w_perpq*0.5/cm)) * cm;
+			m_reso.pos_z = tl::rand_real(-t_real(m_reso.sample_h*0.5/cm),
+				t_real(m_reso.sample_h*0.5/cm)) * cm;*/
+
+			m_reso.pos_x = tl::rand_norm(t_real(0),
+				t_real(tl::get_FWHM2SIGMA<t_real>()*m_reso.sample_w_q/cm)) * cm;
+			m_reso.pos_y = tl::rand_norm(t_real(0),
+				t_real(tl::get_FWHM2SIGMA<t_real>()*m_reso.sample_w_perpq/cm)) * cm;
+			m_reso.pos_z = tl::rand_norm(t_real(0),
+				t_real(tl::get_FWHM2SIGMA<t_real>()*m_reso.sample_h/cm)) * cm;
 		}
 
 		// calculate resolution at (hkl) and E

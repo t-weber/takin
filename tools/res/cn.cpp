@@ -205,7 +205,7 @@ ResoResults calc_cn(const CNParams& cn)
 		/ (1./((cn.sample_mosaic/rads * cn.Q*angs)
 		* (cn.sample_mosaic/rads * cn.Q*angs)) + N(1,1));
 	res.reso(2,2) = N(2,2);
-	res.reso *= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
+	res.reso *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 
 	res.reso_v = ublas::zero_vector<t_real>(4);
 	res.reso_s = 0.;
@@ -227,7 +227,7 @@ ResoResults calc_cn(const CNParams& cn)
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::SIGMA2FWHM/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

@@ -72,7 +72,7 @@ public:
 	ViolParams& GetTofResoParams() { return m_tofreso; }
 
 	const ResoResults& GetResoResults() const { return m_res[0]; }
-	
+
 	void SetRandomSamplePos(std::size_t iNum) { m_res.resize(iNum); }
 };
 

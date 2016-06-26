@@ -263,6 +263,7 @@ void ConvoDlg::Start()
 
 		const bool bUseR0 = true;
 		const unsigned int iNumNeutrons = spinNeutrons->value();
+		const unsigned int iNumSampleSteps = spinSampleSteps->value();
 
 		const unsigned int iNumSteps = spinStepCnt->value();
 		std::vector<t_real> vecH = tl::linspace<t_real,t_real>(
@@ -369,7 +370,8 @@ void ConvoDlg::Start()
 		std::ostringstream ostrOut;
 		ostrOut << "#\n";
 		ostrOut << "# Format: h k l E S\n";
-		ostrOut << "# Neutrons: " << iNumNeutrons << "\n";
+		ostrOut << "# MC Neutrons: " << iNumNeutrons << "\n";
+		ostrOut << "# MC Sample Steps: " << iNumSampleSteps << "\n";
 		ostrOut << "#\n";
 
 		QMetaObject::invokeMethod(progress, "setMaximum", Q_ARG(int, iNumSteps));
@@ -399,11 +401,13 @@ void ConvoDlg::Start()
 			t_real dCurE = vecE[iStep];
 
 			tp.AddTask(
-			[&reso, dCurH, dCurK, dCurL, dCurE, iNumNeutrons, this]() -> std::pair<bool, t_real>
+			[&reso, dCurH, dCurK, dCurL, dCurE, iNumNeutrons, iNumSampleSteps, this]()
+				-> std::pair<bool, t_real>
 			{
 				if(m_atStop.load()) return std::pair<bool, t_real>(false, 0.);
 
 				TASReso localreso = reso;
+				localreso.SetRandomSamplePos(iNumSampleSteps);
 				std::vector<ublas::vector<t_real>> vecNeutrons;
 
 				try
@@ -440,9 +444,9 @@ void ConvoDlg::Start()
 						dhklE_mean[i] += vecHKLE[i];
 				}
 
-				dS /= t_real(iNumNeutrons);
+				dS /= t_real(iNumNeutrons*iNumSampleSteps);
 				for(int i=0; i<4; ++i)
-					dhklE_mean[i] /= t_real(iNumNeutrons);
+					dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
 
 				if(bUseR0)
 					dS *= localreso.GetResoResults().dResVol;
@@ -535,6 +539,7 @@ void ConvoDlg::scanFileChanged(const QString& qstrFile)
 	std::string strFile  = qstrFile.toStdString();
 	tl::trim(strFile);
 	if(strFile == "") return;
+	if(!checkScan->isChecked()) return;
 
 	std::vector<std::string> vecFiles{strFile};
 
@@ -738,9 +743,11 @@ void ConvoDlg::LoadSettings()
 		if(m_pSett->contains("monteconvo/kfix"))
 			spinKfix->setValue(m_pSett->value("monteconvo/kfix").toDouble());
 		if(m_pSett->contains("monteconvo/neutron_count"))
-			spinNeutrons->setValue(m_pSett->value("monteconvo/neutron_count").toDouble());
+			spinNeutrons->setValue(m_pSett->value("monteconvo/neutron_count").toInt());
+		if(m_pSett->contains("monteconvo/sample_step_count"))
+			spinSampleSteps->setValue(m_pSett->value("monteconvo/sample_step_count").toInt());
 		if(m_pSett->contains("monteconvo/step_count"))
-			spinStepCnt->setValue(m_pSett->value("monteconvo/step_count").toDouble());
+			spinStepCnt->setValue(m_pSett->value("monteconvo/step_count").toInt());
 	}
 }
 
@@ -783,6 +790,7 @@ void ConvoDlg::ButtonBoxClicked(QAbstractButton *pBtn)
 
 			m_pSett->setValue("monteconvo/kfix", spinKfix->value());
 			m_pSett->setValue("monteconvo/neutron_count", spinNeutrons->value());
+			m_pSett->setValue("monteconvo/sample_step_count", spinSampleSteps->value());
 			m_pSett->setValue("monteconvo/step_count", spinStepCnt->value());
 		}
 

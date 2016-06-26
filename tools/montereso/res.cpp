@@ -69,7 +69,7 @@ Resolution calc_res(const std::vector<vector<t_real_reso>>& Q_vec,
 	{
 		reso.dQ.resize(4, 0);
 		for(int iQ=0; iQ<4; ++iQ)
-			reso.dQ[iQ] = tl::SIGMA2HWHM/sqrt(res(iQ,iQ));
+			reso.dQ[iQ] = tl::get_SIGMA2HWHM<t_real_reso>()/sqrt(res(iQ,iQ));
 
 		tl::log_info("Resolution matrix: ", res);
 

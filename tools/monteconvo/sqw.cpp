@@ -494,7 +494,7 @@ t_real SqwPhonon::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 		dInc = tl::gauss_model<t_real>(dE, 0., m_dIncSig, m_dIncAmp, 0.);
 
 	return dS * std::abs(tl::DHO_model<t_real>(dE, dT, dE0, dE_HWHM, 1., 0.))
-		* tl::gauss_model<t_real>(dqDist, 0., dQ_HWHM*tl::HWHM2SIGMA, 1., 0.)
+		* tl::gauss_model<t_real>(dqDist, 0., dQ_HWHM*tl::get_HWHM2SIGMA<t_real>(), 1., 0.)
 		+ dInc;
 }
 
@@ -793,7 +793,7 @@ t_real SqwMagnon::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 		dInc = tl::gauss_model<t_real>(dE, 0., m_dIncSig, m_dIncAmp, 0.);
 
 	t_real dS = dS0 * std::abs(tl::DHO_model<t_real>(dE, dT, dE0, dE_HWHM, 1., 0.))
-		* tl::gauss_model<t_real>(dqDist, 0., dQ_HWHM*tl::HWHM2SIGMA, 1., 0.)
+		* tl::gauss_model<t_real>(dqDist, 0., dQ_HWHM*tl::get_HWHM2SIGMA<t_real>(), 1., 0.)
 		+ dInc;
 
 	return dS;

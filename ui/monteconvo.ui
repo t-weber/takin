@@ -411,32 +411,22 @@
           <property name="margin">
            <number>4</number>
           </property>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="comboFocMono">
-            <item>
-             <property name="text">
-              <string>None</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Horizontal</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Vertical</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Both</string>
-             </property>
-            </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>M. Focus:</string>
+            </property>
            </widget>
           </item>
-          <item row="2" column="4">
-           <widget class="QComboBox" name="comboFocAna">
+          <item row="2" column="3">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>A. Focus:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboFocMono">
             <item>
              <property name="text">
               <string>None</string>
@@ -481,6 +471,23 @@
             </item>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="comboFixedK">
+            <property name="currentIndex">
+             <number>1</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>ki = const.</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>kf = const.</string>
+             </property>
+            </item>
+           </widget>
+          </item>
           <item row="0" column="3">
            <widget class="QLabel" name="label_7">
             <property name="sizePolicy">
@@ -501,23 +508,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="comboFixedK">
-            <property name="currentIndex">
-             <number>1</number>
-            </property>
-            <item>
-             <property name="text">
-              <string>ki = const.</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>kf = const.</string>
-             </property>
-            </item>
-           </widget>
-          </item>
           <item row="0" column="4">
            <widget class="QSpinBox" name="spinNeutrons">
             <property name="sizePolicy">
@@ -525,6 +515,12 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>MC steps for overall convolution</string>
+            </property>
+            <property name="suffix">
+             <string/>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -537,25 +533,6 @@
             </property>
             <property name="value">
              <number>1000</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QDoubleSpinBox" name="spinKfix">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="decimals">
-             <number>6</number>
-            </property>
-            <property name="singleStep">
-             <double>0.001000000000000</double>
-            </property>
-            <property name="value">
-             <double>2.662000000000000</double>
             </property>
            </widget>
           </item>
@@ -595,18 +572,69 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>M. Focus:</string>
+          <item row="0" column="5">
+           <widget class="QSpinBox" name="spinSampleSteps">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>MC steps for sample convolution (only for Eckold-Sobolev algorithm)</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="singleStep">
+             <number>100</number>
             </property>
            </widget>
           </item>
-          <item row="2" column="3">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>A. Focus:</string>
+          <item row="1" column="4" colspan="2">
+           <widget class="QDoubleSpinBox" name="spinKfix">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="value">
+             <double>2.662000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4" colspan="2">
+           <widget class="QComboBox" name="comboFocAna">
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Horizontal</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Vertical</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Both</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -679,7 +707,7 @@
              </sizepolicy>
             </property>
             <property name="toolTip">
-             <string>Parameters...</string>
+             <string>S(q,w) model parameters...</string>
             </property>
             <property name="text">
              <string>...</string>
@@ -943,6 +971,7 @@
   <tabstop>btnBrowseScan</tabstop>
   <tabstop>comboAlgo</tabstop>
   <tabstop>spinNeutrons</tabstop>
+  <tabstop>spinSampleSteps</tabstop>
   <tabstop>comboFixedK</tabstop>
   <tabstop>spinKfix</tabstop>
   <tabstop>comboFocMono</tabstop>
@@ -960,13 +989,13 @@
   <tabstop>spinStopL</tabstop>
   <tabstop>spinStopE</tabstop>
   <tabstop>spinStepCnt</tabstop>
-  <tabstop>textResult</tabstop>
-  <tabstop>editScale</tabstop>
-  <tabstop>editOffs</tabstop>
   <tabstop>btnStart</tabstop>
   <tabstop>btnStop</tabstop>
   <tabstop>buttonBox</tabstop>
+  <tabstop>editOffs</tabstop>
+  <tabstop>editScale</tabstop>
   <tabstop>btnSaveResult</tabstop>
+  <tabstop>textResult</tabstop>
  </tabstops>
  <resources/>
  <connections>

@@ -115,7 +115,7 @@ ResoResults calc_viol(const ViolParams& params)
 		std::inner_product(vecEderivs.begin(), vecEderivs.end(), vecsigs.begin(), t_real(0),
 		[](t_real r1, t_real r2)->t_real { return r1 + r2; },
 		[](const std::function<t_real()>& f1, t_real r2)->t_real { return f1()*f1()*r2*r2; } ));
-	tl::log_debug("dE (Vanadium fwhm) = ", tl::SIGMA2FWHM*sigE);
+	tl::log_debug("dE (Vanadium fwhm) = ", tl::get_SIGMA2FWHM<t_real>()*sigE);
 
 
 	// --------------------------------------------------------------------
@@ -128,7 +128,7 @@ ResoResults calc_viol(const ViolParams& params)
 		mn * sd * vf3
 	});
 	t_real sigE2 = tl::my_units_norm2<energy>(vecE2) / meV;
-	tl::log_debug("dE (Vanadium fwhm, check) = ", tl::SIGMA2FWHM*sigE2);
+	tl::log_debug("dE (Vanadium fwhm, check) = ", tl::get_SIGMA2FWHM<t_real>()*sigE2);
 	// --------------------------------------------------------------------
 
 #endif
@@ -226,7 +226,7 @@ ResoResults calc_viol(const ViolParams& params)
 		});
 
 	t_vec sigQ = tl::apply_fkt(vecQsq, static_cast<t_real(*)(t_real)>(std::sqrt));
-	tl::log_debug("dQ (Vanadium fwhm) = ", tl::SIGMA2FWHM*sigQ);
+	tl::log_debug("dQ (Vanadium fwhm) = ", tl::get_SIGMA2FWHM<t_real>()*sigQ);
 
 
 	// --------------------------------------------------------------------
@@ -251,7 +251,7 @@ ResoResults calc_viol(const ViolParams& params)
 	t_vec sigQ2 = tl::make_vec<t_vec>({ 
 		tl::my_units_norm2<wavenumber>(vecQ2[0]) * angs, 
 		tl::my_units_norm2<wavenumber>(vecQ2[1]) * angs });
-	tl::log_debug("dQ (Vanadium fwhm, check) = ", tl::SIGMA2FWHM*sigQ2);
+	tl::log_debug("dQ (Vanadium fwhm, check) = ", tl::get_SIGMA2FWHM<t_real>()*sigQ2);
 	// --------------------------------------------------------------------
 
 #endif
@@ -297,14 +297,14 @@ ResoResults calc_viol(const ViolParams& params)
 	matKiQ(3,2) = matKiQ(0,2) = matKiQ(0,3) = matKiQ(1,2) = matKiQ(1,3) = 0.;
 
 	res.reso = tl::transform(res.reso, matKiQ, true);
-	//res.reso *= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
+	//res.reso *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
 	res.dR0 = 0.;   // TODO
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::SIGMA2FWHM/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
 
 	res.reso_v = ublas::zero_vector<t_real>(4);
 	res.reso_s = 0.;

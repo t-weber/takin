@@ -128,14 +128,14 @@ ResoResults calc_simplereso(const SimpleResoParams& params)
 	matKiQ(3,2) = matKiQ(0,2) = matKiQ(0,3) = matKiQ(1,2) = matKiQ(1,3) = 0.;
 
 	res.reso = tl::transform(res.reso, matKiQ, true);
-	//res.reso *= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
+	//res.reso *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
 	res.dR0 = 0.;   // TODO
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::SIGMA2FWHM/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
 
 	res.reso_v = ublas::zero_vector<t_real>(4);
 	res.reso_s = 0.;

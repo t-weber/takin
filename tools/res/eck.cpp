@@ -134,7 +134,7 @@ get_mono_vals(const length& src_w, const length& src_h,
 /*r*/			- dist_mono_sample / (units::pow<2>(mono_w*units::abs(units::sin(thetam))))
 /*s*/			+ B_t0 * rads*rads
 /*t*/			- B_t0 * rads*rads * inv_mono_curvh*dist_mono_sample /
-				(units::abs(units::sin(thetam)))
+					(units::abs(units::sin(thetam)))
 /*u*/			+ (dist_src_mono-dist_mono_sample) / (src_w*src_w)
 		);
 	}
@@ -154,7 +154,7 @@ get_mono_vals(const length& src_w, const length& src_h,
 		Bv(1) = t_real(8)*std::log(t_real(2))*pos_z / (ki*angs) * t_real(-1.) *
 		(
 /*i*/			+ dist_src_mono / (src_h*src_h)			// typo in paper?
-/*j*/			- t_real(0.5)*Bv_t0/units::abs(units::sin(thetam)) * rads*rads
+/*j*/			+ t_real(0.5)*Bv_t0/units::abs(units::sin(thetam)) * rads*rads
 		);
 	}
 
@@ -427,7 +427,7 @@ ResoResults calc_eck(const EckParams& eck)
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::SIGMA2FWHM/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

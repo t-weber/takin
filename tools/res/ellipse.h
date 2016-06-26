@@ -345,8 +345,8 @@ Ellipse2d<t_real> calc_res_ellipse(
 	}*/
 
 
-	ell.x_hwhm = tl::SIGMA2HWHM * quad.GetRadius(0);
-	ell.y_hwhm = tl::SIGMA2HWHM * quad.GetRadius(1);
+	ell.x_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(0);
+	ell.y_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(1);
 
 	ell.x_offs = Q_offs[iX];
 	ell.y_offs = Q_offs[iY];
@@ -437,9 +437,9 @@ Ellipsoid3d<t_real> calc_res_ellipsoid(
 	ell.quad.GetPrincipalAxes(ell.rot, evals, &quad);
 
 	//tl::log_info("Principal axes: ", quad.GetQ());
-	ell.x_hwhm = tl::SIGMA2HWHM * quad.GetRadius(0);
-	ell.y_hwhm = tl::SIGMA2HWHM * quad.GetRadius(1);
-	ell.z_hwhm = tl::SIGMA2HWHM * quad.GetRadius(2);
+	ell.x_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(0);
+	ell.y_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(1);
+	ell.z_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(2);
 
 	ell.x_offs = Q_offs[iX];
 	ell.y_offs = Q_offs[iY];
@@ -482,10 +482,10 @@ Ellipsoid4d<t_real> calc_res_ellipsoid4d(
 	tl::QuadEllipsoid<t_real> quad(4);
 	ell.quad.GetPrincipalAxes(ell.rot, evals, &quad);
 
-	ell.x_hwhm = tl::SIGMA2HWHM * quad.GetRadius(0);
-	ell.y_hwhm = tl::SIGMA2HWHM * quad.GetRadius(1);
-	ell.z_hwhm = tl::SIGMA2HWHM * quad.GetRadius(2);
-	ell.w_hwhm = tl::SIGMA2HWHM * quad.GetRadius(3);
+	ell.x_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(0);
+	ell.y_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(1);
+	ell.z_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(2);
+	ell.w_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(3);
 
 	ell.x_offs = Q_avg[0];
 	ell.y_offs = Q_avg[1];
