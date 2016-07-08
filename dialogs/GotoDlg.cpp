@@ -135,7 +135,7 @@ void GotoDlg::CalcSample()
 		edit2ThetaS->setText("invalid");
 
 		//log_err(ex.what());
-		labelStatus->setText((std::string("Error: ") + ex.what()).c_str());
+		labelStatus->setText((std::string("Error (sample): ") + ex.what()).c_str());
 		bFailed = 1;
 	}
 
@@ -205,8 +205,8 @@ void GotoDlg::CalcMonoAna()
 		editThetaM->setText("invalid");
 		edit2ThetaM->setText("invalid");
 
-		//log_err(ex.what());
-		labelStatus->setText((std::string("Error: ") + ex.what()).c_str());
+		//tl::log_err("mono: ", ex.what());
+		labelStatus->setText((std::string("Error (mono)): ") + ex.what()).c_str());
 	}
 
 	try
@@ -223,24 +223,28 @@ void GotoDlg::CalcMonoAna()
 		editThetaA->setText("invalid");
 		edit2ThetaA->setText("invalid");
 
-		//log_err(ex.what());
-		labelStatus->setText((std::string("Error: ") + ex.what()).c_str());
+		//tl::log_err("ana: ", ex.what());
+		labelStatus->setText((std::string("Error (ana): ") + ex.what()).c_str());
 	}
 
-	if(!bMonoOk || !bAnaOk)
-		return;
 
+	if(bMonoOk)
+	{
+		t_real dTMono = m_dMono2Theta / 2.;
 
-	t_real dTMono = m_dMono2Theta / 2.;
-	t_real dTAna = m_dAna2Theta / 2.;
+		edit2ThetaM->setText(tl::var_to_str(tl::r2d(m_dMono2Theta), g_iPrec).c_str());
+		editThetaM->setText(tl::var_to_str(tl::r2d(dTMono), g_iPrec).c_str());
+	}
+	if(bAnaOk)
+	{
+		t_real dTAna = m_dAna2Theta / 2.;
 
-	edit2ThetaM->setText(tl::var_to_str(tl::r2d(m_dMono2Theta), g_iPrec).c_str());
-	editThetaM->setText(tl::var_to_str(tl::r2d(dTMono), g_iPrec).c_str());
-	edit2ThetaA->setText(tl::var_to_str(tl::r2d(m_dAna2Theta), g_iPrec).c_str());
-	editThetaA->setText(tl::var_to_str(tl::r2d(dTAna), g_iPrec).c_str());
+		edit2ThetaA->setText(tl::var_to_str(tl::r2d(m_dAna2Theta), g_iPrec).c_str());
+		editThetaA->setText(tl::var_to_str(tl::r2d(dTAna), g_iPrec).c_str());
+	}
 
-	m_bMonoAnaOk = 1;
-
+	if(bMonoOk && bAnaOk)
+		m_bMonoAnaOk = 1;
 	if(m_bMonoAnaOk && m_bSampleOk)
 		labelStatus->setText("Position OK.");
 }
@@ -359,7 +363,7 @@ void GotoDlg::EditedAngles()
 	catch(const std::exception& ex)
 	{
 		//log_err(ex.what());
-		labelStatus->setText((std::string("Error: ") + ex.what()).c_str());
+		labelStatus->setText((std::string("Error (hkl): ") + ex.what()).c_str());
 		bFailed = 1;
 	}
 
@@ -555,7 +559,7 @@ void GotoDlg::AddPosToList(t_real dh, t_real dk, t_real dl, t_real dki, t_real d
 	const std::wstring strAA = tl::get_spec_char_utf16("AA") + tl::get_spec_char_utf16("sup-") + tl::get_spec_char_utf16("sup1");
 
 	std::wostringstream ostrHKL;
-	ostrHKL.precision(4);
+	ostrHKL.precision(g_iPrecGfx);
 	ostrHKL << "(" << pPos->dh << ", " << pPos->dk << ", " << pPos->dl << ") rlu\n";
 	ostrHKL << "ki = " << pPos->dki << " " << strAA;
 	ostrHKL << ", kf = " << pPos->dkf << " " << strAA << "\n";

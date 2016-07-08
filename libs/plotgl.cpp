@@ -122,7 +122,13 @@ void PlotGl::initializeGLThread()
 	// TODO: get selected font path
 	m_pFont = new tl::GlFontMap(DEF_FONT, g_fontGL.pointSize());
 #else
-	m_pFont = new tl::GlFontMap(g_fontGL.freetypeFace());
+	int iPixelSize = g_fontGL.pixelSize();
+	if(iPixelSize < 0)
+	{
+		iPixelSize = g_fontGL.pointSize();
+		tl::log_warn("Using font size:", iPixelSize);
+	}
+	m_pFont = new tl::GlFontMap(g_fontGL.freetypeFace(), iPixelSize);
 #endif
 
 #if QT_VER>=5

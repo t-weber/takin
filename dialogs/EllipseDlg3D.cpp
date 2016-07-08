@@ -11,7 +11,7 @@
 
 
 EllipseDlg3D::EllipseDlg3D(QWidget* pParent, QSettings* pSett)
-	: QDialog(pParent), m_pSettings(pSett)
+	: QDialog(pParent, Qt::WindowStaysOnTopHint), m_pSettings(pSett)
 {
 	setWindowFlags(Qt::Tool);
 	setWindowTitle("Resolution Ellipsoids");
@@ -42,7 +42,7 @@ EllipseDlg3D::EllipseDlg3D(QWidget* pParent, QSettings* pSett)
 	pgridLayout->setContentsMargins(4, 4, 4, 4);
 	pgridLayout->addWidget(pPlotLeft, 0, 0, 1, 1);
 	pgridLayout->addWidget(pPlotRight, 0, 1, 1, 1);
-	pgridLayout->addWidget(m_pComboCoord, 1, 0, 1, 1);
+	pgridLayout->addWidget(m_pComboCoord, 1, 0, 1, 2);
 
 	/*QSplitter *pSplitter = new QSplitter(this);
 	pSplitter->setOrientation(Qt::Horizontal);

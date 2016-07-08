@@ -423,7 +423,7 @@ ResoResults calc_eck(const EckParams& eck)
 
 	// prefactor and volume
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
-	res.dR0 = Z /** res.dResVol*/;	// TODO: check
+	res.dR0 = Z*std::exp(-W) /** res.dResVol*/;
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)

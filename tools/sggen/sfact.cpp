@@ -1,4 +1,4 @@
-// gcc -o sfact sfact.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../helper/spacegroup_clp.cpp ../../helper/crystalsys.cpp ../../helper/globals.cpp ../../helper/formfact.cpp ../../tlibs/log/log.cpp -DNO_QT -lclipper-core -lboost_system -lboost_filesystem
+// gcc -o sfact sfact.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../libs/spacegroups/spacegroup_clp.cpp ../../libs/spacegroups/crystalsys.cpp ../../libs/globals.cpp ../../libs/formfactors/formfact.cpp ../../tlibs/log/log.cpp -DNO_QT -lclipper-core -lboost_system -lboost_filesystem -lboost_iostreams
 /**
  * generates structure factors
  * @author tweber

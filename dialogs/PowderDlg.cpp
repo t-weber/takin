@@ -21,6 +21,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+
 using t_real = t_real_glob;
 static const tl::t_length_si<t_real> angs = tl::get_one_angstrom<t_real>();
 
@@ -30,14 +31,17 @@ namespace algo = boost::algorithm;
 using t_mat = ublas::matrix<t_real>;
 using t_vec = ublas::vector<t_real>;
 
-#define TABLE_ANGLE	0
-#define TABLE_Q		1
-#define TABLE_PEAK	2
-#define TABLE_MULT	3
-#define TABLE_FN	4
-#define TABLE_IN	5
-#define TABLE_FX	6
-#define TABLE_IX	7
+enum : unsigned int
+{
+	TABLE_ANGLE	= 0,
+	TABLE_Q		= 1,
+	TABLE_PEAK	= 2,
+	TABLE_MULT	= 3,
+	TABLE_FN	= 4,
+	TABLE_IN	= 5,
+	TABLE_FX	= 6,
+	TABLE_IX	= 7
+};
 
 PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 	: QDialog(pParent), m_pSettings(pSett),
@@ -122,8 +126,6 @@ PowderDlg::~PowderDlg()
 
 void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 {
-	const unsigned int NUM_POINTS = 512;
-
 	using t_iter = typename std::vector<const PowderLine*>::const_iterator;
 	std::pair<t_iter, t_iter> pairMinMax =
 		boost::minmax_element(vecLines.begin(), vecLines.end(),
@@ -148,14 +150,14 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 	m_vecInt.clear();
 	m_vecIntx.clear();
 
-	m_vecTT.reserve(NUM_POINTS);
-	m_vecTTx.reserve(NUM_POINTS);
-	m_vecInt.reserve(NUM_POINTS);
-	m_vecIntx.reserve(NUM_POINTS);
+	m_vecTT.reserve(GFX_NUM_POINTS);
+	m_vecTTx.reserve(GFX_NUM_POINTS);
+	m_vecInt.reserve(GFX_NUM_POINTS);
+	m_vecIntx.reserve(GFX_NUM_POINTS);
 
-	for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		t_real dTT = (dMinTT + (dMaxTT - dMinTT)/t_real(NUM_POINTS)*t_real(iPt));
+		t_real dTT = (dMinTT + (dMaxTT - dMinTT)/t_real(GFX_NUM_POINTS)*t_real(iPt));
 
 		t_real dInt = 0., dIntX = 0.;
 		for(const PowderLine *pLine : vecLines)
@@ -271,8 +273,16 @@ void PowderDlg::CalcPeaks()
 					t_real dQ = ublas::norm_2(vecBragg);
 					if(tl::is_nan_or_inf<t_real>(dQ)) continue;
 
-					t_real dAngle = tl::bragg_recip_twotheta(dQ/angs, dLam*angs, t_real(1.)) / tl::get_one_radian<t_real>();
-					if(tl::is_nan_or_inf<t_real>(dAngle)) continue;
+					t_real dAngle = 0;
+					try
+					{
+						dAngle = tl::bragg_recip_twotheta(dQ/angs, dLam*angs, t_real(1.)) / tl::get_one_radian<t_real>();
+						if(tl::is_nan_or_inf<t_real>(dAngle)) continue;
+					}
+					catch(const std::exception&)
+					{
+						continue;
+					}
 
 					//std::cout << "Q = " << dQ << ", angle = " << (dAngle/M_PI*180.) << std::endl;
 
@@ -498,7 +508,7 @@ void PowderDlg::RepopulateSpaceGroups()
 		typedef const boost::iterator_range<std::string::const_iterator> t_striterrange;
 		if(strFilter!="" &&
 				!boost::ifind_first(t_striterrange(strName.begin(), strName.end()),
-									t_striterrange(strFilter.begin(), strFilter.end())))
+					t_striterrange(strFilter.begin(), strFilter.end())))
 			continue;
 
 		comboSpaceGroups->insertItem(comboSpaceGroups->count(),
@@ -666,7 +676,7 @@ void PowderDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 	editBeta->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "sample/beta").c_str(), 90., &bOk), g_iPrec).c_str());
 	editGamma->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "sample/gamma").c_str(), 90., &bOk), g_iPrec).c_str());
 
-	spinOrder->setValue(xml.Query<int>((strXmlRoot + "powder/maxhkl").c_str(), 10, &bOk));
+	spinOrder->setValue(xml.Query<int>((strXmlRoot + "powder/maxhkl").c_str(), 5, &bOk));
 	spinLam->setValue(xml.Query<t_real>((strXmlRoot + "powder/lambda").c_str(), 5., &bOk));
 
 	std::string strSpaceGroup = xml.Query<std::string>((strXmlRoot + "sample/spacegroup").c_str(), "", &bOk);
@@ -715,13 +725,22 @@ void PowderDlg::SaveTable()
 		fileopt = QFileDialog::DontUseNativeDialog;
 
 	QString strDirLast = m_pSettings ? m_pSettings->value("powder/last_dir_table", ".").toString() : ".";
-	QString strFile = QFileDialog::getSaveFileName(this,
+	QString _strFile = QFileDialog::getSaveFileName(this,
 		"Save Table", strDirLast, "Data files (*.dat *.DAT)", nullptr, fileopt);
+
+	std::string strFile = _strFile.toStdString();
 
 	if(strFile != "")
 	{
-		if(!save_table(strFile.toStdString().c_str(), tablePowderLines))
+		if(save_table(strFile.c_str(), tablePowderLines))
+		{
+			std::string strDir = tl::get_dir(strFile);
+			m_pSettings->setValue("powder/last_dir_table", QString(strDir.c_str()));
+		}
+		else
+		{
 			QMessageBox::critical(this, "Error", "Could not save table data.");
+		}
 	}
 }
 

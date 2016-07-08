@@ -24,6 +24,7 @@ bool g_bHasScatlens = 0;
 bool g_bHasSpaceGroups = 0;
 bool g_bShowFsq = 1;
 
+unsigned int GFX_NUM_POINTS = 512;
 
 // -----------------------------------------------------------------------------
 

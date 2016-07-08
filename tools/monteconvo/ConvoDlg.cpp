@@ -477,12 +477,12 @@ void ConvoDlg::Start()
 				break;
 			t_real dS = pairS.second;
 
-			ostrOut.precision(16);
-			ostrOut << std::left << std::setw(20) << vecH[iStep] << " "
-				<< std::left << std::setw(20) << vecK[iStep] << " "
-				<< std::left << std::setw(20) << vecL[iStep] << " "
-				<< std::left << std::setw(20) << vecE[iStep] << " "
-				<< std::left << std::setw(20) << dS << "\n";
+			ostrOut.precision(g_iPrec);
+			ostrOut << std::left << std::setw(g_iPrec*2) << vecH[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << vecK[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << vecL[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << vecE[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << dS << "\n";
 
 
 			m_vecQ.push_back((*pVecScanX)[iStep]);

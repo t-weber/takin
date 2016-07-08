@@ -116,11 +116,11 @@ bool TazDlg::Load(const char* pcFile)
 
 	// edit boxes
 	std::vector<std::vector<QLineEdit*>*> vecEdits
-			= {&m_vecEdits_real, &m_vecEdits_recip,
-				&m_vecEdits_plane, &m_vecEdits_monoana};
+		= {&m_vecEdits_real, &m_vecEdits_recip,
+			&m_vecEdits_plane, &m_vecEdits_monoana};
 	std::vector<std::vector<std::string>*> vecEditNames
-			= {&m_vecEditNames_real, &m_vecEditNames_recip,
-				&m_vecEditNames_plane, &m_vecEditNames_monoana};
+		= {&m_vecEditNames_real, &m_vecEditNames_recip,
+			&m_vecEditNames_plane, &m_vecEditNames_monoana};
 	unsigned int iIdxEdit = 0;
 	for(const std::vector<QLineEdit*>* pVec : vecEdits)
 	{
@@ -263,13 +263,6 @@ bool TazDlg::Load(const char* pcFile)
 	}
 
 
-
-	if(xml.Exists((strXmlRoot + "reso").c_str()))
-	{
-		InitReso();
-		m_pReso->Load(xml, strXmlRoot);
-	}
-
 	if(m_pGotoDlg)
 		m_pGotoDlg->ClearList();
 
@@ -278,6 +271,14 @@ bool TazDlg::Load(const char* pcFile)
 	{
 		InitGoto();
 		m_pGotoDlg->Load(xml, strXmlRoot);
+	}
+
+
+	if(xml.Exists((strXmlRoot + "reso").c_str()))
+	{
+		InitReso();
+		m_pReso->SetUpdateOn(0,0);
+		m_pReso->Load(xml, strXmlRoot);
 	}
 
 
@@ -302,6 +303,8 @@ bool TazDlg::Load(const char* pcFile)
 
 	CalcPeaks();
 	m_sceneRecip.emitUpdate();
+	if(m_pReso)
+		m_pReso->SetUpdateOn(1,1);
 
 	return true;
 }

@@ -5,14 +5,12 @@
  * @license GPLv2
  */
 
-#include "DWDlg.h"
-
+#include "tlibs/helper/array.h"
 #include "tlibs/string/string.h"
 #include "tlibs/math/neutrons.h"
 #include "tlibs/math/atoms.h"
-#include "tlibs/helper/array.h"
 
-#include <boost/units/io.hpp>
+#include "DWDlg.h"
 
 using t_real = t_real_glob;
 static const tl::t_length_si<t_real> angs = tl::get_one_angstrom<t_real>();
@@ -144,8 +142,6 @@ void DWDlg::cursorMoved(const QPointF& pt)
 
 void DWDlg::CalcBose()
 {
-	const unsigned int NUM_POINTS = 512;
-
 	const t_real dMinE = spinBoseEMin->value();
 	const t_real dMaxE = spinBoseEMax->value();
 
@@ -155,13 +151,13 @@ void DWDlg::CalcBose()
 	m_vecBoseIntPos.clear();
 	m_vecBoseIntNeg.clear();
 
-	m_vecBoseE.reserve(NUM_POINTS);
-	m_vecBoseIntPos.reserve(NUM_POINTS);
-	m_vecBoseIntNeg.reserve(NUM_POINTS);
+	m_vecBoseE.reserve(GFX_NUM_POINTS);
+	m_vecBoseIntPos.reserve(GFX_NUM_POINTS);
+	m_vecBoseIntNeg.reserve(GFX_NUM_POINTS);
 
-	for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		tl::t_energy_si<t_real> E = (dMinE + (dMaxE - dMinE)/t_real(NUM_POINTS)*t_real(iPt)) * meV;
+		tl::t_energy_si<t_real> E = (dMinE + (dMaxE - dMinE)/t_real(GFX_NUM_POINTS)*t_real(iPt)) * meV;
 		m_vecBoseE.push_back(E / meV);
 
 		m_vecBoseIntPos.push_back(tl::bose(E, T));
@@ -185,8 +181,6 @@ void DWDlg::CalcBose()
 
 void DWDlg::CalcLorentz()
 {
-	const unsigned int NUM_POINTS = 512;
-
 	const t_real dMin2th = tl::d2r(spinMin2Th->value());
 	const t_real dMax2th = tl::d2r(spinMax2Th->value());
 
@@ -195,12 +189,12 @@ void DWDlg::CalcLorentz()
 	m_vecLor2th.clear();
 	m_vecLor.clear();
 
-	m_vecLor2th.reserve(NUM_POINTS);
-	m_vecLor.reserve(NUM_POINTS);
+	m_vecLor2th.reserve(GFX_NUM_POINTS);
+	m_vecLor.reserve(GFX_NUM_POINTS);
 
-	for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		t_real d2th = (dMin2th + (dMax2th - dMin2th)/t_real(NUM_POINTS)*t_real(iPt));
+		t_real d2th = (dMin2th + (dMax2th - dMin2th)/t_real(GFX_NUM_POINTS)*t_real(iPt));
 		t_real dLor = tl::lorentz_factor(d2th);
 		if(bPol)
 			dLor *= tl::lorentz_pol_factor(d2th);
@@ -215,8 +209,6 @@ void DWDlg::CalcLorentz()
 
 void DWDlg::CalcDW()
 {
-	const unsigned int NUM_POINTS = 512;
-
 	t_real dMinQ = spinMinQ_deb->value();
 	t_real dMaxQ = spinMaxQ_deb->value();
 
@@ -227,13 +219,13 @@ void DWDlg::CalcDW()
 	m_vecQ.clear();
 	m_vecDeb.clear();
 
-	m_vecQ.reserve(NUM_POINTS);
-	m_vecDeb.reserve(NUM_POINTS);
+	m_vecQ.reserve(GFX_NUM_POINTS);
+	m_vecDeb.reserve(GFX_NUM_POINTS);
 
 	bool bHasZetaSq = 0;
-	for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		tl::t_wavenumber_si<t_real> Q = (dMinQ + (dMaxQ - dMinQ)/t_real(NUM_POINTS)*t_real(iPt)) / angs;
+		tl::t_wavenumber_si<t_real> Q = (dMinQ + (dMaxQ - dMinQ)/t_real(GFX_NUM_POINTS)*t_real(iPt)) / angs;
 		t_real dDWF = 0.;
 		auto zetasq = angs*angs;
 
@@ -261,34 +253,37 @@ void DWDlg::CalcDW()
 
 void DWDlg::CalcAna()
 {
-	const unsigned int NUM_POINTS = 512;
-
-	const tl::t_length_si<t_real> d = t_real(spinAnad->value()) * angs;
-	const t_real dMinKf = spinMinkf->value();
-	const t_real dMaxKf = spinMaxkf->value();
-
-	t_real dAngMax = 0.5*tl::r2d(tl::get_mono_twotheta(dMinKf/angs, d, 1) / rads);
-	t_real dAngMin = 0.5*tl::r2d(tl::get_mono_twotheta(dMaxKf/angs, d, 1) / rads);
-
-	editAngMin->setText(tl::var_to_str(dAngMin).c_str());
-	editAngMax->setText(tl::var_to_str(dAngMax).c_str());
-
-	m_veckf.clear();
-	m_vecInt.clear();
-
-	m_veckf.reserve(NUM_POINTS);
-	m_vecInt.reserve(NUM_POINTS);
-
-	for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+	try
 	{
-		tl::t_wavenumber_si<t_real> kf = (dMinKf + (dMaxKf - dMinKf)/t_real(NUM_POINTS)*t_real(iPt)) / angs;
-		t_real dEffic = tl::ana_effic_factor(kf, d);
+		const tl::t_length_si<t_real> d = t_real(spinAnad->value()) * angs;
+		const t_real dMinKf = spinMinkf->value();
+		const t_real dMaxKf = spinMaxkf->value();
 
-		m_veckf.push_back(kf * angs);
-		m_vecInt.push_back(dEffic);
+		t_real dAngMax = 0.5*tl::r2d(tl::get_mono_twotheta(dMinKf/angs, d, 1) / rads);
+		t_real dAngMin = 0.5*tl::r2d(tl::get_mono_twotheta(dMaxKf/angs, d, 1) / rads);
+
+		editAngMin->setText(tl::var_to_str(dAngMin).c_str());
+		editAngMax->setText(tl::var_to_str(dAngMax).c_str());
+
+		m_veckf.clear();
+		m_vecInt.clear();
+
+		m_veckf.reserve(GFX_NUM_POINTS);
+		m_vecInt.reserve(GFX_NUM_POINTS);
+
+		for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
+		{
+			tl::t_wavenumber_si<t_real> kf = (dMinKf + (dMaxKf - dMinKf)/t_real(GFX_NUM_POINTS)*t_real(iPt)) / angs;
+			t_real dEffic = tl::ana_effic_factor(kf, d);
+
+			m_veckf.push_back(kf * angs);
+			m_vecInt.push_back(dEffic);
+		}
+
+		set_qwt_data<t_real>()(*m_plotwrapAna, m_veckf, m_vecInt, 0, true);
 	}
-
-	set_qwt_data<t_real>()(*m_plotwrapAna, m_veckf, m_vecInt, 0, true);
+	catch(const std::exception&)
+	{}
 }
 
 

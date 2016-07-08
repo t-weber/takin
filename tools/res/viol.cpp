@@ -17,6 +17,7 @@
 
 #include <string>
 #include <iostream>
+#include <numeric>
 
 typedef t_real_reso t_real;
 typedef ublas::matrix<t_real> t_mat;

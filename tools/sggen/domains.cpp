@@ -1,4 +1,4 @@
-// gcc -o domains domains.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../helper/spacegroup_clp.cpp ../../helper/crystalsys.cpp -DNO_QT -lclipper-core ../../tlibs/log/log.cpp
+// gcc -o domains domains.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../libs/spacegroups/spacegroup_clp.cpp ../../libs/spacegroups/crystalsys.cpp -DNO_QT -lclipper-core ../../tlibs/log/log.cpp
 
 /**
  * generates positions based on space group

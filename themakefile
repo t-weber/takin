@@ -16,6 +16,14 @@ USE_PY = 1
 USE_PLUGINS = 1
 USE_CPP11_ABI = 1
 
+STD_CPP = -std=c++11
+#STD_CPP += -stdlib=libc++
+
+STD_LIBS = -lstdc++
+#STD_LIBS = -lc++ -lc++abi
+STD_LIBS += -lm
+STD_LIBS += -lpthread
+
 BOOST_SUFFIX = 
 #BOOST_SUFFIX = -mt
 QWT5_SUFFIX = 
@@ -121,12 +129,9 @@ LIB_DIRS = -L/opt/local/lib -L/opt/lib -L/usr/local/lib -L/usr/local/lib64 \
 	-L/usr/lib64 -L/usr/lib64/root -L/usr/lib/x86_64-linux-gnu
 
 
-STD_LIBS = -lstdc++ -lm
-STD_LIBS += -lpthread
-
 
 ifeq ($(DO_DEBUG), 0)
-	FLAGS = ${INC} -O2 -std=c++11 -DNDEBUG -Wall -Wpedantic -Wextra -fPIC
+	FLAGS = ${INC} -O2 ${STD_CPP} -DNDEBUG -Wall -Wpedantic -Wextra -fPIC
 	ifeq ($(NATIVE_OPTS), 1)
 		FLAGS += -march=native
 	else
@@ -138,7 +143,7 @@ ifeq ($(DO_DEBUG), 0)
 	FLAGS += ${DEFINES}
 	STRIP = strip -v 
 else
-	FLAGS = ${INC} -std=c++11 -rdynamic -ggdb -DDEBUG -Wall -Wall -Wpedantic -Wextra -Weffc++ -fPIC ${DEFINES}
+	FLAGS = ${INC} ${STD_CPP} -rdynamic -ggdb -DDEBUG -Wall -Wall -Wpedantic -Wextra -Weffc++ -fPIC ${DEFINES}
 	STRIP = echo Retaining debug symbols of 
 endif
 

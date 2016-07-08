@@ -14,7 +14,7 @@
 
 
 EllipseDlg::EllipseDlg(QWidget* pParent, QSettings* pSett)
-	: QDialog(pParent), m_pSettings(pSett)
+	: QDialog(pParent, Qt::WindowStaysOnTopHint), m_pSettings(pSett)
 {
 	setupUi(this);
 	setWindowTitle(m_pcTitle);
@@ -238,8 +238,8 @@ void EllipseDlg::Calc()
 			std::vector<t_real_reso>& vecYSlice = m_vecYCurvePoints[iEll*2+1];
 
 			t_real_reso dBBProj[4], dBBSlice[4];
-			m_elliProj[iEll].GetCurvePoints(vecXProj, vecYProj, 512, dBBProj);
-			m_elliSlice[iEll].GetCurvePoints(vecXSlice, vecYSlice, 512, dBBSlice);
+			m_elliProj[iEll].GetCurvePoints(vecXProj, vecYProj, GFX_NUM_POINTS, dBBProj);
+			m_elliSlice[iEll].GetCurvePoints(vecXSlice, vecYSlice, GFX_NUM_POINTS, dBBSlice);
 
 			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXProj, vecYProj, 0, false);
 			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXSlice, vecYSlice, 1, false);
@@ -248,7 +248,7 @@ void EllipseDlg::Calc()
 
 
 			std::ostringstream ostrSlope;
-			ostrSlope.precision(4);
+			ostrSlope.precision(g_iPrecGfx);
 			ostrSlope << "Projected ellipse (green):\n";
 			ostrSlope << "\tSlope: " << m_elliProj[iEll].slope << "\n";
 			ostrSlope << "\tAngle: " << tl::r2d(m_elliProj[iEll].phi) << strDeg << "\n";

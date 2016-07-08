@@ -7,6 +7,7 @@
 
 #include "sqw_py.h"
 #include "tlibs/string/string.h"
+#include "tlibs/log/log.h"
 
 using t_real = t_real_reso;
 
@@ -21,16 +22,29 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	{
 		::Py_Initialize();
 
+		// set script paths
 		m_sys = py::import("sys");
 		py::dict sysdict = py::extract<py::dict>(m_sys.attr("__dict__"));
 		py::list path = py::extract<py::list>(sysdict["path"]);
 		path.append(strDir.c_str());
 		path.append(".");
 
+		// set script working directory
+		m_os = py::import("os");
+		py::dict osdict = py::extract<py::dict>(m_os.attr("__dict__"));
+		py::object pycwd = osdict["chdir"];
+		if(!!pycwd)
+			pycwd(strDir.c_str());
+		else
+			tl::log_warn("Cannot set script working directory.");
+
+		// import takin functions
 		m_mod = py::import(strMod.c_str());
 		py::dict moddict = py::extract<py::dict>(m_mod.attr("__dict__"));
 		m_Sqw = moddict["TakinSqw"];
 		m_bOk = !!m_Sqw;
+		if(!m_bOk)
+			tl::log_err("Script has no TakinSqw function.");
 
 		try	// optional stuff
 		{
@@ -38,6 +52,10 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 			{
 				m_Init = moddict["TakinInit"];
 				if(!!m_Init) m_Init();
+			}
+			else
+			{
+				tl::log_warn("Script has no TakinInit function.");
 			}
 		}
 		catch(const py::error_already_set& ex) {}
@@ -176,6 +194,7 @@ SqwBase* SqwPy::shallow_copy() const
 
 	pSqw->m_pmtx = this->m_pmtx;
 	pSqw->m_sys = this->m_sys;
+	pSqw->m_os = this->m_os;
 	pSqw->m_mod = this->m_mod;
 	pSqw->m_Sqw = this->m_Sqw;
 	pSqw->m_Init = this->m_Init;

@@ -1,4 +1,4 @@
-/*
+/**
  * Spurion Dialog
  * @author Tobias Weber
  * @date 26-may-2014
@@ -8,15 +8,27 @@
 #include "SpurionDlg.h"
 #include "tlibs/math/neutrons.h"
 #include "tlibs/string/string.h"
-#include "tlibs/string/spec_char.h"
+#include "libs/qthelper.h"
 
 #include <sstream>
 #include <iostream>
+
 #include <qwt_picker_machine.h>
+#include <QFileDialog>
+#include <QMessageBox>
+
 
 using t_real = t_real_glob;
 static const tl::t_length_si<t_real> angs = tl::get_one_angstrom<t_real>();
 static const tl::t_energy_si<t_real> meV = tl::get_one_meV<t_real>();
+
+
+enum : unsigned
+{
+	ITEM_E = 0,
+	ITEM_MONO = 1,
+	ITEM_ANA = 2,
+};
 
 
 SpurionDlg::SpurionDlg(QWidget* pParent, QSettings *pSett)
@@ -29,6 +41,21 @@ SpurionDlg::SpurionDlg(QWidget* pParent, QSettings *pSett)
 		if(m_pSettings->contains("main/font_gen") && font.fromString(m_pSettings->value("main/font_gen", "").toString()))
 			setFont(font);
 	}
+
+
+	tabInel->setColumnCount(3);
+	tabInel->setRowCount(0);
+	tabInel->setColumnWidth(ITEM_E, 150);
+	tabInel->setColumnWidth(ITEM_MONO, 100);
+	tabInel->setColumnWidth(ITEM_ANA, 100);
+	tabInel->verticalHeader()->setDefaultSectionSize(tabInel->verticalHeader()->minimumSectionSize()+2);
+
+	tabInel->setHorizontalHeaderItem(ITEM_E, new QTableWidgetItem("Energy (meV)"));
+	tabInel->setHorizontalHeaderItem(ITEM_MONO, new QTableWidgetItem("Mono. Order"));
+	tabInel->setHorizontalHeaderItem(ITEM_ANA, new QTableWidgetItem("Ana. Order"));
+	
+	tabInel->sortItems(ITEM_E);
+
 
 	m_plotwrap.reset(new QwtPlotWrapper(plotbragg));
 	m_plotwrap->GetCurve(0)->setTitle("Bragg Tail");
@@ -52,6 +79,8 @@ SpurionDlg::SpurionDlg(QWidget* pParent, QSettings *pSett)
 	QObject::connect(spinMinQ, SIGNAL(valueChanged(double)), this, SLOT(CalcBragg()));
 	QObject::connect(spinMaxQ, SIGNAL(valueChanged(double)), this, SLOT(CalcBragg()));
 
+	QObject::connect(btnSaveTable, SIGNAL(clicked()), this, SLOT(SaveTable()));
+
 	Calc();
 
 
@@ -61,6 +90,33 @@ SpurionDlg::SpurionDlg(QWidget* pParent, QSettings *pSett)
 
 SpurionDlg::~SpurionDlg()
 {}
+
+
+void SpurionDlg::SaveTable()
+{
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(m_pSettings && !m_pSettings->value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	QString strDirLast = m_pSettings ? m_pSettings->value("spurions/last_dir_table", ".").toString() : ".";
+	QString _strFile = QFileDialog::getSaveFileName(this,
+		"Save Table", strDirLast, "Data files (*.dat *.DAT)", nullptr, fileopt);
+
+	std::string strFile = _strFile.toStdString();
+
+	if(strFile != "")
+	{
+		if(save_table(strFile.c_str(), tabInel))
+		{
+			std::string strDir = tl::get_dir(strFile);
+			m_pSettings->setValue("spurions/last_dir_table", QString(strDir.c_str()));
+		}
+		else
+		{
+			QMessageBox::critical(this, "Error", "Could not save table data.");
+		}
+	}
+}
 
 
 void SpurionDlg::ChangedKiKfMode()
@@ -93,8 +149,9 @@ void SpurionDlg::CalcInel()
 	const unsigned int iMaxOrder = (unsigned int)spinOrder->value();
 	const bool bFilter = checkFilter->isChecked();
 
-	std::vector<t_real> vecSpurions;
-	std::vector<std::string> vecInfo;
+	const bool bSortTable = tabInel->isSortingEnabled();
+	tabInel->setSortingEnabled(0);
+	tabInel->setRowCount(0);
 
 	if(bFilter)
 	{
@@ -109,14 +166,16 @@ void SpurionDlg::CalcInel()
 			t_real dE_sp = tl::get_inelastic_spurion(bFixedEi, dE*meV,
 				iOrderMono, iOrderAna) / meV;
 
-			if(dE_sp != 0.)
+			if(!tl::float_equal(dE_sp, t_real(0)))
 			{
-				vecSpurions.push_back(dE_sp);
-
-				std::ostringstream ostrInfo;
-				ostrInfo << "Mono order: " << iOrderMono
-					<< ", Ana order: " << iOrderAna;
-				vecInfo.push_back(ostrInfo.str());
+				int iRow = tabInel->rowCount();
+				tabInel->insertRow(iRow);
+				QTableWidgetItemWrapper<t_real> *pItemE = new QTableWidgetItemWrapper<t_real>();
+				pItemE->SetPrec(g_iPrec);
+				pItemE->SetValue(dE_sp);
+				tabInel->setItem(iRow, ITEM_E, pItemE);
+				tabInel->setItem(iRow, ITEM_MONO, new QTableWidgetItemWrapper<int>(iOrderMono));
+				tabInel->setItem(iRow, ITEM_ANA, new QTableWidgetItemWrapper<int>(iOrderAna));
 			}
 		}
 	}
@@ -128,40 +187,22 @@ void SpurionDlg::CalcInel()
 			t_real dE_sp = tl::get_inelastic_spurion(bFixedEi, dE*meV,
 				iOrderMono, iOrderAna) / meV;
 
-			if(dE_sp != 0.)
+			if(!tl::float_equal(dE_sp, t_real(0)))
 			{
-				vecSpurions.push_back(dE_sp);
-
-				std::ostringstream ostrInfo;
-				ostrInfo << "Mono order: " << iOrderMono
-						<< ", Ana order: " << iOrderAna;
-				vecInfo.push_back(ostrInfo.str());
+				int iRow = tabInel->rowCount();
+				tabInel->insertRow(iRow);
+				tabInel->setItem(iRow, ITEM_E, new QTableWidgetItemWrapper<t_real>(dE_sp));
+				tabInel->setItem(iRow, ITEM_MONO, new QTableWidgetItemWrapper<int>(iOrderMono));
+				tabInel->setItem(iRow, ITEM_ANA, new QTableWidgetItemWrapper<int>(iOrderAna));
 			}
 		}
 	}
 
-	const std::string& strDelta = tl::get_spec_char_utf8("Delta");
-	const std::string& strBullet = tl::get_spec_char_utf8("bullet");
-
-	std::ostringstream ostr;
-	ostr << "Spurious inelastic signals for " + strDelta + "E = \n\n";
-	for(unsigned int i=0; i<vecSpurions.size(); ++i)
-	{
-		const t_real dE_Sp = vecSpurions[i];
-		const std::string& strInfo = vecInfo[i];
-
-		ostr << "  " << strBullet << " ";
-		ostr << tl::var_to_str(dE_Sp, 4) << " meV";
-		ostr << " (" << strInfo << ")\n";
-	}
-
-	textSpurions->setPlainText(QString::fromUtf8(ostr.str().c_str(), ostr.str().size()));
+	tabInel->setSortingEnabled(bSortTable);
 }
 
 void SpurionDlg::CalcBragg()
 {
-	const unsigned int NUM_POINTS = 512;
-
 	const bool bFixedEi = radioFixedEi->isChecked();
 	t_real dE = t_real(spinE->value());
 	bool bImag;
@@ -170,7 +211,7 @@ void SpurionDlg::CalcBragg()
 	const t_real dMinq = spinMinQ->value();
 	const t_real dMaxq = spinMaxQ->value();
 
-	m_vecQ = tl::linspace(dMinq, dMaxq, NUM_POINTS);
+	m_vecQ = tl::linspace(dMinq, dMaxq, GFX_NUM_POINTS);
 	m_vecE.clear();
 	m_vecE.reserve(m_vecQ.size());
 

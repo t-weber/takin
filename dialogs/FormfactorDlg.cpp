@@ -202,16 +202,14 @@ void FormfactorDlg::AtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	if(iAtomOrIon == 0) return;
 	const unsigned int iAtom = pItem->data(Qt::UserRole+1).toUInt();
 
-	const unsigned int NUM_POINTS = 512;
-
 	t_real dMinQ = 0.;
 	t_real dMaxQ = 25.;
 
 	m_vecQ.clear();
 	m_vecFF.clear();
 
-	m_vecQ.reserve(NUM_POINTS);
-	m_vecFF.reserve(NUM_POINTS);
+	m_vecQ.reserve(GFX_NUM_POINTS);
+	m_vecFF.reserve(GFX_NUM_POINTS);
 
 	std::shared_ptr<const FormfactList<t_real>> lstff = FormfactList<t_real>::GetInstance();
 	if((iAtomOrIon==1 && iAtom < lstff->GetNumAtoms()) ||
@@ -219,9 +217,9 @@ void FormfactorDlg::AtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	{
 		const Formfact<t_real>& ff = (iAtomOrIon==1 ? lstff->GetAtom(iAtom) : lstff->GetIon(iAtom));
 
-		for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+		for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 		{
-			const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(NUM_POINTS)*t_real(iPt));
+			const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(GFX_NUM_POINTS)*t_real(iPt));
 			const t_real dFF = ff.GetFormfact(dQ);
 
 			m_vecQ.push_back(dQ);
@@ -236,7 +234,6 @@ void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 {
 	if(!pItem || !pItem->data(Qt::UserRole).toUInt()) return;
 	const unsigned int iAtom = pItem->data(Qt::UserRole+1).toUInt();
-	const unsigned int NUM_POINTS = 512;
 
 	t_real dMinQ = 0.;
 	t_real dMaxQ = 15.;
@@ -244,8 +241,8 @@ void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	m_vecQ_m.clear();
 	m_vecFF_m.clear();
 
-	m_vecQ_m.reserve(NUM_POINTS);
-	m_vecFF_m.reserve(NUM_POINTS);
+	m_vecQ_m.reserve(GFX_NUM_POINTS);
+	m_vecFF_m.reserve(GFX_NUM_POINTS);
 
 	t_real dL = spinL->value();
 	t_real dS = spinS->value();
@@ -256,9 +253,9 @@ void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 
 	const MagFormfact<t_real>& ff = lstff->GetAtom(iAtom);
 
-	for(unsigned int iPt=0; iPt<NUM_POINTS; ++iPt)
+	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(NUM_POINTS)*t_real(iPt));
+		const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(GFX_NUM_POINTS)*t_real(iPt));
 		const t_real dFF = ff.GetFormfact(dQ, dL, dS, dJ);
 
 		m_vecQ_m.push_back(dQ);

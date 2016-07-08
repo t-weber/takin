@@ -1,4 +1,4 @@
-/*
+/**
  * Spurion Dialog
  * @author Tobias Weber
  * @date 26-may-2014
@@ -40,6 +40,8 @@ class SpurionDlg : public QDialog, Ui::SpurionDlg
 
 		void cursorMoved(const QPointF& pt);
 		void paramsChanged(const RecipParams& parms);
+
+		void SaveTable();
 
 	protected:
 		virtual void showEvent(QShowEvent *pEvt) override;

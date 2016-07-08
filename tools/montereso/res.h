@@ -37,11 +37,11 @@ Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& Q_vec,
 	const ublas::vector<t_real_reso>& Q_avg,
 	const std::vector<t_real_reso>* pp_vec = 0);
 
-Resolution calc_res(unsigned int uiLen,
+Resolution calc_res(std::size_t uiLen,
 	const t_real_reso *_Q_x, const t_real_reso *_Q_y, const t_real_reso *_Q_z,
 	const t_real_reso *_E);
 
-Resolution calc_res(unsigned int uiLen,
+Resolution calc_res(std::size_t uiLen,
 	const t_real_reso *ki_x, const t_real_reso *ki_y, const t_real_reso *ki_z,
 	const t_real_reso *kf_x, const t_real_reso *kf_y, const t_real_reso *kf_z,
 	const t_real_reso *p_i=0, const t_real_reso *p_f=0);

@@ -656,7 +656,7 @@ void ResoDlg::RefreshSimCmd()
 	const t_real_reso dMin = t_real_reso(tl::get_pi<t_real_reso>()/180./60.);
 
 	std::ostringstream ostrCmd;
-	ostrCmd.precision(12);
+	ostrCmd.precision(g_iPrec);
 
 	ostrCmd << "./templateTAS -n 1e6 verbose=1 ";
 
@@ -842,7 +842,8 @@ void ResoDlg::ReadLastConfig()
 	groupGuide->setChecked(m_pSettings->value("reso/use_guide").value<bool>());
 
 	m_bDontCalc = bOldDontCalc;
-	Calc();
+	RefreshQEPos();
+	//Calc();
 }
 
 void ResoDlg::Save(std::map<std::string, std::string>& mapConf, const std::string& strXmlRoot)
@@ -925,7 +926,8 @@ void ResoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 	if(obGroupVal) groupGuide->setChecked(*obGroupVal);
 
 	m_bDontCalc = bOldDontCalc;
-	Calc();
+	RefreshQEPos();
+	//Calc();
 }
 
 
@@ -1171,31 +1173,31 @@ void ResoDlg::MCGenerate()
 	mc_neutrons(m_ell4d, iNeutrons, opts, vecNeutrons.begin());
 
 
-	ofstr.precision(16);
+	ofstr.precision(g_iPrec);
 
 	if(opts.coords == McNeutronCoords::DIRECT)
 	{
 		ofstr << "# coord_sys: direct\n";
-		ofstr << "# columns: " << std::setw(13) << m_ell4d.x_lab
-			<< std::setw(24) << m_ell4d.y_lab
-			<< std::setw(24) << m_ell4d.z_lab
-			<< std::setw(24) << m_ell4d.w_lab << "\n";
+		ofstr << "# " << std::setw(std::max<int>(g_iPrec*2-2, 4)) << m_ell4d.x_lab << " "
+			<< std::setw(g_iPrec*2) << m_ell4d.y_lab << " "
+			<< std::setw(g_iPrec*2) << m_ell4d.z_lab << " "
+			<< std::setw(g_iPrec*2) << m_ell4d.w_lab << " \n";
 	}
 	else if(opts.coords == McNeutronCoords::ANGS)
 	{
 		ofstr << "# coord_sys: angstrom\n";
-		ofstr << "# columns: " << std::setw(13) << "Qx (1/A)"
-			<< std::setw(24) << "Qy (1/A)"
-			<< std::setw(24) << "Qz (1/A)"
-			<< std::setw(24) << "E (meV)" << "\n";
+		ofstr << "# " << std::setw(std::max<int>(g_iPrec*2-2, 4)) << "Qx (1/A) "
+			<< std::setw(g_iPrec*2) << "Qy (1/A) "
+			<< std::setw(g_iPrec*2) << "Qz (1/A) "
+			<< std::setw(g_iPrec*2) << "E (meV) " << "\n";
 	}
 	else if(opts.coords == McNeutronCoords::RLU)
 	{
 		ofstr << "# coord_sys: rlu\n";
-		ofstr << "# columns: " << std::setw(13) << "h (rlu)"
-			<< std::setw(24) << "k (rlu)"
-			<< std::setw(24) << "l (rlu)"
-			<< std::setw(24) << "E (meV)" << "\n";
+		ofstr << "# " << std::setw(std::max<int>(g_iPrec*2-2, 4)) << "h (rlu) "
+			<< std::setw(g_iPrec*2) << "k (rlu) "
+			<< std::setw(g_iPrec*2) << "l (rlu) "
+			<< std::setw(g_iPrec*2) << "E (meV) " << "\n";
 	}
 	else
 	{
@@ -1206,7 +1208,7 @@ void ResoDlg::MCGenerate()
 	for(const t_vec& vecNeutron : vecNeutrons)
 	{
 		for(unsigned i=0; i<4; ++i)
-			ofstr << std::setw(24) << vecNeutron[i];
+			ofstr << std::setw(g_iPrec*2) << vecNeutron[i] << " ";
 		ofstr << "\n";
 	}
 

@@ -36,12 +36,15 @@ using t_mat = ublas::matrix<t_real>;
 using t_vec = ublas::vector<t_real>;
 using t_cplx = std::complex<t_real>;
 
-#define TABLE_NN_ORDER	0
-#define TABLE_NN_ATOM	1
-#define TABLE_NN_X	2
-#define TABLE_NN_Y	3
-#define TABLE_NN_Z	4
-#define TABLE_NN_DIST	5
+enum : unsigned
+{
+	TABLE_NN_ORDER	= 0,
+	TABLE_NN_ATOM	= 1,
+	TABLE_NN_X		= 2,
+	TABLE_NN_Y		= 3,
+	TABLE_NN_Z		= 4,
+	TABLE_NN_DIST	= 5
+};
 
 DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 	: QDialog(pParent), m_pSettings(pSett),
@@ -271,15 +274,14 @@ void DispDlg::Calc()
 
 		// ---------------------------------------------------------------------
 		// ferro plot
-		const std::size_t NUM_POINTS = 512;
 		m_vecFerroQ.clear();
 		m_vecFerroE.clear();
-		m_vecFerroQ.reserve(NUM_POINTS);
-		m_vecFerroE.reserve(NUM_POINTS);
+		m_vecFerroQ.reserve(GFX_NUM_POINTS);
+		m_vecFerroE.reserve(GFX_NUM_POINTS);
 
-		for(std::size_t iPt=0; iPt<NUM_POINTS; ++iPt)
+		for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 		{
-			t_real tPos = t_real(iPt)/t_real(NUM_POINTS-1) * 1.5;
+			t_real tPos = t_real(iPt)/t_real(GFX_NUM_POINTS-1) * 1.5;
 			t_vec vecq = tl::make_vec<t_vec>({1.,0.,0.}) * tPos;
 			t_vec vecq_AA = tl::mult<t_mat, t_vec>(matB, vecq);
 			t_real dE = tl::ferromag<t_vec, t_real, std::vector>

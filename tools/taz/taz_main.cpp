@@ -26,7 +26,6 @@
 #include <QMetaType>
 #include <QDir>
 #include <QMessageBox>
-#include <QCoreApplication>
 
 
 #ifdef Q_WS_X11
@@ -99,9 +98,9 @@ int main(int argc, char** argv)
 		std::locale::global(std::locale::classic());
 		QLocale::setDefault(QLocale::English);
 
-		QCoreApplication::setApplicationName("Takin");
-		QCoreApplication::setApplicationVersion(TAKIN_VER);
-		std::string strApp = QCoreApplication::applicationDirPath().toStdString();
+		app->setApplicationName("Takin");
+		app->setApplicationVersion(TAKIN_VER);
+		std::string strApp = app->applicationDirPath().toStdString();
 		tl::log_info("Application path: ", strApp);
 
 		add_resource_path(strApp);
@@ -110,6 +109,9 @@ int main(int argc, char** argv)
 		add_resource_path(strApp + "/Resources");
 		add_resource_path(strApp + "/../resources");
 		add_resource_path(strApp + "/../Resources");
+
+		app->addLibraryPath((strApp + "/../lib/plugins").c_str());
+		app->addLibraryPath((strApp + "/lib/plugins").c_str());
 
 
 		// ------------------------------------------------------------

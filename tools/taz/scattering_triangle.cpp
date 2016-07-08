@@ -392,14 +392,28 @@ void ScatteringTriangle::paint(QPainter *painter, const QStyleOptionGraphicsItem
 		painter->setPen(Qt::darkGreen);
 
 		painter->save();
+		t_real dAngleq = -lineq.angle();
 		painter->translate(ptKfQ);
-		painter->rotate(-lineq.angle());
-		painter->drawText(QPointF(lineq.length()/5.,-4.), QString::fromWCharArray(ostrq.str().c_str()));
+		painter->rotate(dAngleq);
+		painter->translate(QPointF(lineq.length()/5.,-4.));
+		if(flip_text(dAngleq))
+		{
+			painter->translate(QPointF(lineq.length()/2., 8.));
+			painter->rotate(180.);
+		}
+		painter->drawText(QPointF(0.,0.), QString::fromWCharArray(ostrq.str().c_str()));
 		painter->restore();
 
 		painter->save();
-		painter->rotate(-lineG.angle());
-		painter->drawText(QPointF(lineG.length()/5.,-4.), QString::fromWCharArray(ostrG.str().c_str()));
+		t_real dAngleG = -lineG.angle();
+		painter->rotate(dAngleG);
+		painter->translate(QPointF(lineG.length()/5.,-4.));
+		if(flip_text(dAngleG))
+		{
+			painter->translate(QPointF(lineG.length()/2., 8.));
+			painter->rotate(180.);
+		}
+		painter->drawText(QPointF(0.,0.), QString::fromWCharArray(ostrG.str().c_str()));
 		painter->rotate(lineG.angle());
 		painter->restore();
 
@@ -476,7 +490,7 @@ void ScatteringTriangle::paint(QPainter *painter, const QStyleOptionGraphicsItem
 			ostrAngle.precision(g_iPrecGfx);
 			ostrAngle << std::fabs(dArcAngle) << strDEG;
 
-			
+
 			t_real dTotalAngle = -dBeginArcAngle-dArcAngle*0.5 + 180.;
 			t_real dTransScale = 50. * m_dZoom;
 			painter->save();
@@ -655,6 +669,7 @@ t_real ScatteringTriangle::GetMonoTwoTheta(t_real dMonoD, bool bPosSense) const
 	t_vec vecKi = qpoint_to_vec(mapFromItem(m_pNodeKiQ, 0, 0))
 		- qpoint_to_vec(mapFromItem(m_pNodeKiKf, 0, 0));
 	t_real dKi = ublas::norm_2(vecKi) / m_dScaleFactor;
+
 	return tl::get_mono_twotheta(dKi/angs, dMonoD*angs, bPosSense) / rads;
 }
 
@@ -663,6 +678,7 @@ t_real ScatteringTriangle::GetAnaTwoTheta(t_real dAnaD, bool bPosSense) const
 	t_vec vecKf = qpoint_to_vec(mapFromItem(m_pNodeKfQ, 0, 0))
 		- qpoint_to_vec(mapFromItem(m_pNodeKiKf, 0, 0));
 	t_real dKf = ublas::norm_2(vecKf) / m_dScaleFactor;
+
 	return tl::get_mono_twotheta(dKf/angs, dAnaD*angs, bPosSense) / rads;
 }
 
@@ -1268,10 +1284,34 @@ void ScatteringTriangleScene::emitUpdate()
 	opts.bChangedAnaTwoTheta = 1;
 	opts.bChangedTwoTheta = 1;
 	opts.bChangedTheta = 1;
-	opts.dTwoTheta = m_pTri->GetTwoTheta(m_bSamplePosSense);
-	opts.dTheta = m_pTri->GetTheta(m_bSamplePosSense);
-	opts.dAnaTwoTheta = m_pTri->GetAnaTwoTheta(m_dAnaD, m_bAnaPosSense);
-	opts.dMonoTwoTheta = m_pTri->GetMonoTwoTheta(m_dMonoD, m_bMonoPosSense);
+
+	try
+	{
+		opts.dTwoTheta = m_pTri->GetTwoTheta(m_bSamplePosSense);
+		opts.dTheta = m_pTri->GetTheta(m_bSamplePosSense);
+	}
+	catch(const std::exception&)
+	{
+		opts.dTwoTheta = std::nan("");
+	}
+
+	try
+	{
+		opts.dMonoTwoTheta = m_pTri->GetMonoTwoTheta(m_dMonoD, m_bMonoPosSense);
+	}
+	catch(const std::exception&)
+	{
+		opts.dMonoTwoTheta = std::nan("");
+	}
+
+	try
+	{
+		opts.dAnaTwoTheta = m_pTri->GetAnaTwoTheta(m_dAnaD, m_bAnaPosSense);
+	}
+	catch(const std::exception&)
+	{
+		opts.dAnaTwoTheta = std::nan("");
+	}
 
 	//tl::log_debug("triangle: triangleChanged");
 	emit triangleChanged(opts);

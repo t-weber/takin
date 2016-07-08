@@ -1,4 +1,4 @@
-/*
+/**
  * qt&qwt helpers
  * @author Tobias Weber
  * @date feb-2016

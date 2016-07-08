@@ -217,6 +217,11 @@ void TazDlg::ExportUCModel()
 		tl::make_vec({1., 1., 1.}), tl::make_vec({0., 0., 0.}), tl::make_vec({0.5, 0.5, 0.5}),
 	};
 
+	const std::vector<t_real> vecRadii =
+	{
+		0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2
+	};
+
 	// to transform into program-specific coordinate systems
 	const t_mat matGlobal = tl::make_mat(
 	{	{-1., 0., 0., 0.},
@@ -239,40 +244,85 @@ void TazDlg::ExportUCModel()
 	tl::X3d x3d;
 	std::ostringstream ostrComment;
 
-	std::vector<std::string> vecAllNames;
 	std::vector<t_vec> vecAllAtoms, vecAllAtomsFrac;
-	std::vector<std::size_t> vecAllAtomTypes;
+	std::vector<std::size_t> vecAllAtomTypes, vecIdxSC;
 
+	// unit cell
 	const t_real dUCSize = 1.;
-	std::tie(vecAllNames, vecAllAtoms, vecAllAtomsFrac, vecAllAtomTypes) =
-	tl::generate_all_atoms<t_mat, t_vec, std::vector>
-		(vecTrafos, vecAtoms,
-		static_cast<const std::vector<std::string>*>(0), matA,
-		-dUCSize*0.5, dUCSize*0.5, g_dEps);
+	std::tie(std::ignore, vecAllAtoms, vecAllAtomsFrac, vecAllAtomTypes) =
+		tl::generate_all_atoms<t_mat, t_vec, std::vector>
+			(vecTrafos, vecAtoms,
+			static_cast<const std::vector<std::string>*>(0), matA,
+			-dUCSize*0.5, dUCSize*0.5, g_dEps);
 
-	for(std::size_t iAtom=0; iAtom<vecAllAtoms.size(); ++iAtom)
+	// super cell
+	const std::size_t iSC_NN = 2;
+	std::vector<t_vec> vecAtomsSC;
+	std::vector<std::complex<t_real>> vecJUC;
+	std::tie(vecAtomsSC, std::ignore, vecIdxSC) =
+		tl::generate_supercell<t_vec, std::vector, t_real>
+			(lattice, vecAllAtoms, vecJUC, iSC_NN);
+
+	//for(std::size_t iAtom=0; iAtom<vecAllAtoms.size(); ++iAtom)
+	for(std::size_t iAtom=0; iAtom<vecIdxSC.size(); ++iAtom)
 	{
-		std::size_t iAtomType = vecAllAtomTypes[iAtom];
-		t_vec vecCoord = vecAllAtoms[iAtom];
+		//std::size_t iAtomType = vecAllAtomTypes[iAtom];
+		//t_vec vecCoord = vecAllAtoms[iAtom];
+
+		std::size_t iAtomType = vecAllAtomTypes[vecIdxSC[iAtom]];
+		const t_vec& vecCentral = vecAtomsSC[iAtom];
+		t_vec vecCoord = vecCentral;
 		vecCoord.resize(4,1); vecCoord[3] = 1.;
 
 		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
 		pTrafo->SetTrans(tl::mult<t_mat, t_vec>(matGlobal, vecCoord));
-		tl::X3dSphere *pSphere = new tl::X3dSphere(0.1);
+		t_real dRadius = vecRadii[iAtomType % vecRadii.size()];
+		tl::X3dSphere *pSphere = new tl::X3dSphere(dRadius);
 		pSphere->SetColor(vecColors[iAtomType % vecColors.size()]);
 		pTrafo->AddChild(pSphere);
 
-		x3d.GetScene().AddChild(pTrafo);
+		// surroundings
+		/*if(iAtomType == 0)
+		{
+			std::vector<std::vector<std::size_t>> vecNN =
+				tl::get_neighbours<t_vec, std::vector, t_real>
+					(vecAtomsSC, vecCentral);
 
-		/*ostrComment << "Unit cell contains " << iGeneratedAtoms
-			<< " " << strAtomName << " atoms (color: "
-			<< vecColors[iAtomType % vecColors.size()] <<  ").\n";*/
+			if(vecNN.size() > 1 && vecNN[1].size() > 2)
+			{
+				tl::X3dPolygon *pPoly = new tl::X3dPolygon();
+
+				for(std::size_t iNN : vecNN[1])
+				{
+					const t_vec& vecNeighbour = vecAtomsSC[iNN];
+					pPoly->AddVertex(vecNeighbour);
+				}
+
+				x3d.GetScene().AddChild(pPoly);
+			}
+		}*/
+
+		x3d.GetScene().AddChild(pTrafo);
 	}
 
-	// only for cubic unit cells!
-	//tl::X3dCube *pCube = new tl::X3dCube(a,b,c);
-	//pCube->SetColor(tl::make_vec({1., 1., 1., 0.75}));
-	//x3d.GetScene().AddChild(pCube);
+	// comment
+	for(std::size_t iAtom=0; iAtom<vecAtoms.size(); ++iAtom)
+	{
+		ostrComment << "Atom " << (iAtom+1) << ": " << vecAtomNames[iAtom]
+			<< ", colour: " << vecColors[iAtom % vecColors.size()] << "\n";
+	}
+	ostrComment << "Unit cell contains " << vecAllAtoms.size() << " atoms.\n";
+	if(iSC_NN > 1)
+		ostrComment << "Super cell contains " << vecIdxSC.size() << " atoms.\n";
+
+
+	if(lattice.IsCubic())
+	{
+		tl::X3dCube *pCube = new tl::X3dCube(a,b,c);
+		pCube->SetColor(tl::make_vec({1., 1., 1., 0.75}));
+		x3d.GetScene().AddChild(pCube);
+	}
+
 
 	tl::log_info(ostrComment.str());
 	x3d.SetComment(std::string("\nCreated with Takin.\n\n") + ostrComment.str());

@@ -98,3 +98,7 @@ def TakinSqw(h, k, l, E):
 		return 0.
 
 # -----------------------------------------------------------------------------
+
+
+import os
+print("Script working directory: " + os.getcwd())

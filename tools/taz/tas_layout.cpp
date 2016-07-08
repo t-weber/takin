@@ -276,9 +276,8 @@ QRectF TasLayout::boundingRect() const
 
 void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	painter->setFont(g_fontGfx);
-
 	const bool bDisplayLengths = 0;
+	painter->setFont(g_fontGfx);
 
 	QPointF ptSrc = mapFromItem(m_pSrc, 0, 0) * m_dZoom;
 	QPointF ptMono = mapFromItem(m_pMono, 0, 0) * m_dZoom;
@@ -444,18 +443,21 @@ void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 		t_real dBeginArcAngle = pLines1[i]->angle() + dAngleOffs[i];
 		t_real dArcAngle = tl::r2d(dAngles[i]);
 
-		painter->setPen(*arcPens[i]);
-		painter->drawArc(QRectF(pPoints[i]->x()-dArcSize/2., pPoints[i]->y()-dArcSize/2.,
-			dArcSize, dArcSize), dBeginArcAngle*16., dArcAngle*16.);
-
-
 		std::wostringstream ostrAngle;
 		ostrAngle.precision(g_iPrecGfx);
 		if(!tl::is_nan_or_inf<t_real>(dArcAngle))
+		{
 			ostrAngle << std::fabs(dArcAngle) << strDEG;
+		}
 		else
+		{
+			dArcAngle = t_real(180);
 			ostrAngle << "invalid";
+		}
 
+		painter->setPen(*arcPens[i]);
+		painter->drawArc(QRectF(pPoints[i]->x()-dArcSize/2., pPoints[i]->y()-dArcSize/2.,
+			dArcSize, dArcSize), dBeginArcAngle*16., dArcAngle*16.);
 
 		bool bFlip = dAngleOffs[i] > 90.;
 		t_real dTotalAngle = -dBeginArcAngle-dArcAngle*0.5 + 180.;

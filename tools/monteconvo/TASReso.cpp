@@ -272,7 +272,7 @@ bool TASReso::SetLattice(t_real a, t_real b, t_real c,
 bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 {
 	ResoResults& resores = m_res[0];
-	
+
 	//std::cout << "UB = " << m_opts.matUB << std::endl;
 	//std::cout << h << " " << k << " " << l << ", " << E << std::endl;
 	if(m_opts.matUB.size1() < 3 || m_opts.matUB.size2() < 3)
