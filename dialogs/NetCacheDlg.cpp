@@ -1,4 +1,4 @@
-/*
+/**
  * Cache dialog
  * @author Tobias Weber
  * @date 21-oct-2014
@@ -9,6 +9,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"
 #include "tlibs/log/log.h"
+#include "tlibs/time/stopwatch.h"
 #include "libs/qthelper.h"
 #include <chrono>
 #include <iostream>
@@ -19,8 +20,9 @@ enum
 {
 	ITEM_KEY = 0,
 	ITEM_VALUE = 1,
+//	ITEM_TYPE = 2,
 	ITEM_TIMESTAMP = 2,
-	ITEM_AGE = 3
+	ITEM_AGE = 3,
 };
 
 NetCacheDlg::NetCacheDlg(QWidget* pParent, QSettings* pSett)
@@ -38,14 +40,18 @@ NetCacheDlg::NetCacheDlg(QWidget* pParent, QSettings* pSett)
 	tableCache->setRowCount(0);
 	tableCache->setColumnWidth(ITEM_KEY, 200);
 	tableCache->setColumnWidth(ITEM_VALUE, 200);
+	//tableCache->setColumnWidth(ITEM_TYPE, 50);
 	tableCache->setColumnWidth(ITEM_TIMESTAMP, 140);
 	tableCache->setColumnWidth(ITEM_AGE, 140);
 	tableCache->verticalHeader()->setDefaultSectionSize(tableCache->verticalHeader()->minimumSectionSize()+2);
 
 	tableCache->setHorizontalHeaderItem(ITEM_KEY, new QTableWidgetItem("Name"));
 	tableCache->setHorizontalHeaderItem(ITEM_VALUE, new QTableWidgetItem("Value"));
+	//tableCache->setHorizontalHeaderItem(ITEM_TYPE, new QTableWidgetItem("Type"));
 	tableCache->setHorizontalHeaderItem(ITEM_TIMESTAMP, new QTableWidgetItem("Time Stamp"));
 	tableCache->setHorizontalHeaderItem(ITEM_AGE, new QTableWidgetItem("Age"));
+
+	tableCache->sortItems(ITEM_AGE);
 
 #if QT_VER >= 5
 	QObject::connect(&m_timer, &QTimer::timeout, this, &NetCacheDlg::UpdateTimer);
@@ -87,7 +93,6 @@ void NetCacheDlg::accept()
 
 void NetCacheDlg::UpdateValue(const std::string& strKey, const CacheVal& val)
 {
-	const bool bSortTable = tableCache->isSortingEnabled();
 	tableCache->setSortingEnabled(0);
 
 	int iRow = 0;
@@ -112,6 +117,8 @@ void NetCacheDlg::UpdateValue(const std::string& strKey, const CacheVal& val)
 			SetValue(val.dTimestamp);
 		dynamic_cast<QTableWidgetItemWrapper<t_real>*>(tableCache->item(iRow, ITEM_AGE))->
 			SetValueKeepText(val.dTimestamp);
+		//dynamic_cast<QTableWidgetItemWrapper<int>*>(tableCache->item(iRow, ITEM_TYPE))->
+		//	SetValue(int(val.ty));
 	}
 	else		// insert new items
 	{
@@ -119,12 +126,14 @@ void NetCacheDlg::UpdateValue(const std::string& strKey, const CacheVal& val)
 		tableCache->setRowCount(iRow+1);
 		tableCache->setItem(iRow, ITEM_KEY, new QTableWidgetItem(qstrKey));
 		tableCache->setItem(iRow, ITEM_VALUE, new QTableWidgetItem(qstrVal));
+		//tableCache->setItem(iRow, ITEM_TYPE, new QTableWidgetItemWrapper<int>(int(val.ty)));
 		tableCache->setItem(iRow, ITEM_TIMESTAMP, new QTableWidgetItemWrapper<t_real>(val.dTimestamp));
 		tableCache->setItem(iRow, ITEM_AGE, new QTableWidgetItemWrapper<t_real>(val.dTimestamp, ""));
 	}
 
 	UpdateAge(iRow);
-	tableCache->setSortingEnabled(bSortTable);
+	tableCache->setSortingEnabled(1);
+	//emit UpdatedValue(strKey, val);
 }
 
 void NetCacheDlg::UpdateAll(const t_mapCacheVal& map)
@@ -140,7 +149,6 @@ void NetCacheDlg::UpdateAll(const t_mapCacheVal& map)
 
 void NetCacheDlg::UpdateAge(int iRow)
 {
-	const bool bSortTable = tableCache->isSortingEnabled();
 	tableCache->setSortingEnabled(0);
 
 	// update all
@@ -163,36 +171,10 @@ void NetCacheDlg::UpdateAge(int iRow)
 	t_real dAgeS = dNow - dTimestamp;
 	//std::cout << strKey << " = " << val.strVal << " (age: " << dAge << "s)" << std::endl;
 
-	int iAgeS = int(dAgeS);
-	int iAgeM = 0;
-	int iAgeH = 0;
-	int iAgeD = 0;
-
-	if(iAgeS > 60)
-	{
-		iAgeM = iAgeS / 60;
-		iAgeS = iAgeS % 60;
-	}
-	if(iAgeM > 60)
-	{
-		iAgeH = iAgeM / 60;
-		iAgeM = iAgeM  % 60;
-	}
-	if(iAgeH > 24)
-	{
-		iAgeD = iAgeH / 24;
-		iAgeH = iAgeH  % 24;
-	}
-
-	bool bHadPrev = 0;
-	std::string strAge;
-	if(iAgeD || bHadPrev) { strAge += tl::var_to_str(iAgeD) + "d "; bHadPrev = 1; }
-	if(iAgeH || bHadPrev) { strAge += tl::var_to_str(iAgeH) + "h "; bHadPrev = 1; }
-	if(iAgeM || bHadPrev) { strAge += tl::var_to_str(iAgeM) + "m "; bHadPrev = 1; }
-	/*if(iAgeS || bHadPrev)*/ { strAge += tl::var_to_str(iAgeS) + "s "; bHadPrev = 1; }
+	std::string strAge = tl::get_duration_str_secs<t_real>(dAgeS);
 	pItem->setText(strAge.c_str());
 
-	tableCache->setSortingEnabled(bSortTable);
+	tableCache->setSortingEnabled(1);
 }
 
 void NetCacheDlg::ClearAll()

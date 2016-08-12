@@ -1,4 +1,4 @@
-/*
+/**
  * Connection to Nicos
  * @author tweber
  * @date 27-aug-2014
@@ -25,16 +25,21 @@ NicosCache::NicosCache(QSettings* pSettings) : m_pSettings(pSettings)
 		{"orient2", &m_strSampleOrient2},
 		{"spacegroup", &m_strSampleSpacegroup},
 		{"psi0", &m_strSamplePsi0},
+
 		{"stheta", &m_strSampleTheta},
 		{"s2theta", &m_strSample2Theta},
+
 		{"mtheta", &m_strMonoTheta},
 		{"m2theta", &m_strMono2Theta},
 		{"mono_d", &m_strMonoD},
+
 		{"atheta", &m_strAnaTheta},
 		{"a2theta", &m_strAna2Theta},
 		{"ana_d", &m_strAnaD},
-		//{"stheta_aux", &m_strSampleTheta_aux},
-		//{"stheta_aux_alias", &m_strSampleTheta_aux_alias}
+
+		{"timer", &m_strTimer},
+		{"preset", &m_strPreset},
+		{"counter", &m_strCtr},
 	};
 
 	for(const std::pair<std::string, std::string*>& pair : vecStrings)
@@ -62,13 +67,10 @@ NicosCache::NicosCache(QSettings* pSettings) : m_pSettings(pSettings)
 		m_strMonoD, m_strMonoTheta, m_strMono2Theta,
 		m_strAnaD, m_strAnaTheta, m_strAna2Theta,
 
-		//m_strSampleTheta_aux, m_strSampleTheta_aux_alias,
+		m_strTimer, m_strPreset, m_strCtr,
 
 		// additional info fields (not needed for calculation)
 		"logbook/remark",
-		//"nicos/ctr1/value",
-		"nicos/timer/value",
-		"nicos/timer/preselection",
 	};
 
 	m_tcp.add_connect(boost::bind(&NicosCache::slot_connected, this, _1, _2));
@@ -181,6 +183,15 @@ void NicosCache::slot_receive(const std::string& str)
 	CacheVal cacheval;
 	cacheval.strVal = strVal;
 	cacheval.dTimestamp = dTimestamp;
+
+	// mark special entries
+	if(strKey == m_strTimer)
+		cacheval.ty = CacheValType::TIMER;
+	else if(strKey == m_strPreset)
+		cacheval.ty = CacheValType::PRESET;
+	else if(strKey == m_strCtr)
+		cacheval.ty = CacheValType::COUNTER;
+
 	m_mapCache[strKey] = cacheval;
 
 	//std::cout << strKey << " = " << strVal << std::endl;

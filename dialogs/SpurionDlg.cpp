@@ -53,7 +53,7 @@ SpurionDlg::SpurionDlg(QWidget* pParent, QSettings *pSett)
 	tabInel->setHorizontalHeaderItem(ITEM_E, new QTableWidgetItem("Energy (meV)"));
 	tabInel->setHorizontalHeaderItem(ITEM_MONO, new QTableWidgetItem("Mono. Order"));
 	tabInel->setHorizontalHeaderItem(ITEM_ANA, new QTableWidgetItem("Ana. Order"));
-	
+
 	tabInel->sortItems(ITEM_E);
 
 

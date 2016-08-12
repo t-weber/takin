@@ -39,7 +39,7 @@ ResoResults calc_pop(const PopParams& pop)
 	ResoResults res;
 
 	res.Q_avg.resize(4);
-	res.Q_avg[0] = pop.Q*angs;
+	res.Q_avg[0] = pop.Q * angs;
 	res.Q_avg[1] = 0.;
 	res.Q_avg[2] = 0.;
 	res.Q_avg[3] = pop.E / meV;

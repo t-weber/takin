@@ -110,6 +110,9 @@ PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 	connect(btnLoad, SIGNAL(clicked()), this, SLOT(LoadPowder()));
 	connect(btnAtoms, SIGNAL(clicked()), this, SLOT(ShowAtomDlg()));
 
+	connect(btnSyncKi, SIGNAL(clicked()), this, SLOT(SetExtKi()));
+	connect(btnSyncKf, SIGNAL(clicked()), this, SLOT(SetExtKf()));
+
 	m_bDontCalc = 0;
 	RepopulateSpaceGroups();
 	CalcPeaks();
@@ -742,6 +745,23 @@ void PowderDlg::SaveTable()
 			QMessageBox::critical(this, "Error", "Could not save table data.");
 		}
 	}
+}
+
+
+void PowderDlg::paramsChanged(const RecipParams& parms)
+{
+	m_dExtKi = parms.dki;
+	m_dExtKf = parms.dkf;
+}
+
+void PowderDlg::SetExtKi()
+{
+	spinLam->setValue(tl::k2lam(m_dExtKi/angs)/angs);
+}
+
+void PowderDlg::SetExtKf()
+{
+	spinLam->setValue(tl::k2lam(m_dExtKf/angs)/angs);
 }
 
 

@@ -270,6 +270,8 @@ void TazDlg::ExportUCModel()
 		//t_vec vecCoord = vecAllAtoms[iAtom];
 
 		std::size_t iAtomType = vecAllAtomTypes[vecIdxSC[iAtom]];
+		//if(iAtomType != 1) continue;	// testing: keep only one atom type
+
 		const t_vec& vecCentral = vecAtomsSC[iAtom];
 		t_vec vecCoord = vecCentral;
 		vecCoord.resize(4,1); vecCoord[3] = 1.;

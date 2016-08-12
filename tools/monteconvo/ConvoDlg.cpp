@@ -9,6 +9,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
 #include "tlibs/helper/thread.h"
+#include "tlibs/time/stopwatch.h"
 
 #ifndef NO_PY
 	#include "sqw_py.h"
@@ -20,10 +21,13 @@
 
 #include <iostream>
 #include <fstream>
+
 #include <QFileDialog>
 #include <QMessageBox>
 
+
 using t_real = t_real_reso;
+using t_stopwatch = tl::Stopwatch<t_real>;
 
 
 ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
@@ -261,6 +265,9 @@ void ConvoDlg::Start()
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 		};
 
+		t_stopwatch watch;
+		watch.start();
+
 		const bool bUseR0 = true;
 		const unsigned int iNumNeutrons = spinNeutrons->value();
 		const unsigned int iNumSampleSteps = spinSampleSteps->value();
@@ -373,6 +380,9 @@ void ConvoDlg::Start()
 		ostrOut << "# MC Neutrons: " << iNumNeutrons << "\n";
 		ostrOut << "# MC Sample Steps: " << iNumSampleSteps << "\n";
 		ostrOut << "#\n";
+
+		QMetaObject::invokeMethod(editStartTime, "setText",
+			Q_ARG(const QString&, QString(watch.GetStartTimeStr().c_str())));
 
 		QMetaObject::invokeMethod(progress, "setMaximum", Q_ARG(int, iNumSteps));
 		QMetaObject::invokeMethod(progress, "setValue", Q_ARG(int, 0));
@@ -505,6 +515,9 @@ void ConvoDlg::Start()
 				Q_ARG(const QString&, QString(ostrOut.str().c_str())));
 
 			QMetaObject::invokeMethod(progress, "setValue", Q_ARG(int, iStep+1));
+			QMetaObject::invokeMethod(editStopTime, "setText",
+				Q_ARG(const QString&, QString(watch.GetEstStopTimeStr(t_real(iStep+1)/t_real(iNumSteps)).c_str())));
+
 			++iStep;
 		}
 
@@ -512,6 +525,10 @@ void ConvoDlg::Start()
 
 		QMetaObject::invokeMethod(textResult, "setPlainText", connty,
 			Q_ARG(const QString&, QString(ostrOut.str().c_str())));
+
+		watch.stop();
+		QMetaObject::invokeMethod(editStopTime, "setText",
+			Q_ARG(const QString&, QString(watch.GetStopTimeStr().c_str())));
 
 		fktEnableButtons();
 	};

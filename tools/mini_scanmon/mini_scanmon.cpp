@@ -64,7 +64,7 @@ void refresh()
 	std::string strMon = "Monitor:  ";
 	if(!bCountToMon)
 		strMon = "Time:     ";
-	ostr << "Counts:   " << std::fixed << dCtr << "\n";
+	ostr << "Counts:   " << std::fixed << dCtr << " +- " << std::sqrt(dCtr) << "\n";
 	ostr << "Expected: " << std::fixed << int(std::round(dExpCtr)) << " (" << dExpCtr << ")\n";
 	ostr << strMon << std::fixed << dMon << " of " << dSel 
 		<< (bCountToMon ? " counts" : " seconds") << "\n";
@@ -104,13 +104,18 @@ void received_nicos(const std::string& strMsg)
 	//log_info("Received: ", strMsg);
 
 	std::pair<std::string, std::string> pair = split_first<std::string>(strMsg, "=", true);
+	std::string& strVal = pair.second;
+	std::size_t iBeg = strVal.find_first_of("0123456789e.+-");
+	if(iBeg == std::string::npos)
+		return;
+	strVal = strVal.substr(iBeg);
 
 	if(pair.first == strTim)
-		dMon = str_to_var<t_real>(pair.second);
+		dMon = str_to_var<t_real>(strVal);
 	else if(pair.first == strCtr)
-		dCtr = str_to_var<t_real>(pair.second);
+		dCtr = str_to_var<t_real>(strVal);
 	else if(pair.first == strSel)
-		dSel = str_to_var<t_real>(pair.second);
+		dSel = str_to_var<t_real>(strVal);
 
 	refresh();
 }

@@ -1,0 +1,18 @@
+# Doxyfile 1.8.11
+
+PROJECT_NAME           = "Takin"
+PROJECT_BRIEF          = "An inelastic neutron scattering software package."
+OUTPUT_DIRECTORY       = doc/devel
+
+EXTRACT_ALL            = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES
+BUILTIN_STL_SUPPORT    = YES
+EXTRACT_LOCAL_CLASSES  = NO
+
+RECURSIVE              = YES
+EXCLUDE_SYMLINKS       = YES
+
+GENERATE_HTML          = YES
+HTML_DYNAMIC_SECTIONS  = YES
+
+GENERATE_LATEX         = NO

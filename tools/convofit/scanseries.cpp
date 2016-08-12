@@ -92,6 +92,10 @@ bool get_fileprops(const char* pcFile, t_map& mapProps)
 
 int main(int argc, char** argv)
 {
+#ifdef NO_TERM_CMDS
+	tl::Log::SetUseTermCmds(0);
+#endif
+
 	if(argc<=1)
 	{
 		std::cerr << "Usage:\n";

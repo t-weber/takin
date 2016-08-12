@@ -1,4 +1,4 @@
-/*
+/**
  * About Dialog
  * @author Tobias Weber
  * @date nov-2015
@@ -37,6 +37,10 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	labelVersion->setText("Version " TAKIN_VER);
 	labelWritten->setText("Written by Tobias Weber <tobias.weber@tum.de>");
 	labelYears->setText("2014 - 2016");
+	labelDesc->setText("An overview of Takin can be found here: "
+		"<a href=http://dx.doi.org/10.1016/j.softx.2016.06.002>doi:10.1016/j.softx.2016.06.002</a>.");
+	labelDesc->setOpenExternalLinks(1);
+	labelLicense->setOpenExternalLinks(1);
 
 	std::string strCC = "Built using " + std::string(BOOST_COMPILER);
 #ifdef __cplusplus
@@ -94,6 +98,7 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrLibs << "</body></html>";
 
 	labelLibraries->setText(ostrLibs.str().c_str());
+	labelLibraries->setOpenExternalLinks(1);
 
 
 	// -------------------------------------------------------------------------
@@ -134,6 +139,7 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrConst << "</dl>";
 	ostrConst << "</body></html>";
 	labelConst->setText(ostrConst.str().c_str());
+	labelConst->setOpenExternalLinks(1);
 
 
 

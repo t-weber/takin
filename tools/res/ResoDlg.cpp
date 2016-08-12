@@ -1297,6 +1297,7 @@ void ResoDlg::AlgoChanged()
 
 	strAlgo += "\n</body></html>\n";
 	labelAlgoRef->setText(strAlgo.c_str());
+	labelAlgoRef->setOpenExternalLinks(1);
 }
 
 

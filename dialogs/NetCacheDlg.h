@@ -1,4 +1,4 @@
-/*
+/**
  * Cache dialog
  * @author Tobias Weber
  * @date 21-oct-2014
@@ -16,10 +16,21 @@
 #include "libs/globals.h"
 
 
+enum class CacheValType : int
+{
+	UNKNOWN,
+
+	TIMER,
+	PRESET,
+	COUNTER
+};
+
 struct CacheVal
 {
 	std::string strVal;
-	t_real_glob dTimestamp;
+	t_real_glob dTimestamp = t_real_glob(-1);
+
+	CacheValType ty = CacheValType::UNKNOWN;
 };
 
 typedef std::map<std::string, CacheVal> t_mapCacheVal;
@@ -51,6 +62,9 @@ public slots:
 	void ClearAll();
 	void UpdateValue(const std::string& strKey, const CacheVal& val);
 	void UpdateAll(const t_mapCacheVal& map);
+
+//signals:
+//	void UpdatedValue(const std::string& strKey, const CacheVal& val);
 };
 
 #endif

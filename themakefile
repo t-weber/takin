@@ -13,7 +13,7 @@ USE_IOSTR = 1
 USE_BOOST_REGEX = 0
 USE_GIL = 1
 USE_PY = 1
-USE_PLUGINS = 1
+USE_PLUGINS = 0
 USE_CPP11_ABI = 1
 
 STD_CPP = -std=c++11
@@ -248,6 +248,7 @@ OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 
 OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
+	obj/spec_char.o \
 	obj/globals.o obj/globals_qt.o
 
 OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o \
@@ -266,7 +267,7 @@ endif
 
 ifeq ($(USE_NET), 1)
 	OBJ_TAZ += obj/tcp.o obj/nicos.o obj/sics.o obj/taz_net.o \
-	obj/SrvDlg.o obj/NetCacheDlg.o
+	obj/SrvDlg.o obj/NetCacheDlg.o obj/ScanMonDlg.o
 else
 	OBJ_TAZ += obj/taz_nonet.o
 endif
@@ -409,6 +410,8 @@ obj/NeutronDlg.o: dialogs/NeutronDlg.cpp dialogs/NeutronDlg.h
 obj/SrvDlg.o: dialogs/SrvDlg.cpp dialogs/SrvDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/NetCacheDlg.o: dialogs/NetCacheDlg.cpp dialogs/NetCacheDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/ScanMonDlg.o: dialogs/ScanMonDlg.cpp dialogs/ScanMonDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/nicos.o: tools/taz/nicos.cpp tools/taz/nicos.h
 	${CC} ${FLAGS} -c -o $@ $<

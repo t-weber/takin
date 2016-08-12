@@ -1,4 +1,4 @@
-/*
+/**
  * About Dialog
  * @author Tobias Weber
  * @date nov-2015

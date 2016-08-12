@@ -13,7 +13,6 @@
 #include "tlibs/math/math.h"
 #include "tlibs/math/neutrons.h"
 #include "tlibs/helper/misc.h"
-#include "libs/globals.h"
 
 #include <sstream>
 #include <iostream>
@@ -54,6 +53,9 @@ NeutronDlg::NeutronDlg(QWidget* pParent, QSettings *pSett)
 	QObject::connect(editV, SIGNAL(textEdited(const QString&)), this, SLOT(CalcNeutronv()));
 	QObject::connect(editK, SIGNAL(textEdited(const QString&)), this, SLOT(CalcNeutronk()));
 	QObject::connect(editT, SIGNAL(textEdited(const QString&)), this, SLOT(CalcNeutronT()));
+
+	QObject::connect(btnSyncKi, SIGNAL(clicked()), this, SLOT(SetExtKi()));
+	QObject::connect(btnSyncKf, SIGNAL(clicked()), this, SLOT(SetExtKf()));
 
 	CalcNeutronLam();
 
@@ -240,6 +242,25 @@ void NeutronDlg::CalcNeutronT()
 	editE->setText(tl::var_to_str<t_real>(E_n / meV, g_iPrec).c_str());
 	editOm->setText(tl::var_to_str<t_real>(E_n / tl::get_hbar<t_real>() * ps, g_iPrec).c_str());
 	editF->setText(tl::var_to_str<t_real>(E_n / tl::get_h<t_real>() * ps, g_iPrec).c_str());
+}
+
+
+void NeutronDlg::paramsChanged(const RecipParams& parms)
+{
+	m_dExtKi = parms.dki;
+	m_dExtKf = parms.dkf;
+}
+
+void NeutronDlg::SetExtKi()
+{
+	editK->setText(tl::var_to_str<t_real>(m_dExtKi, g_iPrec).c_str());
+	CalcNeutronk();
+}
+
+void NeutronDlg::SetExtKf()
+{
+	editK->setText(tl::var_to_str<t_real>(m_dExtKf, g_iPrec).c_str());
+	CalcNeutronk();
 }
 
 

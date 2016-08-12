@@ -18,6 +18,9 @@
 #include <system_error>
 #include <boost/version.hpp>
 #include <boost/system/system_error.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/signal_set.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <locale>
 #include <clocale>
@@ -34,6 +37,9 @@
 
 
 namespace chr = std::chrono;
+namespace asio = boost::asio;
+namespace sys = boost::system;
+
 
 static bool add_logfile(std::ofstream* postrLog, bool bAdd=1)
 {
@@ -71,6 +77,32 @@ int main(int argc, char** argv)
 {
 	try
 	{
+#ifdef NO_TERM_CMDS
+		tl::Log::SetUseTermCmds(0);
+#endif
+
+		// install exit signal handlers
+		asio::io_service ioSrv;
+		asio::signal_set sigInt(ioSrv, SIGABRT, SIGTERM, SIGINT);
+		sigInt.async_wait([&ioSrv](const sys::error_code& err, int iSig)
+		{
+			tl::log_warn("Hard exit requested via signal ", iSig, ". This may cause a fault.");
+			if(err) tl::log_err("Error: ", err.message(), ", error category: ", err.category().name(), ".");
+			ioSrv.stop();
+#ifdef SIGKILL
+			std::raise(SIGKILL);
+#endif
+			exit(-1);
+		});
+		std::thread thSig([&ioSrv]() { ioSrv.run(); });
+		BOOST_SCOPE_EXIT(&ioSrv, &thSig)
+		{
+			ioSrv.stop();
+			thSig.join();
+		}
+		BOOST_SCOPE_EXIT_END
+
+
 		//std::string strLog = QDir::homePath().toStdString();
 		std::string strLog = QDir::tempPath().toStdString();
 		strLog += "/takin.log";
@@ -198,7 +230,7 @@ int main(int argc, char** argv)
 			//tl::log_debug("Days since last warning: ", iDaysSinceEpoch-iPrevDaysSinceEpoch, ".");
 
 			// show warning message box every 5 days
-			if(iDaysSinceEpoch - iPrevDaysSinceEpoch > 5)
+			if(iDaysSinceEpoch - iPrevDaysSinceEpoch >= 5)
 			{
 				QMessageBox::warning(0, "Takin", strExp.c_str());
 				settings.setValue("debug/last_warned", iDaysSinceEpoch);

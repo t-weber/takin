@@ -79,9 +79,9 @@ enum class EllipseCoordSys : int
 {
 	AUTO = -1,
 
-	Q_AVG = 0,	// Q|| Qperp system (1/A)
-	RLU,		// absolute hkl system (rlu)
-	RLU_ORIENT	// system using scattering plane (rlu)
+	Q_AVG = 0,		// Q|| Qperp system (1/A)
+	RLU = 1,		// absolute hkl system (rlu)
+	RLU_ORIENT = 2	// system using scattering plane (rlu)
 };
 
 

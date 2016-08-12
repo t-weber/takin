@@ -11,7 +11,7 @@
 #include "tlibs/log/debug.h"
 #include "tlibs/helper/thread.h"
 #include "tlibs/gfx/gnuplot.h"
-//#include "tlibs/math/neutrons.h"
+#include "tlibs/time/stopwatch.h"
 #include "libs/version.h"
 
 #include <iostream>
@@ -57,7 +57,6 @@ bool run_job(const std::string& strJob)
 	t_real dFieldOverride = prop.QueryAndParse<t_real>("input/field_override");
 	std::string strCntCol = prop.Query<std::string>("input/counts_col");
 	std::string strMonCol = prop.Query<std::string>("input/monitor_col");
-
 	std::string strResFile = prop.Query<std::string>("input/instrument_file");
 	if(strResFile == "")	// "instrument_file_0" is synonymous to "instrument_file"
 		strResFile = prop.Query<std::string>("input/instrument_file_0");
@@ -159,6 +158,8 @@ bool run_job(const std::string& strJob)
 	{
 		plt.reset(new tl::GnuPlot<t_real>());
 		plt->Init();
+		std::string strTerm = prop.Query<std::string>("output/plot_term", "wxt noraise");
+		plt->SetTerminal(0, strTerm.c_str());
 	}
 
 	// thread-local debug log
@@ -183,6 +184,14 @@ bool run_job(const std::string& strJob)
 	std::string strFitErrors = prop.Query<std::string>("fit_parameters/errors");
 	std::string strFitFixed = prop.Query<std::string>("fit_parameters/fixed");
 
+	// parameter using either strModInFile if it is defined or strModOutFile if
+	// reuse_values_from_model_file is set to 1
+	bool bUseValuesFromModel = prop.Query<bool>("fit_parameters/reuse_values_from_model_file", 0);
+	std::string strModInFile = prop.Query<std::string>("input/model_file");
+	if(strModInFile != "")
+		bUseValuesFromModel = 1;
+
+
 	std::vector<std::string> vecFitParams;
 	tl::get_tokens<std::string, std::string>(strFitParams, " \t\n,;", vecFitParams);
 	std::vector<t_real> vecFitValues;
@@ -192,8 +201,8 @@ bool run_job(const std::string& strJob)
 	std::vector<bool> vecFitFixed;
 	tl::get_tokens<bool, std::string>(strFitFixed, " \t\n,;", vecFitFixed);
 
-	if(vecFitParams.size() != vecFitValues.size() || 
-		vecFitParams.size() != vecFitErrors.size() || 
+	if(vecFitParams.size() != vecFitValues.size() ||
+		vecFitParams.size() != vecFitErrors.size() ||
 		vecFitParams.size() != vecFitFixed.size())
 	{
 		tl::log_err("Fit parameter size mismatch.");
@@ -201,6 +210,51 @@ bool run_job(const std::string& strJob)
 	}
 
 
+	if(bUseValuesFromModel)
+	{
+		const std::string *pModOverrideFile = &strModOutFile;
+		if(strModInFile != "")
+		{
+			pModOverrideFile = &strModInFile;
+			tl::log_info("Overriding parameters with model input file \"", strModInFile, "\".");
+		}
+		else
+		{
+			tl::log_info("Overriding parameters with model output file \"", strModOutFile, "\".");
+		}
+
+		tl::DatFile<t_real, char> datMod;
+		if(datMod.Load(*pModOverrideFile))
+		{
+			const auto& mapHdr = datMod.GetHeader();
+			//for(const auto& pair : mapHdr)
+			//	std::cout << pair.first << ", " << pair.second << std::endl;
+
+			for(std::size_t iParam=0; iParam<vecFitParams.size(); ++iParam)
+			{
+				auto iterParam = mapHdr.find(vecFitParams[iParam]);
+				if(iterParam != mapHdr.end())
+				{
+					std::string strNewVal = iterParam->second;
+					strNewVal = tl::split_first<std::string>(strNewVal, "+-", 1, 1).first;
+
+					vecFitValues[iParam] = tl::str_to_var<t_real>(strNewVal);
+					tl::log_info("Overriding parameter \"", iterParam->first,
+						"\" with model value: ", strNewVal, ".");
+				}
+				else
+				{
+					tl::log_warn("Requested override parameter \"",
+						vecFitParams[iParam], "\" is not available in model file.");
+				}
+			}
+		}
+		else
+		{
+			tl::log_err("Parameter override using model file requested, but model file \"",
+				*pModOverrideFile, "\" is invalid.");
+		}
+	}
 
 
 	// --------------------------------------------------------------------
@@ -293,7 +347,6 @@ bool run_job(const std::string& strJob)
 	// base parameter set for single-fits
 	set_tasreso_params_from_scan(vecResos[0], vecSc[0]);
 	// --------------------------------------------------------------------
-
 
 
 
@@ -410,7 +463,6 @@ bool run_job(const std::string& strJob)
 
 
 
-
 	// --------------------------------------------------------------------
 	// Fitting
 	for(std::size_t iParam=0; iParam<vecFitParams.size(); ++iParam)
@@ -516,25 +568,31 @@ bool run_job(const std::string& strJob)
 	if(bPlot)
 	{
 		/*std::ostringstream ostr;
-		ostr << "gnuplot -p -e \"plot \\\"" 
+		ostr << "gnuplot -p -e \"plot \\\""
 			<< strModOutFile.c_str() << "\\\" using 1:2 w lines lw 1.5 lt 1, \\\""
 			<< strScOutFile.c_str() << "\\\" using 1:2:3 w yerrorbars ps 1 pt 7\"\n";
 		std::system(ostr.str().c_str());*/
 
 		tl::DatFile<t_real, char> datMod;
-		datMod.Load(strModOutFile);
+		if(datMod.Load(strModOutFile))
+		{
+			tl::PlotObj<t_real> pltMod;
+			pltMod.vecX = datMod.GetColumn(0);
+			pltMod.vecY = datMod.GetColumn(1);
+			pltMod.linestyle = tl::STYLE_LINES_SOLID;
+			pltMod.odSize = 1.5;
 
-		tl::PlotObj<t_real> pltMod;
-		pltMod.vecX = datMod.GetColumn(0);
-		pltMod.vecY = datMod.GetColumn(1);
-		pltMod.linestyle = tl::STYLE_LINES_SOLID;
-		pltMod.odSize = 1.5;
-
-		plt->StartPlot();
-		plt->SetYLabel("Intensity");
-		plt->AddLine(pltMod);
-		plt->AddLine(pltMeas);
-		plt->FinishPlot();
+			plt->StartPlot();
+			plt->SetYLabel("Intensity");
+			plt->AddLine(pltMod);
+			plt->AddLine(pltMeas);
+			plt->FinishPlot();
+		}
+		else
+		{
+			tl::log_err("Cannot open model file \"",
+				strModOutFile, "\" for plotting.");
+		}
 	}
 	// --------------------------------------------------------------------
 
@@ -556,8 +614,12 @@ bool run_job(const std::string& strJob)
 
 int main(int argc, char** argv)
 {
+#ifdef NO_TERM_CMDS
+	tl::Log::SetUseTermCmds(0);
+#endif
+
 	// plain C locale
-	std::setlocale(LC_ALL, "C");
+	/*std::*/setlocale(LC_ALL, "C");
 	std::locale::global(std::locale::classic());
 
 	// install exit signal handlers
@@ -569,6 +631,7 @@ int main(int argc, char** argv)
 		if(err) tl::log_err("Error: ", err.message(), ", error category: ", err.category().name(), ".");
 		ioSrv.stop();
 #ifdef SIGKILL
+		std::system("killall -s KILL gnuplot");
 		std::raise(SIGKILL);
 #endif
 		exit(-1);
@@ -617,6 +680,8 @@ int main(int argc, char** argv)
 		});
 	}
 
+	tl::Stopwatch<t_real> watch;
+	watch.start();
 	tp.StartTasks();
 
 	auto& lstFut = tp.GetFutures();
@@ -628,6 +693,13 @@ int main(int argc, char** argv)
 			tl::log_err("Job ", iTask, " (", argv[iTask], ") failed or fit invalid!");
 		++iTask;
 	}
+
+	watch.stop();
+	tl::log_info("================================================================================");
+	tl::log_info("Start time:     ", watch.GetStartTimeStr());
+	tl::log_info("Stop time:      ", watch.GetStopTimeStr());
+	tl::log_info("Execution time: ", tl::get_duration_str_secs<t_real>(watch.GetDur()));
+	tl::log_info("================================================================================");
 
 	return 0;
 }

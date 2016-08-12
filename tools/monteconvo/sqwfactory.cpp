@@ -176,7 +176,7 @@ void load_sqw_plugins()
 
 void load_sqw_plugins()
 {
-	tl::log_err("No S(q,w) plugin interface available.");
+	tl::log_warn("No S(q,w) plugin interface available.");
 }
 
 #endif

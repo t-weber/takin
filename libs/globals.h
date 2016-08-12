@@ -30,8 +30,7 @@ extern bool g_bHasSpaceGroups;
 extern bool g_bShowFsq;
 
 extern void add_resource_path(const std::string& strPath);
-extern std::string find_resource(const std::string& strFile);
-extern std::string find_resource_dir(const std::string& strDir);
-
+extern std::string find_resource(const std::string& strFile, bool bLogErr=1);
+extern std::string find_resource_dir(const std::string& strDir, bool bLogErr=1);
 
 #endif

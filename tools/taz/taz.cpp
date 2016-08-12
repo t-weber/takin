@@ -57,6 +57,8 @@ TazDlg::TazDlg(QWidget* pParent)
 	this->setupUi(this);
 	this->setWindowTitle(s_strTitle.c_str());
 	this->setFont(g_fontGen);
+	this->setWindowIcon(load_icon("res/takin.svg"));
+
 	btnAtoms->setEnabled(g_bHasScatlens);
 
 	if(m_settings.contains("main/geo"))
@@ -561,8 +563,12 @@ TazDlg::TazDlg(QWidget* pParent)
 	pDisconn->setIcon(load_icon("res/network-offline.svg"));
 	pMenuNet->addAction(pDisconn);
 
-	QAction *pNetCache = new QAction("Network Cache...", this);
 	pMenuNet->addSeparator();
+
+	QAction *pNetScanMon = new QAction("Scan Monitor...", this);
+	pMenuNet->addAction(pNetScanMon);
+
+	QAction *pNetCache = new QAction("Network Cache...", this);
 	pMenuNet->addAction(pNetCache);
 
 	QAction *pNetRefresh = new QAction("Refresh", this);
@@ -588,6 +594,12 @@ TazDlg::TazDlg(QWidget* pParent)
 	QAction *pHelp = new QAction("Show Help...", this);
 	pHelp->setIcon(load_icon("res/help-browser.svg"));
 	pMenuHelp->addAction(pHelp);
+
+	QAction *pDevelDoc = new QAction("Show Developer Help...", this);
+	if(find_resource("doc/devel/html/index.html", 0) == "")
+		pDevelDoc->setEnabled(0);
+	pDevelDoc->setIcon(load_icon("res/help-browser.svg"));
+	pMenuHelp->addAction(pDevelDoc);
 
 	pMenuHelp->addSeparator();
 
@@ -678,6 +690,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	QObject::connect(pDisconn, SIGNAL(triggered()), this, SLOT(Disconnect()));
 	QObject::connect(pNetRefresh, SIGNAL(triggered()), this, SLOT(NetRefresh()));
 	QObject::connect(pNetCache, SIGNAL(triggered()), this, SLOT(ShowNetCache()));
+	QObject::connect(pNetScanMon, SIGNAL(triggered()), this, SLOT(ShowNetScanMonitor()));
 #endif
 
 	QObject::connect(pSgList, SIGNAL(triggered()), this, SLOT(ShowSgListDlg()));
@@ -686,6 +699,7 @@ TazDlg::TazDlg(QWidget* pParent)
 		QObject::connect(pFormfactor, SIGNAL(triggered()), this, SLOT(ShowFormfactorDlg()));
 
 	QObject::connect(pHelp, SIGNAL(triggered()), this, SLOT(ShowHelp()));
+	QObject::connect(pDevelDoc, SIGNAL(triggered()), this, SLOT(ShowDevelDoc()));
 	QObject::connect(pAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
 	QObject::connect(pAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
@@ -837,6 +851,7 @@ void TazDlg::DeleteDialogs()
 
 #if !defined NO_NET
 	if(m_pSrvDlg) { delete m_pSrvDlg; m_pSrvDlg = 0; }
+	if(m_pScanMonDlg) { delete m_pScanMonDlg; m_pScanMonDlg = 0; }
 	if(m_pNetCacheDlg) { delete m_pNetCacheDlg; m_pNetCacheDlg = 0; }
 	if(m_pNetCache) { delete m_pNetCache; m_pNetCache = 0; }
 #endif
@@ -959,7 +974,12 @@ void TazDlg::closeEvent(QCloseEvent* pEvt)
 void TazDlg::ShowNeutronDlg()
 {
 	if(!m_pNeutronDlg)
+	{
 		m_pNeutronDlg = new NeutronDlg(this, &m_settings);
+		QObject::connect(&m_sceneRecip, SIGNAL(paramsChanged(const RecipParams&)),
+			m_pNeutronDlg, SLOT(paramsChanged(const RecipParams&)));
+		m_sceneRecip.emitAllParams();
+	}
 
 	m_pNeutronDlg->show();
 	m_pNeutronDlg->activateWindow();
@@ -981,7 +1001,12 @@ void TazDlg::ShowGotoDlg()
 void TazDlg::ShowPowderDlg()
 {
 	if(!m_pPowderDlg)
+	{
 		m_pPowderDlg = new PowderDlg(this, &m_settings);
+		QObject::connect(&m_sceneRecip, SIGNAL(paramsChanged(const RecipParams&)),
+			m_pPowderDlg, SLOT(paramsChanged(const RecipParams&)));
+		m_sceneRecip.emitAllParams();
+	}
 
 	m_pPowderDlg->show();
 	m_pPowderDlg->activateWindow();
@@ -1314,31 +1339,44 @@ void TazDlg::ShowAbout()
 
 void TazDlg::ShowHelp()
 {
-	std::string strHelpProg = "assistant";
-	std::string strHelpProgVer = strHelpProg + "-qt" + tl::var_to_str(QT_VER);
-
 	std::string strHelp = find_resource("res/takin.qhc");
-	if(strHelp == "")
+	if(strHelp != "")
 	{
-		QMessageBox::critical(this, "Error", "Help file could not be found.");
-		return;
+		std::string strHelpProg = "assistant";
+		std::string strHelpProgVer = strHelpProg + "-qt" + tl::var_to_str(QT_VER);
+
+		if(std::system((strHelpProgVer + " -collectionFile " + strHelp + "&").c_str()) == 0)
+			return;
+		if(std::system((strHelpProg + " -collectionFile " + strHelp + "&").c_str()) == 0)
+			return;
+
+		tl::log_warn("Help viewer not found, trying associated application.");
 	}
-
-	if(std::system((strHelpProgVer + " -collectionFile " + strHelp + "&").c_str()) == 0)
-		return;
-	if(std::system((strHelpProg + " -collectionFile " + strHelp + "&").c_str()) == 0)
-		return;
-
-	tl::log_warn("Help viewer not found, trying associated application.");
 
 
 	// try opening html files directly
 	std::string strHelpHtml = find_resource("doc/index_help.html");
-	std::string strFile = "file:///" + fs::absolute(strHelpHtml).string();
-	if(QDesktopServices::openUrl(QUrl(strFile.c_str())))
-		return;
+	if(strHelpHtml != "")
+	{
+		std::string strFile = "file:///" + fs::absolute(strHelpHtml).string();
+		if(QDesktopServices::openUrl(QUrl(strFile.c_str())))
+			return;
+	}
 
-	QMessageBox::critical(this, "Error", "Help viewer could not be started.");
+	QMessageBox::critical(this, "Error", "Help could not be displayed.");
+}
+
+void TazDlg::ShowDevelDoc()
+{
+	std::string strHelpHtml = find_resource("doc/devel/html/index.html");
+	if(strHelpHtml != "")
+	{
+		std::string strFile = "file:///" + fs::absolute(strHelpHtml).string();
+		if(QDesktopServices::openUrl(QUrl(strFile.c_str())))
+			return;
+	}
+
+	QMessageBox::critical(this, "Error", "Documentation could not be displayed.");
 }
 
 #include "taz.moc"

@@ -1,4 +1,4 @@
-/*
+/**
  * Scan viewer
  * @author tweber
  * @date mar-2015

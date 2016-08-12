@@ -112,7 +112,7 @@ add_executable(takin
 	dialogs/NeutronDlg.cpp dialogs/SpurionDlg.cpp dialogs/PowderDlg.cpp
 	dialogs/DispDlg.cpp
 	dialogs/RecipParamDlg.cpp dialogs/RealParamDlg.cpp
-	dialogs/SrvDlg.cpp dialogs/NetCacheDlg.cpp
+	dialogs/SrvDlg.cpp dialogs/NetCacheDlg.cpp dialogs/ScanMonDlg.cpp
 	dialogs/EllipseDlg.cpp dialogs/FormfactorDlg.cpp
 	dialogs/AtomsDlg.cpp dialogs/AboutDlg.cpp
 

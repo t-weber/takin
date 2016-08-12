@@ -67,8 +67,9 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupEdit("net/a2theta", "nicos/att/value", editAna2Theta),
 		t_tupEdit("net/ana_d", "nicos/ana/dvalue", editAnaD),
 
-		//t_tupEdit("net/stheta_aux", "nicos/sth/value", editRotTheta),
-		//t_tupEdit("net/stheta_aux_alias", "nicos/sth/alias", editRotAlias),
+		t_tupEdit("net/timer", "nicos/timer/value", editCurTime),
+		t_tupEdit("net/preset", "nicos/timer/preselection", editPreset),
+		t_tupEdit("net/counter", "nicos/ctr1/value", editCounter),
 
 		t_tupEdit("gl/font", g_fontGL.toString().toStdString().c_str(), editGLFont),
 		t_tupEdit("main/font_gfx", g_fontGfx.toString().toStdString().c_str(), editGfxFont),

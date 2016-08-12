@@ -40,6 +40,7 @@ res/*
 !res/ellipses.svg
 !res/goto.svg
 !res/q.svg
+!res/takin.svg
 *.htm
 *.html
 !doc/index_help.html
@@ -52,6 +53,9 @@ res/*
 !doc/reso-sqw.html
 !doc/reso-sqw-native.html
 !doc/reso-sqw-py.html
+doc/devel/**
+!doc/devel/.dir
+!doc/.dir
 takin.log
 *.qch
 *.qhc

@@ -12,11 +12,17 @@
 #include <QSettings>
 #include "ui/ui_neutrons.h"
 
+#include "libs/globals.h"
+#include "RecipParamDlg.h"
+
 
 class NeutronDlg : public QDialog, Ui::NeutronDlg
 { Q_OBJECT
 	protected:
 		QSettings *m_pSettings = 0;
+
+		t_real_glob m_dExtKi = 0.;
+		t_real_glob m_dExtKf = 0.;
 
 	protected:
 		void setupConstants();
@@ -45,6 +51,10 @@ class NeutronDlg : public QDialog, Ui::NeutronDlg
 		void EnableRecipEdits();
 
 		void Eval(const QString&);
+
+		void paramsChanged(const RecipParams& parms);
+		void SetExtKi();
+		void SetExtKf();
 
 	protected:
 		virtual void showEvent(QShowEvent *pEvt) override;

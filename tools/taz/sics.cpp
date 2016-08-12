@@ -140,6 +140,15 @@ void SicsCache::slot_receive(const std::string& str)
 	cacheval.strVal = strVal;
 	boost::to_upper(cacheval.strVal);
 	cacheval.dTimestamp = tl::epoch<t_real>();
+
+	/*// mark special entries
+	if(strKey == m_strTimer)
+		cacheval.ty = CacheValType::TIMER;
+	else if(strKey == m_strPreset)
+		cacheval.ty = CacheValType::PRESET;
+	else if(strKey == m_strCtr)
+		cacheval.ty = CacheValType::COUNTER;*/
+
 	m_mapCache[strKey] = cacheval;
 
 	//std::cout << strKey << " = " << strVal << std::endl;

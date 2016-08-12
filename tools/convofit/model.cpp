@@ -271,33 +271,44 @@ minuit::MnUserParameters SqwFuncModel::GetMinuitParams() const
 
 bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax, std::size_t iNum=512) const
 {
-	std::ofstream ofstr(pcFile);
-	if(!ofstr)
+	try
 	{
-		tl::log_err("Cannot open \"", pcFile, "\".");
-		return false;
+		std::ofstream ofstr;
+		//ofstr.exceptions(ofstr.exceptions() | std::ios_base::failbit | std::ios_base::badbit);
+		ofstr.open(pcFile, std::ios_base::out | std::ios_base::trunc);
+		if(!ofstr)
+		{
+			tl::log_err("Cannot open model file \"", pcFile, "\" for writing.");
+			return false;
+		}
+
+		ofstr.precision(16);
+
+		const std::vector<std::string> vecNames = GetParamNames();
+
+		tl::container_cast<t_real, tl::t_real_min, std::vector> cst;
+		const std::vector<t_real> vecVals = cst(GetParamValues());
+		const std::vector<t_real> vecErrs = cst(GetParamErrors());
+
+		for(std::size_t iParam=0; iParam<vecNames.size(); ++iParam)
+			ofstr << "# " << vecNames[iParam] << " = " 
+				<< vecVals[iParam] << " +- " 
+				<< vecErrs[iParam] << "\n";
+
+		for(std::size_t i=0; i<iNum; ++i)
+		{
+			t_real dX = tl::lerp(dXMin, dXMax, t_real(i)/t_real(iNum-1));
+			t_real dY = (*this)(dX);
+
+			ofstr << std::left << std::setw(32) << dX << " "
+				<< std::left << std::setw(32) << dY << "\n";
+		}
+
 	}
-
-	ofstr.precision(16);
-
-	const std::vector<std::string> vecNames = GetParamNames();
-
-	tl::container_cast<t_real, tl::t_real_min, std::vector> cst;
-	const std::vector<t_real> vecVals = cst(GetParamValues());
-	const std::vector<t_real> vecErrs = cst(GetParamErrors());
-
-	for(std::size_t iParam=0; iParam<vecNames.size(); ++iParam)
-		ofstr << "# " << vecNames[iParam] << " = " 
-			<< vecVals[iParam] << " +- " 
-			<< vecErrs[iParam] << "\n";
-
-	for(std::size_t i=0; i<iNum; ++i)
+	catch(const std::exception& ex)
 	{
-		t_real dX = tl::lerp(dXMin, dXMax, t_real(i)/t_real(iNum-1));
-		t_real dY = (*this)(dX);
-
-		ofstr << std::left << std::setw(32) << dX << " "
-			<< std::left << std::setw(32) << dY << "\n";
+		tl::log_err("Saving model failed: ", ex.what());
+		return false;
 	}
 
 	return true;

@@ -11,6 +11,7 @@
 #if !defined NO_NET
 	#include "dialogs/SrvDlg.h"
 	#include "dialogs/NetCacheDlg.h"
+	#include "dialogs/ScanMonDlg.h"
 	#include "nicos.h"
 	#include "sics.h"
 #endif
@@ -161,6 +162,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		SrvDlg *m_pSrvDlg = nullptr;
 		NetCache *m_pNetCache = nullptr;
 		NetCacheDlg *m_pNetCacheDlg = nullptr;
+		ScanMonDlg *m_pScanMonDlg = nullptr;
 #endif
 
 #if !defined NO_3D
@@ -215,6 +217,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void RealContextMenu(const QPoint&);
 
 		void ShowHelp();
+		void ShowDevelDoc();
 		void ShowAbout();
 
 		void New();
@@ -277,6 +280,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void Disconnect();
 		void NetRefresh();
 		void ShowNetCache();
+		void ShowNetScanMonitor();
 
 		void Connected(const QString& strHost, const QString& strSrv);
 		void Disconnected();

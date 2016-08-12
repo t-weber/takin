@@ -18,6 +18,8 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	std::string strDir = tl::get_dir(strFile);
 	std::string strMod = tl::get_file_noext(tl::get_file(strFile));
 
+	bool bSetScriptCWD = 0;
+
 	try	// mandatory stuff
 	{
 		::Py_Initialize();
@@ -29,14 +31,17 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 		path.append(strDir.c_str());
 		path.append(".");
 
-		// set script working directory
-		m_os = py::import("os");
-		py::dict osdict = py::extract<py::dict>(m_os.attr("__dict__"));
-		py::object pycwd = osdict["chdir"];
-		if(!!pycwd)
-			pycwd(strDir.c_str());
-		else
-			tl::log_warn("Cannot set script working directory.");
+		if(bSetScriptCWD)
+		{
+			// set script working directory -> warning: also sets main cwd
+			m_os = py::import("os");
+			py::dict osdict = py::extract<py::dict>(m_os.attr("__dict__"));
+			py::object pycwd = osdict["chdir"];
+			if(!!pycwd)
+				pycwd(strDir.c_str());
+			else
+				tl::log_warn("Cannot set script working directory.");
+		}
 
 		// import takin functions
 		m_mod = py::import(strMod.c_str());

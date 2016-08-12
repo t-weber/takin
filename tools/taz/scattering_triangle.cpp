@@ -217,6 +217,7 @@ QPointF ScatteringTriangle::GetGfxMid() const
 	return (ptKiQ + ptKfQ + ptKiKf) / 3.;
 }
 
+
 void ScatteringTriangle::paint(QPainter *painter, const QStyleOptionGraphicsItem* pOpt, QWidget* pWid)
 {
 	painter->setFont(g_fontGfx);
@@ -919,7 +920,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 							ostrTip << "\n" << strStructfact << " fm";
 						}
 
-						if(ih!=0 || ik!=0 || il!=0)
+						//if(ih!=0 || ik!=0 || il!=0)
 							pPeak->SetLabel(ostrLabel.str().c_str());
 
 						tl::set_eps_0(vecPeak);

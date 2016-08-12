@@ -208,6 +208,15 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 	m_tofreso.sig_outplane_i = tl::d2r(xml.Query<t_real>((strXmlRoot + "reso/viol_angle_ph_i_sig").c_str(), 0.)) * rads;
 	m_tofreso.sig_outplane_f = tl::d2r(xml.Query<t_real>((strXmlRoot + "reso/viol_angle_ph_f_sig").c_str(), 0.)) * rads;
 
+	TofDetShape tofdet = TofDetShape::SPH;
+	switch(xml.Query<int>((strXmlRoot + "reso/viol_det_sph").c_str(), 1))
+	{
+		case 0: tofdet = TofDetShape::CYL; break;
+		case 1: tofdet = TofDetShape::SPH; break;
+		default: tl::log_err("Invalid TOF detector shape, using spherical."); break;
+	}
+	m_tofreso.det_shape = tofdet;
+
 
 	m_algo = ResoAlgo(xml.Query<int>((strXmlRoot + "reso/algo").c_str(), 0));
 
@@ -435,6 +444,7 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		else if(m_algo == ResoAlgo::VIOL)
 		{
 			//tl::log_info("Algorithm: Violini (TOF)");
+			m_reso.bCalcR0 = false;
 			resores_cur = calc_viol(m_tofreso);
 		}
 		else

@@ -436,6 +436,10 @@ bool gen_magformfacts()
 
 int main()
 {
+#ifdef NO_TERM_CMDS
+	tl::Log::SetUseTermCmds(0);
+#endif
+
 	std::cout << "Generating atomic form factor coefficient table ... ";
 	if(gen_formfacts())
 		std::cout << "OK" << std::endl;

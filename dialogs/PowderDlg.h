@@ -25,6 +25,7 @@
 #include "libs/globals_qt.h"
 #include "tlibs/file/prop.h"
 #include "AtomsDlg.h"
+#include "RecipParamDlg.h"
 
 
 struct PowderLine
@@ -64,6 +65,9 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 		AtomsDlg *m_pAtomsDlg = nullptr;
 		std::vector<AtomPos<t_real_glob>> m_vecAtoms;
 
+		t_real_glob m_dExtKi = 0.;
+		t_real_glob m_dExtKf = 0.;
+
 	public:
 		PowderDlg(QWidget* pParent=0, QSettings* pSett=0);
 		virtual ~PowderDlg();
@@ -89,6 +93,10 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 
 		virtual void dragEnterEvent(QDragEnterEvent *pEvt) override;
 		virtual void dropEvent(QDropEvent *pEvt) override;
+
+		void paramsChanged(const RecipParams& parms);
+		void SetExtKi();
+		void SetExtKf();
 
 	protected:
 		virtual void showEvent(QShowEvent *pEvt) override;

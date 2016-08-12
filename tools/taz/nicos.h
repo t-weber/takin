@@ -1,4 +1,4 @@
-/*
+/**
  * Connection to Nicos
  * @author tweber
  * @date 27-aug-2014
@@ -55,9 +55,7 @@ class NicosCache : public NetCache
 		std::string m_strSamplePsi0, m_strSampleTheta, m_strSample2Theta;
 		std::string m_strMonoTheta, m_strMono2Theta, m_strMonoD;
 		std::string m_strAnaTheta, m_strAna2Theta, m_strAnaD;
-
-		// rotation sample stick: sth != om, otherwise: sth == om
-		std::string m_strSampleTheta_aux, m_strSampleTheta_aux_alias;
+		std::string m_strTimer, m_strPreset, m_strCtr;
 };
 
 #endif

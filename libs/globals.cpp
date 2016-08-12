@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "tlibs/log/log.h"
 #include "tlibs/file/file.h"
+#include "tlibs/string/string.h"
 
 
 // -----------------------------------------------------------------------------
@@ -43,7 +44,8 @@ void add_resource_path(const std::string& strPath)
 	s_vecInstallPaths.push_back(strPath);
 }
 
-std::string find_resource(const std::string& strFile)
+std::string find_resource(const std::string& strFile,
+	bool bLogErr)
 {
 	for(const std::string& strPrefix : s_vecInstallPaths)
 	{
@@ -57,11 +59,13 @@ std::string find_resource(const std::string& strFile)
 			return _strFile + ".bz2";
 	}
 
-	tl::log_err("Could not load resource file \"", strFile, "\".");
+	if(bLogErr)
+		tl::log_err("Could not load resource file \"", strFile, "\".");
 	return "";
 }
 
-std::string find_resource_dir(const std::string& strDir)
+std::string find_resource_dir(const std::string& strDir,
+	bool bLogErr)
 {
 	for(const std::string& strPrefix : s_vecInstallPaths)
 	{
@@ -70,7 +74,8 @@ std::string find_resource_dir(const std::string& strDir)
 			return _strDir;
 	}
 
-	tl::log_err("Could not load resource directory \"", strDir, "\".");
+	if(bLogErr)
+		tl::log_err("Could not load resource directory \"", strDir, "\".");
 	return "";
 }
 

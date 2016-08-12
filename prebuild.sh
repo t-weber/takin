@@ -58,31 +58,32 @@ echo -e "-----------------------------------------------------------------------
 echo -e "building mocs..."
 
 declare -a hfiles=(
-        "${TAKINROOT}/tools/taz/taz.h"
-        "${TAKINROOT}/tools/taz/scattering_triangle.h"
-        "${TAKINROOT}/tools/taz/real_lattice.h"
-        "${TAKINROOT}/tools/taz/proj_lattice.h"
-        "${TAKINROOT}/tools/taz/tas_layout.h"
-        "${TAKINROOT}/tools/taz/tof_layout.h"
-        "${TAKINROOT}/tools/taz/recip3d.h"
-        "${TAKINROOT}/tools/taz/net.h"
-        "${TAKINROOT}/tools/taz/nicos.h"
-        "${TAKINROOT}/tools/taz/sics.h"
-        "${TAKINROOT}/tools/res/ResoDlg.h"
-        "${TAKINROOT}/tools/scanviewer/scanviewer.h"
+	"${TAKINROOT}/tools/taz/taz.h"
+	"${TAKINROOT}/tools/taz/scattering_triangle.h"
+	"${TAKINROOT}/tools/taz/real_lattice.h"
+	"${TAKINROOT}/tools/taz/proj_lattice.h"
+	"${TAKINROOT}/tools/taz/tas_layout.h"
+	"${TAKINROOT}/tools/taz/tof_layout.h"
+	"${TAKINROOT}/tools/taz/recip3d.h"
+	"${TAKINROOT}/tools/taz/net.h"
+	"${TAKINROOT}/tools/taz/nicos.h"
+	"${TAKINROOT}/tools/taz/sics.h"
+	"${TAKINROOT}/tools/res/ResoDlg.h"
+	"${TAKINROOT}/tools/scanviewer/scanviewer.h"
 	"${TAKINROOT}/tools/monteconvo/ConvoDlg.h"
 	"${TAKINROOT}/tools/monteconvo/SqwParamDlg.h"
 	"${TAKINROOT}/tools/sglist/SgListDlg.h"
-        "${TAKINROOT}/dialogs/EllipseDlg.h"
-        "${TAKINROOT}/dialogs/EllipseDlg3D.h"
-        "${TAKINROOT}/dialogs/RecipParamDlg.h"
-        "${TAKINROOT}/dialogs/RealParamDlg.h"
-        "${TAKINROOT}/dialogs/SpurionDlg.h"
-        "${TAKINROOT}/dialogs/NeutronDlg.h"
-        "${TAKINROOT}/dialogs/SrvDlg.h"
-        "${TAKINROOT}/dialogs/GotoDlg.h"
-        "${TAKINROOT}/dialogs/AtomsDlg.h"
-        "${TAKINROOT}/dialogs/NetCacheDlg.h"
+	"${TAKINROOT}/dialogs/EllipseDlg.h"
+	"${TAKINROOT}/dialogs/EllipseDlg3D.h"
+	"${TAKINROOT}/dialogs/RecipParamDlg.h"
+	"${TAKINROOT}/dialogs/RealParamDlg.h"
+	"${TAKINROOT}/dialogs/SpurionDlg.h"
+	"${TAKINROOT}/dialogs/NeutronDlg.h"
+	"${TAKINROOT}/dialogs/SrvDlg.h"
+	"${TAKINROOT}/dialogs/GotoDlg.h"
+	"${TAKINROOT}/dialogs/AtomsDlg.h"
+	"${TAKINROOT}/dialogs/NetCacheDlg.h"
+	"${TAKINROOT}/dialogs/ScanMonDlg.h"
 	"${TAKINROOT}/dialogs/PowderDlg.h"
 	"${TAKINROOT}/dialogs/SettingsDlg.h"
 	"${TAKINROOT}/dialogs/DWDlg.h"
@@ -112,6 +113,14 @@ echo -e "building docs..."
 qcollectiongenerator ${TAKINROOT}/doc/takin.qhcp -o ${TAKINROOT}/doc/takin.qhc
 cp -v ${TAKINROOT}/doc/takin.qhc ${TAKINROOT}/res/
 cp -v ${TAKINROOT}/doc/takin.qch ${TAKINROOT}/res/
+
+
+echo -e "--------------------------------------------------------------------------------"
+echo -e "building devel docs..."
+
+cd ${TAKINROOT}
+doxygen tastools-doc
+
 
 echo -e "--------------------------------------------------------------------------------"
 
