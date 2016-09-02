@@ -1,3 +1,6 @@
 [submodule "tlibs"]
 	path = tlibs
 	url = https://t-weber@github.com/t-weber/tlibs.git
+[submodule "takin-data"]
+	path = takin-data
+	url = https://t-weber@github.com/t-weber/takin-data

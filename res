@@ -1,0 +1,1 @@
+takin-data/res/
