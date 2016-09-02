@@ -41,6 +41,25 @@ static const auto hbar = tl::get_hbar<t_real>();
 
 
 // -----------------------------------------------------------------------------
+// scattering factors
+
+std::tuple<t_real, t_real> get_scatter_factors(std::size_t flags,
+	const angle& thetam, const wavenumber& ki,
+	const angle& thetaa, const wavenumber& kf)
+{
+	t_real dmono = t_real(1);
+	t_real dana = t_real(1);
+
+	if(flags & CALC_KI3)
+		dmono *= tl::ana_effic_factor(ki, units::abs(thetam));
+	if(flags & CALC_KF3)
+		dana *= tl::ana_effic_factor(kf, units::abs(thetaa));
+
+	return std::make_tuple(dmono, dana);
+}
+
+
+// -----------------------------------------------------------------------------
 // R0 factor from formula (2) in [ch73]
 
 t_real R0_P(angle theta, angle coll, angle mosaic)
@@ -109,7 +128,6 @@ ResoResults calc_cn(const CNParams& cn)
 	ki_Q *= cn.dsample_sense;
 	kf_Q *= cn.dsample_sense;
 
-
 	t_mat Ti = tl::rotation_matrix_2d(ki_Q/rads);
 	t_mat Tf = -tl::rotation_matrix_2d(kf_Q/rads);
 
@@ -132,6 +150,10 @@ ResoResults calc_cn(const CNParams& cn)
 
 	// -------------------------------------------------------------------------
 
+	const auto tupScFact = get_scatter_factors(cn.flags, cn.thetam, cn.ki, cn.thetaa, cn.kf);
+
+	t_real dmono_refl = cn.dmono_refl * std::get<0>(tupScFact);
+	t_real dana_effic = cn.dana_effic * std::get<1>(tupScFact);
 
 	// -------------------------------------------------------------------------
 	// resolution matrix
@@ -223,7 +245,7 @@ ResoResults calc_cn(const CNParams& cn)
 
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
 	res.dR0 = chess_R0(cn.ki,cn.kf, thetam, thetaa, cn.twotheta, cn.mono_mosaic,
-		cn.ana_mosaic, cn.coll_v_pre_mono, cn.coll_v_post_ana, cn.dmono_refl, cn.dana_effic);
+		cn.ana_mosaic, cn.coll_v_pre_mono, cn.coll_v_post_ana, dmono_refl, dana_effic);
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)

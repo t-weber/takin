@@ -58,8 +58,8 @@ DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 			setFont(font);
 	}
 
-	btnSave->setIcon(load_icon("res/document-save.svg"));
-	btnLoad->setIcon(load_icon("res/document-open.svg"));
+	btnSave->setIcon(load_icon("res/icons/document-save.svg"));
+	btnLoad->setIcon(load_icon("res/icons/document-open.svg"));
 
 
 	//tableNN->sortByColumn(TABLE_NN_ORDER);

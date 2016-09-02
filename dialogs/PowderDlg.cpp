@@ -78,8 +78,8 @@ PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 	// -------------------------------------------------------------------------
 
 
-	btnSave->setIcon(load_icon("res/document-save.svg"));
-	btnLoad->setIcon(load_icon("res/document-open.svg"));
+	btnSave->setIcon(load_icon("res/icons/document-save.svg"));
+	btnLoad->setIcon(load_icon("res/icons/document-open.svg"));
 
 	tablePowderLines->horizontalHeader()->setVisible(true);
 	tablePowderLines->verticalHeader()->setDefaultSectionSize(tablePowderLines->verticalHeader()->defaultSectionSize()*1.4);

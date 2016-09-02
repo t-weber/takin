@@ -1,4 +1,4 @@
-/*
+/**
  * spacegroup helpers
  * @author Tobias Weber
  * @date oct-2015
@@ -198,7 +198,9 @@ std::string get_trafo_desc(const ublas::matrix<T>& mat)
 	return ostr.str();
 }
 
-// convert e.g.: "P 21 3"  ->  "P2_13"
+/**
+ * convert e.g.: "P 21 3"  ->  "P2_13"
+ */
 template<class t_str=std::string>
 void convert_hm_symbol(t_str& strHM)
 {
@@ -231,7 +233,9 @@ void convert_hm_symbol(t_str& strHM)
 }
 
 
-// get PG from SG, eg.: P2_13 -> 23
+/**
+ * get PG from SG, eg.: P2_13 -> 23
+ */
 template<class t_str=std::string>
 t_str get_pointgroup(const t_str& str)
 {
@@ -263,7 +267,7 @@ t_str get_pointgroup(const t_str& str)
 /**
  * check allowed Bragg reflections
  * algorithm based on Clipper's HKL_class
- *    constructor in clipper/core/coords.cpp by K. Cowtan
+ * constructor in clipper/core/coords.cpp by K. Cowtan
  */
 template<template<class...> class t_cont = std::vector,
 	class t_mat = ublas::matrix<double>,

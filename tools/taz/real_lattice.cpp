@@ -250,7 +250,7 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 
 					LatticePoint *pPeak = new LatticePoint();
 					if(ih==0 && ik==0 && il==0)
-						pPeak->SetColor(Qt::green);
+						pPeak->SetColor(Qt::darkGreen);
 					pPeak->setPos(dX * m_dScaleFactor, dY * m_dScaleFactor);
 					pPeak->setData(REAL_LATTICE_NODE_TYPE_KEY, NODE_REAL_LATTICE);
 

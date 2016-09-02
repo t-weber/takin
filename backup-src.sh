@@ -14,4 +14,4 @@ find . \( -name "*.cpp" -type f \) -o \
 	\( -name "*.ui" -type f \) \
 	| xargs tar -Jvcf ${thefile}
 
-echo -e "\nWrote ${thefile}\n"
+echo -e "\n$(tput bold)Wrote ${thefile}$(tput sgr0)\n"

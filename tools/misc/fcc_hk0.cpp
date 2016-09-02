@@ -1,4 +1,4 @@
-/*
+/**
  * gcc -o fcc_hk0 fcc_hk0.cpp -std=c++11 -lstdc++ -lm
  * draws 1st BZ of fcc in hk0 plane
  * @author: tweber
@@ -12,7 +12,8 @@
 namespace geo = boost::geometry;
 namespace trafo = geo::strategy::transform;
 
-using t_point = geo::model::point<double, 2, geo::cs::cartesian>;
+using t_real = double;
+using t_point = geo::model::point<t_real, 2, geo::cs::cartesian>;
 using t_poly = geo::model::polygon<t_point>;
 
 int main()
@@ -25,11 +26,11 @@ int main()
 	bz.outer().push_back(t_point(-1,-1));
 
 	t_poly bz_trans, bz1, bz2, bz3, bz4;
-	geo::transform(bz, bz_trans, trafo::translate_transformer<double, 2, 2>(1. + 0.75*std::sqrt(2.), 0.));
-	geo::transform(bz_trans, bz1, trafo::rotate_transformer<geo::degree, double, 2, 2>(45.));
-	geo::transform(bz_trans, bz2, trafo::rotate_transformer<geo::degree, double, 2, 2>(-45.));
-	geo::transform(bz_trans, bz3, trafo::rotate_transformer<geo::degree, double, 2, 2>(135.));
-	geo::transform(bz_trans, bz4, trafo::rotate_transformer<geo::degree, double, 2, 2>(-135.));
+	geo::transform(bz, bz_trans, trafo::translate_transformer<t_real, 2, 2>(1. + 0.75*std::sqrt(2.), 0.));
+	geo::transform(bz_trans, bz1, trafo::rotate_transformer<geo::degree, t_real, 2, 2>(45.));
+	geo::transform(bz_trans, bz2, trafo::rotate_transformer<geo::degree, t_real, 2, 2>(-45.));
+	geo::transform(bz_trans, bz3, trafo::rotate_transformer<geo::degree, t_real, 2, 2>(135.));
+	geo::transform(bz_trans, bz4, trafo::rotate_transformer<geo::degree, t_real, 2, 2>(-135.));
 
 	std::vector<t_poly> vecDiff1, vecDiff2, vecDiff3, vecDiff4;
 	geo::difference(bz,bz1, vecDiff1);
@@ -47,7 +48,7 @@ int main()
 
 	for(const t_poly& poly : vecDiff4)
 	{
-		//geo::transform(poly, poly, trafo::scale_transformer<double, 2,2>(1e-5, 1e-5));
+		//geo::transform(poly, poly, trafo::scale_transformer<t_real, 2,2>(1e-5, 1e-5));
 		svg.add(poly);
 		svg.map(poly, "stroke:rgb(0,0,0); fill:rgb(0,0,255)");
 	}
@@ -61,6 +62,11 @@ int main()
 		t_point(0.75, -0.75),	// K
 		t_point(-0.75, 0.75),	// K
 		t_point(-0.75, -0.75),	// K
+
+		t_point(0., 1.),	// X
+		t_point(0., -1.),	// X
+		t_point(1., 0.),	// X
+		t_point(-1., 0.),	// X
 	};
 
 	for(const t_point& pt : vecPts)
@@ -68,5 +74,6 @@ int main()
 		svg.add(pt);
 		svg.map(pt, "stroke:rgb(0,0,0); fill:rgb(0,0,0)", 10);
 	}
+
 	return 0;
 }

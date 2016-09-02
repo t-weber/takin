@@ -39,6 +39,9 @@ struct EllipseDlgParams
 	const ublas::vector<t_real_reso>* reso_vOrient = nullptr;
 	const ublas::vector<t_real_reso>* Q_avgOrient = nullptr;
 
+	const std::vector<ublas::vector<t_real_reso>>* vecMC_direct = nullptr;
+	const std::vector<ublas::vector<t_real_reso>>* vecMC_HKL = nullptr;
+
 	ResoAlgo algo = ResoAlgo::UNKNOWN;
 };
 
@@ -56,18 +59,26 @@ class EllipseDlg : public QDialog, Ui::EllipseDlg
 		std::vector<struct Ellipse2d<t_real_reso>> m_elliProj;
 		std::vector<struct Ellipse2d<t_real_reso>> m_elliSlice;
 
-		std::vector<std::vector<t_real_reso> > m_vecXCurvePoints;
-		std::vector<std::vector<t_real_reso> > m_vecYCurvePoints;
+		std::vector<std::vector<t_real_reso>> m_vecXCurvePoints;
+		std::vector<std::vector<t_real_reso>> m_vecYCurvePoints;
+
+		std::vector<std::vector<t_real_reso>> m_vecMCXCurvePoints;
+		std::vector<std::vector<t_real_reso>> m_vecMCYCurvePoints;
 
 		QSettings *m_pSettings = 0;
 
 	protected:
+		// pointers to original parameters
+		EllipseDlgParams m_params;
+
+		// copied or modified parameters
 		ublas::matrix<t_real_reso> m_reso, m_resoHKL, m_resoOrient;
 		ublas::vector<t_real_reso> m_reso_v = ublas::zero_vector<t_real_reso>(4),
 			m_reso_vHKL = ublas::zero_vector<t_real_reso>(4),
 			m_reso_vOrient = ublas::zero_vector<t_real_reso>(4);
 		t_real_reso m_reso_s = 0;
 		ublas::vector<t_real_reso> m_Q_avg, m_Q_avgHKL, m_Q_avgOrient;
+
 		ResoAlgo m_algo = ResoAlgo::UNKNOWN;
 
 	public:

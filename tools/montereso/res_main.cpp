@@ -1,4 +1,4 @@
-/*
+/**
  * Montereso
  * @author tweber
  * @date 2012, 22-sep-2014
@@ -17,6 +17,7 @@
 #include <string>
 
 using namespace ublas;
+using t_real = t_real_reso;
 
 static void add_param(std::unordered_map<std::string, std::string>& map, const std::string& strLine)
 {
@@ -60,8 +61,8 @@ static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 		return 0;
 	}
 
-	matrix<t_real_reso>& res = reso.res;
-	matrix<t_real_reso>& cov = reso.cov;
+	matrix<t_real>& res = reso.res;
+	matrix<t_real>& cov = reso.cov;
 	res.resize(4,4,0);
 	cov.resize(4,4,0);
 
@@ -88,16 +89,16 @@ static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 
 	if(reso.bHasRes)
 	{
-		vector<t_real_reso>& dQ = reso.dQ;
+		vector<t_real>& dQ = reso.dQ;
 
 		dQ.resize(4, 0);
 		reso.Q_avg.resize(4, 0);
 		for(int iQ=0; iQ<4; ++iQ)
-			dQ[iQ] = tl::get_SIGMA2HWHM<t_real_reso>()/sqrt(res(iQ,iQ));
+			dQ[iQ] = tl::get_SIGMA2HWHM<t_real>()/sqrt(res(iQ,iQ));
 
 		std::ostringstream ostrVals;
 		ostrVals << "Gaussian HWHM values: ";
-		std::copy(dQ.begin(), dQ.end(), std::ostream_iterator<t_real_reso>(ostrVals, ", "));
+		std::copy(dQ.begin(), dQ.end(), std::ostream_iterator<t_real>(ostrVals, ", "));
 
 		tl::log_info(ostrVals.str());
 	}
@@ -116,19 +117,18 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 		return 0;
 	}
 
-	// neutron Q list
-	std::vector<t_real_reso> vecQx, vecQy, vecQz, vecE;
+	// neutron Q,E list
+	std::vector<vector<t_real>> vecQ;
 
 	// neutron ki, kf list
-	std::vector<t_real_reso> vecKi[3], vecKf[3], vecPos[3];
-	std::vector<t_real_reso> vecPi, vecPf;
+	std::vector<vector<t_real>> vecKi, vecKf, vecPos;
+	std::vector<t_real> vecPi, vecPf;
 	std::string strLine;
 
 	std::unordered_map<std::string, std::string> mapParams;
-
 	bool bEndOfHeader = 0;
 
-	unsigned int uiNumNeutr = 0;
+	std::size_t uiNumNeutr = 0;
 	while(std::getline(ifstr, strLine))
 	{
 		tl::trim(strLine);
@@ -163,18 +163,15 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 
 		if(ft == FileType::NEUTRON_Q_LIST)
 		{
-			t_real_reso dQx=0., dQy=0., dQz=0., dE=0.;
-
+			t_real dQx=0., dQy=0., dQz=0., dE=0.;
 			istr >> dQx >> dQy >> dQz >> dE;
+			vector<t_real> _vec = tl::make_vec<vector<t_real>>({dQx, dQy, dQz, dE});
 
-			vecQx.push_back(dQx);
-			vecQy.push_back(dQy);
-			vecQz.push_back(dQz);
-			vecE.push_back(dE);
+			vecQ.push_back(std::move(_vec));
 		}
 		else if(ft == FileType::NEUTRON_KIKF_LIST)
 		{
-			t_real_reso dKi[3], dKf[3], dPos[3], dPi=0., dPf=0.;
+			t_real dKi[3], dKf[3], dPos[3], dPi=0., dPf=0.;
 
 			istr >> dKi[0] >> dKi[2] >> dKi[1];
 			istr >> dKf[0] >> dKf[2] >> dKf[1];
@@ -185,12 +182,10 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 			dKf[1] = -dKf[1];
 			dPos[1] = -dPos[1];
 
-			for(short s=0; s<3; ++s)
-			{
-				vecKi[s].push_back(dKi[s]);
-				vecKf[s].push_back(dKf[s]);
-				vecPos[s].push_back(dPos[s]);
-			}
+			vecKi.push_back(tl::make_vec<vector<t_real>>({dKi[0], dKi[1], dKi[2]}));
+			vecKf.push_back(tl::make_vec<vector<t_real>>({dKf[0], dKf[1], dKf[2]}));
+			vecPos.push_back(tl::make_vec<vector<t_real>>({dPos[0], dPos[1], dPos[2]}));
+
 			vecPi.push_back(dPi);
 			vecPf.push_back(dPf);
 		}
@@ -202,12 +197,12 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 	//print_map(std::cout, mapParams);
 
 	if(ft == FileType::NEUTRON_Q_LIST)
-		res = calc_res(vecQx.size(), vecQx.data(), vecQy.data(), vecQz.data(), vecE.data());
+		res = calc_res(std::forward<decltype(vecQ)&&>(vecQ));
 	else if(ft == FileType::NEUTRON_KIKF_LIST)
-		res = calc_res(vecPi.size(),
-			vecKi[0].data(), vecKi[1].data(), vecKi[2].data(),
-			vecKf[0].data(), vecKf[1].data(), vecKf[2].data(),
-			vecPi.data(), vecPf.data());
+		res = calc_res(vecKi, vecKf, &vecPi, &vecPf);
+
+	for(vector<t_real>& vecCurQ : res.vecQ)
+		vecCurQ -= res.Q_avg_notrafo;
 
 	if(!res.bHasRes)
 	{
@@ -223,12 +218,13 @@ static EllipseDlg* show_ellipses(const Resolution& res)
 	EllipseDlg* pdlg = new EllipseDlg(0);
 	pdlg->show();
 
-	matrix<t_real_reso> matDummy;
-	vector<t_real_reso> vecDummy;
-	vector<t_real_reso> vecZero = zero_vector<t_real_reso>(4);
+	matrix<t_real> matDummy;
+	vector<t_real> vecDummy;
+	vector<t_real> vecZero = zero_vector<t_real>(4);
 
 	EllipseDlgParams params;
 	params.reso = &res.res;
+	params.vecMC_direct = &res.vecQ;
 	pdlg->SetParams(params);
 
 	return pdlg;

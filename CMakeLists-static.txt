@@ -17,7 +17,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}" "." "${PROJECT_SOURCE_DIR}
 set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
-find_package(Boost REQUIRED COMPONENTS iostreams system filesystem regex python REQUIRED)
+find_package(Boost REQUIRED COMPONENTS iostreams system filesystem regex python program_options REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(PNG REQUIRED)
@@ -110,7 +110,7 @@ add_executable(takin
 	dialogs/SettingsDlg.cpp dialogs/FilePreviewDlg.cpp
 	dialogs/GotoDlg.cpp dialogs/DWDlg.cpp dialogs/DynPlaneDlg.cpp
 	dialogs/NeutronDlg.cpp dialogs/SpurionDlg.cpp dialogs/PowderDlg.cpp
-	dialogs/DispDlg.cpp
+	dialogs/DispDlg.cpp dialogs/FavDlg.cpp
 	dialogs/RecipParamDlg.cpp dialogs/RealParamDlg.cpp
 	dialogs/SrvDlg.cpp dialogs/NetCacheDlg.cpp dialogs/ScanMonDlg.cpp
 	dialogs/EllipseDlg.cpp dialogs/FormfactorDlg.cpp

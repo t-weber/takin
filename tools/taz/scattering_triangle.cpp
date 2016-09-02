@@ -264,27 +264,43 @@ void ScatteringTriangle::paint(QPainter *painter, const QStyleOptionGraphicsItem
 	// Powder lines
 	{
 		QPen penOrg = painter->pen();
-		painter->setPen(Qt::red);
 
-		const typename tl::Powder<int,t_real>::t_peaks_unique& powderpeaks = m_powder.GetUniquePeaks();
-		for(const typename tl::Powder<int,t_real>::t_peak& powderpeak : powderpeaks)
+		for(std::size_t iLine=0; iLine<m_vecPowderLines.size(); ++iLine)
 		{
+			const typename tl::Powder<int,t_real>::t_peak& powderpeak = m_vecPowderLines[iLine];
+			t_real dLineWidth = m_vecPowderLineWidths[iLine];
+
 			const int ih = std::get<0>(powderpeak);
 			const int ik = std::get<1>(powderpeak);
 			const int il = std::get<2>(powderpeak);
+			t_real dF = std::get<4>(powderpeak);
+			bool bHasF = 1;
 
 			if(ih==0 && ik==0 && il==0) continue;
+			if(dF < t_real(0))
+			{
+				bHasF = 0;
+				dF = t_real(1);
+			}
 
 			std::ostringstream ostrPowderLine;
+			ostrPowderLine.precision(g_iPrecGfx);
 			ostrPowderLine << "(" << ih << " "<< ik << " " << il << ")";
+			if(bHasF)
+				ostrPowderLine << ", F=" << dF;
 
-			t_vec vec = m_powder.GetRecipLatticePos(t_real(ih), t_real(ik), t_real(il));
+			t_vec vec = m_recip.GetPos(t_real(ih), t_real(ik), t_real(il));
 			t_real drad = std::sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
 			drad *= m_dScaleFactor*m_dZoom;
+
+			QPen penLine(Qt::red);
+			penLine.setWidthF(dLineWidth);
+			painter->setPen(penLine);
 
 			painter->drawEllipse(ptKiQ, drad, drad);
 			painter->drawText(ptKiQ + QPointF(0., drad), ostrPowderLine.str().c_str());
 		}
+
 		painter->setPen(penOrg);
 	}
 
@@ -765,7 +781,8 @@ void ScatteringTriangle::RotateKiVec0To(bool bSense, t_real dAngle)
 void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, bool bIsPowder)
 {
 	ClearPeaks();
-	m_powder.clear();
+	m_vecPowderLines.clear();
+	m_vecPowderLineWidths.clear();
 	m_kdLattice.Unload();
 
 	m_lattice = recipcommon.lattice;
@@ -773,8 +790,8 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	m_matPlane = recipcommon.matPlane;
 	m_matPlane_inv = recipcommon.matPlane_inv;
 
-	m_powder.SetRecipLattice(&m_recip);
-
+	tl::Powder<int, t_real_glob> powder;
+	powder.SetRecipLattice(&m_recip);
 
 	// -------------------------------------------------------------------------
 	// central peak for BZ calculation
@@ -833,9 +850,10 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	std::list<std::vector<t_real>> lstPeaksForKd;
 	t_real dMinF = std::numeric_limits<t_real>::max(), dMaxF = -1.;
 
-	for(int ih=-m_iMaxPeaks; ih<=m_iMaxPeaks; ++ih)
-		for(int ik=-m_iMaxPeaks; ik<=m_iMaxPeaks; ++ik)
-			for(int il=-m_iMaxPeaks; il<=m_iMaxPeaks; ++il)
+	const int iMaxPeaks = bIsPowder ? m_iMaxPeaks/2 : m_iMaxPeaks;
+	for(int ih=-iMaxPeaks; ih<=iMaxPeaks; ++ih)
+		for(int ik=-iMaxPeaks; ik<=iMaxPeaks; ++ik)
+			for(int il=-iMaxPeaks; il<=iMaxPeaks; ++il)
 			{
 				const t_real h = t_real(ih);
 				const t_real k = t_real(ik);
@@ -853,57 +871,46 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 				//const t_real dG = ublas::norm_2(vecPeak);
 
 
-				if(bIsPowder)
-					m_powder.AddPeak(ih, ik, il);
+				// add peak in 1/A and rlu units
+				lstPeaksForKd.push_back(std::vector<t_real>
+					{ vecPeak[0],vecPeak[1],vecPeak[2], h,k,l/*, dF*/ });
 
-				// (000), i.e. direct beam, also needed for powder
-				if(!bIsPowder || (ih==0 && ik==0 && il==0))
+				t_real dDist = 0.;
+				t_vec vecDropped = recipcommon.plane.GetDroppedPerp(vecPeak, &dDist);
+				bool bInPlane = tl::float_equal<t_real>(dDist, 0., m_dPlaneDistTolerance);
+
+				// --------------------------------------------------------------------
+				// structure factors
+				std::string strStructfact;
+				t_real dF = -1., dFsq = -1.;
+
+				if(recipcommon.CanCalcStructFact() && (bInPlane || bIsPowder))
 				{
-					// add peak in 1/A and rlu units
-					lstPeaksForKd.push_back(std::vector<t_real>
-						{ vecPeak[0],vecPeak[1],vecPeak[2], h,k,l/*, dF*/ });
+					std::tie(std::ignore, dF, dFsq) =
+						recipcommon.GetStructFact(vecPeak);
 
-					t_real dDist = 0.;
-					t_vec vecDropped = recipcommon.plane.GetDroppedPerp(vecPeak, &dDist);
+					//dFsq *= tl::lorentz_factor(dAngle);
+					tl::set_eps_0(dFsq, g_dEpsGfx);
 
-					if(tl::float_equal<t_real>(dDist, 0., m_dPlaneDistTolerance))
+					tl::set_eps_0(dF, g_dEpsGfx);
+					dMinF = std::min(dF, dMinF);
+					dMaxF = std::max(dF, dMaxF);
+				}
+				// --------------------------------------------------------------------
+
+				t_vec vecCoord = ublas::prod(m_matPlane_inv, vecDropped);
+				t_real dX = vecCoord[0];
+				t_real dY = -vecCoord[1];
+
+				// in scattering plane?
+				if(bInPlane)
+				{
+					// (000), i.e. direct beam, also needed for powder
+					if(!bIsPowder || (ih==0 && ik==0 && il==0))
 					{
-						t_vec vecCoord = ublas::prod(m_matPlane_inv, vecDropped);
-						t_real dX = vecCoord[0];
-						t_real dY = -vecCoord[1];
-
-						t_real dF = -1.;
-						std::string strStructfact;
-
-						// --------------------------------------------------------------------
-						// structure factors
-						if(recipcommon.CanCalcStructFact())
-						{
-							t_real dFsq;
-							std::tie(std::ignore, dF, dFsq) =
-								recipcommon.GetStructFact(vecPeak);
-
-							//dFsq *= tl::lorentz_factor(dAngle);
-							tl::set_eps_0(dFsq, g_dEpsGfx);
-
-							tl::set_eps_0(dF, g_dEpsGfx);
-							dMinF = std::min(dF, dMinF);
-							dMaxF = std::max(dF, dMaxF);
-
-							std::ostringstream ostrStructfact;
-							ostrStructfact.precision(g_iPrecGfx);
-							if(g_bShowFsq)
-								ostrStructfact << "S = " << dFsq;
-							else
-								ostrStructfact << "F = " << dF;
-							strStructfact = ostrStructfact.str();
-						}
-						// --------------------------------------------------------------------
-
-
 						RecipPeak *pPeak = new RecipPeak();
 						if(ih==0 && ik==0 && il==0)
-							pPeak->SetColor(Qt::green);
+							pPeak->SetColor(Qt::darkGreen);
 						pPeak->setPos(dX * m_dScaleFactor, dY * m_dScaleFactor);
 						if(dF >= 0.) pPeak->SetRadius(dF);
 						pPeak->setData(TRIANGLE_NODE_TYPE_KEY, NODE_BRAGG);
@@ -914,8 +921,16 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 
 						ostrLabel << "(" << ih << " " << ik << " " << il << ")";
 						ostrTip << "(" << ih << " " << ik << " " << il << ") rlu";
-						if(strStructfact.length())
+						if(dFsq > -1.)
 						{
+							std::ostringstream ostrStructfact;
+							ostrStructfact.precision(g_iPrecGfx);
+							if(g_bShowFsq)
+								ostrStructfact << "S = " << dFsq;
+							else
+								ostrStructfact << "F = " << dF;
+							strStructfact = ostrStructfact.str();
+
 							ostrLabel << "\n" << strStructfact;
 							ostrTip << "\n" << strStructfact << " fm";
 						}
@@ -935,7 +950,6 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 						m_vecPeaks.push_back(pPeak);
 						m_scene.addItem(pPeak);
 
-
 						// 1st BZ
 						if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
 						{
@@ -954,6 +968,9 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 						}
 					}
 				}
+
+				if(bIsPowder)
+					powder.AddPeak(ih, ik, il, dF);
 			}
 
 	if(!bIsPowder)
@@ -966,11 +983,13 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 		m_kdLattice.Load(lstPeaksForKd, 3);
 	}
 
+	// single crystal peaks
 	if(dMaxF >= 0.)
 	{
+		bool bValidStructFacts = !tl::float_equal(dMinF, dMaxF, g_dEpsGfx);
 		for(RecipPeak *pPeak : m_vecPeaks)
 		{
-			if(!tl::float_equal(dMinF, dMaxF, g_dEpsGfx))
+			if(bValidStructFacts)
 			{
 				t_real dFScale = (pPeak->GetRadius()-dMinF) / (dMaxF-dMinF);
 				pPeak->SetRadius(tl::lerp(MIN_PEAK_SIZE, MAX_PEAK_SIZE, dFScale));
@@ -978,6 +997,42 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 			else
 			{
 				pPeak->SetRadius(DEF_PEAK_SIZE);
+			}
+		}
+	}
+
+	// powder lines
+	if(bIsPowder)
+	{
+		using t_line = typename decltype(powder)::t_peak;
+		m_vecPowderLines = powder.GetUniquePeaksSumF();
+		m_vecPowderLineWidths.reserve(m_vecPowderLines.size());
+
+		t_real dMinFLine = 0.;
+		t_real dMaxFLine = 0.;
+
+		if(dMaxF >= 0.)
+		{
+			auto minmaxiters = std::minmax_element(m_vecPowderLines.begin(), m_vecPowderLines.end(),
+				[](const t_line& line1, const t_line& line2) -> bool
+				{
+					return std::get<4>(line1) < std::get<4>(line2);
+				});
+			dMinFLine = std::get<4>(*minmaxiters.first);
+			dMaxFLine = std::get<4>(*minmaxiters.second);
+		}
+
+		bool bValidStructFacts = !tl::float_equal(dMinFLine, dMaxFLine, g_dEpsGfx);
+		for(t_line& line : m_vecPowderLines)
+		{
+			if(bValidStructFacts)
+			{
+				t_real dFScale = (std::get<4>(line)-dMinFLine) / (dMaxFLine-dMinFLine);
+				m_vecPowderLineWidths.push_back(tl::lerp(MIN_PEAK_SIZE, MAX_PEAK_SIZE, dFScale));
+			}
+			else
+			{
+				m_vecPowderLineWidths.push_back(1.);
 			}
 		}
 	}
@@ -1100,8 +1155,9 @@ get_nearest_elastic_kikf_pos(const QPointF& ptKiKf, const QPointF& ptKiQ, const 
 
 static std::tuple<bool, t_real, QPointF>
 get_nearest_node(const QPointF& pt,
-	const QGraphicsItem* pCurItem, const QList<QGraphicsItem*>& nodes,
-	t_real dFactor, const tl::Powder<int,t_real>* pPowder=nullptr)
+	const QGraphicsItem* pCurItem, const QList<QGraphicsItem*>& nodes, t_real dFactor, 
+	const std::vector<typename ScatteringTriangle::t_powderline>* pPowderLines=nullptr,
+	const tl::Lattice<t_real>* pRecip=nullptr)
 {
 	if(nodes.size()==0)
 		return std::tuple<bool, t_real, QPointF>(0, 0., QPointF());
@@ -1137,7 +1193,7 @@ get_nearest_node(const QPointF& pt,
 
 	// Powder peaks
 	QPointF ptPowder;
-	if(pNodeOrigin && pPowder)
+	if(pNodeOrigin && pPowderLines && pRecip)
 	{
 		t_vec vecOrigin = qpoint_to_vec(pNodeOrigin->scenePos());
 		t_vec vecPt = qpoint_to_vec(pt);
@@ -1145,15 +1201,14 @@ get_nearest_node(const QPointF& pt,
 		const t_real dDistToOrigin = ublas::norm_2(vecOriginPt);
 		vecOriginPt /= dDistToOrigin;
 
-		const typename tl::Powder<int,t_real>::t_peaks_unique& powderpeaks = pPowder->GetUniquePeaks();
-		for(const typename tl::Powder<int,t_real>::t_peak& powderpeak : powderpeaks)
+		for(const typename ScatteringTriangle::t_powderline& powderpeak : *pPowderLines)
 		{
 			const int ih = std::get<0>(powderpeak);
 			const int ik = std::get<1>(powderpeak);
 			const int il = std::get<2>(powderpeak);
 			if(ih==0 && ik==0 && il==0) continue;
 
-			t_vec vec = pPowder->GetRecipLatticePos(t_real(ih), t_real(ik), t_real(il));
+			t_vec vec = pRecip->GetPos(t_real(ih), t_real(ik), t_real(il));
 			t_real drad = std::sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
 			drad *= dFactor;
 
@@ -1192,7 +1247,7 @@ void ScatteringTriangle::SnapToNearestPeak(ScatteringTriangleNode* pNode,
 
 	std::tuple<bool, t_real, QPointF> tupNearest =
 		get_nearest_node(pNodeOrg->pos(), pNode, m_scene.items(),
-			GetScaleFactor(), &GetPowder());
+			GetScaleFactor(), &GetPowder(), &GetRecipLattice());
 
 	if(std::get<0>(tupNearest))
 		pNode->setPos(std::get<2>(tupNearest));
@@ -1650,7 +1705,8 @@ void ScatteringTriangleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *pEvt)
 				QList<QGraphicsItem*> nodes = items();
 				std::tuple<bool, t_real, QPointF> tupNearest =
 					get_nearest_node(pEvt->scenePos(), pCurItem, nodes,
-						m_pTri->GetScaleFactor(), &m_pTri->GetPowder());
+						m_pTri->GetScaleFactor(), &m_pTri->GetPowder(), 
+						&m_pTri->GetRecipLattice());
 
 				if(std::get<0>(tupNearest))
 				{

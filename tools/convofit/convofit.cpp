@@ -21,6 +21,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/scope_exit.hpp>
+#include <boost/program_options.hpp>
 
 #include "convofit.h"
 #include "scan.h"
@@ -28,11 +29,20 @@
 #include "../monteconvo/sqwfactory.h"
 #include "../res/defs.h"
 
+
 //using t_real = tl::t_real_min;
 using t_real = t_real_reso;
 
 namespace asio = boost::asio;
 namespace sys = boost::system;
+namespace opts = boost::program_options;
+
+// global overrides
+bool g_bSkipFit = 0;
+bool g_bUseValuesFromModel = 0;
+unsigned int g_iNumNeutrons = 0;
+std::string g_strSetParams;
+std::string g_strOutFileSuffix;
 
 
 bool run_job(const std::string& strJob)
@@ -67,6 +77,13 @@ bool run_job(const std::string& strJob)
 	std::string strFieldVar = prop.Query<std::string>("input/sqw_field_var", "");
 	std::string strSetParams = prop.Query<std::string>("input/sqw_set_params", "");
 	bool bNormToMon = prop.Query<bool>("input/norm_to_monitor", 1);
+
+	if(g_strSetParams != "")
+	{
+		if(strSetParams != "")
+			strSetParams += "; ";
+		strSetParams += g_strSetParams;
+	}
 
 	Filter filter;
 	filter.bLower = prop.Exists("input/filter_lower");
@@ -131,6 +148,9 @@ bool run_job(const std::string& strJob)
 	unsigned iNumNeutrons = prop.Query<unsigned>("montecarlo/neutrons", 1000);
 	unsigned iNumSample = prop.Query<unsigned>("montecarlo/sample_positions", 1);
 
+	if(g_iNumNeutrons > 0)
+		iNumNeutrons = g_iNumNeutrons;
+
 	std::string strResAlgo = prop.Query<std::string>("resolution/algorithm", "pop");
 	bool bUseR0 = prop.Query<bool>("resolution/use_r0", 0);
 	bool bResFocMonoV = prop.Query<bool>("resolution/focus_mono_v", 0);
@@ -143,6 +163,8 @@ bool run_job(const std::string& strJob)
 	t_real dSigma = prop.Query<t_real>("fitter/sigma", 1.);
 
 	bool bDoFit = prop.Query<bool>("fitter/do_fit", 1);
+	if(g_bSkipFit) bDoFit = 0;
+
 	unsigned int iMaxFuncCalls = prop.Query<unsigned>("fitter/max_funccalls", 0);
 	t_real dTolerance = prop.Query<t_real>("fitter/tolerance", 0.5);
 
@@ -153,6 +175,7 @@ bool run_job(const std::string& strJob)
 	bool bPlotIntermediate = prop.Query<bool>("output/plot_intermediate", 0);
 	unsigned int iPlotPoints = prop.Query<unsigned>("output/plot_points", 128);
 
+
 	std::unique_ptr<tl::GnuPlot<t_real>> plt;
 	if(bPlot || bPlotIntermediate)
 	{
@@ -161,6 +184,9 @@ bool run_job(const std::string& strJob)
 		std::string strTerm = prop.Query<std::string>("output/plot_term", "wxt noraise");
 		plt->SetTerminal(0, strTerm.c_str());
 	}
+
+	if(g_strOutFileSuffix != "")
+		strLogOutFile += g_strOutFileSuffix;
 
 	// thread-local debug log
 	std::unique_ptr<std::ostream> ofstrLog;
@@ -188,7 +214,7 @@ bool run_job(const std::string& strJob)
 	// reuse_values_from_model_file is set to 1
 	bool bUseValuesFromModel = prop.Query<bool>("fit_parameters/reuse_values_from_model_file", 0);
 	std::string strModInFile = prop.Query<std::string>("input/model_file");
-	if(strModInFile != "")
+	if(g_bUseValuesFromModel || strModInFile != "")
 		bUseValuesFromModel = 1;
 
 
@@ -235,12 +261,17 @@ bool run_job(const std::string& strJob)
 				auto iterParam = mapHdr.find(vecFitParams[iParam]);
 				if(iterParam != mapHdr.end())
 				{
-					std::string strNewVal = iterParam->second;
-					strNewVal = tl::split_first<std::string>(strNewVal, "+-", 1, 1).first;
+					std::pair<std::string, std::string> pairVal =
+						tl::split_first<std::string>(iterParam->second, "+-", 1, 1);
+
+					const std::string& strNewVal = pairVal.first;
+					const std::string& strNewErr = pairVal.second;
 
 					vecFitValues[iParam] = tl::str_to_var<t_real>(strNewVal);
+					vecFitErrors[iParam] = tl::str_to_var<t_real>(strNewErr);
+
 					tl::log_info("Overriding parameter \"", iterParam->first,
-						"\" with model value: ", strNewVal, ".");
+						"\" with model value: ", strNewVal, " +- ", strNewErr, ".");
 				}
 				else
 				{
@@ -254,6 +285,12 @@ bool run_job(const std::string& strJob)
 			tl::log_err("Parameter override using model file requested, but model file \"",
 				*pModOverrideFile, "\" is invalid.");
 		}
+	}
+
+	if(g_strOutFileSuffix != "")
+	{
+		strScOutFile += g_strOutFileSuffix;
+		strModOutFile += g_strOutFileSuffix;
 	}
 
 
@@ -337,7 +374,7 @@ bool run_job(const std::string& strJob)
 			reso.SetOptimalFocus(ResoFocus(iFoc));
 		}
 
-		if(bUseR0 && !reso.GetResoParams().bCalcR0)
+		if(bUseR0 && !(reso.GetResoParams().flags & CALC_R0))
 			tl::log_warn("Resolution R0 requested, but not calculated, using raw ellipsoid volume.");
 
 		reso.SetRandomSamplePos(iNumSample);
@@ -411,6 +448,7 @@ bool run_job(const std::string& strJob)
 	if(vecSc.size() > 1)
 		mod.SetScans(&vecSc);
 
+	tl::log_info("Number of neutrons: ", iNumNeutrons, ".");
 	mod.SetNumNeutrons(iNumNeutrons);
 	mod.SetUseR0(bUseR0);
 
@@ -606,100 +644,177 @@ bool run_job(const std::string& strJob)
 			plog->RemoveOstr(ofstrLog.get());
 	}
 
+
+	if(!bDoFit) return 1;
 	return bValidFit;
 }
 
 
 
+template<class T>
+static inline void get_prog_option(opts::variables_map& map, const char* pcKey, T& var)
+{
+	if(map.count(pcKey))
+		var = map[pcKey].as<T>();
+}
+
 
 int main(int argc, char** argv)
 {
-#ifdef NO_TERM_CMDS
-	tl::Log::SetUseTermCmds(0);
-#endif
-
-	// plain C locale
-	/*std::*/setlocale(LC_ALL, "C");
-	std::locale::global(std::locale::classic());
-
-	// install exit signal handlers
-	asio::io_service ioSrv;
-	asio::signal_set sigInt(ioSrv, SIGABRT, SIGTERM, SIGINT);
-	sigInt.async_wait([&ioSrv](const sys::error_code& err, int iSig)
+	try
 	{
-		tl::log_warn("Hard exit requested via signal ", iSig, ". This may cause a fault.");
-		if(err) tl::log_err("Error: ", err.message(), ", error category: ", err.category().name(), ".");
-		ioSrv.stop();
-#ifdef SIGKILL
-		std::system("killall -s KILL gnuplot");
-		std::raise(SIGKILL);
-#endif
-		exit(-1);
-	});
-	std::thread thSig([&ioSrv]() { ioSrv.run(); });
-	BOOST_SCOPE_EXIT(&ioSrv, &thSig)
-	{
-		//tl::log_debug("Exiting...");
-		ioSrv.stop();
-		thSig.join();
-	}
-	BOOST_SCOPE_EXIT_END
+	#ifdef NO_TERM_CMDS
+		tl::Log::SetUseTermCmds(0);
+	#endif
+
+		// plain C locale
+		/*std::*/setlocale(LC_ALL, "C");
+		std::locale::global(std::locale::classic());
 
 
-	tl::log_info("This is the Takin command-line convolution fitter, version " TAKIN_VER ".");
-	tl::log_info("Written by Tobias Weber <tobias.weber@tum.de>, 2014-2016.");
-	tl::log_debug("Resolution calculation uses ", sizeof(t_real_reso)*8, " bit ", tl::get_typename<t_real_reso>(), "s.");
-	tl::log_debug("Fitting uses ", sizeof(tl::t_real_min)*8, " bit ", tl::get_typename<tl::t_real_min>(), "s.");
-
-	if(argc > 2)
-	{
-		for(tl::Log* log : { &tl::log_info, &tl::log_warn, &tl::log_err, &tl::log_crit, &tl::log_debug })
-			log->SetShowThread(1);
-	}
-
-	if(argc <= 1)
-	{
-		tl::log_info("Usage:");
-		tl::log_info("\t", argv[0], " <job file 1> <job file 2> ...");
-		return -1;
-	}
-
-
-	unsigned int iNumThreads = std::thread::hardware_concurrency();
-	tl::ThreadPool<bool()> tp(iNumThreads);
-
-	for(int iArg=1; iArg<argc; ++iArg)
-	{
-		std::string strJob = argv[iArg];
-		tp.AddTask([iArg, strJob]() -> bool
+		// --------------------------------------------------------------------
+		// install exit signal handlers
+		asio::io_service ioSrv;
+		asio::signal_set sigInt(ioSrv, SIGABRT, SIGTERM, SIGINT);
+		sigInt.async_wait([&ioSrv](const sys::error_code& err, int iSig)
 		{
-			tl::log_info("Executing job file ", iArg, ": \"", strJob, "\".");
-
-			return run_job(strJob);
-			//if(argc > 2) tl::log_info("================================================================================");
+			tl::log_warn("Hard exit requested via signal ", iSig, ". This may cause a fault.");
+			if(err) tl::log_err("Error: ", err.message(), ", error category: ", err.category().name(), ".");
+			ioSrv.stop();
+	#ifdef SIGKILL
+			std::system("killall -s KILL gnuplot");
+			std::raise(SIGKILL);
+	#endif
+			exit(-1);
 		});
+		std::thread thSig([&ioSrv]() { ioSrv.run(); });
+		BOOST_SCOPE_EXIT(&ioSrv, &thSig)
+		{
+			//tl::log_debug("Exiting...");
+			ioSrv.stop();
+			thSig.join();
+		}
+		BOOST_SCOPE_EXIT_END
+		// --------------------------------------------------------------------
+
+
+		tl::log_info("This is the Takin command-line convolution fitter, version " TAKIN_VER ".");
+		tl::log_info("Written by Tobias Weber <tobias.weber@tum.de>, 2014-2016.");
+		tl::log_debug("Resolution calculation uses ", sizeof(t_real_reso)*8, " bit ", tl::get_typename<t_real_reso>(), "s.");
+		tl::log_debug("Fitting uses ", sizeof(tl::t_real_min)*8, " bit ", tl::get_typename<tl::t_real_min>(), "s.");
+
+
+		// --------------------------------------------------------------------
+		// get job files and program options
+		std::vector<std::string> vecJobs;
+
+		// normal args
+		opts::options_description args("convofit options (overriding job file settings)");
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("job-file",
+			opts::value<decltype(vecJobs)>(&vecJobs),
+			"convolution fitting job file")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("neutrons",
+			opts::value<decltype(g_iNumNeutrons)>(&g_iNumNeutrons),
+			"neutron count")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("skip-fit",
+			opts::bool_switch(&g_bSkipFit),
+			"skip the fitting step")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("keep-model",
+			opts::bool_switch(&g_bUseValuesFromModel),
+			"keep the initial values from the model file")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("model-params",
+			opts::value<decltype(g_strSetParams)>(&g_strSetParams),
+			"set S(q,w) model parameters")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("outfile-suffix",
+			opts::value<decltype(g_strOutFileSuffix)>(&g_strOutFileSuffix),
+			"suffix to append to output files")));
+
+
+		// positional args
+		opts::positional_options_description args_pos;
+		args_pos.add("job-file", -1);
+
+		opts::basic_command_line_parser<char> clparser(argc, argv);
+		clparser.options(args);
+		clparser.positional(args_pos);
+		opts::basic_parsed_options<char> parsedopts = clparser.run();
+
+		opts::variables_map opts_map;
+		opts::store(parsedopts, opts_map);
+		opts::notify(opts_map);
+
+		//get_prog_option<decltype(vecJobs)>(opts_map, "job-file", vecJobs);
+
+
+		if(vecJobs.size() >= 2)
+		{
+			for(tl::Log* log : { &tl::log_info, &tl::log_warn, &tl::log_err, &tl::log_crit, &tl::log_debug })
+				log->SetShowThread(1);
+		}
+
+		if(argc <= 1)
+		{
+			std::ostringstream ostrHelp;
+			ostrHelp << "Usage: " << argv[0] << " [options] <job-file 1> <job-file 2> ...\n";
+			ostrHelp << args;
+			tl::log_info(ostrHelp.str());
+			return -1;
+		}
+
+		if(vecJobs.size() == 0)
+		{
+			tl::log_err("No job files given.");
+			return -1;
+		}
+		// --------------------------------------------------------------------
+
+
+		unsigned int iNumThreads = std::thread::hardware_concurrency();
+		tl::ThreadPool<bool()> tp(iNumThreads);
+
+		for(std::size_t iJob=0; iJob<vecJobs.size(); ++iJob)
+		{
+			const std::string& strJob = vecJobs[iJob];
+			tp.AddTask([iJob, strJob]() -> bool
+			{
+				tl::log_info("Executing job file ", iJob+1, ": \"", strJob, "\".");
+
+				return run_job(strJob);
+				//if(argc > 2) tl::log_info("================================================================================");
+			});
+		}
+
+		tl::Stopwatch<t_real> watch;
+		watch.start();
+		tp.StartTasks();
+
+		auto& lstFut = tp.GetFutures();
+		std::size_t iTask = 0;
+		for(auto& fut : lstFut)
+		{
+			bool bOk = fut.get();
+			if(!bOk)
+				tl::log_err("Job ", iTask+1, " (", vecJobs[iTask], ") failed or fit invalid!");
+			++iTask;
+		}
+
+		watch.stop();
+		tl::log_info("================================================================================");
+		tl::log_info("Start time:     ", watch.GetStartTimeStr());
+		tl::log_info("Stop time:      ", watch.GetStopTimeStr());
+		tl::log_info("Execution time: ", tl::get_duration_str_secs<t_real>(watch.GetDur()));
+		tl::log_info("================================================================================");
 	}
-
-	tl::Stopwatch<t_real> watch;
-	watch.start();
-	tp.StartTasks();
-
-	auto& lstFut = tp.GetFutures();
-	unsigned int iTask = 1;
-	for(auto& fut : lstFut)
+	catch(const std::exception& ex)
 	{
-		bool bOk = fut.get();
-		if(!bOk)
-			tl::log_err("Job ", iTask, " (", argv[iTask], ") failed or fit invalid!");
-		++iTask;
+		tl::log_crit(ex.what());
 	}
-
-	watch.stop();
-	tl::log_info("================================================================================");
-	tl::log_info("Start time:     ", watch.GetStartTimeStr());
-	tl::log_info("Stop time:      ", watch.GetStopTimeStr());
-	tl::log_info("Execution time: ", tl::get_duration_str_secs<t_real>(watch.GetDur()));
-	tl::log_info("================================================================================");
 
 	return 0;
 }

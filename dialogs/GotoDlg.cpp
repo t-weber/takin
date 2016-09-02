@@ -1,4 +1,4 @@
-/*
+/**
  * Goto Dialog
  * @author Tobias Weber
  * @date 15-oct-2014
@@ -29,10 +29,10 @@ GotoDlg::GotoDlg(QWidget* pParent, QSettings* pSett) : QDialog(pParent), m_pSett
 			setFont(font);
 	}
 
-	btnAdd->setIcon(load_icon("res/list-add.svg"));
-	btnDel->setIcon(load_icon("res/list-remove.svg"));
-	btnSave->setIcon(load_icon("res/document-save.svg"));
-	btnLoad->setIcon(load_icon("res/document-open.svg"));
+	btnAdd->setIcon(load_icon("res/icons/list-add.svg"));
+	btnDel->setIcon(load_icon("res/icons/list-remove.svg"));
+	btnSave->setIcon(load_icon("res/icons/document-save.svg"));
+	btnLoad->setIcon(load_icon("res/icons/document-open.svg"));
 
 	std::vector<QLineEdit*> vecObjs {editH, editK, editL};
 	std::vector<QLineEdit*> vecAngles {edit2ThetaM, editThetaM, edit2ThetaA, editThetaA, edit2ThetaS, editThetaS};
@@ -708,12 +708,12 @@ void GotoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 {
 	bool bOk=0;
 
-	editH->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "goto_pos/h").c_str(), 1., &bOk), g_iPrec).c_str());
-	editK->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "goto_pos/k").c_str(), 0., &bOk), g_iPrec).c_str());
-	editL->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "goto_pos/l").c_str(), 0., &bOk), g_iPrec).c_str());
-	editKi->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "goto_pos/ki").c_str(), 1.4, &bOk), g_iPrec).c_str());
-	editKf->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "goto_pos/kf").c_str(), 1.4, &bOk), g_iPrec).c_str());
-	radioFixedKi->setChecked(xml.Query<bool>((strXmlRoot + "goto_pos/cki").c_str(), 0, &bOk));
+	editH->setText(tl::var_to_str(xml.Query<t_real>(strXmlRoot + "goto_pos/h", 1., &bOk), g_iPrec).c_str());
+	editK->setText(tl::var_to_str(xml.Query<t_real>(strXmlRoot + "goto_pos/k", 0., &bOk), g_iPrec).c_str());
+	editL->setText(tl::var_to_str(xml.Query<t_real>(strXmlRoot + "goto_pos/l", 0., &bOk), g_iPrec).c_str());
+	editKi->setText(tl::var_to_str(xml.Query<t_real>(strXmlRoot + "goto_pos/ki", 1.4, &bOk), g_iPrec).c_str());
+	editKf->setText(tl::var_to_str(xml.Query<t_real>(strXmlRoot + "goto_pos/kf", 1.4, &bOk), g_iPrec).c_str());
+	radioFixedKi->setChecked(xml.Query<bool>(strXmlRoot + "goto_pos/cki", 0, &bOk));
 
 	// favlist
 	ClearList();
@@ -724,14 +724,14 @@ void GotoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 		ostrItemBase << "goto_favlist/pos_" << iItem << "/";
 		std::string strItemBase = ostrItemBase.str();
 
-		if(!xml.Exists((strXmlRoot + strItemBase).c_str()))
+		if(!xml.Exists(strXmlRoot + strItemBase))
 			break;
 
-		t_real dh = xml.Query<t_real>((strXmlRoot + strItemBase + "h").c_str(), 0., &bOk);
-		t_real dk = xml.Query<t_real>((strXmlRoot + strItemBase + "k").c_str(), 0., &bOk);
-		t_real dl = xml.Query<t_real>((strXmlRoot + strItemBase + "l").c_str(), 0., &bOk);
-		t_real dki = xml.Query<t_real>((strXmlRoot + strItemBase + "ki").c_str(), 0., &bOk);
-		t_real dkf = xml.Query<t_real>((strXmlRoot + strItemBase + "kf").c_str(), 0., &bOk);
+		t_real dh = xml.Query<t_real>(strXmlRoot + strItemBase + "h", 0., &bOk);
+		t_real dk = xml.Query<t_real>(strXmlRoot + strItemBase + "k", 0., &bOk);
+		t_real dl = xml.Query<t_real>(strXmlRoot + strItemBase + "l", 0., &bOk);
+		t_real dki = xml.Query<t_real>(strXmlRoot + strItemBase + "ki", 0., &bOk);
+		t_real dkf = xml.Query<t_real>(strXmlRoot + strItemBase + "kf", 0., &bOk);
 
 		AddPosToList(dh, dk, dl, dki, dkf);
 		++iItem;

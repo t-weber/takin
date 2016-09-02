@@ -16,9 +16,20 @@
 
 #include "defs.h"
 #include "tlibs/math/neutrons.h"
+#include <tuple>
 
 namespace units = boost::units;
 namespace codata = boost::units::si::constants::codata;
+
+
+enum ResoFlags : std::size_t
+{
+	CALC_R0		= 1<<0,
+
+	CALC_KI3	= 1<<1,
+	CALC_KF3	= 1<<2,
+};
+
 
 struct CNParams
 {
@@ -61,9 +72,16 @@ struct CNParams
 	t_real_reso dmono_refl;
 	t_real_reso dana_effic;
 
-	bool bCalcR0 = 1;
+	std::size_t flags = CALC_R0 | CALC_KI3 | CALC_KF3;
 };
 
 extern ResoResults calc_cn(const CNParams& cn);
+
+extern std::tuple<t_real_reso, t_real_reso>
+	get_scatter_factors(std::size_t flags,
+		const tl::t_angle_si<t_real_reso>& thetam,
+		const tl::t_wavenumber_si<t_real_reso>& ki,
+		const tl::t_angle_si<t_real_reso>& thetaa,
+		const tl::t_wavenumber_si<t_real_reso>& kf);
 
 #endif

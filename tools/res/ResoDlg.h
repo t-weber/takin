@@ -1,4 +1,4 @@
-/*
+/**
  * resolution calculation
  * @author tweber
  * @date 2013 - 2016
@@ -57,6 +57,9 @@ protected:
 	std::vector<QDoubleSpinBox*> m_vecSpinBoxes;
 	std::vector<std::string> m_vecSpinNames;
 
+	std::vector<QSpinBox*> m_vecIntSpinBoxes;
+	std::vector<std::string> m_vecIntSpinNames;
+
 	std::vector<QCheckBox*> m_vecCheckBoxes;
 	std::vector<std::string> m_vecCheckNames;
 
@@ -92,6 +95,10 @@ protected:
 	ublas::matrix<t_real_reso> m_resoHKL, m_resoOrient;
 	ublas::vector<t_real_reso> m_reso_vHKL, m_reso_vOrient;
 	ublas::vector<t_real_reso> m_Q_avgHKL, m_Q_avgOrient;
+
+	std::vector<ublas::vector<t_real_reso>> m_vecMC_direct;
+	std::vector<ublas::vector<t_real_reso>> m_vecMC_HKL;
+
 
 	bool m_bDontCalc;
 	bool m_bEll4dCurrent = 0;

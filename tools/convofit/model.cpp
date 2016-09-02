@@ -69,7 +69,7 @@ tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x) const
 
 	if(m_bUseR0)
 		dS *= reso.GetResoResults().dResVol;
-	if(m_bUseR0 && reso.GetResoParams().bCalcR0)
+	if(m_bUseR0 && (reso.GetResoParams().flags & CALC_R0))
 		dS *= reso.GetResoResults().dR0;
 
 	if(m_psigFuncResult)

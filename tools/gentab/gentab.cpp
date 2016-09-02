@@ -88,9 +88,9 @@ bool gen_formfacts()
 	}
 
 
-	if(!prop.Save("res/ffacts.xml.gz"))
+	if(!prop.Save("res/data/ffacts.xml.gz"))
 	{
-		tl::log_err("Cannot write \"res/ffacts.xml.gz\".");
+		tl::log_err("Cannot write \"res/data/ffacts.xml.gz\".");
 		return false;
 	}
 	return true;
@@ -215,9 +215,9 @@ bool gen_scatlens()
 	prop.Add("scatlens.num_atoms", tl::var_to_str(iAtom));
 
 
-	if(!prop.Save("res/scatlens.xml.gz"))
+	if(!prop.Save("res/data/scatlens.xml.gz"))
 	{
-		tl::log_err("Cannot write \"res/scatlens.xml.gz\".");
+		tl::log_err("Cannot write \"res/data/scatlens.xml.gz\".");
 		return false;
 	}
 	return true;
@@ -284,9 +284,9 @@ bool gen_spacegroups()
 	}
 
 
-	if(!prop.Save("res/sgroups.xml.gz"))
+	if(!prop.Save("res/data/sgroups.xml.gz"))
 	{
-		tl::log_err("Cannot write \"res/sgroups.xml.gz\".");
+		tl::log_err("Cannot write \"res/data/sgroups.xml.gz\".");
 		return false;
 	}
 
@@ -421,9 +421,9 @@ bool gen_magformfacts()
 
 	propOut.Add("magffacts.num_atoms", tl::var_to_str(iAtom));
 
-	if(!propOut.Save("res/magffacts.xml.gz"))
+	if(!propOut.Save("res/data/magffacts.xml.gz"))
 	{
-		tl::log_err("Cannot write \"res/magffacts.xml.gz\".");
+		tl::log_err("Cannot write \"res/data/magffacts.xml.gz\".");
 		return false;
 	}
 

@@ -24,6 +24,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMenu>
 
 
 using t_real = t_real_reso;
@@ -42,9 +43,9 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 			setFont(font);
 	}
 
-	btnStart->setIcon(load_icon("res/media-playback-start.svg"));
-	btnStop->setIcon(load_icon("res/media-playback-stop.svg"));
-	btnSaveResult->setIcon(load_icon("res/document-save-as.svg"));
+	btnStart->setIcon(load_icon("res/icons/media-playback-start.svg"));
+	btnStop->setIcon(load_icon("res/icons/media-playback-stop.svg"));
+	btnSaveResult->setIcon(load_icon("res/icons/document-save-as.svg"));
 
 
 	m_plotwrap.reset(new QwtPlotWrapper(plot, 3, true));
@@ -76,6 +77,19 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	// --------------------------------------------------------------------
 
 
+	// --------------------------------------------------------------------
+	QMenu *pMenuActions = new QMenu("Actions", this);
+
+	QAction *pHK = new QAction("h <-> k", pMenuActions);
+	QAction *pHL = new QAction("h <-> l", pMenuActions);
+	QAction *pKL = new QAction("k <-> l", pMenuActions);
+	pMenuActions->addAction(pHK);
+	pMenuActions->addAction(pHL);
+	pMenuActions->addAction(pKL);
+
+	btnActions->setMenu(pMenuActions);
+	// --------------------------------------------------------------------
+
 
 	// --------------------------------------------------------------------
 	// fill sqw combo box
@@ -98,12 +112,18 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	QObject::connect(m_pSqwParamDlg, SIGNAL(SqwParamsChanged(const std::vector<SqwBase::t_var>&)),
 		this, SLOT(SqwParamsChanged(const std::vector<SqwBase::t_var>&)));
 
+	m_pFavDlg = new FavDlg(this, m_pSett);
+	QObject::connect(m_pFavDlg, SIGNAL(ChangePos(const struct FavHklPos&)),
+		this, SLOT(ChangePos(const struct FavHklPos&)));
+
 	QObject::connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(ButtonBoxClicked(QAbstractButton*)));
 
 	QObject::connect(btnBrowseCrys, SIGNAL(clicked()), this, SLOT(browseCrysFiles()));
 	QObject::connect(btnBrowseRes, SIGNAL(clicked()), this, SLOT(browseResoFiles()));
 	QObject::connect(btnBrowseSqw, SIGNAL(clicked()), this, SLOT(browseSqwFiles()));
 	QObject::connect(btnBrowseScan, SIGNAL(clicked()), this, SLOT(browseScanFiles()));
+
+	QObject::connect(btnFav, SIGNAL(clicked()), this, SLOT(ShowFavourites()));
 
 	QObject::connect(btnSqwParams, SIGNAL(clicked()), this, SLOT(showSqwParamDlg()));
 	QObject::connect(btnSaveResult, SIGNAL(clicked()), this, SLOT(SaveResult()));
@@ -117,6 +137,15 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 
 	QObject::connect(btnStart, SIGNAL(clicked()), this, SLOT(Start()));
 	QObject::connect(btnStop, SIGNAL(clicked()), this, SLOT(Stop()));
+
+
+	QObject::connect(pHK, SIGNAL(triggered()), this, SLOT(ChangeHK()));
+	QObject::connect(pHL, SIGNAL(triggered()), this, SLOT(ChangeHL()));
+	QObject::connect(pKL, SIGNAL(triggered()), this, SLOT(ChangeKL()));
+
+	for(QDoubleSpinBox* pSpin : {spinStartH, spinStartK, spinStartL, spinStartE,
+		spinStopH, spinStopK, spinStopL, spinStopE})
+		QObject::connect(pSpin, SIGNAL(valueChanged(double)), this, SLOT(UpdateCurFavPos()));
 
 	LoadSettings();
 }
@@ -136,6 +165,12 @@ ConvoDlg::~ConvoDlg()
 	{
 		delete m_pSqwParamDlg;
 		m_pSqwParamDlg = nullptr;
+	}
+
+	if(m_pFavDlg)
+	{
+		delete m_pFavDlg;
+		m_pFavDlg = nullptr;
 	}
 }
 
@@ -460,7 +495,7 @@ void ConvoDlg::Start()
 
 				if(bUseR0)
 					dS *= localreso.GetResoResults().dResVol;
-				if(bUseR0 && localreso.GetResoParams().bCalcR0)
+				if(bUseR0 && (localreso.GetResoParams().flags & CALC_R0))
 					dS *= localreso.GetResoResults().dR0;
 
 				return std::pair<bool, t_real>(true, dS);
@@ -698,6 +733,70 @@ void ConvoDlg::browseScanFiles()
 	if(m_pSett)
 		m_pSett->setValue("convo/last_dir_scan", QString(strDir.c_str()));
 }
+
+
+// -----------------------------------------------------------------------------
+
+
+void ConvoDlg::ShowFavourites()
+{
+	m_pFavDlg->show();
+	m_pFavDlg->activateWindow();
+}
+
+void ConvoDlg::UpdateCurFavPos()
+{
+	FavHklPos pos;
+	pos.dhstart = spinStartH->value();
+	pos.dkstart = spinStartK->value();
+	pos.dlstart = spinStartL->value();
+	pos.dEstart = spinStartE->value();
+	pos.dhstop = spinStopH->value();
+	pos.dkstop = spinStopK->value();
+	pos.dlstop = spinStopL->value();
+	pos.dEstop = spinStopE->value();
+
+	m_pFavDlg->UpdateCurPos(pos);
+}
+
+void ConvoDlg::ChangePos(const struct FavHklPos& pos)
+{
+	spinStartH->setValue(pos.dhstart);
+	spinStartK->setValue(pos.dkstart);
+	spinStartL->setValue(pos.dlstart);
+	spinStartE->setValue(pos.dEstart);
+	spinStopH->setValue(pos.dhstop);
+	spinStopK->setValue(pos.dkstop);
+	spinStopL->setValue(pos.dlstop);
+	spinStopE->setValue(pos.dEstop);
+}
+
+// -----------------------------------------------------------------------------
+
+
+static void SwapSpin(QDoubleSpinBox* pS1, QDoubleSpinBox* pS2)
+{
+	double dVal = pS1->value();
+	pS1->setValue(pS2->value());
+	pS2->setValue(dVal);
+}
+
+void ConvoDlg::ChangeHK()
+{
+	SwapSpin(spinStartH, spinStartK);
+	SwapSpin(spinStopH, spinStopK);
+}
+void ConvoDlg::ChangeHL()
+{
+	SwapSpin(spinStartH, spinStartL);
+	SwapSpin(spinStopH, spinStopL);
+}
+void ConvoDlg::ChangeKL()
+{
+	SwapSpin(spinStartK, spinStartL);
+	SwapSpin(spinStopK, spinStopL);
+}
+
 
 // -----------------------------------------------------------------------------
 

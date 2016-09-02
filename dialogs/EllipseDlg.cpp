@@ -14,7 +14,7 @@
 
 
 EllipseDlg::EllipseDlg(QWidget* pParent, QSettings* pSett)
-	: QDialog(pParent, Qt::WindowStaysOnTopHint), m_pSettings(pSett)
+	: QDialog(pParent, Qt::Tool), m_pSettings(pSett)
 {
 	setupUi(this);
 	setWindowTitle(m_pcTitle);
@@ -33,24 +33,33 @@ EllipseDlg::EllipseDlg(QWidget* pParent, QSettings* pSett)
 	m_elliSlice.resize(4);
 	m_vecXCurvePoints.resize(8);
 	m_vecYCurvePoints.resize(8);
+	m_vecMCXCurvePoints.resize(4);
+	m_vecMCYCurvePoints.resize(4);
 
 	QwtPlot* pPlots[] = {plot1, plot2, plot3, plot4};
 	for(unsigned int i=0; i<4; ++i)
 	{
-		m_vecplotwrap.push_back(std::unique_ptr<QwtPlotWrapper>(new QwtPlotWrapper(pPlots[i], 2)));
+		m_vecplotwrap.push_back(std::unique_ptr<QwtPlotWrapper>(new QwtPlotWrapper(pPlots[i], 3)));
 		m_vecplotwrap[i]->GetPlot()->setMinimumSize(200,200);
 
 		m_vecplotwrap[i]->GetCurve(0)->setTitle("Projected Ellipse");
 		m_vecplotwrap[i]->GetCurve(1)->setTitle("Sliced Ellipse");
 
-		QPen penProj, penSlice;
+		QPen penProj, penSlice, penPoints;
 		penProj.setColor(QColor(0, 0x99,0));
 		penSlice.setColor(QColor(0,0,0x99));
+		penPoints.setColor(QColor(0xff,0,0));
 		penProj.setWidth(2);
 		penSlice.setWidth(2);
+		penPoints.setWidth(2);
 
-		m_vecplotwrap[i]->GetCurve(0)->setPen(penProj);
-		m_vecplotwrap[i]->GetCurve(1)->setPen(penSlice);
+		m_vecplotwrap[i]->GetCurve(0)->setStyle(QwtPlotCurve::CurveStyle::Dots);
+		m_vecplotwrap[i]->GetCurve(1)->setStyle(QwtPlotCurve::CurveStyle::Lines);
+		m_vecplotwrap[i]->GetCurve(2)->setStyle(QwtPlotCurve::CurveStyle::Lines);
+
+		m_vecplotwrap[i]->GetCurve(0)->setPen(penPoints);
+		m_vecplotwrap[i]->GetCurve(1)->setPen(penProj);
+		m_vecplotwrap[i]->GetCurve(2)->setPen(penSlice);
 
 		if(m_vecplotwrap[i]->HasTrackerSignal())
 		{
@@ -114,6 +123,7 @@ void EllipseDlg::Calc()
 	const ublas::matrix<t_real_reso> *pReso = nullptr;
 	const ublas::vector<t_real_reso> *pReso_v = nullptr;
 	const ublas::vector<t_real_reso> *pQavg = nullptr;
+	const std::vector<ublas::vector<t_real_reso>> *pvecMC = nullptr;
 
 	switch(coord)
 	{
@@ -121,11 +131,13 @@ void EllipseDlg::Calc()
 			pReso = &m_reso;
 			pQavg = &m_Q_avg;
 			pReso_v = &m_reso_v;
+			pvecMC = m_params.vecMC_direct;
 			break;
 		case EllipseCoordSys::RLU:		// rlu system
 			pReso = &m_resoHKL;
 			pQavg = &m_Q_avgHKL;
 			pReso_v = &m_reso_vHKL;
+			pvecMC = m_params.vecMC_HKL;
 			break;
 		case EllipseCoordSys::RLU_ORIENT:	// rlu system
 			pReso = &m_resoOrient;
@@ -220,6 +232,32 @@ void EllipseDlg::Calc()
 
 			tasks_ell_proj.push_back(std::move(ell_proj));
 			tasks_ell_slice.push_back(std::move(ell_slice));
+
+
+			// MC neutrons
+			if(pvecMC)
+			{
+				m_vecMCXCurvePoints[iEll].resize(pvecMC->size());
+				m_vecMCYCurvePoints[iEll].resize(pvecMC->size());
+
+				for(std::size_t iMC=0; iMC<pvecMC->size(); ++iMC)
+				{
+					const ublas::vector<t_real_reso>& vecMC = (*pvecMC)[iMC];
+					m_vecMCXCurvePoints[iEll][iMC] = vecMC[iP[0]];
+					m_vecMCYCurvePoints[iEll][iMC] = vecMC[iP[1]];
+
+					if(m_bCenterOn0)
+					{
+						m_vecMCXCurvePoints[iEll][iMC] -= _Q_avg[iP[0]];
+						m_vecMCYCurvePoints[iEll][iMC] -= _Q_avg[iP[1]];
+					}
+				}
+			}
+			else
+			{
+				m_vecMCXCurvePoints[iEll].clear();
+				m_vecMCYCurvePoints[iEll].clear();
+			}
 		}
 
 		for(unsigned int iEll=0; iEll<4; ++iEll)
@@ -236,13 +274,16 @@ void EllipseDlg::Calc()
 			std::vector<t_real_reso>& vecYProj = m_vecYCurvePoints[iEll*2+0];
 			std::vector<t_real_reso>& vecXSlice = m_vecXCurvePoints[iEll*2+1];
 			std::vector<t_real_reso>& vecYSlice = m_vecYCurvePoints[iEll*2+1];
+			std::vector<t_real_reso>& vecXMC = m_vecMCXCurvePoints[iEll];
+			std::vector<t_real_reso>& vecYMC = m_vecMCYCurvePoints[iEll];
 
 			t_real_reso dBBProj[4], dBBSlice[4];
 			m_elliProj[iEll].GetCurvePoints(vecXProj, vecYProj, GFX_NUM_POINTS, dBBProj);
 			m_elliSlice[iEll].GetCurvePoints(vecXSlice, vecYSlice, GFX_NUM_POINTS, dBBSlice);
 
-			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXProj, vecYProj, 0, false);
-			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXSlice, vecYSlice, 1, false);
+			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXProj, vecYProj, 1, false);
+			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXSlice, vecYSlice, 2, false);
+			set_qwt_data<t_real_reso>()(*m_vecplotwrap[iEll], vecXMC, vecYMC, 0, false);
 			//m_vecplotwrap[iEll]->SetData(vecXProj, vecYProj, 0, false);
 			//m_vecplotwrap[iEll]->SetData(vecXSlice, vecYSlice, 1, false);
 
@@ -287,11 +328,6 @@ void EllipseDlg::Calc()
 				case ResoAlgo::SIMPLE: SetTitle("Simple Algorithm"); break;
 				default: SetTitle("Unknown Resolution Algorithm"); break;
 			}
-
-			/*if(iEll == 0)
-				tl::log_err("reso v = ", reso_v, 
-					", proj offs: ", m_elliProj[iEll].x_offs, " ", m_elliProj[iEll].y_offs,
-					", slice offs: ", m_elliSlice[iEll].x_offs, " ", m_elliSlice[iEll].y_offs);*/
 		}
 	}
 	catch(const std::exception& ex)
@@ -311,6 +347,8 @@ void EllipseDlg::SetCenterOn0(bool bCenter)
 
 void EllipseDlg::SetParams(const EllipseDlgParams& params)
 {
+	m_params = params;
+	
 	static const ublas::matrix<t_real_reso> mat0 = ublas::zero_matrix<t_real_reso>(4,4);
 	static const ublas::vector<t_real_reso> vec0 = ublas::zero_vector<t_real_reso>(4);
 

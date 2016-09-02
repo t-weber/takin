@@ -158,7 +158,7 @@ void calc(const std::vector<std::string>& vecArgs)
 
 	const ResoResults& res = g_tas.GetResoResults();
 
-	g_tas.GetResoParams().bCalcR0 = 1;
+	g_tas.GetResoParams().flags |= CALC_R0;
 	//g_tas.GetTofResoParams().bCalcR0 = 1;
 
 	if(!g_tas.SetHKLE(dH, dK, dL, dE))

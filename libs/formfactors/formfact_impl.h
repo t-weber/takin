@@ -29,7 +29,7 @@ FormfactList<T>::FormfactList()
 	tl::log_debug("Loading atomic form factors.");
 
 	tl::Prop<std::string> xml;
-	if(!xml.Load(find_resource("res/ffacts.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(find_resource("res/data/ffacts.xml").c_str(), tl::PropType::XML))
 		return;
 
 	unsigned int iNumDat = xml.Query<unsigned int>("ffacts/num_atoms", 0);
@@ -126,7 +126,7 @@ MagFormfactList<T>::MagFormfactList()
 	tl::log_debug("Loading magnetic form factors.");
 
 	tl::Prop<std::string, true> xml;
-	if(!xml.Load(find_resource("res/magffacts.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(find_resource("res/data/magffacts.xml").c_str(), tl::PropType::XML))
 		return;
 
 	unsigned int iNumDat = xml.Query<unsigned int>("magffacts/num_atoms", 0);
@@ -221,7 +221,7 @@ ScatlenList<T>::ScatlenList()
 	tl::log_debug("Loading neutron scattering lengths.");
 
 	tl::Prop<std::string> xml;
-	if(!xml.Load(find_resource("res/scatlens.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(find_resource("res/data/scatlens.xml").c_str(), tl::PropType::XML))
 		return;
 
 	const unsigned int iNumDat = xml.Query<unsigned int>("scatlens/num_atoms", 0);

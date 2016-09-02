@@ -35,6 +35,7 @@ template<class t_real = t_real_reso>
 struct Ellipse2d
 {
 	tl::QuadEllipsoid<t_real> quad;
+	ublas::matrix<t_real> rot;
 
 	t_real phi, slope;
 	t_real x_hwhm, y_hwhm;
@@ -98,14 +99,11 @@ enum class EllipseCoordSys : int
 template<class T = t_real_reso>
 ublas::matrix<T> ellipsoid_gauss_int(const ublas::matrix<T>& mat, std::size_t iIdx)
 {
-	ublas::vector<T> b(mat.size1());
-	for(std::size_t i=0; i<mat.size1(); ++i)
-		b[i] = mat(i,iIdx);
+	ublas::vector<T> b = tl::get_column(mat, iIdx);
 	b = tl::remove_elem(b, iIdx);
-	ublas::matrix<T> bb = ublas::outer_prod(b,b);
 
 	ublas::matrix<T> m = tl::remove_elems(mat, iIdx);
-	m -= bb / mat(iIdx, iIdx);
+	m -= ublas::outer_prod(b,b) / mat(iIdx, iIdx);
 
 	return m;
 }
@@ -118,9 +116,7 @@ template<class T = t_real_reso>
 ublas::vector<T> ellipsoid_gauss_int(const ublas::vector<T>& vec,
 	const ublas::matrix<T>& mat, std::size_t iIdx)
 {
-	ublas::vector<T> b(mat.size1());
-	for(std::size_t i=0; i<mat.size1(); ++i)
-		b[i] = mat(i,iIdx);
+	ublas::vector<T> b = tl::get_column(mat, iIdx);
 	b = tl::remove_elem(b, iIdx);
 
 	ublas::vector<T> vecInt = tl::remove_elem(vec, iIdx);
@@ -173,12 +169,14 @@ std::ostream& operator<<(std::ostream& ostr, const Ellipsoid4d<t_real>& ell)
 template<class t_real>
 ublas::vector<t_real> Ellipse2d<t_real>::operator()(t_real t) const
 {
-	ublas::vector<t_real> vec(2);
+	ublas::vector<t_real> vec = tl::make_vec<ublas::vector<t_real>>
+		({ x_hwhm * std::cos(2.*tl::get_pi<t_real>()*t),
+			y_hwhm * std::sin(2.*tl::get_pi<t_real>()*t) });
 
-	vec[0] = x_hwhm*std::cos(2.*tl::get_pi<t_real>()*t)*std::cos(phi)
-		- y_hwhm*std::sin(2.*tl::get_pi<t_real>()*t)*std::sin(phi) + x_offs;
-	vec[1] = x_hwhm*std::cos(2.*tl::get_pi<t_real>()*t)*std::sin(phi)
-		+ y_hwhm*std::sin(2.*tl::get_pi<t_real>()*t)*std::cos(phi) + y_offs;
+	vec = ublas::prod(rot, vec);
+
+	vec[0] += x_offs;
+	vec[1] += y_offs;
 
 	return vec;
 }
@@ -308,46 +306,16 @@ Ellipse2d<t_real> calc_res_ellipse(
 	}
 
 	std::vector<t_real> evals;
-	ublas::matrix<t_real> matRot;
 
 	tl::QuadEllipsoid<t_real> quad(2);
-	ell.quad.GetPrincipalAxes(matRot, evals, &quad);
+	ell.quad.GetPrincipalAxes(ell.rot, evals, &quad);
 	//tl::log_debug("old: ", ell.quad.GetR(), ", new: ", quad.GetR());
 
-	/*std::cout << "matrix: " << ell.quad.GetQ() << std::endl;
-	for(t_real dEval : evals)
-		std::cout << "evals: " << dEval << ", ";
-	std::cout << "\nevecs: " << matRot << std::endl;
-	std::cout << std::endl;*/
-
-	ell.phi = tl::rotation_angle(matRot)[0];
+	ell.phi = tl::rotation_angle(ell.rot)[0];
 
 	// test: set rotation directly
 	//ublas::matrix<t_real> matEvecs = tl::rotation_matrix_2d(ell.phi);
 	//quad.SetR(ublas::prod(matEvecs, ell.quad.GetR()));
-
-
-	// if rotation angle >= 90° -> choose other axis as first axis
-	/*if(std::fabs(ell.phi) >= M_PI/2.)
-	{
-		std::swap(evecs[0], evecs[1]);
-		std::swap(evals[0], evals[1]);
-		evecs[0] = -evecs[0];
-
-		if(ell.phi < 0.)
-			evecs[0] = -evecs[0];
-
-		evecs_rot = column_matrix(evecs);
-		ell.phi = rotation_angle(evecs_rot)[0];
-	}*/
-
-	/*if(std::fabs(ell.phi) > std::fabs(M_PI-std::fabs(ell.phi)))
-	{
-		evecs[0] = -evecs[0];
-		evecs_rot = column_matrix(evecs);
-		ell.phi = rotation_angle(evecs_rot)[0];
-	}*/
-
 
 	ell.x_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(0);
 	ell.y_hwhm = tl::get_SIGMA2HWHM<t_real>() * quad.GetRadius(1);
@@ -356,7 +324,7 @@ Ellipse2d<t_real> calc_res_ellipse(
 	ell.y_offs = Q_offs[iY];
 
 	// linear part of quadric
-	const ublas::vector<t_real> vecTrans = ublas::prod(matRot, quad.GetPrincipalOffset());
+	const ublas::vector<t_real> vecTrans = ublas::prod(ell.rot, quad.GetPrincipalOffset());
 
 	if(vecTrans.size() == 2)
 	{
@@ -411,7 +379,6 @@ Ellipsoid3d<t_real> calc_res_ellipsoid(
 	ell.x_lab = g_strLabels[iX];
 	ell.y_lab = g_strLabels[iY];
 	ell.z_lab = g_strLabels[iZ];
-
 
 	ublas::vector<t_real> Q_offs = Q_avg;
 

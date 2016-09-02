@@ -22,46 +22,43 @@
 #include <memory>
 
 using namespace ublas;
+using t_real = t_real_reso;
 
 
 /*
  * this function tries to be a 1:1 C++ reimplementation of the Perl function
  * 'read_mcstas_res' of the McStas 'mcresplot' program
  */
-Resolution calc_res(const std::vector<vector<t_real_reso>>& Q_vec,
-	const vector<t_real_reso>& Q_avg, const std::vector<t_real_reso>* pp_vec)
+Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
+	const vector<t_real>& Q_avg, const std::vector<t_real>* pp_vec)
 {
-	vector<t_real_reso> Q_dir = tl::make_vec({Q_avg[0], Q_avg[1], Q_avg[2]});
+	vector<t_real> Q_dir = tl::make_vec({Q_avg[0], Q_avg[1], Q_avg[2]});
 	Q_dir = Q_dir / norm_2(Q_dir);
-	vector<t_real_reso> Q_perp = tl::make_vec({-Q_dir[1], Q_dir[0], Q_dir[2]});
-	vector<t_real_reso> vecUp = tl::cross_3(Q_dir, Q_perp);
+	vector<t_real> Q_perp = tl::make_vec({-Q_dir[1], Q_dir[0], Q_dir[2]});
+	vector<t_real> vecUp = tl::cross_3(Q_dir, Q_perp);
 
 	/*
 	 * transformation from the <Q_x, Q_y, Q_z, E> system
 	 * into the <Q_avg, Q_perp, Q_z, E> system,
 	 * i.e. rotate by the (ki,Q) angle
 	 */
-	matrix<t_real_reso> trafo = identity_matrix<t_real_reso>(4);
+	matrix<t_real> trafo = identity_matrix<t_real>(4);
 	tl::set_column(trafo, 0, Q_dir);
 	tl::set_column(trafo, 1, Q_perp);
 	tl::set_column(trafo, 2, vecUp);
 	tl::log_info("Transformation: ", trafo);
-	
+
 
 	Resolution reso;
+	reso.Q_avg_notrafo = Q_avg;
 	reso.Q_avg = prod(trans(trafo), Q_avg);
 	tl::log_info("Transformed average Q vector: ", reso.Q_avg);
 
 	reso.res.resize(4,4,0);
 	reso.cov.resize(4,4,0);
 
-	/*std::vector<vector<t_real_reso>> Q_vec_T = Q_vec;
-	for(vector<t_real_reso>& vec : Q_vec_T)
-		vec = prod(trafo_inv, vec);
-	reso.cov = tl::covariance(Q_vec_T, pp_vec);*/
-
 	reso.cov = tl::covariance(Q_vec, pp_vec);
-	reso.cov = tl::transform<matrix<t_real_reso>>(reso.cov, trafo, true);
+	reso.cov = tl::transform<matrix<t_real>>(reso.cov, trafo, true);
 
 	tl::log_info("Covariance matrix: ", reso.cov);
 	if(!(reso.bHasRes = tl::inverse(reso.cov, reso.res)))
@@ -71,19 +68,21 @@ Resolution calc_res(const std::vector<vector<t_real_reso>>& Q_vec,
 	{
 		reso.dQ.resize(4, 0);
 		for(int iQ=0; iQ<4; ++iQ)
-			reso.dQ[iQ] = tl::get_SIGMA2HWHM<t_real_reso>()/sqrt(reso.res(iQ,iQ));
+			reso.dQ[iQ] = tl::get_SIGMA2HWHM<t_real>()/sqrt(reso.res(iQ,iQ));
 
 		tl::log_info("Resolution matrix: ", reso.res);
 
 		std::ostringstream ostrVals;
 		ostrVals << "Gaussian HWHM values: ";
 		std::copy(reso.dQ.begin(), reso.dQ.end(),
-			std::ostream_iterator<t_real_reso>(ostrVals, ", "));
+			std::ostream_iterator<t_real>(ostrVals, ", "));
 
 		std::ostringstream ostrElli;
 		ostrElli << "Ellipsoid offsets: ";
 		std::copy(reso.Q_avg.begin(), reso.Q_avg.end(),
-			std::ostream_iterator<t_real_reso>(ostrElli, ", "));
+			std::ostream_iterator<t_real>(ostrElli, ", "));
+
+		reso.vecQ = std::move(Q_vec);
 
 		tl::log_info(ostrVals.str());
 		tl::log_info(ostrElli.str());
@@ -92,87 +91,57 @@ Resolution calc_res(const std::vector<vector<t_real_reso>>& Q_vec,
 	return reso;
 }
 
-
-Resolution calc_res(std::size_t uiLen,
-	const t_real_reso *_Q_x, const t_real_reso *_Q_y, const t_real_reso *_Q_z,
-	const t_real_reso *_E)
+Resolution calc_res(std::vector<vector<t_real>>&& vecQ)
 {
-	vector<t_real_reso> Q_avg(4);
-	Q_avg[0] = Q_avg[1] = Q_avg[2] = Q_avg[3] = 0.;
+	vector<t_real> Q_avg = tl::make_vec<vector<t_real>>({0., 0., 0., 0.});
 
-	std::vector<vector<t_real_reso>> Q_vec;
-	Q_vec.reserve(uiLen);
+	for(const vector<t_real>& vec : vecQ)
+		Q_avg += vec;
 
-	for(std::size_t uiRow=0; uiRow<uiLen; ++uiRow)
-	{
-		vector<t_real_reso> Q(4);
-
-		Q[0] = _Q_x[uiRow];
-		Q[1] = _Q_y[uiRow];
-		Q[2] = _Q_z[uiRow];
-		Q[3] = _E[uiRow];
-
-		Q_avg += Q;
-		Q_vec.push_back(std::move(Q));
-	}
-
-	Q_avg /= t_real_reso(uiLen);
+	Q_avg /= t_real(vecQ.size());
 	tl::log_info("Average Q vector: ", Q_avg);
 
-	return calc_res(Q_vec, Q_avg);
+	return calc_res(std::forward<std::vector<vector<t_real>>&&>(vecQ), Q_avg);
 }
-
 
 /*
  * this function tries to be a 1:1 C++ reimplementation of the Perl function
  * 'read_mcstas_res' of the McStas 'mcresplot' program
  */
-Resolution calc_res(std::size_t uiLen,
-	const t_real_reso *_ki_x, const t_real_reso *_ki_y, const t_real_reso *_ki_z,
-	const t_real_reso *_kf_x, const t_real_reso *_kf_y, const t_real_reso *_kf_z,
-	const t_real_reso *_p_i, const t_real_reso *_p_f)
+Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& vecKi,
+	const std::vector<ublas::vector<t_real_reso>>& vecKf,
+	const std::vector<t_real_reso>* _p_i,
+	const std::vector<t_real_reso>* _p_f)
 {
 	tl::log_info("Calculating resolution...");
 
-	std::vector<vector<t_real_reso>> Q_vec;
-	std::vector<t_real_reso> p_vec;
+	std::size_t uiLen = vecKi.size();
+	std::vector<vector<t_real>> Q_vec;
+	std::vector<t_real> p_vec;
 	Q_vec.reserve(uiLen);
 	p_vec.reserve(uiLen);
 
-	std::unique_ptr<t_real_reso[]> ptr_dE_vec(new t_real_reso[uiLen]);
+	const t_real pi_max = _p_i ? *std::max_element(_p_i->begin(), _p_i->end()) : 1.;
+	const t_real pf_max = _p_f ? *std::max_element(_p_f->begin(), _p_f->end()) : 1.;
+	const t_real p_max = fabs(pi_max*pf_max);
 
-	t_real_reso *dE_vec = ptr_dE_vec.get();
-
-
-	const t_real_reso pi_max = _p_i ? *std::max_element(_p_i, _p_i+uiLen) : 1.;
-	const t_real_reso pf_max = _p_f ? *std::max_element(_p_f, _p_f+uiLen) : 1.;
-	const t_real_reso p_max = fabs(pi_max*pf_max);
-
-
-	vector<t_real_reso> Q_avg(4);
+	vector<t_real> Q_avg(4);
 	Q_avg[0] = Q_avg[1] = Q_avg[2] = Q_avg[3] = 0.;
 
-	t_real_reso p_sum = 0.;
-
+	t_real p_sum = 0.;
 	for(std::size_t uiRow=0; uiRow<uiLen; ++uiRow)
 	{
-		vector<t_real_reso> Q(3);
-		t_real_reso p;
+		const vector<t_real>& ki = vecKi[uiRow];
+		const vector<t_real>& kf = vecKf[uiRow];
 
-		p = (_p_i && _p_f) ? fabs(_p_i[uiRow]*_p_f[uiRow]) : 1.;
+		t_real p = (_p_i && _p_f) ? fabs((*_p_i)[uiRow] * (*_p_f)[uiRow]) : 1.;
 		p /= p_max;		// normalize p to 0..1
 		p_sum += p;
 
-		t_real_reso &dE = dE_vec[uiRow];
-
-		vector<t_real_reso> ki(3), kf(3);
-		ki[0]=_ki_x[uiRow]; ki[1]=_ki_y[uiRow]; ki[2]=_ki_z[uiRow];
-		kf[0]=_kf_x[uiRow]; kf[1]=_kf_y[uiRow]; kf[2]=_kf_z[uiRow];
-
-		Q = ki - kf;
-		t_real_reso Ei = tl::get_KSQ2E<t_real_reso>() * inner_prod(ki, ki);
-		t_real_reso Ef = tl::get_KSQ2E<t_real_reso>() * inner_prod(kf, kf);
-		dE = Ei - Ef;
+		vector<t_real> Q = ki - kf;
+		t_real Ei = tl::get_KSQ2E<t_real>() * inner_prod(ki, ki);
+		t_real Ef = tl::get_KSQ2E<t_real>() * inner_prod(kf, kf);
+		t_real dE = Ei - Ef;
 
 		// insert the energy into the Q vector
 		Q.resize(4, true);
@@ -186,6 +155,5 @@ Resolution calc_res(std::size_t uiLen,
 	Q_avg /= p_sum;
 	tl::log_info("Average Q vector: ", Q_avg);
 
-
-	return calc_res(Q_vec, Q_avg, &p_vec);
+	return calc_res(std::move(Q_vec), Q_avg, &p_vec);
 }

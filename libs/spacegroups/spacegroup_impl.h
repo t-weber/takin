@@ -20,7 +20,7 @@ SpaceGroups<t_real>::SpaceGroups()
 	//using t_vec = typename SpaceGroup<t_real>::t_vec;
 
 	tl::Prop<std::string> xml;
-	if(!xml.Load(find_resource("res/sgroups.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(find_resource("res/data/sgroups.xml").c_str(), tl::PropType::XML))
 		return;
 
 	unsigned int iNumSGs = xml.Query<unsigned int>("sgroups/num_groups", 0);

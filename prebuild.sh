@@ -81,6 +81,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/dialogs/NeutronDlg.h"
 	"${TAKINROOT}/dialogs/SrvDlg.h"
 	"${TAKINROOT}/dialogs/GotoDlg.h"
+	"${TAKINROOT}/dialogs/FavDlg.h"
 	"${TAKINROOT}/dialogs/AtomsDlg.h"
 	"${TAKINROOT}/dialogs/NetCacheDlg.h"
 	"${TAKINROOT}/dialogs/ScanMonDlg.h"
@@ -111,8 +112,8 @@ echo -e "-----------------------------------------------------------------------
 echo -e "building docs..."
 
 qcollectiongenerator ${TAKINROOT}/doc/takin.qhcp -o ${TAKINROOT}/doc/takin.qhc
-cp -v ${TAKINROOT}/doc/takin.qhc ${TAKINROOT}/res/
-cp -v ${TAKINROOT}/doc/takin.qch ${TAKINROOT}/res/
+cp -v ${TAKINROOT}/doc/takin.qhc ${TAKINROOT}/res/doc/
+cp -v ${TAKINROOT}/doc/takin.qch ${TAKINROOT}/res/doc/
 
 
 echo -e "--------------------------------------------------------------------------------"

@@ -160,10 +160,10 @@ int main(int argc, char** argv)
 		}
 
 		// check tables
-		g_bHasScatlens = (find_resource("res/scatlens.xml") != "");
-		g_bHasFormfacts = (find_resource("res/ffacts.xml") != "");
-		g_bHasMagFormfacts = (find_resource("res/magffacts.xml") != "");
-		g_bHasSpaceGroups = (find_resource("res/sgroups.xml") != "");
+		g_bHasScatlens = (find_resource("res/data/scatlens.xml") != "");
+		g_bHasFormfacts = (find_resource("res/data/ffacts.xml") != "");
+		g_bHasMagFormfacts = (find_resource("res/data/magffacts.xml") != "");
+		g_bHasSpaceGroups = (find_resource("res/data/sgroups.xml") != "");
 
 		if(!g_bHasScatlens)
 		{
@@ -184,10 +184,10 @@ int main(int argc, char** argv)
 		if(!g_bHasMagFormfacts)
 		{
 			const char* pcErr = "Magnetic form factor coefficient table could not be found." TAKIN_CHECK;
-			tl::log_err(pcErr);
+			tl::log_warn(pcErr);
 
-			QMessageBox::critical(0, "Takin - Error", pcErr);
-			return -1;
+			QMessageBox::warning(0, "Takin - Warning", pcErr);
+			//return -1;
 		}
 
 		if(!g_bHasSpaceGroups)
@@ -203,7 +203,8 @@ int main(int argc, char** argv)
 
 
 		// check if icons are available
-		if(find_resource("res/document-new.svg") == "")
+		if(find_resource("res/icons/document-new.svg") == "" ||
+			find_resource("res/icons/takin.svg") == "")
 		{
 			const char* pcErr = "Takin resources could not be found!" TAKIN_CHECK;
 			tl::log_err(pcErr);

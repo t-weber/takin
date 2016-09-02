@@ -7,8 +7,10 @@
 
 #include "taz.h"
 #include "tlibs/string/string.h"
-#include "dialogs/FilePreviewDlg.h"
 #include "tlibs/file/recent.h"
+#include "tlibs/time/chrono.h"
+#include "libs/version.h"
+#include "dialogs/FilePreviewDlg.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -433,6 +435,10 @@ bool TazDlg::Save()
 		mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/z"] =
 			tl::var_to_str(atom.vecPos[2]);
 	}
+
+	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real_glob>(tl::epoch<t_real_glob>());
+	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
+	mapConf[strXmlRoot + "meta/comment"] = "Created with Takin.";
 
 
 	if(m_pReso) m_pReso->Save(mapConf, strXmlRoot);

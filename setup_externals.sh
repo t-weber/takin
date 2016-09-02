@@ -74,13 +74,13 @@ function dl_tangoicons
 	${GTAR} --wildcards -xzvf tango-icon-theme.tar.gz */scalable/apps/help-browser.svg --strip-components=3
 
 	cd ..
-	mv -v tmp/*.svg res/
+	mv -v tmp/*.svg res/icons/
 }
 
 function dl_scatlens
 {
 	if [ ! -f tmp/scatlens.html ]; then
-		echo -e "Downloading scattering length list...\n"
+		echo -e "Obtaining scattering length list...\n"
 
 #		if ! wget ${SCATLENS} -O tmp/${SCATLENS##*/}; then
 #			echo -e "Error: Cannot download scattering length list.";

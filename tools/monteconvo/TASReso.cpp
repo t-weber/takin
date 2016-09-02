@@ -1,4 +1,4 @@
-/*
+/**
  * loads reso settings
  * @author tweber
  * @date jul-2015
@@ -122,6 +122,19 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 
 	m_reso.dmono_refl = xml.Query<t_real>((strXmlRoot + "reso/mono_refl").c_str(), 0.);
 	m_reso.dana_effic = xml.Query<t_real>((strXmlRoot + "reso/ana_effic").c_str(), 0.);
+
+	if(xml.Query<int>((strXmlRoot + "reso/use_ki3").c_str(), 1))
+		m_reso.flags |= CALC_KI3;
+	else
+		m_reso.flags &= ~CALC_KI3;
+	if(xml.Query<int>((strXmlRoot + "reso/use_kf3").c_str(), 1))
+		m_reso.flags |= CALC_KF3;
+	else
+		m_reso.flags &= ~CALC_KF3;
+	if(xml.Query<int>((strXmlRoot + "reso/use_R0").c_str(), 1))
+		m_reso.flags |= CALC_R0;
+	else
+		m_reso.flags &= ~CALC_R0;
 
 	m_reso.dmono_sense = (xml.Query<int>((strXmlRoot+"reso/mono_scatter_sense").c_str(), 0) ? +1. : -1.);
 	m_reso.dana_sense = (xml.Query<int>((strXmlRoot+"reso/ana_scatter_sense").c_str(), 0) ? +1. : -1.);
@@ -426,25 +439,25 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		if(m_algo == ResoAlgo::CN)
 		{
 			//tl::log_info("Algorithm: Cooper-Nathans (TAS)");
-			m_reso.bCalcR0 = false;
+			m_reso.flags &= ~CALC_R0;
 			resores_cur = calc_cn(m_reso);
 		}
 		else if(m_algo == ResoAlgo::POP)
 		{
 			//tl::log_info("Algorithm: Popovici (TAS)");
-			//m_reso.bCalcR0 = true;
+			//m_reso.flags |= CALC_R0;
 			resores_cur = calc_pop(m_reso);
 		}
 		else if(m_algo == ResoAlgo::ECK)
 		{
 			//tl::log_info("Algorithm: Eckold-Sobolev (TAS)");
-			m_reso.bCalcR0 = true;
+			m_reso.flags |= CALC_R0;
 			resores_cur = calc_eck(m_reso);
 		}
 		else if(m_algo == ResoAlgo::VIOL)
 		{
 			//tl::log_info("Algorithm: Violini (TOF)");
-			m_reso.bCalcR0 = false;
+			m_reso.flags &= ~CALC_R0;
 			resores_cur = calc_viol(m_tofreso);
 		}
 		else

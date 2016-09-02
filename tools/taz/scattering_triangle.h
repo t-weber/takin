@@ -57,6 +57,7 @@ enum EwaldSphere : int
 	EWALD_KF
 };
 
+
 class ScatteringTriangle;
 class ScatteringTriangleNode : public QGraphicsItem
 {
@@ -101,6 +102,9 @@ class RecipPeak : public QGraphicsItem
 class ScatteringTriangleScene;
 class ScatteringTriangle : public QGraphicsItem
 {
+	public:
+		using t_powderline = typename tl::Powder<int,t_real_glob>::t_peak;
+	
 	protected:
 		bool m_bReady = 0;
 
@@ -120,7 +124,8 @@ class ScatteringTriangle : public QGraphicsItem
 		ublas::matrix<t_real_glob> m_matPlane, m_matPlane_inv;
 		std::vector<RecipPeak*> m_vecPeaks;
 
-		tl::Powder<int, t_real_glob> m_powder;
+		std::vector<t_powderline> m_vecPowderLines;
+		std::vector<t_real_glob> m_vecPowderLineWidths;
 		tl::Kd<t_real_glob> m_kdLattice;
 
 		bool m_bShowBZ = 1;
@@ -182,7 +187,7 @@ class ScatteringTriangle : public QGraphicsItem
 		void SetBZVisible(bool bVisible);
 		void SetEwaldSphereVisible(EwaldSphere iEw);
 
-		const tl::Powder<int,t_real_glob>& GetPowder() const { return m_powder; }
+		const std::vector<t_powderline>& GetPowder() const { return m_vecPowderLines; }
 		const tl::Kd<t_real_glob>& GetKdLattice() const { return m_kdLattice; }
 
 	public:

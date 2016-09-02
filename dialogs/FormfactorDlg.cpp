@@ -27,65 +27,91 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 			setFont(font);
 	}
 
-	SetupAtoms();
-	SetupMagAtoms();
-
 	// form factors
-	m_plotwrap.reset(new QwtPlotWrapper(plotF));
-	m_plotwrap->GetCurve(0)->setTitle("Atomic Form Factor");
-	m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Wavenumber Q (1/A)");
-	m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Atomic Form Factor f (e-)");
-	if(m_plotwrap->HasTrackerSignal())
-		connect(m_plotwrap->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+	if(g_bHasFormfacts)
+	{
+		SetupAtoms();
+
+		m_plotwrap.reset(new QwtPlotWrapper(plotF));
+		m_plotwrap->GetCurve(0)->setTitle("Atomic Form Factor");
+		m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Wavenumber Q (1/A)");
+		m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Atomic Form Factor f (e-)");
+		if(m_plotwrap->HasTrackerSignal())
+			connect(m_plotwrap->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+
+		// connections
+		QObject::connect(listAtoms, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+			this, SLOT(AtomSelected(QListWidgetItem*, QListWidgetItem*)));
+		QObject::connect(editFilter, SIGNAL(textEdited(const QString&)),
+			this, SLOT(SearchAtom(const QString&)));
+
+		SearchAtom("H");
+	}
+	else
+	{
+		tabFF->setEnabled(0);
+	}
 
 	// mag. form factors
-	m_plotwrap_m.reset(new QwtPlotWrapper(plotMF));
-	m_plotwrap_m->GetCurve(0)->setTitle("Magnetic Form Factor");
-	m_plotwrap_m->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Wavenumber Q (1/A)");
-	m_plotwrap_m->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Magnetic Form Factor");
-	if(m_plotwrap_m->HasTrackerSignal())
-		connect(m_plotwrap_m->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+	if(g_bHasMagFormfacts)
+	{
+		SetupMagAtoms();
+
+		m_plotwrap_m.reset(new QwtPlotWrapper(plotMF));
+		m_plotwrap_m->GetCurve(0)->setTitle("Magnetic Form Factor");
+		m_plotwrap_m->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Wavenumber Q (1/A)");
+		m_plotwrap_m->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Magnetic Form Factor");
+		if(m_plotwrap_m->HasTrackerSignal())
+			connect(m_plotwrap_m->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+
+		// connections
+		QObject::connect(listMAtoms, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+			this, SLOT(MagAtomSelected(QListWidgetItem*, QListWidgetItem*)));
+		QObject::connect(editMFilter, SIGNAL(textEdited(const QString&)),
+			this, SLOT(SearchMagAtom(const QString&)));
+		QObject::connect(spinL, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
+		QObject::connect(spinS, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
+		QObject::connect(spinJ, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
+
+		QObject::connect(editOrbital, SIGNAL(textEdited(const QString&)),
+			this, SLOT(CalcTermSymbol(const QString&)));
+	}
+	else
+	{
+		tabMFF->setEnabled(0);
+	}
+
 
 	// scattering lengths
-	m_plotwrapSc.reset(new QwtPlotWrapper(plotSc));
-	m_plotwrapSc->GetCurve(0)->setTitle("Scattering Lengths");
-	m_plotwrapSc->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Element");
-	m_plotwrapSc->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Scattering Length b (fm)");
-	if(m_plotwrapSc->HasTrackerSignal())
-		connect(m_plotwrapSc->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+	if(g_bHasScatlens)
+	{
+		SetupScatteringLengths();
 
+		m_plotwrapSc.reset(new QwtPlotWrapper(plotSc));
+		m_plotwrapSc->GetCurve(0)->setTitle("Scattering Lengths");
+		m_plotwrapSc->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Element");
+		m_plotwrapSc->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Scattering Length b (fm)");
+		if(m_plotwrapSc->HasTrackerSignal())
+			connect(m_plotwrapSc->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
 
-	// connections
-	QObject::connect(listAtoms, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-		this, SLOT(AtomSelected(QListWidgetItem*, QListWidgetItem*)));
-	QObject::connect(editFilter, SIGNAL(textEdited(const QString&)),
-		this, SLOT(SearchAtom(const QString&)));
+		// connections
+		QObject::connect(radioCoherent, SIGNAL(toggled(bool)),
+			this, SLOT(PlotScatteringLengths()));
+		QObject::connect(editSLSearch, SIGNAL(textEdited(const QString&)),
+			this, SLOT(SearchSLAtom(const QString&)));
 
-	QObject::connect(listMAtoms, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-		this, SLOT(MagAtomSelected(QListWidgetItem*, QListWidgetItem*)));
-	QObject::connect(editMFilter, SIGNAL(textEdited(const QString&)),
-		this, SLOT(SearchMagAtom(const QString&)));
-	QObject::connect(spinL, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
-	QObject::connect(spinS, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
-	QObject::connect(spinJ, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
-
-	QObject::connect(editOrbital, SIGNAL(textEdited(const QString&)),
-		this, SLOT(CalcTermSymbol(const QString&)));
-
-	QObject::connect(radioCoherent, SIGNAL(toggled(bool)),
-		this, SLOT(PlotScatteringLengths()));
-	QObject::connect(editSLSearch, SIGNAL(textEdited(const QString&)),
-		this, SLOT(SearchSLAtom(const QString&)));
+		PlotScatteringLengths();
+	}
+	else
+	{
+		tabSc->setEnabled(0);
+	}
 
 
 	if(m_pSettings && m_pSettings->contains("formfactors/geo"))
 		restoreGeometry(m_pSettings->value("formfactors/geo").toByteArray());
 
-
-	SearchAtom("H");
 	//radioCoherent->setChecked(1);
-	SetupScatteringLengths();
-	PlotScatteringLengths();
 }
 
 FormfactorDlg::~FormfactorDlg()

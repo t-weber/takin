@@ -39,8 +39,8 @@ AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableJ)
 		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::J), new QTableWidgetItem("J (meV/K)"));	}
 
 	tableAtoms->setColumnWidth(0, 75);
-	btnAdd->setIcon(load_icon("res/list-add.svg"));
-	btnDel->setIcon(load_icon("res/list-remove.svg"));
+	btnAdd->setIcon(load_icon("res/icons/list-add.svg"));
+	btnDel->setIcon(load_icon("res/icons/list-remove.svg"));
 
 #if QT_VER >= 5
 	QObject::connect(btnAdd, &QAbstractButton::clicked, this, &AtomsDlg::AddAtom);

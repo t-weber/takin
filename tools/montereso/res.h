@@ -22,28 +22,29 @@ struct Resolution
 	ublas::matrix<t_real_reso> cov;
 
 	// resolution matrix
-	bool bHasRes;
+	bool bHasRes = 0;
 	ublas::matrix<t_real_reso> res;
 
 	// half-widths
 	ublas::vector<t_real_reso> dQ;	// in 1/A and meV
 
 	// ellipse origin
-	ublas::vector<t_real_reso> Q_avg;
+	ublas::vector<t_real_reso> Q_avg, Q_avg_notrafo;
+
+	// all MC events
+	std::vector<ublas::vector<t_real_reso>> vecQ;
 };
 
 
-Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& Q_vec,
+Resolution calc_res(std::vector<ublas::vector<t_real_reso>>&& Q_vec,
 	const ublas::vector<t_real_reso>& Q_avg,
 	const std::vector<t_real_reso>* pp_vec = 0);
 
-Resolution calc_res(std::size_t uiLen,
-	const t_real_reso *_Q_x, const t_real_reso *_Q_y, const t_real_reso *_Q_z,
-	const t_real_reso *_E);
+Resolution calc_res(std::vector<ublas::vector<t_real_reso>>&&);
 
-Resolution calc_res(std::size_t uiLen,
-	const t_real_reso *ki_x, const t_real_reso *ki_y, const t_real_reso *ki_z,
-	const t_real_reso *kf_x, const t_real_reso *kf_y, const t_real_reso *kf_z,
-	const t_real_reso *p_i=0, const t_real_reso *p_f=0);
+Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& vecKi,
+	const std::vector<ublas::vector<t_real_reso>>& vecKf,
+	const std::vector<t_real_reso>* p_i = nullptr,
+	const std::vector<t_real_reso>* p_f = nullptr);
 
 #endif

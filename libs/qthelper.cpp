@@ -13,12 +13,12 @@
 
 #include <algorithm>
 #include <fstream>
-//#include <iostream>
 #include <iomanip>
 #include <memory>
 
 #include <qwt_picker_machine.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_curve_fitter.h>
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -93,7 +93,7 @@ public:
 
 
 QwtPlotWrapper::QwtPlotWrapper(QwtPlot *pPlot,
-	unsigned int iNumCurves, bool bNoTrackerSignal)
+	unsigned int iNumCurves, bool bNoTrackerSignal, bool bUseSpline)
 	: m_pPlot(pPlot)
 {
 	QPen penGrid;
@@ -106,6 +106,7 @@ QwtPlotWrapper::QwtPlotWrapper(QwtPlot *pPlot,
 
 	QColor colorBck(240, 240, 240, 255);
 	m_pPlot->setCanvasBackground(colorBck);
+	//((QwtPlotCanvas*)m_pPlot->canvas())->setPaintAttribute(QwtPlotCanvas::HackStyledBackground, true);
 
 	m_vecCurves.reserve(iNumCurves);
 	for(unsigned int iCurve=0; iCurve<iNumCurves; ++iCurve)
@@ -113,6 +114,15 @@ QwtPlotWrapper::QwtPlotWrapper(QwtPlot *pPlot,
 		QwtPlotCurve* pCurve = new QwtPlotCurve();
 		pCurve->setPen(penCurve);
 		pCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+		if(bUseSpline)
+		{
+			pCurve->setCurveFitter(new QwtSplineCurveFitter());
+			((QwtSplineCurveFitter*)pCurve->curveFitter())->setFitMode(
+				QwtSplineCurveFitter::/*Parametric*/Spline);
+			pCurve->setCurveAttribute(QwtPlotCurve::Fitted);
+		}
+
 		pCurve->attach(m_pPlot);
 		m_vecCurves.push_back(pCurve);
 	}
@@ -284,6 +294,7 @@ void QwtPlotWrapper::SavePlot() const
 	}
 }
 
+
 // ----------------------------------------------------------------------------
 
 
@@ -389,5 +400,3 @@ void set_zoomer_base(QwtPlotZoomer *pZoomer,
 		pZoomer->setZoomBase(rect);
 	}
 }
-
-// ----------------------------------------------------------------------------

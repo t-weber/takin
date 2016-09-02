@@ -38,7 +38,8 @@ protected:
 	std::vector<std::pair<const std::vector<t_real_qwt>*, const std::vector<t_real_qwt>*>> m_vecDataPtrs;
 
 public:
-	QwtPlotWrapper(QwtPlot *pPlot, unsigned int iNumCurves=1, bool bNoTrackerSignal=0);
+	QwtPlotWrapper(QwtPlot *pPlot, unsigned int iNumCurves=1,
+		bool bNoTrackerSignal=0, bool bUseSpline=0);
 	virtual ~QwtPlotWrapper();
 
 	QwtPlot* GetPlot() { return m_pPlot; }
@@ -91,6 +92,7 @@ struct set_qwt_data<t_real, 0>
 		plot.SetData(vecNewX, vecNewY, iCurve, bReplot, 1);
 	}
 };
+
 
 // ----------------------------------------------------------------------------
 

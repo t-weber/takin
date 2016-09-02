@@ -50,6 +50,10 @@ const char* get_crystal_system_name(CrystalSystem ty)
 
 #ifndef NO_QT
 
+/**
+ * allowed lattice definitions for crystal systems
+ * see e.g.: https://en.wikipedia.org/wiki/Bravais_lattice
+ */
 void set_crystal_system_edits(CrystalSystem crystalsys,
 	QLineEdit* editA, QLineEdit* editB, QLineEdit* editC,
 	QLineEdit* editAlpha, QLineEdit* editBeta, QLineEdit* editGamma,
@@ -85,49 +89,24 @@ void set_crystal_system_edits(CrystalSystem crystalsys,
 			if(editGammaRecip) editGammaRecip->setText("90");
 			break;
 
-		case CRYS_HEXAGONAL:
-			if(editA) editA->setEnabled(1);
-			if(editB) editB->setEnabled(0);
-			if(editC) editC->setEnabled(1);
-			if(editAlpha) editAlpha->setEnabled(0);
-			if(editBeta) editBeta->setEnabled(0);
-			if(editGamma) editGamma->setEnabled(0);
-
-			if(editARecip) editARecip->setEnabled(1);
-			if(editBRecip) editBRecip->setEnabled(0);
-			if(editCRecip) editCRecip->setEnabled(1);
-			if(editAlphaRecip) editAlphaRecip->setEnabled(0);
-			if(editBetaRecip) editBetaRecip->setEnabled(0);
-			if(editGammaRecip) editGammaRecip->setEnabled(0);
-
-			if(editB) editB->setText(editA->text());
-			if(editBRecip) editBRecip->setText(editARecip->text());
-			if(editAlpha) editAlpha->setText("90");
-			if(editBeta) editBeta->setText("90");
-			if(editGamma) editGamma->setText("120");
-			if(editAlphaRecip) editAlphaRecip->setText("90");
-			if(editBetaRecip) editBetaRecip->setText("90");
-			if(editGammaRecip) editGammaRecip->setText("60");
-			break;
-
 		case CRYS_MONOCLINIC:
 			if(editA) editA->setEnabled(1);
 			if(editB) editB->setEnabled(1);
 			if(editC) editC->setEnabled(1);
-			if(editAlpha) editAlpha->setEnabled(1);
-			if(editBeta) editBeta->setEnabled(0);
+			if(editAlpha) editAlpha->setEnabled(0);
+			if(editBeta) editBeta->setEnabled(1);
 			if(editGamma) editGamma->setEnabled(0);
 
 			if(editARecip) editARecip->setEnabled(1);
 			if(editBRecip) editBRecip->setEnabled(1);
 			if(editCRecip) editCRecip->setEnabled(1);
-			if(editAlphaRecip) editAlphaRecip->setEnabled(1);
-			if(editBetaRecip) editBetaRecip->setEnabled(0);
+			if(editAlphaRecip) editAlphaRecip->setEnabled(0);
+			if(editBetaRecip) editBetaRecip->setEnabled(1);
 			if(editGammaRecip) editGammaRecip->setEnabled(0);
 
-			if(editBeta) editBeta->setText("90");
+			if(editAlpha) editBeta->setText("90");
 			if(editGamma) editGamma->setText("90");
-			if(editBetaRecip) editBetaRecip->setText("90");
+			if(editAlphaRecip) editBetaRecip->setText("90");
 			if(editGammaRecip) editGammaRecip->setText("90");
 			break;
 
@@ -179,29 +158,30 @@ void set_crystal_system_edits(CrystalSystem crystalsys,
 			if(editGammaRecip) editGammaRecip->setText("90");
 			break;
 
+		case CRYS_HEXAGONAL:
 		case CRYS_TRIGONAL:
 			if(editA) editA->setEnabled(1);
 			if(editB) editB->setEnabled(0);
-			if(editC) editC->setEnabled(0);
-			if(editAlpha) editAlpha->setEnabled(1);
+			if(editC) editC->setEnabled(1);
+			if(editAlpha) editAlpha->setEnabled(0);
 			if(editBeta) editBeta->setEnabled(0);
 			if(editGamma) editGamma->setEnabled(0);
 
 			if(editARecip) editARecip->setEnabled(1);
 			if(editBRecip) editBRecip->setEnabled(0);
-			if(editCRecip) editCRecip->setEnabled(0);
-			if(editAlphaRecip) editAlphaRecip->setEnabled(1);
+			if(editCRecip) editCRecip->setEnabled(1);
+			if(editAlphaRecip) editAlphaRecip->setEnabled(0);
 			if(editBetaRecip) editBetaRecip->setEnabled(0);
 			if(editGammaRecip) editGammaRecip->setEnabled(0);
 
 			if(editB) editB->setText(editA->text());
-			if(editC) editC->setText(editA->text());
 			if(editBRecip) editBRecip->setText(editARecip->text());
-			if(editCRecip) editCRecip->setText(editARecip->text());
-			if(editBeta) editBeta->setText(editAlpha->text());
-			if(editGamma) editGamma->setText(editAlpha->text());
-			if(editBetaRecip) editBetaRecip->setText(editAlphaRecip->text());
-			if(editGammaRecip) editGammaRecip->setText(editAlphaRecip->text());
+			if(editAlpha) editAlpha->setText("90");
+			if(editBeta) editBeta->setText("90");
+			if(editGamma) editGamma->setText("120");
+			if(editAlphaRecip) editAlphaRecip->setText("90");
+			if(editBetaRecip) editBetaRecip->setText("90");
+			if(editGammaRecip) editGammaRecip->setText("60");
 			break;
 
 		case CRYS_TRICLINIC:

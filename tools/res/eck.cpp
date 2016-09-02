@@ -260,6 +260,17 @@ ResoResults calc_eck(const EckParams& eck)
 	res.Q_avg[3] = eck.E/meV;
 
 
+	// -------------------------------------------------------------------------
+
+	// - if the instruments works in kf=const mode and the scans are counted for
+	//   or normalised to monitor counts no ki^3 or kf^3 factor is needed.
+	// - if the instrument works in ki=const mode the kf^3 factor is needed.
+	const auto tupScFact = get_scatter_factors(eck.flags, eck.thetam, eck.ki, eck.thetaa, eck.kf);
+
+	t_real dmono_refl = eck.dmono_refl * std::get<0>(tupScFact);
+	t_real dana_effic = eck.dana_effic * std::get<1>(tupScFact);
+
+
 	//--------------------------------------------------------------------------
 	// mono part
 
@@ -275,7 +286,7 @@ ResoResults calc_eck(const EckParams& eck)
 			eck.mono_mosaic, eck.mono_mosaic_v,
 			inv_mono_curvh, inv_mono_curvv,
 			eck.pos_x , eck.pos_y, eck.pos_z,
-			eck.dmono_refl);
+			dmono_refl);
 
 	//--------------------------------------------------------------------------
 
@@ -297,7 +308,7 @@ ResoResults calc_eck(const EckParams& eck)
 			eck.ana_mosaic, eck.ana_mosaic_v,
 			inv_ana_curvh, inv_ana_curvv,
 			eck.pos_x, pos_y2, eck.pos_z,
-			eck.dana_effic);
+			dana_effic);
 
 	//--------------------------------------------------------------------------
 	// get mono & ana results

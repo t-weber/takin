@@ -15,11 +15,13 @@
 #include <memory>
 
 #include "libs/qthelper.h"
+#include "sqwfactory.h"
+#include "tools/res/defs.h"
+#include "tools/convofit/scan.h"
+
 #include "SqwParamDlg.h"
 #include "ui/ui_monteconvo.h"
-#include "sqwfactory.h"
-#include "../res/defs.h"
-#include "../convofit/scan.h"
+#include "dialogs/FavDlg.h"
 
 
 class ConvoDlg : public QDialog, Ui::ConvoDlg
@@ -30,6 +32,7 @@ protected:
 
 	QSettings *m_pSett = nullptr;
 	SqwParamDlg *m_pSqwParamDlg = nullptr;
+	FavDlg *m_pFavDlg = nullptr;
 
 	std::shared_ptr<SqwBase> m_pSqw;
 	std::vector<t_real_reso> m_vecQ, m_vecS, m_vecScaledS;
@@ -61,6 +64,14 @@ protected slots:
 
 	void Start();
 	void Stop();
+
+	void ChangeHK();
+	void ChangeHL();
+	void ChangeKL();
+
+	void ShowFavourites();
+	void UpdateCurFavPos();
+	void ChangePos(const struct FavHklPos& pos);
 
 	void ButtonBoxClicked(QAbstractButton *pBtn);
 

@@ -1,4 +1,4 @@
-/*
+/**
  * Goto Dialog
  * @author Tobias Weber
  * @date 15-oct-2014
