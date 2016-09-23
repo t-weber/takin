@@ -1,4 +1,4 @@
-/*
+/**
  * implementation of the eckold-sobolev algo
  *
  * @author tweber
@@ -13,6 +13,9 @@
 
 #include "pop.h"
 
+/**
+ * TAS parameters in fwhm
+ */
 struct EckParams : public PopParams
 {
 	tl::t_angle_si<t_real_reso> mono_mosaic_v;

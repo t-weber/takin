@@ -99,7 +99,7 @@ enum class EllipseCoordSys : int
 template<class T = t_real_reso>
 ublas::matrix<T> ellipsoid_gauss_int(const ublas::matrix<T>& mat, std::size_t iIdx)
 {
-	ublas::vector<T> b = tl::get_column(mat, iIdx);
+	ublas::vector<T> b = T(0.5)*(tl::get_column(mat, iIdx) + tl::get_row(mat, iIdx));
 	b = tl::remove_elem(b, iIdx);
 
 	ublas::matrix<T> m = tl::remove_elems(mat, iIdx);

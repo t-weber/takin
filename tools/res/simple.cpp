@@ -128,6 +128,7 @@ ResoResults calc_simplereso(const SimpleResoParams& params)
 	matKiQ(3,2) = matKiQ(0,2) = matKiQ(0,3) = matKiQ(1,2) = matKiQ(1,3) = 0.;
 
 	res.reso = tl::transform(res.reso, matKiQ, true);
+	// uncomment to have parameter deviations in FWHM
 	//res.reso *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);

@@ -35,6 +35,7 @@ namespace fs = boost::filesystem;
 
 using t_real = t_real_glob;
 const std::string TazDlg::s_strTitle = "Takin";
+const t_real_glob TazDlg::s_dPlaneDistTolerance = std::cbrt(tl::get_epsilon<t_real_glob>());
 
 
 TazDlg::TazDlg(QWidget* pParent)
@@ -1339,6 +1340,7 @@ void TazDlg::ShowAbout()
 
 void TazDlg::ShowHelp()
 {
+#ifndef NO_HELP_ASSISTANT
 	std::string strHelp = find_resource("res/doc/takin.qhc");
 	if(strHelp != "")
 	{
@@ -1352,10 +1354,13 @@ void TazDlg::ShowHelp()
 
 		tl::log_warn("Help viewer not found, trying associated application.");
 	}
+#endif
 
 
 	// try opening html files directly
 	std::string strHelpHtml = find_resource("doc/index_help.html");
+	if(strHelpHtml == "")	// try alternate directory
+		strHelpHtml = find_resource("res/doc/index_help.html");
 	if(strHelpHtml != "")
 	{
 		std::string strFile = "file:///" + fs::absolute(strHelpHtml).string();

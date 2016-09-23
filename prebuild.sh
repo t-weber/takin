@@ -70,6 +70,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/tools/taz/sics.h"
 	"${TAKINROOT}/tools/res/ResoDlg.h"
 	"${TAKINROOT}/tools/scanviewer/scanviewer.h"
+	"${TAKINROOT}/tools/scanviewer/FitParamDlg.h"
 	"${TAKINROOT}/tools/monteconvo/ConvoDlg.h"
 	"${TAKINROOT}/tools/monteconvo/SqwParamDlg.h"
 	"${TAKINROOT}/tools/sglist/SgListDlg.h"

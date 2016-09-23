@@ -285,9 +285,9 @@ void ConvoDlg::Start()
 	tabWidget->setCurrentWidget(tabPlot);
 
 	bool bForceDeferred = false;
-	std::string strSqwIdent = comboSqw->itemData(comboSqw->currentIndex()).toString().toStdString();
+	/*std::string strSqwIdent = comboSqw->itemData(comboSqw->currentIndex()).toString().toStdString();
 	if(strSqwIdent == "py")
-		bForceDeferred = true;
+		bForceDeferred = true;*/
 	Qt::ConnectionType connty = bForceDeferred ? Qt::ConnectionType::DirectConnection
 			: Qt::ConnectionType::BlockingQueuedConnection;
 

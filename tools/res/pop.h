@@ -15,6 +15,9 @@
 
 #include "cn.h"
 
+/**
+ * TAS parameters in fwhm
+ */
 struct PopParams : public CNParams
 {
 	tl::t_length_si<t_real_reso> mono_w;

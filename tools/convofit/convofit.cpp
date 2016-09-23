@@ -77,6 +77,7 @@ bool run_job(const std::string& strJob)
 	std::string strFieldVar = prop.Query<std::string>("input/sqw_field_var", "");
 	std::string strSetParams = prop.Query<std::string>("input/sqw_set_params", "");
 	bool bNormToMon = prop.Query<bool>("input/norm_to_monitor", 1);
+	bool bFlipCoords = prop.Query<bool>("input/flip_lhs_rhs", 0);
 
 	if(g_strSetParams != "")
 	{
@@ -309,7 +310,7 @@ bool run_job(const std::string& strJob)
 
 		if(vecvecScFiles.size() > 1)
 			tl::log_info("Loading scan group ", iSc, ".");
-		if(!load_file(vecvecScFiles[iSc], sc, bNormToMon, filter))
+		if(!load_file(vecvecScFiles[iSc], sc, bNormToMon, filter, bFlipCoords))
 		{
 			tl::log_err("Cannot load scan files of group ", iSc, ".");
 			continue;

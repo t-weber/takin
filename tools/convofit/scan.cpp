@@ -34,8 +34,8 @@ bool save_file(const char* pcFile, const Scan& sc)
 
 	ofstr << "#\n";
 
-	ofstr << std::left << std::setw(21) << "# x" 
-		<< std::left << std::setw(21) << "counts" 
+	ofstr << std::left << std::setw(21) << "# x"
+		<< std::left << std::setw(21) << "counts"
 		<< std::left << std::setw(21) << "count errors"
 		<< std::left << std::setw(21) << "monitor"
 		<< std::left << std::setw(21) << "monitor errors" << "\n";
@@ -44,7 +44,7 @@ bool save_file(const char* pcFile, const Scan& sc)
 	for(std::size_t i=0; i<iNum; ++i)
 	{
 		ofstr << std::left << std::setw(20) << sc.vecX[i] << " "
-			<< std::left << std::setw(20) << sc.vecCts[i] << " " 
+			<< std::left << std::setw(20) << sc.vecCts[i] << " "
 			<< std::left << std::setw(20) << sc.vecCtsErr[i] << " "
 			<< std::left << std::setw(20) << sc.vecMon[i] << " "
 			<< std::left << std::setw(20) << sc.vecMonErr[i] << "\n";
@@ -54,7 +54,8 @@ bool save_file(const char* pcFile, const Scan& sc)
 }
 
 
-bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormToMon, const Filter& filter)
+bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormToMon,
+	const Filter& filter, bool bFlipCoords)
 {
 	if(!vecFiles.size()) return 0;
 	tl::log_info("Loading \"", vecFiles[0], "\".");
@@ -84,7 +85,7 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	std::string strMonVar = pInstr->GetMonVar();
 	if(scan.strCntCol != "") strCountVar = scan.strCntCol;	// overrides
 	if(scan.strMonCol != "") strMonVar = scan.strMonCol;
-	tl::log_info("Counts column: ", strCountVar, "\nMonitor column: ", strMonVar);
+	tl::log_info("Counts column: ", strCountVar, "\nMonitor column: ", strMonVar, ".");
 
 	scan.vecCts = pInstr->GetCol(strCountVar);
 	scan.vecMon = pInstr->GetCol(strMonVar);
@@ -118,25 +119,28 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	scan.sample.a = latt[0]; scan.sample.b = latt[1]; scan.sample.c = latt[2];
 	scan.sample.alpha = ang[0]; scan.sample.beta = ang[1]; scan.sample.gamma = ang[2];
 
-	tl::log_info("Sample lattice: ", scan.sample.a, " ", scan.sample.b, " ", scan.sample.c);
-	tl::log_info("Sample angles: ", tl::r2d(scan.sample.alpha), " ", tl::r2d(scan.sample.beta), " ", tl::r2d(scan.sample.gamma));
+	tl::log_info("Sample lattice: ", scan.sample.a, " ", scan.sample.b, " ", scan.sample.c, ".");
+	tl::log_info("Sample angles: ", tl::r2d(scan.sample.alpha), " ", tl::r2d(scan.sample.beta), " ", tl::r2d(scan.sample.gamma), ".");
 
 
 	const std::array<t_real_sc, 3> vec1 = pInstr->GetScatterPlane0();
 	const std::array<t_real_sc, 3> vec2 = pInstr->GetScatterPlane1();
+	t_real_sc dFlip = bFlipCoords ? t_real_sc(-1) : t_real_sc(1);
 	scan.plane.vec1[0] = vec1[0]; scan.plane.vec1[1] = vec1[1]; scan.plane.vec1[2] = vec1[2];
-	scan.plane.vec2[0] = vec2[0]; scan.plane.vec2[1] = vec2[1]; scan.plane.vec2[2] = vec2[2];
+	scan.plane.vec2[0] = dFlip*vec2[0]; scan.plane.vec2[1] = dFlip*vec2[1]; scan.plane.vec2[2] = dFlip*vec2[2];
 
 	tl::log_info("Scattering plane: [", vec1[0], vec1[1], vec1[2], "], "
-		"[", vec2[0], vec2[1], vec2[2], "]");
+		"[", vec2[0], vec2[1], vec2[2], "].");
+	if(bFlipCoords)
+		tl::log_info("Flipped RHS <-> LHS coordinate system.");
 
 
 	scan.bKiFixed = pInstr->IsKiFixed();
 	scan.dKFix = pInstr->GetKFix();
 	if(scan.bKiFixed)
-		tl::log_info("ki = ", scan.dKFix);
+		tl::log_info("ki = ", scan.dKFix, ".");
 	else
-		tl::log_info("kf = ", scan.dKFix);
+		tl::log_info("kf = ", scan.dKFix, ".");
 
 
 	const tl::FileInstrBase<t_real_sc>::t_vecVals& vecTemp = pInstr->GetCol(scan.strTempCol);
@@ -162,7 +166,7 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	{
 		scan.dField = tl::mean_value(vecField);
 		scan.dFieldErr = tl::std_dev(vecField);
-		tl::log_info("Sample field: ", scan.dField, " +- ", scan.dFieldErr);
+		tl::log_info("Sample field: ", scan.dField, " +- ", scan.dFieldErr, ".");
 	}
 
 
@@ -183,7 +187,7 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 			", kf=", t_real_sc(pt.kf*tl::get_one_angstrom<t_real_sc>()),
 			", E=", t_real_sc(pt.E/tl::get_one_meV<t_real_sc>())/*, ", Q=", pt.Q*tl::angstrom*/,
 			", Cts=", scan.vecCts[iPt]/*, "+-", scan.vecCtsErr[iPt]*/,
-			", Mon=", scan.vecMon[iPt]/*, "+-", scan.vecMonErr[iPt]*/);
+			", Mon=", scan.vecMon[iPt]/*, "+-", scan.vecMonErr[iPt]*/, ".");
 
 		scan.vecPoints.emplace_back(std::move(pt));
 	}
@@ -218,8 +222,8 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 		}
 	}
 
-	tl::log_info("Scan origin: (", scan.vecScanOrigin[0], " ", scan.vecScanOrigin[1], " ", scan.vecScanOrigin[2], " ", scan.vecScanOrigin[3], ")");
-	tl::log_info("Scan dir: [", scan.vecScanDir[0], " ", scan.vecScanDir[1], " ", scan.vecScanDir[2], " ", scan.vecScanDir[3], "]");
+	tl::log_info("Scan origin: (", scan.vecScanOrigin[0], " ", scan.vecScanOrigin[1], " ", scan.vecScanOrigin[2], " ", scan.vecScanOrigin[3], ").");
+	tl::log_info("Scan dir: [", scan.vecScanDir[0], " ", scan.vecScanDir[1], " ", scan.vecScanDir[2], " ", scan.vecScanDir[3], "].");
 
 
 
@@ -269,8 +273,8 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	return true;
 }
 
-bool load_file(const char* pcFile, Scan& scan, bool bNormToMon, const Filter& filter)
+bool load_file(const char* pcFile, Scan& scan, bool bNormToMon, const Filter& filter, bool bFlip)
 {
 	std::vector<std::string> vec{pcFile};
-	return load_file(vec, scan, bNormToMon, filter);
+	return load_file(vec, scan, bNormToMon, filter, bFlip);
 }

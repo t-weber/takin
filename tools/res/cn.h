@@ -9,6 +9,7 @@
  *		http://www.ill.eu/en/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab/
  * @desc see: [cn67] M. J. Cooper and R. Nathans, Acta Cryst. 23, 357 (1967),
  * 		[ch73] N. J. Chesser and J. D. Axe, Acta Cryst. A 29, 160 (1973)
+ *		[mit84] P. W. Mitchell, R. A. Cowley and S. A. Higgins, Acta Cryst. Sec A, 40(2), 152-160 (1984)
  */
 
 #ifndef __TAKIN_CN_H__
@@ -31,6 +32,9 @@ enum ResoFlags : std::size_t
 };
 
 
+/**
+ * TAS parameters in fwhm
+ */
 struct CNParams
 {
 	// monochromator

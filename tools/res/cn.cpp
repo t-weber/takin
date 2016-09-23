@@ -7,8 +7,9 @@
  * @desc This is a reimplementation in C++ of the file rc_cnmat.m of the
  *		rescal5 package by Zinkin, McMorrow, Tennant, Farhi, and Wildes:
  *		http://www.ill.eu/en/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab/
- * @desc see: [cn67] M. J. Cooper and R. Nathans, Acta Cryst. 23, 357 (1967),
- * 		[ch73] N. J. Chesser and J. D. Axe, Acta Cryst. A 29, 160 (1973)
+ * @desc see: [cn67] M. J. Cooper and R. Nathans, Acta Cryst. 23, 357 (1967)
+ *		[ch73] N. J. Chesser and J. D. Axe, Acta Cryst. A 29, 160 (1973)
+ *		[mit84] P. W. Mitchell, R. A. Cowley and S. A. Higgins, Acta Cryst. Sec A, 40(2), 152-160 (1984)
  */
 
 #include "cn.h"
@@ -107,6 +108,10 @@ ResoResults calc_cn(const CNParams& cn)
 	angle coll_h_pre_mono = cn.coll_h_pre_mono;
 	angle coll_v_pre_mono = cn.coll_v_pre_mono;
 
+	// use the same as the horizontal mosaics for now
+	angle mono_mosaic_v = cn.mono_mosaic;
+	angle ana_mosaic_v = cn.ana_mosaic;
+
 /*
 	const length lam = tl::k2lam(cn.ki);
 
@@ -117,9 +122,9 @@ ResoResults calc_cn(const CNParams& cn)
 	}
 */
 
+
 	// -------------------------------------------------------------------------
 	// transformation matrix
-
 	angle thetaa = cn.thetaa * cn.dana_sense;
 	angle thetam = cn.thetam * cn.dmono_sense;
 	angle ki_Q = cn.angle_ki_Q;
@@ -147,75 +152,70 @@ ResoResults calc_cn(const CNParams& cn)
 		res.strErr = "Transformation matrix cannot be inverted.";
 		return res;
 	}
-
 	// -------------------------------------------------------------------------
+
 
 	const auto tupScFact = get_scatter_factors(cn.flags, cn.thetam, cn.ki, cn.thetaa, cn.kf);
 
 	t_real dmono_refl = cn.dmono_refl * std::get<0>(tupScFact);
 	t_real dana_effic = cn.dana_effic * std::get<1>(tupScFact);
 
+
 	// -------------------------------------------------------------------------
-	// resolution matrix
-
-	t_vec pm(2);
-	pm[0] = units::tan(thetam);
-	pm[1] = 1.;
-	pm /= cn.ki*angs * cn.mono_mosaic/rads;
-
-	t_vec pa(2);
-	pa[0] = -units::tan(thetaa);
-	pa[1] = 1.;
-	pa /= cn.kf*angs * cn.ana_mosaic/rads;
-
-	t_vec palf0(2);
-	palf0[0] = 2.*units::tan(thetam);
-	palf0[1] = 1.;
-	palf0 /= (cn.ki*angs * coll_h_pre_mono/rads);
-
-	t_vec palf1(2);
-	palf1[0] = 0;
-	palf1[1] = 1.;
-	palf1 /= (cn.ki*angs * cn.coll_h_pre_sample/rads);
-
-	t_vec palf2(2);
-	palf2[0] = -2.*units::tan(thetaa);
-	palf2[1] = 1.;
-	palf2 /= (cn.kf*angs * cn.coll_h_post_ana/rads);
-
-	t_vec palf3(2);
-	palf3[0] = 0;
-	palf3[1] = 1.;
-	palf3 /= (cn.kf*angs * cn.coll_h_post_sample/rads);
-
-	t_mat m01(2,2);
-	m01 = ublas::outer_prod(pm,pm) +
-		ublas::outer_prod(palf0,palf0) +
-		ublas::outer_prod(palf1,palf1);
-	t_mat m34(2,2);
-	m34 = ublas::outer_prod(pa,pa) +
-		ublas::outer_prod(palf2,palf2) +
-		ublas::outer_prod(palf3,palf3);
-
+	// resolution matrix, [mit84], equ. A.5
 	t_mat M = ublas::zero_matrix<t_real>(6,6);
-	tl::submatrix_copy(M, m01, 0, 0);
-	tl::submatrix_copy(M, m34, 3, 3);
 
-	M(2,2) = t_real(1)/(cn.ki*cn.ki * angs*angs) * rads*rads *
-	(
-		t_real(1)/(cn.coll_v_pre_sample*cn.coll_v_pre_sample) +
-		t_real(1)/((t_real(2)*units::sin(thetam)*cn.mono_mosaic)*
-			(t_real(2)*units::sin(thetam)*cn.mono_mosaic) +
-			coll_v_pre_mono*coll_v_pre_mono)
-	);
-	M(5,5) = t_real(1)/(cn.kf*cn.kf * angs*angs) * rads*rads *
-	(
-		t_real(1) / (cn.coll_v_post_sample*cn.coll_v_post_sample) +
-		t_real(1) / ((t_real(2)*units::sin(thetaa)*cn.ana_mosaic)*
-			(t_real(2)*units::sin(thetaa)*cn.ana_mosaic) +
-			cn.coll_v_post_ana*cn.coll_v_post_ana)
-	);
+	// horizontal part
+	auto calc_mono_ana_res_h =
+		[](angle theta, wavenumber k, angle mosaic, angle coll1, angle coll2) -> t_mat
+	{
+		t_vec vecMos(2);
+		vecMos[0] = units::tan(theta);
+		vecMos[1] = 1.;
+		vecMos /= k*angs * mosaic/rads;
+
+		t_vec vecColl1(2);
+		vecColl1[0] = 2.*units::tan(theta);
+		vecColl1[1] = 1.;
+		vecColl1 /= (k*angs * coll1/rads);
+
+		t_vec vecColl2(2);
+		vecColl2[0] = 0;
+		vecColl2[1] = 1.;
+		vecColl2 /= (k*angs * coll2/rads);
+
+		return ublas::outer_prod(vecMos, vecMos) +
+			ublas::outer_prod(vecColl1, vecColl1) +
+			ublas::outer_prod(vecColl2, vecColl2);
+	};
+
+	t_mat matMonoH = calc_mono_ana_res_h(thetam, cn.ki, cn.mono_mosaic,
+		cn.coll_h_pre_mono, cn.coll_h_pre_sample);
+	t_mat matAnaH = calc_mono_ana_res_h(-thetaa, cn.kf, cn.ana_mosaic,
+		cn.coll_h_post_ana, cn.coll_h_post_sample);
+
+	tl::submatrix_copy(M, matMonoH, 0, 0);
+	tl::submatrix_copy(M, matAnaH, 3, 3);
+
+	// vertical part, [mit84], equ. A.9 & A.13
+	auto calc_mono_ana_res_v =
+		[](angle theta, wavenumber k, angle mosaic_v, angle coll1, angle coll2) -> t_real
+	{
+		return t_real(1)/(k*k * angs*angs) * rads*rads *
+		(
+			t_real(1) / (coll2 * coll2) +
+			t_real(1) / ((t_real(2)*units::sin(theta) * mosaic_v) *
+				(t_real(2)*units::sin(theta) * mosaic_v) +
+				coll1 * coll1)
+		);
+	};
+
+	M(2,2) = calc_mono_ana_res_v(thetam, cn.ki, mono_mosaic_v,
+		cn.coll_v_pre_mono, cn.coll_v_pre_sample);
+	M(5,5) = calc_mono_ana_res_v(thetaa, cn.kf, ana_mosaic_v,
+		cn.coll_v_post_ana, cn.coll_v_post_sample);
 	// -------------------------------------------------------------------------
+
 
 	t_mat N = tl::transform(M, V, 1);
 

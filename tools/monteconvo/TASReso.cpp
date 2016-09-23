@@ -293,6 +293,8 @@ bool TASReso::SetLattice(t_real a, t_real b, t_real c,
 
 bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 {
+	static const t_real s_dPlaneDistTolerance = std::cbrt(tl::get_epsilon<t_real>());
+
 	ResoResults& resores = m_res[0];
 
 	//std::cout << "UB = " << m_opts.matUB << std::endl;
@@ -400,7 +402,7 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 	tl::log_info("thetaa = ", m_reso.thetaa);
 	tl::log_info("2theta = ", m_reso.twotheta);*/
 
-	if(std::fabs(vecQ[2]) > tl::get_plane_dist_tolerance<t_real>())
+	if(std::fabs(vecQ[2]) > s_dPlaneDistTolerance)
 	{
 		tl::log_err("Position Q = (", h, " ", k, " ", l, "),",
 			" E = ", E, " meV not in scattering plane.");

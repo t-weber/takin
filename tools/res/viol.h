@@ -19,6 +19,10 @@ namespace codata = boost::units::si::constants::codata;
 
 enum class TofDetShape { SPH, CYL, UNKNOWN };
 
+
+/**
+ * TOF parameters in sigma
+ */
 struct ViolParams
 {
 	// scattering triangle

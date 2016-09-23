@@ -65,12 +65,7 @@ void mc_neutrons(const Ellipsoid4d<typename t_vec::value_type>& ell4d,
 		bInited = 1;
 	}
 
-	t_vec vecTrans(4);
-	vecTrans[0] = ell4d.x_offs;
-	vecTrans[1] = ell4d.y_offs;
-	vecTrans[2] = ell4d.z_offs;
-	vecTrans[3] = ell4d.w_offs;
-
+	t_vec vecTrans = tl::make_vec<t_vec>({ell4d.x_offs, ell4d.y_offs, ell4d.z_offs, ell4d.w_offs});
 	const t_mat& rot = ell4d.rot;
 	//if(vecResult.size() != iNum)
 	//	vecResult.resize(iNum);
@@ -78,12 +73,7 @@ void mc_neutrons(const Ellipsoid4d<typename t_vec::value_type>& ell4d,
 	//tl::log_debug("rot: ", rot);
 	//tl::log_debug("Qvec0 = ", opts.dAngleQVec0/M_PI*180.);
 	t_mat matQVec0 = tl::rotation_matrix_2d(-opts.dAngleQVec0);
-	matQVec0.resize(4,4, true);
-	matQVec0(2,2) = matQVec0(3,3) = 1.;
-	matQVec0(2,0) = matQVec0(2,1) = matQVec0(2,3) = 0.;
-	matQVec0(3,0) = matQVec0(3,1) = matQVec0(3,2) = 0.;
-	matQVec0(0,2) = matQVec0(0,3) = 0.;
-	matQVec0(1,2) = matQVec0(1,3) = 0.;
+	tl::resize_unity(matQVec0, 4);
 
 	t_mat matUBinvQVec0 = ublas::prod(opts.matUBinv, matQVec0);
 

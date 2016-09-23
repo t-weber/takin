@@ -8,12 +8,8 @@ system's package manager or directly from the given URLs:
 	* Qt 4: http://www.qt.io
 	* Qwt 6: http://qwt.sourceforge.net
 	* Clipper: http://www.ysbl.york.ac.uk/~cowtan/clipper/
-	* Tlibs: 
-		checkout tlibs submodule
-		    OR:
-		use ./setup_tlibs.sh
-		and follow the instructions in the INSTALL file
-		in the ./tlibs/ subfolder
+	* Minuit 2: http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/release/download.html
+
 
 Set up other external dependencies:
 	* ./setup_externals.sh

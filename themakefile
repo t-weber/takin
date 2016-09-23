@@ -14,7 +14,9 @@ USE_BOOST_REGEX = 0
 USE_GIL = 1
 USE_PY = 1
 USE_PLUGINS = 0
+USE_FADDEEVA = 0
 USE_CPP11_ABI = 1
+
 
 STD_CPP = -std=c++11
 #STD_CPP += -stdlib=libc++
@@ -22,7 +24,7 @@ STD_CPP = -std=c++11
 STD_LIBS = -lstdc++
 #STD_LIBS = -lc++ -lc++abi
 STD_LIBS += -lm
-STD_LIBS += -lpthread
+STD_LIBS += -lpthread -lrt
 
 BOOST_SUFFIX = 
 #BOOST_SUFFIX = -mt
@@ -148,7 +150,9 @@ else
 endif
 
 
-FLAGS += -D_GLIBCXX_USE_CXX11_ABI=${USE_CPP11_ABI}
+ifeq ($(USE_CPP11_ABI), 1)
+	FLAGS += -D_GLIBCXX_USE_CXX11_ABI
+endif
 
 
 
@@ -178,6 +182,14 @@ ifeq ($(USE_BOOST_REGEX), 1)
 	BASIC_LIBS += -lboost_regex${BOOST_SUFFIX}
 endif
 
+ifeq (${USE_FADDEEVA}, 1)
+	FAD_DEFS += -DHAS_COMPLEX_ERF
+	FAD_LIBS += /usr/local/include/Faddeeva.cc
+else
+	FAD_DEFS =
+	FAD_LIBS =
+endif
+
 ifeq ($(USE_PY), 1)
 	PY_LIBS = -lboost_python${BOOST_SUFFIX} -lpython2.7
 	PY_OBJS = obj/sqw_py.o 
@@ -199,8 +211,8 @@ else
 endif
 
 
-LIBS_TAZ = ${STD_LIBS} ${QT_LIB} ${BASIC_LIBS} ${GL_LIBS} ${PY_LIBS} ${GIL_LIBS} ${DL_LIBS}
-LIBS_RESO = ${QWT_LIB} ${STD_LIBS} ${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS}
+LIBS_TAZ = ${BASIC_LIBS} ${FAD_LIBS} ${QT_LIB} ${QWT_LIB} ${GL_LIBS} \
+	${PY_LIBS} ${GIL_LIBS} ${DL_LIBS} ${LAPACK_LIBS} ${STD_LIBS}
 
 
 # -----------------------------------------------------------------------------
@@ -225,7 +237,7 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/globals_qt.o obj/qthelper.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} obj/tasreso.o \
 	obj/ConvoDlg.o obj/SqwParamDlg.o \
-	obj/scanviewer.o obj/x3d.o obj/eval.o \
+	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
 	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o
 
 OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
@@ -248,7 +260,7 @@ OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 
 OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
-	obj/spec_char.o \
+	obj/spec_char.o obj/FitParamDlg.o \
 	obj/globals.o obj/globals_qt.o
 
 OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o \
@@ -286,46 +298,47 @@ all: takin  montereso  monteconvo xmonteconvo posextract \
 
 
 takin: ${OBJ_COMMON} ${OBJ_TAZ}
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/takin $+ ${LIBS_TAZ} ${LIBS_RESO}
+	${CC} ${FLAGS} ${FAD_DEFS} ${LIB_DIRS} -o bin/takin $+ -lMinuit2 ${LIBS_TAZ}
 	${STRIP} bin/takin
 
 montereso: ${OBJ_COMMON} ${OBJ_MONTERESO}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/montereso $+ \
-		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} ${LAPACK_LIBS}
+		${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} ${LAPACK_LIBS} ${STD_LIBS}
 	${STRIP} montereso
 
 monteconvo: ${OBJ_MONTECONVO} obj/globals.o obj/mconv_main.o
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/monteconvo $+ \
-		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS}
+		${BASIC_LIBS} ${QT_LIB} ${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS} ${STD_LIBS}
 	${STRIP} monteconvo
 
 xmonteconvo: ${OBJ_MONTECONVO} obj/xmconv_main.o obj/ConvoDlg.o obj/FavDlg.o obj/qthelper.o \
 	obj/globals.o obj/globals_qt.o obj/SqwParamDlg.o obj/convo_scan.o obj/loadinstr.o \
 	obj/spec_char.o
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/xmonteconvo $+ \
-		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} \
-		${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS}
+		${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} \
+		${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS} ${STD_LIBS}
 	${STRIP} xmonteconvo
 
 convofit: ${OBJ_CONVOFIT}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/convofit $+ \
-		-lMinuit2 ${STD_LIBS} ${BASIC_LIBS} -lboost_program_options ${PY_LIBS} ${LAPACK_LIBS} ${DL_LIBS}
+		-lMinuit2 ${BASIC_LIBS} -lboost_program_options ${PY_LIBS} \
+		${LAPACK_LIBS} ${DL_LIBS} ${STD_LIBS}
 	${STRIP} convofit
 convoseries: ${OBJ_CONVOSERIES}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/convoseries $+ ${BASIC_LIBS} ${STD_LIBS}
 
 posextract: obj/posextract.o obj/loadinstr.o obj/log.o obj/debug.o
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/posextract $+ ${STD_LIBS} ${BASIC_LIBS}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/posextract $+ ${BASIC_LIBS} ${STD_LIBS}
 	${STRIP} posextract
 
 reso: ${OBJ_RESO}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/reso $+ \
-		${STD_LIBS} ${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS} -lX11
+		${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS} -lX11 ${STD_LIBS}
 	${STRIP} reso
 
 scanviewer: ${OBJ_SCANVIEWER}
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/scanviewer $+ \
-		${STD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB}
+	${CC} ${FLAGS} ${FAD_DEFS} ${LIB_DIRS} -o bin/scanviewer $+ \
+		-lMinuit2 ${FAD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} ${STD_LIBS}
 	${STRIP} scanviewer
 
 sglist: ${OBJ_SGLIST}
@@ -335,11 +348,11 @@ sglist: ${OBJ_SGLIST}
 
 gentab: ${OBJ_GENTAB}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/gentab $+ \
-		${STD_LIBS} ${BASIC_LIBS} -lclipper-core
+		${BASIC_LIBS} -lclipper-core ${STD_LIBS}
 
 sfact: ${OBJ_SFACT}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sfact $+ \
-		${STD_LIBS} ${BASIC_LIBS} -lclipper-core
+		${BASIC_LIBS} -lclipper-core ${STD_LIBS}
 
 doc: doc/takin.qhcp doc/takin.qhp doc/*.html
 	qcollectiongenerator doc/takin.qhcp -o doc/takin.qhc
@@ -451,14 +464,10 @@ obj/gnuplot.o: tlibs/gfx/gnuplot.cpp tlibs/gfx/gnuplot.h tlibs/gfx/gnuplot_impl.
 	${CC} ${FLAGS} -c -o $@ $<
 obj/loadinstr.o: tlibs/file/loadinstr.cpp tlibs/file/loadinstr.h
 	${CC} ${FLAGS} -c -o $@ $<
-#obj/loadtxt.o: tlibs/old/loadtxt.cpp tlibs/old/loadtxt.h
-#	${CC} ${FLAGS} -c -o $@ $<
 obj/x3d.o: tlibs/file/x3d.cpp tlibs/file/x3d.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/recent.o: tlibs/file/recent.cpp tlibs/file/recent.h
 	${CC} ${FLAGS} -c -o $@ $<
-#obj/minuit.o: tlibs/fit/minuit.cpp tlibs/fit/minuit.h
-#	${CC} ${FLAGS} -c -o $@ $<
 obj/eval.o: tlibs/string/eval.cpp tlibs/string/eval.h tlibs/string/eval_impl.h
 	${CC} ${FLAGS} -c -o $@ $<
 
@@ -472,8 +481,6 @@ obj/viol.o: tools/res/viol.cpp tools/res/viol.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/simple.o: tools/res/simple.cpp tools/res/simple.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
-#obj/ellipse.o: tools/res/ellipse.cpp tools/res/ellipse.h
-#	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/ResoDlg.o: tools/res/ResoDlg.cpp tools/res/ResoDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/ConvoDlg.o: tools/monteconvo/ConvoDlg.cpp tools/monteconvo/ConvoDlg.h
@@ -500,7 +507,8 @@ obj/sqw.o: tools/monteconvo/sqw.cpp tools/monteconvo/sqw.h tlibs/math/kd.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/sqwbase.o: tools/monteconvo/sqwbase.cpp tools/monteconvo/sqwbase.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
-obj/sqwfact.o: tools/monteconvo/sqwfactory.cpp tools/monteconvo/sqwfactory.h
+obj/sqwfact.o: tools/monteconvo/sqwfactory.cpp tools/monteconvo/sqwfactory.h \
+	tools/monteconvo/sqw_proc.h tools/monteconvo/sqw_proc_impl.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/sqw_py.o: tools/monteconvo/sqw_py.cpp tools/monteconvo/sqw_py.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
@@ -519,9 +527,11 @@ obj/scanseries.o: tools/convofit/scanseries.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 
 obj/scanviewer_main.o: tools/scanviewer/main.cpp
-	${CC} ${FLAGS} -c -o $@ $<
+	${CC} ${FLAGS} ${FAD_DEFS} -c -o $@ $<
 obj/scanviewer.o: tools/scanviewer/scanviewer.cpp tools/scanviewer/scanviewer.h
-	${CC} ${FLAGS} -c -o $@ $<
+	${CC} ${FLAGS} ${FAD_DEFS} -c -o $@ $<
+obj/FitParamDlg.o: tools/scanviewer/FitParamDlg.cpp tools/scanviewer/FitParamDlg.h
+	${CC} ${FLAGS} ${FAD_DEFS} -c -o $@ $<
 
 obj/gentab.o: tools/gentab/gentab.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
@@ -537,7 +547,7 @@ obj/sfact.o: tools/sggen/sfact.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 
 obj/AboutDlg.o: dialogs/AboutDlg.cpp dialogs/AboutDlg.h
-	${CC} ${FLAGS} -c -o $@ $<
+	${CC} ${FLAGS} ${FAD_DEFS} -c -o $@ $<
 
 
 # -----------------------------------------------------------------------------

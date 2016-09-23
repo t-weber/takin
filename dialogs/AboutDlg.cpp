@@ -82,10 +82,20 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrLibs << "<dd><a href=\"http://www.netlib.org/lapack\">http://www.netlib.org/lapack</a></dd>";
 #endif
 
+#ifndef DNO_FIT
+	ostrLibs << "<dt>Uses Minuit version 2</dt>";
+	ostrLibs << "<dd><a href=\"https://root.cern.ch\">https://root.cern.ch</a></dd>";
+#endif
+
 	ostrLibs << "<dt>Uses tLibs version " << TLIBS_VERSION << "</dt>";
 
 	ostrLibs << "<dt>Uses Clipper crystallography library</dt>";
 	ostrLibs << "<dd><a href=\"http://www.ysbl.york.ac.uk/~cowtan/clipper\">http://www.ysbl.york.ac.uk/~cowtan/clipper</a></dd>";
+
+#ifdef HAS_COMPLEX_ERF
+	ostrLibs << "<dt>Uses Faddeeva library</dt>";
+	ostrLibs << "<dd><a href=\"http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package\">http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package</a></dd>";
+#endif
 
 	ostrLibs << "<dt>Uses resolution algorithms ported from Rescal version 5</dt>";
 	ostrLibs << "<dd><a href=\"http://www.ill.eu/en/html/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab\">http://www.ill.eu/en/html/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab</a></dd>";

@@ -114,7 +114,7 @@ ResoResults calc_pop(const PopParams& pop)
 	// C matrix, [pop75], Appendix 1
 	t_mat C = ublas::zero_matrix<t_real>(4,8);
 	C(2,5) = C(2,4) = C(0,1) = C(0,0) = 0.5;
-	C(1,2) = 0.5/units::sin(thetam);
+	C(1,2) = t_real(0.5)/units::sin(thetam);
 	C(1,3) /*C(2,2)*/ = t_real(-0.5)/units::sin(thetam);	// Popovici says C(2,2), not C(1,3)
 	C(3,6) = t_real(0.5)/units::sin(thetaa);
 	C(3,7) = t_real(-0.5)/units::sin(thetaa);
@@ -181,7 +181,6 @@ ResoResults calc_pop(const PopParams& pop)
 		dSiAna[0], dSiAna[1], dSiAna[2],
 		dSiDet[0], dSiDet[1]});
 
-	// convert dimensions from sigma to fwhm
 	SI *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
 
 	t_mat S;

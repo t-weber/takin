@@ -98,8 +98,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		std::vector<std::string> m_vecCheckBoxNamesSenses;
 
 	protected:
-		static constexpr t_real_glob s_dPlaneDistTolerance =
-			tl::get_plane_dist_tolerance<t_real_glob>();
+		static const t_real_glob s_dPlaneDistTolerance;
 
 		bool m_bReady = false;
 		QSettings m_settings;

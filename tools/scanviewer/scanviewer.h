@@ -18,6 +18,7 @@
 #include "libs/qthelper.h"
 #include "libs/globals.h"
 #include "ui/ui_scanviewer.h"
+#include "FitParamDlg.h"
 
 
 class ScanViewerDlg : public QDialog, Ui::ScanViewerDlg
@@ -31,8 +32,11 @@ protected:
 	bool m_bDoUpdate = 0;
 	tl::FileInstrBase<t_real_glob> *m_pInstr = nullptr;
 	std::vector<t_real_glob> m_vecX, m_vecY;
+	std::vector<t_real_glob> m_vecFitX, m_vecFitY;
 	std::unique_ptr<QwtPlotWrapper> m_plotwrap;
 	std::string m_strX, m_strY, m_strCmd;
+
+	FitParamDlg *m_pFitParamDlg = nullptr;
 
 protected:
 	void ClearPlot();
@@ -46,6 +50,15 @@ protected:
 
 	virtual void closeEvent(QCloseEvent* pEvt) override;
 
+#ifndef NO_FIT
+	template<std::size_t iNumArgs, class t_func>
+	bool Fit(t_func&& func,
+		const std::vector<std::string>& vecParamNames,
+		std::vector<t_real_glob>& vecVals,
+		std::vector<t_real_glob>& vecErrs,
+		const std::vector<bool>& vecFixed);
+#endif
+
 protected slots:
 	void GenerateExternal(int iLang=0);
 
@@ -57,6 +70,11 @@ protected slots:
 
 	void XAxisSelected(const QString&);
 	void YAxisSelected(const QString&);
+
+	void ShowFitParams();
+	void FitGauss();
+	void FitLorentz();
+	void FitVoigt();
 
 	//void openExternally();
 

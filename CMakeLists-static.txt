@@ -19,6 +19,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
 find_package(Boost REQUIRED COMPONENTS iostreams system filesystem regex python program_options REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Rt REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Qwt REQUIRED)
@@ -102,10 +103,10 @@ add_executable(takin
 
 	tools/monteconvo/ConvoDlg.cpp tools/monteconvo/SqwParamDlg.cpp tools/monteconvo/TASReso.cpp
 	tools/monteconvo/sqw.cpp tools/monteconvo/sqwbase.cpp tools/monteconvo/sqwfactory.cpp
-	tools/monteconvo/sqw_py.cpp
+	tools/monteconvo/sqw_py.cpp # tools/monteconvo/sqw_proc.cpp
 
 	tools/convofit/scan.cpp
-	tools/scanviewer/scanviewer.cpp
+	tools/scanviewer/scanviewer.cpp tools/scanviewer/FitParamDlg.cpp
 
 	dialogs/SettingsDlg.cpp dialogs/FilePreviewDlg.cpp
 	dialogs/GotoDlg.cpp dialogs/DWDlg.cpp dialogs/DynPlaneDlg.cpp
@@ -132,8 +133,9 @@ add_executable(takin
 )
 
 target_link_libraries(takin 
+	${Minuit2_LIBRARIES}
 	${Boost_LIBRARIES}
-	Threads::Threads
+	Threads::Threads ${Rt_LIBRARIES}
 	Qt4::QtCore Qt4::QtGui Qt4::QtSvg #Qt4::QtOpenGL
 	${PYTHON_LIBRARIES}
 	${PNG_LIBRARIES}
@@ -178,7 +180,7 @@ add_executable(convofit
 
 	tools/monteconvo/TASReso.cpp
 	tools/monteconvo/sqw.cpp tools/monteconvo/sqwbase.cpp tools/monteconvo/sqwfactory.cpp
-	tools/monteconvo/sqw_py.cpp
+	tools/monteconvo/sqw_py.cpp # tools/monteconvo/sqw_proc.cpp
 
 	tools/convofit/convofit.cpp
 	tools/convofit/model.cpp tools/convofit/scan.cpp
@@ -194,7 +196,7 @@ add_executable(convofit
 set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convofit
-	Threads::Threads
+	Threads::Threads ${Rt_LIBRARIES}
 	${Boost_LIBRARIES} ${Minuit2_LIBRARIES} ${PYTHON_LIBRARIES}
 )
 
@@ -236,8 +238,10 @@ endif()
 # -----------------------------------------------------------------------------
 install(TARGETS takin DESTINATION bin)
 install(TARGETS convofit convoseries DESTINATION bin)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/res ${PROJECT_SOURCE_DIR}/examples ${PROJECT_SOURCE_DIR}/doc
-    DESTINATION share/takin)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples ${PROJECT_SOURCE_DIR}/doc
+	DESTINATION share/takin)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/res/data ${PROJECT_SOURCE_DIR}/res/doc ${PROJECT_SOURCE_DIR}/res/icons
+	DESTINATION share/takin/res)
 install(FILES ${PROJECT_SOURCE_DIR}/COPYING ${PROJECT_SOURCE_DIR}/AUTHORS ${PROJECT_SOURCE_DIR}/LICENSES
 	DESTINATION share/takin)
 # -----------------------------------------------------------------------------

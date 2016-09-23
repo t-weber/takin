@@ -1,4 +1,4 @@
-/*
+/**
  * S(Q,w) python interface
  * @author tweber
  * @date aug-2015
@@ -19,6 +19,7 @@ class SqwPy : public SqwBase
 {
 protected:
 	mutable std::shared_ptr<std::mutex> m_pmtx;
+
 	py::object m_sys, m_os, m_mod;
 	py::object m_Sqw, m_Init;
 

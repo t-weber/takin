@@ -543,15 +543,15 @@ void ResoDlg::Calc()
 			ostrRes << "\t<ul><li>Resolution Volume: " << res.dResVol << " meV " << strAA_3 << "</li>\n";
 			ostrRes << "\t<li>R0: " << res.dR0 << "</li></ul></p>\n\n";
 
-			ostrRes << "<p><b>Bragg FWHMs:</b>\n";
+			ostrRes << "<p><b>Coherent (Bragg) FWHMs:</b>\n";
 			ostrRes << "\t<ul><li>Q_para: " << res.dBraggFWHMs[0] << " " << strAA_1 << "</li>\n";
 			ostrRes << "\t<li>Q_ortho: " << res.dBraggFWHMs[1] << " " << strAA_1 << "</li>\n";
 			ostrRes << "\t<li>Q_z: " << res.dBraggFWHMs[2] << " " << strAA_1 << "</li>\n";
 			ostrRes << "\t<li>E: " << res.dBraggFWHMs[3] << " meV</li></ul></p>\n\n";
 
-			ostrRes << "<p><b>Vanadium FWHM:</b> "
-				<< dVanadiumFWHM_Q << " " << strAA_1 << ", "
-				<< dVanadiumFWHM_E << " meV</p>\n\n";
+			ostrRes << "<p><b>Incoherent (Vanadium) FWHMs:</b>\n";
+			ostrRes << "\t<ul><li>Q: " << dVanadiumFWHM_Q << " " << strAA_1 << "</li>\n";
+			ostrRes << "\t<li>E: " << dVanadiumFWHM_E << " meV</li></ul></p>\n\n";
 
 			ostrRes << "<p><b>Resolution Matrix (Q_para, Q_ortho, Q_z, E):</b>\n\n";
 			ostrRes << "<blockquote><table border=\"0\" width=\"75%\">\n";
@@ -616,12 +616,7 @@ void ResoDlg::Calc()
 				// Qavg system in 1/A -> rotate back to orient system in 1/A ->
 				// transform to hkl rlu system
 				t_mat matQVec0 = tl::rotation_matrix_2d(-m_dAngleQVec0);
-				matQVec0.resize(4,4, true);
-				matQVec0(2,2) = matQVec0(3,3) = 1.;
-				matQVec0(2,0) = matQVec0(2,1) = matQVec0(2,3) = 0.;
-				matQVec0(3,0) = matQVec0(3,1) = matQVec0(3,2) = 0.;
-				matQVec0(0,2) = matQVec0(0,3) = 0.;
-				matQVec0(1,2) = matQVec0(1,3) = 0.;
+				tl::resize_unity(matQVec0, 4);
 				const t_mat matQVec0inv = ublas::trans(matQVec0);
 
 				const t_mat matUBinvQVec0 = ublas::prod(m_matUBinv, matQVec0);
@@ -1344,6 +1339,11 @@ void ResoDlg::AlgoChanged()
 			strAlgo += "<a href=http://dx.doi.org/10.1107/S0365110X67002816>"
 				"Acta Cryst. 23, <br>pp. 357-367</a><br>\n";
 			strAlgo += "1967";
+
+			strAlgo += "<br><b>P. W. Mitchell <i>et al.</i></b><br>\n";
+			strAlgo += "<a href=http://dx.doi.org/10.1107/S0108767384000325>"
+				"Acta Cryst. A 40(2), <br>pp. 152-160</a><br>\n";
+			strAlgo += "1984";
 			break;
 		}
 		case ResoAlgo::POP:
@@ -1379,7 +1379,7 @@ void ResoDlg::AlgoChanged()
 			tabWidget->setTabEnabled(2,0);
 			tabWidget->setTabEnabled(3,1);
 			tabWidget->setTabEnabled(4,0);
-			strAlgo = "<b>N. Violini et al.</b><br>\n";
+			strAlgo = "<b>N. Violini <i>et al.</i></b><br>\n";
 			strAlgo += "<a href=http://dx.doi.org/10.1016/j.nima.2013.10.042>"
 				"NIM A 736, <br>pp. 31-39</a><br>\n";
 			strAlgo += "2014";

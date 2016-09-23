@@ -8,6 +8,8 @@
 #include "sqwfactory.h"
 #include "sqw.h"
 #ifndef NO_PY
+	#include "sqw_proc.h"
+	#include "sqw_proc_impl.h"
 	#include "sqw_py.h"
 #endif
 
@@ -50,7 +52,7 @@ static t_mapSqw g_mapSqw =
 #ifndef NO_PY
 	{ "py", t_mapSqw::mapped_type {
 		[](const std::string& strCfgFile) -> std::shared_ptr<SqwBase>
-		{ return std::make_shared<SqwPy>(strCfgFile.c_str()); }, 
+		{ return std::make_shared<SqwProc<SqwPy>>(strCfgFile.c_str()); }, 
 		"Python Model" } },
 #endif
 	{ "elastic", t_mapSqw::mapped_type {
