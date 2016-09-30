@@ -418,7 +418,7 @@
          </attribute>
          <column>
           <property name="text">
-           <string>Variable</string>
+           <string>Constant</string>
           </property>
          </column>
          <column>

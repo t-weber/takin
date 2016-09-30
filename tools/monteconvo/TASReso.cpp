@@ -131,6 +131,10 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 		m_reso.flags |= CALC_KF3;
 	else
 		m_reso.flags &= ~CALC_KF3;
+	if(xml.Query<int>((strXmlRoot + "reso/use_kfki").c_str(), 1))
+		m_reso.flags |= CALC_KFKI;
+	else
+		m_reso.flags &= ~CALC_KFKI;
 	if(xml.Query<int>((strXmlRoot + "reso/use_R0").c_str(), 1))
 		m_reso.flags |= CALC_R0;
 	else

@@ -8,6 +8,7 @@
 #ifndef __TAZ_SCATT_TRIAG_H__
 #define __TAZ_SCATT_TRIAG_H__
 
+#include <memory>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsItem>
@@ -104,16 +105,14 @@ class ScatteringTriangle : public QGraphicsItem
 {
 	public:
 		using t_powderline = typename tl::Powder<int,t_real_glob>::t_peak;
-	
+
 	protected:
-		bool m_bReady = 0;
+		bool m_bReady=0, m_bUpdate=0;
 
 		ScatteringTriangleScene &m_scene;
 
-		ScatteringTriangleNode *m_pNodeKiQ = 0;
-		ScatteringTriangleNode *m_pNodeKiKf = 0;
-		ScatteringTriangleNode *m_pNodeKfQ = 0;
-		ScatteringTriangleNode *m_pNodeGq = 0;
+		std::unique_ptr<ScatteringTriangleNode> m_pNodeKiQ,
+			m_pNodeKiKf, m_pNodeKfQ, m_pNodeGq;
 
 		t_real_glob m_dScaleFactor = 150.;	// pixels per A^-1 for zoom == 1.
 		t_real_glob m_dZoom = 1.;
@@ -197,10 +196,10 @@ class ScatteringTriangle : public QGraphicsItem
 		t_real_glob GetScaleFactor() const { return m_dScaleFactor; }
 		void SetScaleFactor(t_real_glob dScale) { m_dScaleFactor = dScale; }
 
-		ScatteringTriangleNode* GetNodeGq() { return m_pNodeGq; }
-		ScatteringTriangleNode* GetNodeKiQ() { return m_pNodeKiQ; }
-		ScatteringTriangleNode* GetNodeKfQ() { return m_pNodeKfQ; }
-		ScatteringTriangleNode* GetNodeKiKf() { return m_pNodeKiKf; }
+		ScatteringTriangleNode* GetNodeGq() { return m_pNodeGq.get(); }
+		ScatteringTriangleNode* GetNodeKiQ() { return m_pNodeKiQ.get(); }
+		ScatteringTriangleNode* GetNodeKfQ() { return m_pNodeKfQ.get(); }
+		ScatteringTriangleNode* GetNodeKiKf() { return m_pNodeKiKf.get(); }
 
 		ublas::vector<t_real_glob> GetHKLFromPlanePos(t_real_glob x, t_real_glob y) const;
 		ublas::vector<t_real_glob> GetQVec(bool bSmallQ=0, bool bRLU=1) const;	// careful: check sign
@@ -224,7 +223,7 @@ class ScatteringTriangle : public QGraphicsItem
 class ScatteringTriangleScene : public QGraphicsScene
 {	Q_OBJECT
 	protected:
-		ScatteringTriangle *m_pTri;
+		std::unique_ptr<ScatteringTriangle> m_pTri;
 		t_real_glob m_dMonoD = 3.355;
 		t_real_glob m_dAnaD = 3.355;
 
@@ -255,8 +254,8 @@ class ScatteringTriangleScene : public QGraphicsScene
 		void SetMonoSense(bool bPos);
 		void SetAnaSense(bool bPos);
 
-		const ScatteringTriangle* GetTriangle() const { return m_pTri; }
-		ScatteringTriangle* GetTriangle() { return m_pTri; }
+		const ScatteringTriangle* GetTriangle() const { return m_pTri.get(); }
+		ScatteringTriangle* GetTriangle() { return m_pTri.get(); }
 
 		void CheckForSpurions();
 

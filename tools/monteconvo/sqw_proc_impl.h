@@ -123,7 +123,9 @@ enum class ProcMsgTypes
 	SQW,
 	GET_VARS,
 	SET_VARS,
+
 	IS_OK,
+	READY,
 };
 
 struct ProcMsg
@@ -182,15 +184,21 @@ static void child_proc(proc::message_queue& msgToParent, proc::message_queue& ms
 {
 	std::unique_ptr<t_sqw> pSqw(new t_sqw(pcCfg));
 
+	// tell parent that pSqw is inited
+	ProcMsg msgReady;
+	msgReady.ty = ProcMsgTypes::READY;
+	msgReady.bRet = pSqw->IsOk();
+	msg_send(msgToParent, msgReady);
+
 	while(1)
 	{
 		ProcMsg msg = msg_recv(msgFromParent);
+		ProcMsg msgRet;
 
 		switch(msg.ty)
 		{
 			case ProcMsgTypes::SQW:
 			{
-				ProcMsg msgRet;
 				msgRet.ty = msg.ty;
 				msgRet.dRet = pSqw->operator()(msg.dParam1, msg.dParam2, msg.dParam3, msg.dParam4);
 				msg_send(msgToParent, msgRet);
@@ -198,7 +206,6 @@ static void child_proc(proc::message_queue& msgToParent, proc::message_queue& ms
 			}
 			case ProcMsgTypes::GET_VARS:
 			{
-				ProcMsg msgRet;
 				msgRet.ty = msg.ty;
 				msgRet.pPars = msg.pPars;	// use provided pointer to shared mem
 				pars_to_str(*msgRet.pPars, pSqw->GetVars());
@@ -208,11 +215,13 @@ static void child_proc(proc::message_queue& msgToParent, proc::message_queue& ms
 			case ProcMsgTypes::SET_VARS:
 			{
 				pSqw->SetVars(str_to_pars(*msg.pPars));
+				msgRet.ty = ProcMsgTypes::READY;
+				msgRet.bRet = 1;
+				msg_send(msgToParent, msgRet);
 				break;
 			}
 			case ProcMsgTypes::IS_OK:
 			{
-				ProcMsg msgRet;
 				msgRet.ty = msg.ty;
 				msgRet.bRet = pSqw->IsOk();
 				msg_send(msgToParent, msgRet);
@@ -276,7 +285,14 @@ SqwProc<t_sqw>::SqwProc(const char* pcCfg)
 			exit(0);
 		}
 
-		m_bOk = 1;
+		tl::log_debug("Waiting for client to become ready...");
+		ProcMsg msgReady = msg_recv(*m_pmsgIn);
+		if(!msgReady.bRet)
+			tl::log_err("Client reports failure.");
+		else
+			tl::log_debug("Client is ready.");
+
+		m_bOk = msgReady.bRet;
 	}
 	catch(const std::exception& ex)
 	{
@@ -288,6 +304,9 @@ SqwProc<t_sqw>::SqwProc(const char* pcCfg)
 template<class t_sqw>
 SqwProc<t_sqw>::~SqwProc()
 {
+	// is this instance the last?
+	if(m_pMem.use_count() > 1) return;
+
 	try
 	{
 		if(m_pmsgOut)
@@ -366,8 +385,12 @@ void SqwProc<t_sqw>::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 	msg.ty = ProcMsgTypes::SET_VARS;
 	msg.pPars = static_cast<decltype(msg.pPars)>(m_pSharedPars);
 	pars_to_str(*msg.pPars, vecVars);
-
+	//tl::log_debug("Message string: ", *msg.pPars);
 	msg_send(*m_pmsgOut, msg);
+
+	ProcMsg msgRet = msg_recv(*m_pmsgIn);
+	if(!msgRet.bRet)
+		tl::log_err("Could not set variables.");
 }
 
 template<class t_sqw>
@@ -381,6 +404,8 @@ SqwBase* SqwProc<t_sqw>::shallow_copy() const
 	pSqw->m_pmsgIn = this->m_pmsgIn;
 	pSqw->m_pmsgOut = this->m_pmsgOut;
 	pSqw->m_strProcName = this->m_strProcName;
+	pSqw->m_pidChild = this->m_pidChild;
+	pSqw->m_pSharedPars = this->m_pSharedPars;
 
 	return pSqw;
 }

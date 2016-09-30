@@ -1,4 +1,4 @@
-/*
+/**
  * TAS layout
  * @author tweber
  * @date feb-2014
@@ -51,15 +51,14 @@ QVariant TasLayoutNode::itemChange(GraphicsItemChange change, const QVariant &va
 
 // --------------------------------------------------------------------------------
 
-TasLayout::TasLayout(TasLayoutScene& scene) : m_scene(scene)
+TasLayout::TasLayout(TasLayoutScene& scene) : m_scene(scene),
+	m_pSrc(new TasLayoutNode(this)),
+	m_pMono(new TasLayoutNode(this)),
+	m_pSample(new TasLayoutNode(this)),
+	m_pAna(new TasLayoutNode(this)),
+	m_pDet(new TasLayoutNode(this))
 {
 	setFlag(QGraphicsItem::ItemIgnoresTransformations);
-
-	m_pSrc = new TasLayoutNode(this);
-	m_pMono = new TasLayoutNode(this);
-	m_pSample = new TasLayoutNode(this);
-	m_pAna = new TasLayoutNode(this);
-	m_pDet = new TasLayoutNode(this);
 
 	m_pSrc->setToolTip("Source");
 	m_pMono->setToolTip("Monochromator");
@@ -75,25 +74,19 @@ TasLayout::TasLayout(TasLayoutScene& scene) : m_scene(scene)
 
 	AllowMouseMove(1);
 
-	scene.addItem(m_pSrc);
-	scene.addItem(m_pMono);
-	scene.addItem(m_pSample);
-	scene.addItem(m_pAna);
-	scene.addItem(m_pDet);
+	scene.addItem(m_pSrc.get());
+	scene.addItem(m_pMono.get());
+	scene.addItem(m_pSample.get());
+	scene.addItem(m_pAna.get());
+	scene.addItem(m_pDet.get());
 
 	setAcceptedMouseButtons(0);
-	m_bReady = 1;
+	m_bUpdate = m_bReady = 1;
 }
 
 TasLayout::~TasLayout()
 {
-	m_bReady = 0;
-
-	delete m_pSrc;
-	delete m_pMono;
-	delete m_pSample;
-	delete m_pAna;
-	delete m_pDet;
+	m_bUpdate = m_bReady = 0;
 }
 
 void TasLayout::AllowMouseMove(bool bAllow)
@@ -109,17 +102,18 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 {
 	if(!m_bReady) return;
 
+	// prevents recursive calling of update
 	static bool bAllowUpdate = 1;
 	if(!bAllowUpdate) return;
 
-	const t_vec vecSrc = qpoint_to_vec(mapFromItem(m_pSrc, 0, 0));
-	const t_vec vecMono = qpoint_to_vec(mapFromItem(m_pMono, 0, 0));
-	const t_vec vecSample = qpoint_to_vec(mapFromItem(m_pSample, 0, 0));
-	const t_vec vecAna = qpoint_to_vec(mapFromItem(m_pAna, 0, 0));
-	const t_vec vecDet = qpoint_to_vec(mapFromItem(m_pDet, 0, 0));
+	const t_vec vecSrc = qpoint_to_vec(mapFromItem(m_pSrc.get(), 0, 0));
+	const t_vec vecMono = qpoint_to_vec(mapFromItem(m_pMono.get(), 0, 0));
+	const t_vec vecSample = qpoint_to_vec(mapFromItem(m_pSample.get(), 0, 0));
+	const t_vec vecAna = qpoint_to_vec(mapFromItem(m_pAna.get(), 0, 0));
+	const t_vec vecDet = qpoint_to_vec(mapFromItem(m_pDet.get(), 0, 0));
 
 	bAllowUpdate = 0;
-	if(pNode==m_pSample)
+	if(pNode == m_pSample.get())
 	{
 		//tl::log_debug("Sample node moved.");
 
@@ -143,7 +137,7 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 
 
 		t_vec vecSampleAna =
-				ublas::prod(tl::rotation_matrix_2d(-dTwoTheta), vecMonoSample);
+			ublas::prod(tl::rotation_matrix_2d(-dTwoTheta), vecMonoSample);
 		vecSampleAna /= ublas::norm_2(vecSampleAna);
 		vecSampleAna *= m_dLenSampleAna*m_dScaleFactor;
 
@@ -155,7 +149,7 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 		vecSampleAna /= ublas::norm_2(vecSampleAna);
 
 		t_vec vecAnaDet =
-				ublas::prod(tl::rotation_matrix_2d(-dAnaTwoTheta), vecSampleAna);
+			ublas::prod(tl::rotation_matrix_2d(-dAnaTwoTheta), vecSampleAna);
 		vecAnaDet /= ublas::norm_2(vecAnaDet);
 		vecAnaDet *= m_dLenAnaDet*m_dScaleFactor;
 
@@ -164,14 +158,10 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 
 		TriangleOptions opts;
 		opts.bChangedMonoTwoTheta = 1;
-		opts.bChangedTwoTheta = 1;
-		opts.bChangedAnaTwoTheta = 1;
 		opts.dMonoTwoTheta = m_dMonoTwoTheta;
-		opts.dTwoTheta = dTwoTheta;
-		opts.dAnaTwoTheta = dAnaTwoTheta;
 		m_scene.emitUpdate(opts);
 	}
-	else if(pNode==m_pMono)
+	else if(pNode == m_pMono.get())
 	{
 		//tl::log_debug("Mono node moved.");
 
@@ -204,7 +194,7 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 
 		m_pDet->setPos(vec_to_qpoint(vecAnaNew + vecAnaDet));
 	}
-	else if(pNode==m_pDet)
+	else if(pNode == m_pDet.get())
 	{
 		//tl::log_debug("Det node moved.");
 
@@ -222,7 +212,6 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 			if(m_dAnaTwoTheta < -tl::get_pi<t_real>()) m_dAnaTwoTheta += 2.*tl::get_pi<t_real>();
 			if(m_dAnaTwoTheta > tl::get_pi<t_real>()) m_dAnaTwoTheta -= 2.*tl::get_pi<t_real>();
 		}
-
 		//std::cout << m_dAnaTwoTheta/M_PI*180. << std::endl;
 
 		TriangleOptions opts;
@@ -231,12 +220,12 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 		m_scene.emitUpdate(opts);
 	}
 
-	if(/*pNode==m_pMono ||*/ pNode==m_pAna)
+	if(pNode == m_pAna.get())
 	{
 		//tl::log_debug("Ana node moved.");
 
 		t_vec vecSampleAna = vecAna-vecSample;
-		if(pNode==m_pAna && m_bAllowChanges)
+		if(pNode == m_pAna.get() && m_bAllowChanges)
 			m_dLenSampleAna = ublas::norm_2(vecSampleAna)/m_dScaleFactor;
 		vecSampleAna /= ublas::norm_2(vecSampleAna);
 
@@ -264,8 +253,12 @@ void TasLayout::nodeMoved(const TasLayoutNode *pNode)
 	}
 
 	bAllowUpdate = 1;
-	this->update();
-	m_scene.emitAllParams();
+
+	if(m_bUpdate)
+	{
+		this->update();
+		m_scene.emitAllParams();
+	}
 }
 
 QRectF TasLayout::boundingRect() const
@@ -279,11 +272,11 @@ void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 	const bool bDisplayLengths = 0;
 	painter->setFont(g_fontGfx);
 
-	QPointF ptSrc = mapFromItem(m_pSrc, 0, 0) * m_dZoom;
-	QPointF ptMono = mapFromItem(m_pMono, 0, 0) * m_dZoom;
-	QPointF ptSample = mapFromItem(m_pSample, 0, 0) * m_dZoom;
-	QPointF ptAna = mapFromItem(m_pAna, 0, 0) * m_dZoom;
-	QPointF ptDet = mapFromItem(m_pDet, 0, 0) * m_dZoom;
+	QPointF ptSrc = mapFromItem(m_pSrc.get(), 0, 0) * m_dZoom;
+	QPointF ptMono = mapFromItem(m_pMono.get(), 0, 0) * m_dZoom;
+	QPointF ptSample = mapFromItem(m_pSample.get(), 0, 0) * m_dZoom;
+	QPointF ptAna = mapFromItem(m_pAna.get(), 0, 0) * m_dZoom;
+	QPointF ptDet = mapFromItem(m_pDet.get(), 0, 0) * m_dZoom;
 
 	QLineF lineSrcMono(ptSrc, ptMono);
 	QLineF lineKi(ptMono, ptSample);
@@ -521,9 +514,9 @@ void TasLayout::SetSampleTwoTheta(t_real dAngle)
 	m_dTwoTheta = dAngle;
 	//std::cout << m_dTwoTheta/M_PI*180. << std::endl;
 
-	t_vec vecMono = qpoint_to_vec(mapFromItem(m_pMono, 0, 0));
-	t_vec vecSample = qpoint_to_vec(mapFromItem(m_pSample, 0, 0));
-	t_vec vecAna = qpoint_to_vec(mapFromItem(m_pAna, 0, 0));
+	t_vec vecMono = qpoint_to_vec(mapFromItem(m_pMono.get(), 0, 0));
+	t_vec vecSample = qpoint_to_vec(mapFromItem(m_pSample.get(), 0, 0));
+	t_vec vecAna = qpoint_to_vec(mapFromItem(m_pAna.get(), 0, 0));
 
 	t_vec vecKi = vecSample - vecMono;
 	vecKi /= ublas::norm_2(vecKi);
@@ -534,10 +527,15 @@ void TasLayout::SetSampleTwoTheta(t_real dAngle)
 	vecKf /= ublas::norm_2(vecKf);
 	vecKf *= dLenKf;
 
-	m_pAna->setPos(vec_to_qpoint(vecSample + vecKf));
 
-	nodeMoved(m_pSample);
-	nodeMoved(m_pAna);
+	m_bReady = m_bUpdate = 0;
+	m_pAna->setPos(vec_to_qpoint(vecSample + vecKf));
+	m_bReady = 1;
+
+	// don't call update twice
+	nodeMoved(m_pSample.get());
+	m_bUpdate = 1;
+	nodeMoved(m_pAna.get());
 }
 
 void TasLayout::SetSampleTheta(t_real dAngle)
@@ -549,13 +547,13 @@ void TasLayout::SetSampleTheta(t_real dAngle)
 void TasLayout::SetMonoTwoTheta(t_real dAngle)
 {
 	m_dMonoTwoTheta = dAngle;
-	nodeMoved(m_pMono);
+	nodeMoved(m_pMono.get());
 }
 
 void TasLayout::SetAnaTwoTheta(t_real dAngle)
 {
 	m_dAnaTwoTheta = dAngle;
-	nodeMoved(m_pAna);
+	nodeMoved(m_pAna.get());
 }
 
 void TasLayout::SetAngleKiQ(t_real dAngle)
@@ -579,7 +577,8 @@ void TasLayout::SetZoom(t_real dZoom)
 std::vector<TasLayoutNode*> TasLayout::GetNodes()
 {
 	return std::vector<TasLayoutNode*>
-			{ m_pSrc, m_pMono, m_pSample, m_pAna, m_pDet };
+			{ m_pSrc.get(), m_pMono.get(), m_pSample.get(),
+			m_pAna.get(), m_pDet.get() };
 }
 
 std::vector<std::string> TasLayout::GetNodeNames() const
@@ -591,16 +590,14 @@ std::vector<std::string> TasLayout::GetNodeNames() const
 // --------------------------------------------------------------------------------
 
 
-TasLayoutScene::TasLayoutScene(QObject *pParent) : QGraphicsScene(pParent)
+TasLayoutScene::TasLayoutScene(QObject *pParent)
+	: QGraphicsScene(pParent), m_pTas(new TasLayout(*this))
 {
-	m_pTas = new TasLayout(*this);
-	this->addItem(m_pTas);
+	this->addItem(m_pTas.get());
 }
 
 TasLayoutScene::~TasLayoutScene()
-{
-	delete m_pTas;
-}
+{}
 
 void TasLayoutScene::emitAllParams()
 {

@@ -73,12 +73,12 @@ TofLayout::TofLayout(TofLayoutScene& scene) : m_scene(scene)
 	scene.addItem(m_pDet);
 
 	setAcceptedMouseButtons(0);
-	m_bReady = 1;
+	m_bUpdate = m_bReady = 1;
 }
 
 TofLayout::~TofLayout()
 {
-	m_bReady = 0;
+	m_bUpdate = m_bReady = 0;
 
 	delete m_pSrc;
 	delete m_pSample;
@@ -96,6 +96,7 @@ void TofLayout::nodeMoved(const TofLayoutNode *pNode)
 {
 	if(!m_bReady) return;
 
+	// prevents recursive calling of update
 	static bool bAllowUpdate = 1;
 	if(!bAllowUpdate) return;
 
@@ -152,8 +153,12 @@ void TofLayout::nodeMoved(const TofLayoutNode *pNode)
 	}
 
 	bAllowUpdate = 1;
-	this->update();
-	m_scene.emitAllParams();
+
+	if(m_bUpdate)
+	{
+		this->update();
+		m_scene.emitAllParams();
+	}
 }
 
 QRectF TofLayout::boundingRect() const
@@ -410,9 +415,13 @@ void TofLayout::SetSampleTwoTheta(t_real dAngle)
 	vecKf /= ublas::norm_2(vecKf);
 	vecKf *= dLenKf;
 
+	m_bUpdate = m_bReady = 0;
 	m_pDet->setPos(vec_to_qpoint(vecSample + vecKf));
+	m_bReady = 1;
 
+	// don't call update twice
 	nodeMoved(m_pSample);
+	m_bUpdate = 1;
 	nodeMoved(m_pDet);
 }
 

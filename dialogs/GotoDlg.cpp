@@ -101,16 +101,11 @@ void GotoDlg::CalcSample()
 	for(QLineEdit* pEdit : vecEdits)
 		pEdit->setText("");
 
-	bool bHOk=0, bKOk=0, bLOk=0, bKiOk=0, bKfOk=0;
-
-	t_real dH = editH->text().toDouble(&bHOk);
-	t_real dK = editK->text().toDouble(&bKOk);
-	t_real dL = editL->text().toDouble(&bLOk);
-	t_real dKi = editKi->text().toDouble(&bKiOk);
-	t_real dKf = editKf->text().toDouble(&bKfOk);
-
-	if(!bHOk || !bKOk || !bLOk || !bKiOk || !bKfOk)
-		return;
+	t_real dH = tl::str_to_var_parse<t_real>(editH->text().toStdString());
+	t_real dK = tl::str_to_var_parse<t_real>(editK->text().toStdString());
+	t_real dL = tl::str_to_var_parse<t_real>(editL->text().toStdString());
+	t_real dKi = tl::str_to_var_parse<t_real>(editKi->text().toStdString());
+	t_real dKf = tl::str_to_var_parse<t_real>(editKf->text().toStdString());
 
 	ublas::vector<t_real> vecQ;
 	bool bFailed = 0;
@@ -180,10 +175,8 @@ void GotoDlg::CalcMonoAna()
 	for(QLineEdit* pEdit : vecEdits)
 		pEdit->setText("");
 
-	bool bKiOk=0, bKfOk=0;
-	t_real dKi = editKi->text().toDouble(&bKiOk);
-	t_real dKf = editKf->text().toDouble(&bKfOk);
-	if(!bKiOk || !bKfOk) return;
+	t_real dKi = tl::str_to_var_parse<t_real>(editKi->text().toStdString());
+	t_real dKf = tl::str_to_var_parse<t_real>(editKf->text().toStdString());
 
 	tl::t_wavenumber_si<t_real> ki = dKi / angs;
 	tl::t_wavenumber_si<t_real> kf = dKf / angs;
@@ -251,10 +244,8 @@ void GotoDlg::CalcMonoAna()
 
 void GotoDlg::EditedKiKf()
 {
-	bool bKiOk=0, bKfOk=0;
-	t_real dKi = editKi->text().toDouble(&bKiOk);
-	t_real dKf = editKf->text().toDouble(&bKfOk);
-	if(!bKiOk || !bKfOk) return;
+	t_real dKi = tl::str_to_var_parse<t_real>(editKi->text().toStdString());
+	t_real dKf = tl::str_to_var_parse<t_real>(editKf->text().toStdString());
 
 	tl::t_energy_si<t_real> Ei = tl::k2E(dKi / angs);
 	tl::t_energy_si<t_real> Ef = tl::k2E(dKf / angs);
@@ -272,9 +263,7 @@ void GotoDlg::EditedKiKf()
 
 void GotoDlg::EditedE()
 {
-	bool bOk = 0;
-	t_real dE = editE->text().toDouble(&bOk);
-	if(!bOk) return;
+	t_real dE = tl::str_to_var_parse<t_real>(editE->text().toStdString());
 	tl::t_energy_si<t_real> E = dE * meV;
 
 	bool bImag=0;
@@ -284,9 +273,7 @@ void GotoDlg::EditedE()
 
 	if(radioFixedKi->isChecked())
 	{
-		bool bKOk = 0;
-		t_real dKi = editKi->text().toDouble(&bKOk);
-		if(!bKOk) return;
+		t_real dKi = tl::str_to_var_parse<t_real>(editKi->text().toStdString());
 
 		tl::t_wavenumber_si<t_real> ki = dKi / angs;
 		tl::t_wavenumber_si<t_real> kf =
@@ -300,9 +287,7 @@ void GotoDlg::EditedE()
 	}
 	else
 	{
-		bool bKOk = 0;
-		t_real dKf = editKf->text().toDouble(&bKOk);
-		if(!bKOk) return;
+		t_real dKf = tl::str_to_var_parse<t_real>(editKf->text().toStdString());
 
 		tl::t_wavenumber_si<t_real> kf = dKf / angs;
 		tl::t_wavenumber_si<t_real> ki =
@@ -322,25 +307,16 @@ void GotoDlg::EditedE()
 // calc. tas angles -> hkl
 void GotoDlg::EditedAngles()
 {
-	bool bthmOk;
-	t_real th_m = tl::d2r(edit2ThetaM->text().toDouble(&bthmOk)/2.);
+	t_real th_m = tl::d2r(tl::str_to_var_parse<t_real>(edit2ThetaM->text().toStdString())/2.);
 	tl::set_eps_0(th_m, g_dEps);
-	if(bthmOk)
-		editThetaM->setText(tl::var_to_str<t_real>(tl::r2d(th_m), g_iPrec).c_str());
+	editThetaM->setText(tl::var_to_str<t_real>(tl::r2d(th_m), g_iPrec).c_str());
 
-	bool bthaOk;
-	t_real th_a = tl::d2r(edit2ThetaA->text().toDouble(&bthaOk)/2.);
+	t_real th_a = tl::d2r(tl::str_to_var_parse<t_real>(edit2ThetaA->text().toStdString())/2.);
 	tl::set_eps_0(th_a, g_dEps);
-	if(bthaOk)
-		editThetaA->setText(tl::var_to_str<t_real>(tl::r2d(th_a), g_iPrec).c_str());
+	editThetaA->setText(tl::var_to_str<t_real>(tl::r2d(th_a), g_iPrec).c_str());
 
-	bool bthsOk, bttsOk;
-	t_real th_s = tl::d2r(editThetaS->text().toDouble(&bthsOk));
-	t_real tt_s = tl::d2r(edit2ThetaS->text().toDouble(&bttsOk));
-
-	if(!bthmOk || !bthaOk || !bthsOk || !bttsOk)
-		return;
-
+	t_real th_s = tl::d2r(tl::str_to_var_parse<t_real>(editThetaS->text().toStdString()));
+	t_real tt_s = tl::d2r(tl::str_to_var_parse<t_real>(edit2ThetaS->text().toStdString()));
 
 	t_real h,k,l;
 	t_real dKi, dKf, dE;
@@ -572,11 +548,11 @@ void GotoDlg::AddPosToList(t_real dh, t_real dk, t_real dl, t_real dki, t_real d
 
 void GotoDlg::AddPosToList()
 {
-	t_real dh = tl::str_to_var<t_real>(editH->text().toStdString());
-	t_real dk = tl::str_to_var<t_real>(editK->text().toStdString());
-	t_real dl = tl::str_to_var<t_real>(editL->text().toStdString());
-	t_real dki = tl::str_to_var<t_real>(editKi->text().toStdString());
-	t_real dkf = tl::str_to_var<t_real>(editKf->text().toStdString());
+	t_real dh = tl::str_to_var_parse<t_real>(editH->text().toStdString());
+	t_real dk = tl::str_to_var_parse<t_real>(editK->text().toStdString());
+	t_real dl = tl::str_to_var_parse<t_real>(editL->text().toStdString());
+	t_real dki = tl::str_to_var_parse<t_real>(editKi->text().toStdString());
+	t_real dkf = tl::str_to_var_parse<t_real>(editKf->text().toStdString());
 
 	AddPosToList(dh, dk, dl, dki, dkf);
 }

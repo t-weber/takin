@@ -32,6 +32,7 @@ static const auto angs = tl::get_one_angstrom<t_real>();
 static const auto rads = tl::get_one_radian<t_real>();
 static const auto meV = tl::get_one_meV<t_real>();
 static const auto cm = tl::get_one_centimeter<t_real>();
+static const t_real sig2fwhm = tl::get_SIGMA2FWHM<t_real>();
 
 
 ResoResults calc_pop(const PopParams& pop)
@@ -181,7 +182,7 @@ ResoResults calc_pop(const PopParams& pop)
 		dSiAna[0], dSiAna[1], dSiAna[2],
 		dSiDet[0], dSiDet[1]});
 
-	SI *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
+	SI *= sig2fwhm*sig2fwhm;
 
 	t_mat S;
 	if(!tl::inverse(SI, S))
@@ -218,6 +219,7 @@ ResoResults calc_pop(const PopParams& pop)
 
 	t_real dmono_refl = pop.dmono_refl * std::get<0>(tupScFact);
 	t_real dana_effic = pop.dana_effic * std::get<1>(tupScFact);
+	t_real dxsec = std::get<2>(tupScFact);
 
 
 	//if(pop.bMonoIsCurvedH) tl::log_debug("mono curv h: ", mono_curvh);
@@ -334,7 +336,7 @@ ResoResults calc_pop(const PopParams& pop)
 	// -------------------------------------------------------------------------
 
 
-	res.reso *= tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>();
+	res.reso *= sig2fwhm*sig2fwhm;
 	res.reso_v = ublas::zero_vector<t_real>(4);
 	res.reso_s = 0.;
 
@@ -352,9 +354,6 @@ ResoResults calc_pop(const PopParams& pop)
 	const t_real pi = tl::get_pi<t_real>();
 	if(pop.flags & CALC_R0)
 	{
-		//SI /= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
-		//S *= tl::SIGMA2FWHM*tl::SIGMA2FWHM;
-
 		// resolution volume, [pop75], equ. 13a & 16
 		// [D] = 1/cm, [SI] = cm^2
 		t_mat DSiDt = tl::transform_inv(SI, D, 1);
@@ -369,6 +368,7 @@ ResoResults calc_pop(const PopParams& pop)
 		t_real dP0 = dmono_refl*dana_effic *
 			t_real((2.*pi)*(2.*pi)*(2.*pi)*(2.*pi)) /
 			std::sqrt(tl::determinant(DSiDti));
+		dP0 *= dxsec;
 
 		// [T] = 1/cm, [F] = 1/rad^2, [pop75], equ. 15
 		t_mat K = S + tl::transform(F, T, 1);
@@ -388,7 +388,7 @@ ResoResults calc_pop(const PopParams& pop)
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = sig2fwhm/sqrt(res.reso(i,i));
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

@@ -12,6 +12,7 @@
 #include "tlibs/helper/thread.h"
 #include "tlibs/gfx/gnuplot.h"
 #include "tlibs/time/stopwatch.h"
+#include "tlibs/math/rand.h"
 #include "libs/version.h"
 
 #include <iostream>
@@ -47,6 +48,8 @@ std::string g_strOutFileSuffix;
 
 bool run_job(const std::string& strJob)
 {
+	tl::init_rand();
+
 	// Parameters
 	tl::Prop<std::string> prop;
 	if(!prop.Load(strJob.c_str(), tl::PropType::INFO))
@@ -703,7 +706,6 @@ int main(int argc, char** argv)
 		tl::log_info("Written by Tobias Weber <tobias.weber@tum.de>, 2014-2016.");
 		tl::log_debug("Resolution calculation uses ", sizeof(t_real_reso)*8, " bit ", tl::get_typename<t_real_reso>(), "s.");
 		tl::log_debug("Fitting uses ", sizeof(tl::t_real_min)*8, " bit ", tl::get_typename<tl::t_real_min>(), "s.");
-
 
 		// --------------------------------------------------------------------
 		// get job files and program options

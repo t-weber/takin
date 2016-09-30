@@ -479,6 +479,16 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="checkUseKfKi">
+            <property name="text">
+             <string>Calculate kf/ki Factor</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -556,7 +566,7 @@
              <string> arcmin</string>
             </property>
             <property name="maximum">
-             <double>99990000.000000000000000</double>
+             <double>9999.000000000000000</double>
             </property>
             <property name="value">
              <double>9999.000000000000000</double>
@@ -576,7 +586,7 @@
              <string> arcmin</string>
             </property>
             <property name="maximum">
-             <double>99990000.000000000000000</double>
+             <double>9999.000000000000000</double>
             </property>
             <property name="value">
              <double>9999.000000000000000</double>
@@ -3201,6 +3211,7 @@
   <tabstop>checkUseR0</tabstop>
   <tabstop>checkUseKi3</tabstop>
   <tabstop>checkUseKf3</tabstop>
+  <tabstop>checkUseKiKf</tabstop>
   <tabstop>spinMonoW</tabstop>
   <tabstop>spinMonoH</tabstop>
   <tabstop>spinMonoThick</tabstop>

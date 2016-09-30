@@ -35,6 +35,8 @@ static const auto rads = tl::get_one_radian<t_real>();
 static const auto meV = tl::get_one_meV<t_real>();
 static const auto cm = tl::get_one_centimeter<t_real>();
 static const auto secs = tl::get_one_second<t_real>();
+static const t_real pi = tl::get_pi<t_real>();
+static const t_real sig2fwhm = tl::get_SIGMA2FWHM<t_real>();
 
 
 static std::tuple<t_mat, t_vec, t_real, t_real, t_real>
@@ -56,24 +58,22 @@ get_mono_vals(const length& src_w, const length& src_h,
 		const auto A_tx = inv_mono_curvh*dist_mono_sample / units::abs(units::sin(thetam));
 		const auto A_t1 = A_t0*A_tx;
 
-		A(0,0) = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			/ (ki*angs*ki*angs) *
+		A(0,0) = t_real(0.5)*sig2fwhm*sig2fwhm / (ki*angs*ki*angs) *
 			units::tan(thetam)*units::tan(thetam) *
 		(
 /*a*/			+ units::pow<2>(t_real(2)/coll_h_pre_mono) *rads*rads
 /*b*/			+ units::pow<2>(t_real(2)*dist_src_mono/src_w)
 /*c*/			+ A_t0*A_t0 *rads*rads
 		);
-		A(0,1) = A(1,0) = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			/ (ki*angs*ki*angs) * units::tan(thetam) *
+		A(0,1) = A(1,0) = t_real(0.5)*sig2fwhm*sig2fwhm / (ki*angs*ki*angs)
+			* units::tan(thetam) *
 		(
 /*w*/			+ t_real(2)*tl::my_units_pow2(t_real(1)/coll_h_pre_mono) *rads*rads
 /*x*/			+ t_real(2)*dist_src_mono*(dist_src_mono-dist_mono_sample)/(src_w*src_w)
 /*y*/			+ A_t0*A_t0 * rads*rads
 /*z*/			- A_t0*A_t1 *rads*rads
 		);
-		A(1,1) = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			/ (ki*angs*ki*angs) *
+		A(1,1) = t_real(0.5)*sig2fwhm*sig2fwhm / (ki*angs*ki*angs) *
 		(
 /*1*/			+ units::pow<2>(t_real(1)/coll_h_pre_mono) *rads*rads
 /*2*/			+ units::pow<2>(t_real(1)/coll_h_pre_sample) *rads*rads
@@ -95,8 +95,7 @@ get_mono_vals(const length& src_w, const length& src_h,
 		const auto Av_t0 = t_real(0.5) / (mono_mosaic_v*units::abs(units::sin(thetam)));
 		const auto Av_t1 = inv_mono_curvv*dist_mono_sample / mono_mosaic_v;
 
-		Av(0,0) = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			/ (ki*angs*ki*angs) *
+		Av(0,0) = t_real(0.5)*sig2fwhm*sig2fwhm / (ki*angs*ki*angs) *
 		(
 /*1*/	//		+ units::pow<2>(t_real(1)/coll_v_pre_mono) *rads*rads	// missing in paper?
 /*2*/			+ units::pow<2>(t_real(1)/coll_v_pre_sample) *rads*rads
@@ -107,16 +106,14 @@ get_mono_vals(const length& src_w, const length& src_h,
 /*6*/			- t_real(2)*Av_t0*Av_t1 * rads*rads
 /*7*/			+ Av_t1*Av_t1 * rads*rads 				// missing in paper?
 		);
-		Av(0,1) = Av(1,0) = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			/ (ki*angs*ki*angs) *
+		Av(0,1) = Av(1,0) = t_real(0.5)*sig2fwhm*sig2fwhm / (ki*angs*ki*angs) *
 		(
 /*w*/	//		- units::pow<2>(1./coll_v_pre_mono) *rads*rads		// missing in paper?
 /*~x*/			+ dist_src_mono*dist_mono_sample/(src_h*src_h)
 /*y*/			- Av_t0*Av_t0 * rads*rads
 /*z*/			+ Av_t0*Av_t1 * rads*rads
 		);
-		Av(1,1) = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			/ (ki*angs*ki*angs) *
+		Av(1,1) = t_real(0.5)*sig2fwhm*sig2fwhm / (ki*angs*ki*angs) *
 		(
 /*a*/			+ units::pow<2>(t_real(1)/(coll_v_pre_mono)) *rads*rads
 /*b*/			+ units::pow<2>(dist_src_mono/src_h)
@@ -129,14 +126,12 @@ get_mono_vals(const length& src_w, const length& src_h,
 	{
 		const auto B_t0 = inv_mono_curvh / (mono_mosaic*mono_mosaic*units::abs(units::sin(thetam)));
 
-		B(0) = tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			* pos_y / (ki*angs) * units::tan(thetam) *
+		B(0) = sig2fwhm*sig2fwhm * pos_y / (ki*angs) * units::tan(thetam) *
 		(
 /*i*/			+ t_real(2)*dist_src_mono / (src_w*src_w)
 /*j*/			+ B_t0 *rads*rads
 		);
-		B(1) = tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			* pos_y / (ki*angs) *
+		B(1) = sig2fwhm*sig2fwhm * pos_y / (ki*angs) *
 		(
 /*r*/			- dist_mono_sample / (units::pow<2>(mono_w*units::abs(units::sin(thetam))))
 /*s*/			+ B_t0 * rads*rads
@@ -151,16 +146,14 @@ get_mono_vals(const length& src_w, const length& src_h,
 	{
 		const auto Bv_t0 = inv_mono_curvv/(mono_mosaic_v*mono_mosaic_v);
 
-		Bv(0) = tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			* pos_z / (ki*angs) * t_real(-1.) *
+		Bv(0) = sig2fwhm*sig2fwhm * pos_z / (ki*angs) * t_real(-1.) *
 		(
 /*r*/			+ dist_mono_sample / (mono_h*mono_h)	// typo in paper?
 /*~s*/			- t_real(0.5)*Bv_t0 *rads*rads / units::abs(units::sin(thetam))
 /*~t*/			+ Bv_t0 * rads*rads * inv_mono_curvv*dist_mono_sample
 /*~u*/			+ dist_mono_sample / (src_h*src_h)		// typo in paper?
 		);
-		Bv(1) = tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-			* pos_z / (ki*angs) * t_real(-1.) *
+		Bv(1) = sig2fwhm*sig2fwhm * pos_z / (ki*angs) * t_real(-1.) *
 		(
 /*i*/			+ dist_src_mono / (src_h*src_h)			// typo in paper?
 /*j*/			+ t_real(0.5)*Bv_t0/units::abs(units::sin(thetam)) * rads*rads
@@ -169,8 +162,7 @@ get_mono_vals(const length& src_w, const length& src_h,
 
 
 	// C scalar: formula 28 in [eck14]
-	t_real C = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-		* pos_y*pos_y *
+	t_real C = t_real(0.5)*sig2fwhm*sig2fwhm * pos_y*pos_y *
 	(
 		t_real(1)/(src_w*src_w) +
 		units::pow<2>(t_real(1)/(mono_w*units::abs(units::sin(thetam)))) +
@@ -178,8 +170,7 @@ get_mono_vals(const length& src_w, const length& src_h,
 	);
 
 	// Cv scalar: formula 40 in [eck14]
-	t_real Cv = t_real(0.5)*tl::get_SIGMA2FWHM<t_real>()*tl::get_SIGMA2FWHM<t_real>()
-		* pos_z*pos_z *
+	t_real Cv = t_real(0.5)*sig2fwhm*sig2fwhm * pos_z*pos_z *
 	(
 		t_real(1)/(src_h*src_h) +
 		t_real(1)/(mono_h*mono_h) +
@@ -194,7 +185,7 @@ get_mono_vals(const length& src_w, const length& src_h,
 
 
 	// [eck14], equ. 54
-	t_real refl = dRefl * std::sqrt(tl::get_pi<t_real>()/Av(1,1));
+	t_real refl = dRefl * std::sqrt(pi/Av(1,1));
 
 
 	return std::make_tuple(A, B, C, D, refl);
@@ -280,6 +271,7 @@ ResoResults calc_eck(const EckParams& eck)
 
 	t_real dmono_refl = eck.dmono_refl * std::get<0>(tupScFact);
 	t_real dana_effic = eck.dana_effic * std::get<1>(tupScFact);
+	t_real dxsec = std::get<2>(tupScFact);
 
 
 	//--------------------------------------------------------------------------
@@ -418,8 +410,8 @@ ResoResults calc_eck(const EckParams& eck)
 	t_real W = (C + D + G + H) - 0.25*V1[5]/U1(5,5) - 0.25*V2[4]/U2(4,4);
 
 	t_real Z = dReflM*dReflA
-		* std::sqrt(tl::get_pi<t_real>()/std::abs(U1(5,5)))
-		* std::sqrt(tl::get_pi<t_real>()/std::abs(U2(4,4)));
+		* std::sqrt(pi/std::abs(U1(5,5)))
+		* std::sqrt(pi/std::abs(U2(4,4)));
 
 	/*std::cout << "U = " << U << std::endl;
 	std::cout << "V = " << V << std::endl;
@@ -446,10 +438,11 @@ ResoResults calc_eck(const EckParams& eck)
 	// prefactor and volume
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
 	res.dR0 = Z*std::exp(-W) /** res.dResVol*/;
+	res.dR0 *= dxsec;
 
 	// Bragg widths
 	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
+		res.dBraggFWHMs[i] = sig2fwhm/sqrt(res.reso(i,i));
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

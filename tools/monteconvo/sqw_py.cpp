@@ -26,7 +26,9 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 		if(!bInited)
 		{
 			::Py_InitializeEx(0);
-			tl::log_debug("Initialised Python interpreter version ", Py_GetVersion(), ".");
+			std::string strPy = Py_GetVersion();
+			tl::find_all_and_replace(strPy, std::string("\n"), std::string(", "));
+			tl::log_debug("Initialised Python interpreter version ", strPy, ".");
 			bInited = 1;
 		}
 
@@ -97,7 +99,11 @@ SqwPy::~SqwPy()
 
 t_real SqwPy::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 {
-	if(!m_bOk) return t_real(0);
+	if(!m_bOk)
+	{
+		tl::log_err("Interpreter has not initialised, cannot query S(q,w).");
+		return t_real(0);
+	}
 
 	std::lock_guard<std::mutex> lock(*m_pmtx);
 	try
@@ -117,7 +123,11 @@ t_real SqwPy::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 std::vector<SqwBase::t_var> SqwPy::GetVars() const
 {
 	std::vector<SqwBase::t_var> vecVars;
-	if(!m_bOk) return vecVars;
+	if(!m_bOk)
+	{
+		tl::log_err("Interpreter has not initialised, cannot get variables.");
+		return vecVars;
+	}
 
 	try
 	{
@@ -139,8 +149,7 @@ std::vector<SqwBase::t_var> SqwPy::GetVars() const
 				continue;
 
 			// value
-			std::string strValue = py::extract<std::string>(dict.items()[i][1]
-				.attr("__repr__")());
+			std::string strValue = py::extract<std::string>(dict.items()[i][1].attr("__repr__")());
 			if(strValue.length() > MAX_PARAM_VAL_SIZE)
 			{
 				//tl::log_warn("Value of variable \"", strName, "\" is too large, skipping.");
@@ -167,11 +176,24 @@ std::vector<SqwBase::t_var> SqwPy::GetVars() const
 
 void SqwPy::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 {
-	if(!m_bOk) return;
+	if(!m_bOk)
+	{
+		tl::log_err("Interpreter has not initialised, cannot set variables.");
+		return;
+	}
+
+	/*for(const auto& var : vecVars)
+	{
+		tl::log_debug("Setting variable \"", std::get<0>(var),
+			"\" to \"", std::get<2>(var), "\".");
+	}*/
 
 	try
 	{
 		py::dict dict = py::extract<py::dict>(m_mod.attr("__dict__"));
+		std::vector<bool> vecVarsSet;
+		for(std::size_t iCurVar=0; iCurVar<vecVars.size(); ++iCurVar)
+			vecVarsSet.push_back(0);
 
 		for(py::ssize_t i=0; i<py::len(dict.items()); ++i)
 		{
@@ -183,12 +205,14 @@ void SqwPy::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 			// look for the variable name in vecVars
 			bool bFound = 0;
 			std::string strNewVal;
-			for(const SqwBase::t_var& var : vecVars)
+			for(std::size_t iCurVar=0; iCurVar<vecVars.size(); ++iCurVar)
 			{
+				const SqwBase::t_var& var = vecVars[iCurVar];
 				if(std::get<0>(var) == strName)
 				{
 					bFound = 1;
 					strNewVal = std::get<2>(var);
+					vecVarsSet[iCurVar] = 1;
 					break;
 				}
 			}
@@ -202,8 +226,22 @@ void SqwPy::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 			//tl::log_debug(strName, " = ", strNewVal);
 		}
 
+		for(std::size_t iCurVar=0; iCurVar<vecVarsSet.size(); ++iCurVar)
+		{
+			bool bVarSet = vecVarsSet[iCurVar];
+			if(!bVarSet)
+			{
+				tl::log_err("Could not set variable \"", std::get<0>(vecVars[iCurVar]),
+					"\" as it was not found.");
+			}
+		}
+
 		// TODO: check for changed parameters and if reinit is needed
-		if(!!m_Init) m_Init();
+		if(!!m_Init)
+		{
+			//tl::log_debug("Calling TakinInit...");
+			m_Init();
+		}
 	}
 	catch(const py::error_already_set& ex)
 	{

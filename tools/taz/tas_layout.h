@@ -1,4 +1,4 @@
-/*
+/**
  * TAS layout
  * @author tweber
  * @date feb-2014
@@ -13,6 +13,7 @@
 #include "libs/globals_qt.h"
 
 #include <cmath>
+#include <memory>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsItem>
@@ -49,14 +50,11 @@ class TasLayoutScene;
 class TasLayout : public QGraphicsItem
 {
 	protected:
-		bool m_bReady = 0;
+		bool m_bReady = 0, m_bUpdate = 0;
 		TasLayoutScene& m_scene;
 
-		TasLayoutNode *m_pSrc = 0;
-		TasLayoutNode *m_pMono = 0;
-		TasLayoutNode *m_pSample = 0;
-		TasLayoutNode *m_pAna = 0;
-		TasLayoutNode *m_pDet = 0;
+		std::unique_ptr<TasLayoutNode> m_pSrc,
+			m_pMono, m_pSample, m_pAna, m_pDet;
 
 		t_real_glob m_dMonoTwoTheta = 3.1415/2.;
 		t_real_glob m_dAnaTwoTheta = 3.1415/2.;
@@ -127,7 +125,7 @@ class TasLayout : public QGraphicsItem
 class TasLayoutScene : public QGraphicsScene
 {	Q_OBJECT
 	protected:
-		TasLayout *m_pTas;
+		std::unique_ptr<TasLayout> m_pTas;
 		bool m_bDontEmitChange = 1;
 
 	protected:
@@ -142,7 +140,7 @@ class TasLayoutScene : public QGraphicsScene
 		void SetEmitChanges(bool bEmit) { m_bDontEmitChange = !bEmit; }
 		void emitUpdate(const TriangleOptions& opts);
 
-		TasLayout* GetTasLayout() { return m_pTas; }
+		TasLayout* GetTasLayout() { return m_pTas.get(); }
 
 		void emitAllParams();
 

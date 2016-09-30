@@ -79,11 +79,13 @@ void mc_neutrons(const Ellipsoid4d<typename t_vec::value_type>& ell4d,
 
 	for(std::size_t iCur=0; iCur<iNum; ++iCur)
 	{
-		t_vec vecMC = tl::rand_norm_nd<t_vec>({0.,0.,0.,0.},
-			{ ell4d.x_hwhm*tl::get_HWHM2SIGMA<t_real>(),
-			ell4d.y_hwhm*tl::get_HWHM2SIGMA<t_real>(),
-			ell4d.z_hwhm*tl::get_HWHM2SIGMA<t_real>(),
-			ell4d.w_hwhm*tl::get_HWHM2SIGMA<t_real>() });
+		t_vec vecMC = tl::make_vec<t_vec, std::vector>(
+			tl::rand_norm_nd<t_real, std::vector>
+				({0.,0.,0.,0.},
+				{ ell4d.x_hwhm*tl::get_HWHM2SIGMA<t_real>(),
+				ell4d.y_hwhm*tl::get_HWHM2SIGMA<t_real>(),
+				ell4d.z_hwhm*tl::get_HWHM2SIGMA<t_real>(),
+				ell4d.w_hwhm*tl::get_HWHM2SIGMA<t_real>() }));
 
 		vecMC = ublas::prod(rot, vecMC);
 		if(!opts.bCenter)

@@ -49,7 +49,7 @@ class TofLayoutScene;
 class TofLayout : public QGraphicsItem
 {
 	protected:
-		bool m_bReady = 0;
+		bool m_bReady = 0, m_bUpdate = 0;
 		TofLayoutScene& m_scene;
 
 		TofLayoutNode *m_pSrc = nullptr;
