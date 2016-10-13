@@ -301,13 +301,6 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Term Sym.:</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
@@ -345,6 +338,22 @@
              </property>
              <property name="toolTip">
               <string>Orbitals</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QDoubleSpinBox" name="sping">
+             <property name="prefix">
+              <string>g=</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="singleStep">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>2.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -471,15 +480,18 @@
   <tabstop>tabSc2</tabstop>
   <tabstop>editSLSearch</tabstop>
   <tabstop>tableSL</tabstop>
-  <tabstop>radioCoherent</tabstop>
-  <tabstop>radioIncoherent</tabstop>
   <tabstop>listMAtoms</tabstop>
+  <tabstop>editMFilter</tabstop>
+  <tabstop>sping</tabstop>
   <tabstop>spinJ</tabstop>
   <tabstop>spinL</tabstop>
   <tabstop>spinS</tabstop>
+  <tabstop>editOrbital</tabstop>
   <tabstop>listAtoms</tabstop>
   <tabstop>editFilter</tabstop>
   <tabstop>buttonBox</tabstop>
+  <tabstop>radioIncoherent</tabstop>
+  <tabstop>radioCoherent</tabstop>
  </tabstops>
  <resources/>
  <connections>

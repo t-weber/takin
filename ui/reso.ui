@@ -235,7 +235,7 @@
              <string> arcmin</string>
             </property>
             <property name="maximum">
-             <double>99990000.000000000000000</double>
+             <double>9999.000000000000000</double>
             </property>
             <property name="value">
              <double>30.000000000000000</double>
@@ -255,7 +255,7 @@
              <string> arcmin</string>
             </property>
             <property name="maximum">
-             <double>99990000.000000000000000</double>
+             <double>9999.000000000000000</double>
             </property>
             <property name="value">
              <double>30.000000000000000</double>
@@ -275,7 +275,7 @@
              <string> arcmin</string>
             </property>
             <property name="maximum">
-             <double>99990000.000000000000000</double>
+             <double>9999.000000000000000</double>
             </property>
             <property name="value">
              <double>30.000000000000000</double>
@@ -295,7 +295,7 @@
              <string> arcmin</string>
             </property>
             <property name="maximum">
-             <double>99990000.000000000000000</double>
+             <double>9999.000000000000000</double>
             </property>
             <property name="value">
              <double>30.000000000000000</double>
@@ -3211,7 +3211,6 @@
   <tabstop>checkUseR0</tabstop>
   <tabstop>checkUseKi3</tabstop>
   <tabstop>checkUseKf3</tabstop>
-  <tabstop>checkUseKiKf</tabstop>
   <tabstop>spinMonoW</tabstop>
   <tabstop>spinMonoH</tabstop>
   <tabstop>spinMonoThick</tabstop>

@@ -19,6 +19,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 find_package(Boost REQUIRED COMPONENTS iostreams system filesystem regex python program_options REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Rt REQUIRED)
+find_package(Mp REQUIRED)
 find_package(tlibs REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(PythonInterp 2.7 REQUIRED)
@@ -126,7 +127,7 @@ add_executable(takin
 
 target_link_libraries(takin 
 	${Minuit2_LIBRARIES} ${Boost_LIBRARIES} ${tlibs_LIBRARIES}
-	Threads::Threads ${Rt_LIBRARIES}
+	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
 	Qt4::QtCore Qt4::QtGui Qt4::QtSvg #Qt4::QtOpenGL
 	${PYTHON_LIBRARIES}
 	${PNG_LIBRARIES}
@@ -180,7 +181,7 @@ add_executable(convofit
 set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convofit
-	${tlibs_LIBRARIES} Threads::Threads ${Rt_LIBRARIES}
+	${tlibs_LIBRARIES} Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
 	${Boost_LIBRARIES} ${Minuit2_LIBRARIES} ${PYTHON_LIBRARIES}
 )
 

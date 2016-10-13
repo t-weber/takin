@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 			const char* pcErr = "Magnetic form factor coefficient table could not be found." TAKIN_CHECK;
 			tl::log_warn(pcErr);
 
-			QMessageBox::warning(0, "Takin - Warning", pcErr);
+			//QMessageBox::warning(0, "Takin - Warning", pcErr);
 			//return -1;
 		}
 

@@ -1,4 +1,4 @@
-/*
+/**
  * Form factor and scattering length tables
  * @author Tobias Weber
  * @date nov-2015
@@ -73,7 +73,7 @@ template<typename T>
 std::shared_ptr<const FormfactList<T>> FormfactList<T>::GetInstance()
 {
 	std::lock_guard<std::mutex> _guard(s_mutex);
-	
+
 	if(!s_inst)
 		s_inst = std::shared_ptr<FormfactList<T>>(new FormfactList<T>());
 
@@ -180,7 +180,7 @@ template<typename T>
 std::shared_ptr<const MagFormfactList<T>> MagFormfactList<T>::GetInstance()
 {
 	std::lock_guard<std::mutex> _guard(s_mutex);
-	
+
 	if(!s_inst)
 		s_inst = std::shared_ptr<MagFormfactList<T>>(new MagFormfactList<T>());
 
@@ -264,7 +264,7 @@ template<typename T>
 std::shared_ptr<const ScatlenList<T>> ScatlenList<T>::GetInstance()
 {
 	std::lock_guard<std::mutex> _guard(s_mutex);
-	
+
 	if(!s_inst)
 		s_inst = std::shared_ptr<ScatlenList<T>>(new ScatlenList<T>());
 

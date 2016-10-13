@@ -1,4 +1,4 @@
-/*
+/**
  * Form factor and scattering length tables
  * @author Tobias Weber
  * @date nov-2015
@@ -98,10 +98,22 @@ class MagFormfact
 	public:
 		const std::string& GetAtomIdent() const { return strAtom; }
 
+		T GetFormfact(T Q, T g=2) const
+		{
+			T F;
+			std::tie(std::ignore,std::ignore,F) =
+				tl::mag_formfact_d<T, std::vector>
+					(Q, g, A0,a0, A2,a2);
+			return F;
+		}
+
 		T GetFormfact(T Q, T L, T S, T J) const
 		{
-			return tl::mag_formfact<T, std::vector>
-				(Q, L,S,J, A0,a0, A2,a2);
+			T F;
+			std::tie(std::ignore,std::ignore,F) =
+				tl::mag_formfact_f<T, std::vector>
+					(Q, L,S,J, A0,a0, A2,a2);
+			return F;
 		}
 };
 

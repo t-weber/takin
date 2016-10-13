@@ -1,4 +1,4 @@
-/*
+/**
  * Form factor and scattering length tables
  * @author Tobias Weber
  * @date nov-2015
