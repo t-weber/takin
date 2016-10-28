@@ -341,6 +341,8 @@ void NeutronDlg::setupConstants()
 
 		vecConsts.push_back(std::move(constant));
 	}
+
+	// neutron
 	{
 		std::ostringstream ostrVal;
 		ostrVal << std::scientific;
@@ -356,11 +358,11 @@ void NeutronDlg::setupConstants()
 	{
 		std::ostringstream ostrVal;
 		ostrVal << std::scientific;
-		ostrVal << tl::get_g_n<t_real>();
+		ostrVal << t_real(tl::get_g_n<t_real>());
 
 		Constant constant;
 		constant.strSymbol = "g_n";
-		constant.strName = "Neutron g";
+		constant.strName = "Neutron g factor";
 		constant.strVal = tl::insert_before<std::string>(ostrVal.str(), "(", "\n");
 
 		vecConsts.push_back(std::move(constant));
@@ -403,6 +405,59 @@ void NeutronDlg::setupConstants()
 
 		vecConsts.push_back(std::move(constant));
 	}
+
+
+
+	// electron
+	{
+		std::ostringstream ostrVal;
+		ostrVal << std::scientific;
+		ostrVal << tl::get_m_e<t_real>();
+
+		Constant constant;
+		constant.strSymbol = "m_e";
+		constant.strName = "Electron mass";
+		constant.strVal = tl::insert_before<std::string>(ostrVal.str(), "(", "\n");
+
+		vecConsts.push_back(std::move(constant));
+	}
+	{
+		std::ostringstream ostrVal;
+		ostrVal << std::scientific;
+		ostrVal << t_real(tl::get_g_e<t_real>());
+
+		Constant constant;
+		constant.strSymbol = "g_e";
+		constant.strName = "Electron g factor";
+		constant.strVal = tl::insert_before<std::string>(ostrVal.str(), "(", "\n");
+
+		vecConsts.push_back(std::move(constant));
+	}
+	{
+		std::ostringstream ostrVal;
+		ostrVal << std::scientific;
+		ostrVal << co::gamma_e;		// TODO: replace with a tl::... getter
+
+		Constant constant;
+		constant.strSymbol = "gamma_e";
+		constant.strName = "Electron gyromagnetic ratio";
+		constant.strVal = tl::insert_before<std::string>(ostrVal.str(), "(", "\n");
+
+		vecConsts.push_back(std::move(constant));
+	}
+	{
+		std::ostringstream ostrVal;
+		ostrVal << std::scientific;
+		//ostrVal << tl::get_mu_n<t_real>();
+		ostrVal << t_real(tl::get_mu_e<t_real>() / meV * tesla) << " meV/T";
+
+		Constant constant;
+		constant.strSymbol = "mu_e";
+		constant.strName = "Electron magnetic moment";
+		constant.strVal = tl::insert_before<std::string>(ostrVal.str(), "(", "\n");
+
+		vecConsts.push_back(std::move(constant));
+	}
 	{
 		std::ostringstream ostrVal;
 		ostrVal << std::scientific;
@@ -415,6 +470,9 @@ void NeutronDlg::setupConstants()
 
 		vecConsts.push_back(std::move(constant));
 	}
+
+
+
 	{
 		std::ostringstream ostrVal;
 		//ostrVal << std::scientific;

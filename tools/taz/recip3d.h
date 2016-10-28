@@ -9,6 +9,8 @@
 #define __TAZ_RECIP_3D__
 
 #include <QDialog>
+#include <QStatusBar>
+
 #include "libs/plotgl.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/geo.h"
@@ -21,7 +23,9 @@
 class Recip3DDlg : public QDialog
 {Q_OBJECT
 protected:
-	PlotGl* m_pPlot;
+	QSettings* m_pSettings = nullptr;
+	QStatusBar *m_pStatus = nullptr;
+	PlotGl* m_pPlot = nullptr;
 	t_real_glob m_dMaxPeaks = 5.;
 	t_real_glob m_dPlaneDistTolerance = 0.01;
 
@@ -35,8 +39,9 @@ public:
 	void SetMaxPeaks(t_real_glob dMax) { m_dMaxPeaks = dMax; }
 
 protected:
-	void hideEvent(QHideEvent*);
-	void showEvent(QShowEvent*);
+	virtual void hideEvent(QHideEvent*) override;
+	virtual void showEvent(QShowEvent*) override;
+	virtual void closeEvent(QCloseEvent*) override;
 };
 
 

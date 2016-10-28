@@ -25,6 +25,7 @@ class NicosCache : public NetCache
 		t_mapCacheVal m_mapCache;
 
 		bool m_bFlipOrient2 = 1;
+		bool m_bSthCorr = 0;
 
 		// endpoints of the TcpClient signals
 		void slot_connected(const std::string& strHost, const std::string& strSrv);
@@ -47,7 +48,7 @@ class NicosCache : public NetCache
 		void RegisterKeys();
 
 	protected:
-		// Nicos device names
+		// device names
 		std::string m_strSampleName;
 		std::string m_strSampleLattice, m_strSampleAngles;
 		std::string m_strSampleOrient1, m_strSampleOrient2;

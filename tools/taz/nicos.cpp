@@ -16,6 +16,8 @@ using t_real = t_real_glob;
 
 NicosCache::NicosCache(QSettings* pSettings) : m_pSettings(pSettings)
 {
+	// map device names from settings
+	// first: settings name, second: pointer to string receiving device name
 	std::vector<std::pair<std::string, std::string*>> vecStrings =
 	{
 		{"sample_name", &m_strSampleName},
@@ -42,6 +44,7 @@ NicosCache::NicosCache(QSettings* pSettings) : m_pSettings(pSettings)
 		{"counter", &m_strCtr},
 	};
 
+	// fill in device names from settings
 	for(const std::pair<std::string, std::string*>& pair : vecStrings)
 	{
 		std::string strKey = std::string("net/") + pair.first;
@@ -53,11 +56,11 @@ NicosCache::NicosCache(QSettings* pSettings) : m_pSettings(pSettings)
 	}
 
 	m_bFlipOrient2 = m_pSettings->value("net/flip_orient2", true).toBool();
-	//tl::log_info("Flipping Nicos' orientation vector 2: ", m_bFlipOrient2);
+	m_bSthCorr = m_pSettings->value("net/sth_stt_corr", false).toBool();
 
-
+	// all final device names
 	m_vecKeys = std::vector<std::string>
-	{
+	({
 		m_strSampleName,
 		m_strSampleLattice, m_strSampleAngles,
 		m_strSampleOrient1, m_strSampleOrient2,
@@ -70,8 +73,9 @@ NicosCache::NicosCache(QSettings* pSettings) : m_pSettings(pSettings)
 		m_strTimer, m_strPreset, m_strCtr,
 
 		// additional info fields (not needed for calculation)
-		"logbook/remark",
-	};
+		//"logbook/remark",
+		//"nicos/mira/value",
+	});
 
 	m_tcp.add_connect(boost::bind(&NicosCache::slot_connected, this, _1, _2));
 	m_tcp.add_disconnect(boost::bind(&NicosCache::slot_disconnected, this, _1, _2));
@@ -301,6 +305,13 @@ void NicosCache::slot_receive(const std::string& str)
 		// sth and psi0 are arbitrary, but together they form the
 		// angle from ki to the bragg peak at orient1
 		triag.dAngleKiVec0 = -dSth-dPsi;
+
+		if(m_bSthCorr && m_mapCache.find(m_strSample2Theta) != m_mapCache.end())
+		{
+			t_real dStt = tl::d2r(tl::str_to_var<t_real>(m_mapCache[m_strSample2Theta].strVal));
+			triag.dAngleKiVec0 -= dStt;
+		}
+
 		triag.bChangedAngleKiVec0 = 1;
 		//std::cout << "rotation: " << triag.dAngleKiVec0 << std::endl;
 	}

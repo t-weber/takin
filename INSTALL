@@ -26,8 +26,9 @@ Takin has to be compiled with a fully C++11 compliant compiler, e.g.:
 	* GCC version 4.8 or above
 	* Clang
 
-Select appropriate Make lists (standard: (1) native, dynamic):
+Optional: Select appropriate Make lists (standard: (2) native, with static tlibs):
 	* ./setup_makelists.sh
+	* If the non-static tlibs is selected, tlibs has to be installed separately.
 
 Make using CMake:
 	* mkdir build

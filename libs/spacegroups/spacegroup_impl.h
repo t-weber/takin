@@ -14,13 +14,14 @@
 template<class t_real>
 SpaceGroups<t_real>::SpaceGroups()
 {
-	tl::log_debug("Loading space groups.");
-
 	using t_mat = typename SpaceGroup<t_real>::t_mat;
 	//using t_vec = typename SpaceGroup<t_real>::t_vec;
 
+	std::string strTabFile = find_resource("res/data/sgroups.xml");
+	tl::log_debug("Loading space groups from file \"", strTabFile, "\".");
+
 	tl::Prop<std::string> xml;
-	if(!xml.Load(find_resource("res/data/sgroups.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
 	unsigned int iNumSGs = xml.Query<unsigned int>("sgroups/num_groups", 0);

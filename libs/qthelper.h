@@ -9,6 +9,7 @@
 #define __QT_HELPER_H__
 
 #include <vector>
+#include <string>
 #include <type_traits>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -162,6 +163,18 @@ public:
 		return this->GetValue() < pItem->GetValue();
 	}
 };
+
+
+// ----------------------------------------------------------------------------
+
+
+enum class QtStdPath
+{
+	HOME,
+	FONTS
+};
+
+extern std::vector<std::string> get_qt_std_path(QtStdPath path);
 
 
 #endif

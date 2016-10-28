@@ -108,7 +108,7 @@ struct LatticeCommon
 				planeFrac.GetDir1()[1] * lattice.GetVec(1) +
 				planeFrac.GetDir1()[2] * lattice.GetVec(2);
 			planeReal = tl::Plane<t_real>(vecX0, vecPlaneX, vecPlaneY);
-			
+
 			std::vector<t_vec> vecOrth =
 				tl::gram_schmidt<t_vec>(
 					{planeReal.GetDir0(), planeReal.GetDir1(), planeReal.GetNorm()}, 1);

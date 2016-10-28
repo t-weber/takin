@@ -13,6 +13,7 @@
 #endif
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
+#include "libs/qthelper.h"
 
 #include <QFileDialog>
 #include <QFontDialog>
@@ -31,7 +32,6 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 
 	g_fontGen.setStyleHint(QFont::SansSerif);
 	g_fontGfx.setStyleHint(QFont::SansSerif, QFont::PreferAntialias);
-	g_fontGL.setStyleHint(QFont::Monospace, QFont::OpenGLCompatible);
 	setFont(g_fontGen);
 
 #if QT_VER >= 5
@@ -48,6 +48,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 
 	m_vecEdits =
 	{
+		// nicos devices
 		t_tupEdit("net/sample_name", "nicos/sample/samplename", editSampleName),
 		t_tupEdit("net/lattice", "nicos/sample/lattice", editSampleLattice),
 		t_tupEdit("net/angles", "nicos/sample/angles", editSampleAngles),
@@ -71,7 +72,42 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupEdit("net/preset", "nicos/timer/preselection", editPreset),
 		t_tupEdit("net/counter", "nicos/ctr1/value", editCounter),
 
-		t_tupEdit("gl/font", g_fontGL.toString().toStdString().c_str(), editGLFont),
+
+		// sics devices
+		t_tupEdit("net/lattice_a_6", "AS", edit6_AS),
+		t_tupEdit("net/lattice_b_6", "BS", edit6_BS),
+		t_tupEdit("net/lattice_c_6", "CS", edit6_CS),
+
+		t_tupEdit("net/angle_a_6", "AA", edit6_AA),
+		t_tupEdit("net/angle_b_6", "BB", edit6_BB),
+		t_tupEdit("net/angle_c_6", "CC", edit6_CC),
+
+		t_tupEdit("net/orient1_x_6", "AX", edit6_AX),
+		t_tupEdit("net/orient1_y_6", "AY", edit6_AY),
+		t_tupEdit("net/orient1_z_6", "AZ", edit6_AZ),
+
+		t_tupEdit("net/orient2_x_6", "BX", edit6_BX),
+		t_tupEdit("net/orient2_y_6", "BY", edit6_BY),
+		t_tupEdit("net/orient2_z_6", "BZ", edit6_BZ),
+
+		t_tupEdit("net/stheta_6", "A3", edit6_A3),
+		t_tupEdit("net/s2theta_6", "A4", edit6_A4),
+
+		t_tupEdit("net/mtheta_6", "A1", edit6_A1),
+		t_tupEdit("net/m2theta_6", "A2", edit6_A2),
+		t_tupEdit("net/mono_d_6", "DM", edit6_DM),
+
+		t_tupEdit("net/atheta_6", "A5", edit6_A5),
+		t_tupEdit("net/a2theta_6", "A6", edit6_A6),
+		t_tupEdit("net/ana_d_6", "DA", edit6_DA),
+
+		t_tupEdit("net/timer_6", "counter.Monitor 1", edit6_CurTime),
+		t_tupEdit("net/preset_6", "counter.Preset", edit6_Preset),
+		t_tupEdit("net/counter_6", "counter.Counts", edit6_Counter),
+
+
+		// misc
+		t_tupEdit("gl/font", "", editGLFont),
 		t_tupEdit("main/font_gfx", g_fontGfx.toString().toStdString().c_str(), editGfxFont),
 		t_tupEdit("main/font_gen", g_fontGen.toString().toStdString().c_str(), editGenFont)
 	};
@@ -81,6 +117,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupCheck("main/dlg_previews", 1, checkPreview),
 		t_tupCheck("main/native_dialogs", 0, checkNativeDlg),
 		t_tupCheck("net/flip_orient2", 1, checkFlipOrient2),
+		t_tupCheck("net/sth_stt_corr", 0, checkSthSttCorr),
 	};
 
 	m_vecSpins =
@@ -89,6 +126,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupSpin("main/prec_gfx", g_iPrecGfx, spinPrecGfx),
 		t_tupSpin("main/points_gfx", GFX_NUM_POINTS, spinPtsGfx),
 		t_tupSpin("main/max_peaks", 10, spinBragg),
+		t_tupSpin("gl/font_size", 24, spinGLFont),
 		t_tupSpin("net/poll", 750, spinNetPoll),
 	};
 
@@ -273,13 +311,13 @@ void SettingsDlg::SetGlobals() const
 			g_fontGfx = font;
 	}
 
-	QString strGLFont = editGLFont->text();
-	if(strGLFont.length() != 0)
+	if(editGLFont->text().length() != 0)
 	{
-		QFont font;
-		if(font.fromString(strGLFont))
-			g_fontGL = font;
+		g_strFontGL = editGLFont->text().toStdString();
 	}
+
+	if(spinGLFont->value() > 0)
+		g_iFontGLSize = spinGLFont->value();
 
 	QString strGenFont = editGenFont->text();
 	if(strGenFont.length() != 0)
@@ -295,13 +333,32 @@ void SettingsDlg::SetGlobals() const
 
 void SettingsDlg::SelectGLFont()
 {
-	bool bOk;
-	QFont fontNew = QFontDialog::getFont(&bOk, g_fontGL, this);
-	if(bOk)
-	{
-		g_fontGL = fontNew;
-		editGLFont->setText(fontNew.toString());
-	}
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(m_pSettings && !m_pSettings->value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	// find a default font directory
+	std::string strFontDir;
+	std::vector<std::string> vecFontDir = get_qt_std_path(QtStdPath::FONTS);
+	if(vecFontDir.size() == 0)
+		tl::log_warn("Could not determine font directory.");
+	else
+		strFontDir = vecFontDir[0];
+
+	// get font dir either from font file or from default
+	std::string strPath;
+	if(g_strFontGL != "")
+		strPath = tl::get_dir(g_strFontGL);
+	else
+		strPath = strFontDir;
+
+	QString strFile = QFileDialog::getOpenFileName(this,
+		"Open Font File...", strPath.c_str(),
+		"Font files (*.ttf *.TTF)", nullptr, fileopt);
+	if(strFile == "")
+		return;
+
+	editGLFont->setText(strFile);
 }
 
 void SettingsDlg::SelectGfxFont()

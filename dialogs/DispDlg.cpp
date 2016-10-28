@@ -23,6 +23,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMimeData>
 
 using t_real = t_real_glob;
 static const auto one_meV = tl::get_one_meV<t_real>();
@@ -589,7 +590,7 @@ void DispDlg::ShowAtomDlg()
 
 void DispDlg::cursorMoved(const QPointF& pt)
 {
-	const t_real dPos[] = { pt.x(), pt.y() };
+	const t_real dPos[] = { t_real(pt.x()), t_real(pt.y()) };
 
 	//const std::wstring strAA = tl::get_spec_char_utf16("AA") +
 	//	tl::get_spec_char_utf16("sup-") + tl::get_spec_char_utf16("sup1");

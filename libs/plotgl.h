@@ -1,4 +1,4 @@
-/*
+/**
  * gl plotter
  * @author tweber
  * @date 19-may-2013
@@ -12,10 +12,12 @@
        	#include <QtWidgets>
 #endif
 #include <QGLWidget>
+//#include <QOpenGLWidget>
 #include <QMouseEvent>
 #include <QThread>
 #include <QMutex>
 #include <QSettings>
+
 #include <vector>
 #include <atomic>
 
@@ -27,6 +29,13 @@
 #include <boost/numeric/ublas/matrix.hpp>
 namespace ublas = boost::numeric::ublas;
 
+#include <boost/signals2.hpp>
+namespace sig = boost::signals2;
+
+
+using tl::t_real_gl;
+using t_qglwidget = QGLWidget;
+//using t_qglwidget = QOpenGLWidget;
 
 enum PlotTypeGl
 {
@@ -39,7 +48,7 @@ enum PlotTypeGl
 struct PlotObjGl
 {
 	PlotTypeGl plttype = PLOT_INVALID;
-	std::vector<double> vecParams;
+	std::vector<t_real_gl> vecParams;
 	std::vector<t_real_glob> vecColor;
 
 	bool bSelected = 0;
@@ -47,14 +56,14 @@ struct PlotObjGl
 	std::string strLabel;
 };
 
-class PlotGl : public QGLWidget, QThread
+class PlotGl : public t_qglwidget, QThread
 {
 protected:
 	QSettings *m_pSettings = 0;
 	std::atomic<bool> m_bEnabled;
 	QMutex m_mutex;
 
-	static constexpr double m_dFOV = 45./180.*M_PI;
+	static constexpr t_real_gl m_dFOV = 45./180.*M_PI;
 	tl::t_mat4 m_matProj, m_matView;
 
 	tl::GlFontMap *m_pFont = nullptr;
@@ -63,41 +72,48 @@ protected:
 	GLuint m_iLstSphere[8];
 	QString m_strLabels[3];
 
-	unsigned int m_iPrec = 6;
-	double m_dXMin=-10., m_dXMax=10.;
-	double m_dYMin=-10., m_dYMax=10.;
-	double m_dZMin=-10., m_dZMax=10.;
-	double m_dXMinMaxOffs, m_dYMinMaxOffs, m_dZMinMaxOffs;
+	std::size_t m_iPrec = 6;
+	t_real_gl m_dXMin=-10., m_dXMax=10.;
+	t_real_gl m_dYMin=-10., m_dYMax=10.;
+	t_real_gl m_dZMin=-10., m_dZMax=10.;
+	t_real_gl m_dXMinMaxOffs, m_dYMinMaxOffs, m_dZMinMaxOffs;
 
 	//void initializeGL();
 	void resizeEvent(QResizeEvent*);
 	void paintEvent(QPaintEvent*);
 
 	void SetColor(t_real_glob r, t_real_glob g, t_real_glob b, t_real_glob a=1.);
-	void SetColor(unsigned int iIdx);
+	void SetColor(std::size_t iIdx);
+
 
 	// ------------------------------------------------------------------------
 	// mouse stuff
 	bool m_bMouseRotateActive = 0;
-	double m_dMouseRot[2];
-	double m_dMouseBegin[2];
+	t_real_gl m_dMouseRot[2];
+	t_real_gl m_dMouseBegin[2];
 
 	bool m_bMouseScaleActive = 0;
-	double m_dMouseScale;
-	double m_dMouseScaleBegin;
+	t_real_gl m_dMouseScale;
+	t_real_gl m_dMouseScaleBegin;
 
-	double m_dMouseX = 0., m_dMouseY = 0.;
+	t_real_gl m_dMouseX = 0., m_dMouseY = 0.;
 
 	void mousePressEvent(QMouseEvent*);
 	void mouseReleaseEvent(QMouseEvent*);
 	void mouseMoveEvent(QMouseEvent*);
 
 	void updateViewMatrix();
-	void mouseSelectObj(double dX, double dY);
+	void mouseSelectObj(t_real_gl dX, t_real_gl dY);
+
+public:
+	using t_sigHover = sig::signal<void(const PlotObjGl*)>;
+	void AddHoverSlot(const typename t_sigHover::slot_type& conn);
+protected:
+	t_sigHover m_sigHover;
+
 
 	// ------------------------------------------------------------------------
 	// render thread
-	bool m_bGLInited = 0;
 	bool m_bDoResize = 1;
 	bool m_bRenderThreadActive = 1;
 
@@ -105,25 +121,25 @@ protected:
 	void freeGLThread();
 	void resizeGLThread(int w, int h);
 	void paintGLThread();
-	void tickThread(double dTime);
+	void tickThread(t_real_gl dTime);
 	void run();
 
 	int m_iW=640, m_iH=480;
 	// ------------------------------------------------------------------------
 
 public:
-	PlotGl(QWidget* pParent, QSettings *pSettings=0);
+	PlotGl(QWidget* pParent, QSettings *pSettings=nullptr, t_real_gl dMouseScale=25.);
 	virtual ~PlotGl();
 
-	void PlotSphere(const ublas::vector<double>& vecPos, double dRadius, int iObjIdx=-1);
-	void PlotEllipsoid(const ublas::vector<double>& widths,
-		const ublas::vector<double>& offsets,
-		const ublas::matrix<double>& rot,
+	void PlotSphere(const ublas::vector<t_real_gl>& vecPos, t_real_gl dRadius, int iObjIdx=-1);
+	void PlotEllipsoid(const ublas::vector<t_real_gl>& widths,
+		const ublas::vector<t_real_gl>& offsets,
+		const ublas::matrix<t_real_gl>& rot,
 		int iObjsIdx=-1);
-	void SetObjectCount(unsigned int iSize) { m_vecObjs.resize(iSize); }
-	void SetObjectColor(int iObjIdx, const std::vector<t_real_glob>& vecCol);
-	void SetObjectLabel(int iObjIdx, const std::string& strLab);
-	void SetObjectUseLOD(int iObjIdx, bool bLOD);
+	void SetObjectCount(std::size_t iSize) { m_vecObjs.resize(iSize); }
+	void SetObjectColor(std::size_t iObjIdx, const std::vector<t_real_glob>& vecCol);
+	void SetObjectLabel(std::size_t iObjIdx, const std::string& strLab);
+	void SetObjectUseLOD(std::size_t iObjIdx, bool bLOD);
 	void clear();
 
 	void SetLabels(const char* pcLabX, const char* pcLabY, const char* pcLabZ);
@@ -140,7 +156,7 @@ public:
 		m_dZMinMaxOffs =  pOffs ? (*pOffs)[2] : 0.;
 	}
 
-	template<class t_vec=ublas::vector<double> >
+	template<class t_vec=ublas::vector<t_real_gl>>
 	void SetMinMax(const t_vec& vec, const t_vec* pOffs=0)
 	{
 		m_dXMin = -vec[0]; m_dXMax = vec[0];
@@ -153,7 +169,7 @@ public:
 	}
 
 	void SetEnabled(bool b);
-	void SetPrec(unsigned int iPrec) { m_iPrec = iPrec; }
+	void SetPrec(std::size_t iPrec) { m_iPrec = iPrec; }
 };
 
 #endif

@@ -145,7 +145,8 @@ void EllipseDlg::Calc()
 			pReso_v = &m_reso_vOrient;
 			break;
 		default:
-			tl::log_err("Unknown coordinate system selected."); return;
+			tl::log_err("Unknown coordinate system selected.");
+			return;
 	}
 
 
@@ -348,7 +349,7 @@ void EllipseDlg::SetCenterOn0(bool bCenter)
 void EllipseDlg::SetParams(const EllipseDlgParams& params)
 {
 	m_params = params;
-	
+
 	static const ublas::matrix<t_real_reso> mat0 = ublas::zero_matrix<t_real_reso>(4,4);
 	static const ublas::vector<t_real_reso> vec0 = ublas::zero_vector<t_real_reso>(4);
 

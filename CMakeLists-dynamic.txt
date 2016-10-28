@@ -181,8 +181,9 @@ add_executable(convofit
 set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convofit
+	${Minuit2_LIBRARIES}
 	${tlibs_LIBRARIES} Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
-	${Boost_LIBRARIES} ${Minuit2_LIBRARIES} ${PYTHON_LIBRARIES}
+	${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

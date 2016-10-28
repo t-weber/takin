@@ -14,7 +14,9 @@
 #include <QFont>
 
 extern QIcon load_icon(const std::string& strIcon);
-extern QFont g_fontGen, g_fontGfx, g_fontGL;
+extern QFont g_fontGen, g_fontGfx/*, g_fontGL*/;
+extern std::string g_strFontGL;
+extern int g_iFontGLSize;
 
 
 #endif

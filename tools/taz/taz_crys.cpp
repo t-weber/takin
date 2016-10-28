@@ -303,11 +303,13 @@ void TazDlg::CalcPeaks()
 			m_sceneRecip.emitUpdate();
 
 			m_sceneProjRecip.GetLattice()->CalcPeaks(m_latticecommon, true);
-
 			m_sceneRealLattice.GetLattice()->CalcPeaks(m_latticecommon);
+
 #ifndef NO_3D
 			if(m_pRecip3d)
 				m_pRecip3d->CalcPeaks(m_latticecommon);
+			if(m_pReal3d)
+				m_pReal3d->CalcPeaks(m_latticecommon);
 #endif
 		}
 		else

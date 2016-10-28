@@ -26,10 +26,11 @@ std::mutex FormfactList<T>::s_mutex;
 template<typename T>
 FormfactList<T>::FormfactList()
 {
-	tl::log_debug("Loading atomic form factors.");
+	std::string strTabFile = find_resource("res/data/ffacts.xml");
+	tl::log_debug("Loading atomic form factors from file \"", strTabFile, "\".");
 
 	tl::Prop<std::string> xml;
-	if(!xml.Load(find_resource("res/data/ffacts.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
 	unsigned int iNumDat = xml.Query<unsigned int>("ffacts/num_atoms", 0);
@@ -123,10 +124,11 @@ std::mutex MagFormfactList<T>::s_mutex;
 template<typename T>
 MagFormfactList<T>::MagFormfactList()
 {
-	tl::log_debug("Loading magnetic form factors.");
+	std::string strTabFile = find_resource("res/data/magffacts.xml");
+	tl::log_debug("Loading magnetic form factors from file \"", strTabFile, "\".");
 
 	tl::Prop<std::string, true> xml;
-	if(!xml.Load(find_resource("res/data/magffacts.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
 	unsigned int iNumDat = xml.Query<unsigned int>("magffacts/num_atoms", 0);
@@ -218,10 +220,11 @@ std::mutex ScatlenList<T>::s_mutex;
 template<typename T>
 ScatlenList<T>::ScatlenList()
 {
-	tl::log_debug("Loading neutron scattering lengths.");
+	std::string strTabFile = find_resource("res/data/scatlens.xml");
+	tl::log_debug("Loading neutron scattering lengths from file \"", strTabFile, "\".");
 
 	tl::Prop<std::string> xml;
-	if(!xml.Load(find_resource("res/data/scatlens.xml").c_str(), tl::PropType::XML))
+	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
 	const unsigned int iNumDat = xml.Query<unsigned int>("scatlens/num_atoms", 0);

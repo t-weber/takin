@@ -39,12 +39,13 @@ struct Ellipse2d
 
 	t_real phi, slope;
 	t_real x_hwhm, y_hwhm;
+	t_real x_hwhm_bound, y_hwhm_bound;
 	t_real x_offs, y_offs;
 	t_real area;
 
 	std::string x_lab, y_lab;
 
-	ublas::vector<t_real> operator()(t_real t) const;
+	ublas::vector<t_real> operator()(t_real t, bool bOffs=true) const;
 	void GetCurvePoints(std::vector<t_real>& x, std::vector<t_real>& y,
 		std::size_t iPoints=512, t_real *pLRTB=0);
 };
@@ -135,6 +136,8 @@ std::ostream& operator<<(std::ostream& ostr, const Ellipse2d<t_real>& ell)
 	ostr << "slope = " << ell.slope << " deg \n";
 	ostr << "x_hwhm = " << ell.x_hwhm << ", ";
 	ostr << "y_hwhm = " << ell.y_hwhm << "\n";
+	ostr << "x_hwhm_bound = " << ell.x_hwhm_bound << ", ";
+	ostr << "y_hwhm_bound = " << ell.y_hwhm_bound << "\n";
 	ostr << "x_offs = " << ell.x_offs << ", ";
 	ostr << "y_offs = " << ell.y_offs << "\n";
 	ostr << "x_lab = " << ell.x_lab << ", ";
@@ -167,16 +170,19 @@ std::ostream& operator<<(std::ostream& ostr, const Ellipsoid4d<t_real>& ell)
 // --------------------------------------------------------------------------------
 
 template<class t_real>
-ublas::vector<t_real> Ellipse2d<t_real>::operator()(t_real t) const
+ublas::vector<t_real> Ellipse2d<t_real>::operator()(t_real t, bool bAddOffs/*=1*/) const
 {
 	ublas::vector<t_real> vec = tl::make_vec<ublas::vector<t_real>>
-		({ x_hwhm * std::cos(2.*tl::get_pi<t_real>()*t),
-			y_hwhm * std::sin(2.*tl::get_pi<t_real>()*t) });
+		({ x_hwhm * std::cos(t_real(2)*tl::get_pi<t_real>()*t),
+			y_hwhm * std::sin(t_real(2)*tl::get_pi<t_real>()*t) });
 
 	vec = ublas::prod(rot, vec);
 
-	vec[0] += x_offs;
-	vec[1] += y_offs;
+	if(bAddOffs)
+	{
+		vec[0] += x_offs;
+		vec[1] += y_offs;
+	}
 
 	return vec;
 }
@@ -322,6 +328,25 @@ Ellipse2d<t_real> calc_res_ellipse(
 
 	ell.x_offs = Q_offs[iX];
 	ell.y_offs = Q_offs[iY];
+
+
+	// calculate bounding rect
+	std::tie(ell.x_hwhm_bound, ell.y_hwhm_bound)
+		= [&ell]() -> std::pair<t_real, t_real>
+	{
+		t_real t0deg = ell.phi / (tl::get_pi<t_real>()*t_real(2));
+		t_real t90deg = (ell.phi + tl::get_pi<t_real>()/t_real(2))
+			/ (tl::get_pi<t_real>()*t_real(2));
+
+		ublas::vector<t_real> vec1 = ell(t0deg, false);
+		ublas::vector<t_real> vec2 = ell(t90deg, false);
+
+		t_real dX = std::max(std::abs(vec1[0]), std::abs(vec2[0]));
+		t_real dY = std::max(std::abs(vec1[1]), std::abs(vec2[1]));
+
+		return std::pair<t_real, t_real>(dX, dY);
+	}();
+
 
 	// linear part of quadric
 	const ublas::vector<t_real> vecTrans = ublas::prod(ell.rot, quad.GetPrincipalOffset());

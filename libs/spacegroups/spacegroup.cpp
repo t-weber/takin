@@ -1,4 +1,4 @@
-/*
+/**
  * Loads tabulated spacegroups
  * @author Tobias Weber
  * @date feb-2016

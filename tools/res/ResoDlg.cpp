@@ -267,9 +267,9 @@ void ResoDlg::RefreshQEPos()
 {
 	try
 	{
-		tl::t_wavenumber_si<t_real_reso> Q = editQ->text().toDouble() / angs;
-		tl::t_wavenumber_si<t_real_reso> ki = editKi->text().toDouble() / angs;
-		tl::t_wavenumber_si<t_real_reso> kf = editKf->text().toDouble() / angs;
+		tl::t_wavenumber_si<t_real_reso> Q = t_real_reso(editQ->text().toDouble()) / angs;
+		tl::t_wavenumber_si<t_real_reso> ki = t_real_reso(editKi->text().toDouble()) / angs;
+		tl::t_wavenumber_si<t_real_reso> kf = t_real_reso(editKf->text().toDouble()) / angs;
 		//t_real_reso dE = editE->text().toDouble();
 		tl::t_energy_si<t_real_reso> E = tl::get_energy_transfer(ki, kf);
 
@@ -289,8 +289,8 @@ void ResoDlg::RefreshQEPos()
 		m_simpleparams.angle_ki_Q = m_tofparams.angle_ki_Q = m_tasparams.angle_ki_Q = kiQ;
 		m_simpleparams.angle_kf_Q = m_tofparams.angle_kf_Q = m_tasparams.angle_kf_Q = kfQ;
 
-		m_tasparams.thetam = 0.5 * tl::get_mono_twotheta(ki, dMono*angs, 1);
-		m_tasparams.thetaa = 0.5 * tl::get_mono_twotheta(kf, dAna*angs, 1);
+		m_tasparams.thetam = t_real_reso(0.5) * tl::get_mono_twotheta(ki, dMono*angs, 1);
+		m_tasparams.thetaa = t_real_reso(0.5) * tl::get_mono_twotheta(kf, dAna*angs, 1);
 
 #ifndef NDEBUG
 		tl::log_debug("Manually changed parameters: ",
@@ -520,14 +520,8 @@ void ResoDlg::Calc()
 				calc_res_ellipse<t_real_reso>(res.reso, res.reso_v, res.reso_s,
 				res.Q_avg, 0, 3, 1, 2, -1);
 
-			//std::cout << ellVa.phi/M_PI*180. << std::endl;
-			t_real_reso dVanadiumFWHM_Q = ellVa.x_hwhm*2.;
-			t_real_reso dVanadiumFWHM_E = ellVa.y_hwhm*2.;
-			if(std::fabs(ellVa.phi) >= tl::get_pi<t_real_reso>()/4.)
-			{
-				dVanadiumFWHM_Q = ellVa.y_hwhm*2.;
-				dVanadiumFWHM_E = ellVa.x_hwhm*2.;
-			}
+			t_real_reso dVanadiumFWHM_Q = ellVa.x_hwhm_bound*2.;
+			t_real_reso dVanadiumFWHM_E = ellVa.y_hwhm_bound*2.;
 			// --------------------------------------------------------------------------------
 
 			const std::string& strAA_1 = tl::get_spec_char_utf8("AA")
@@ -625,7 +619,6 @@ void ResoDlg::Calc()
 
 				const t_mat matUBinvQVec0 = ublas::prod(m_matUBinv, matQVec0);
 				const t_mat matQVec0invUB = ublas::prod(matQVec0inv, m_matUB);
-				// TODO: check: does this work for non-cubic crystals, i.e. non-orthogonal B matrices?
 				m_resoHKL = tl::transform(m_res.reso, matQVec0invUB, 1);
 				//m_resoHKL = ublas::prod(m_res.reso, matUBinvQVec0);
 				//m_resoHKL = ublas::prod(matQVec0invUB, m_resoHKL);
@@ -642,7 +635,6 @@ void ResoDlg::Calc()
 				const t_mat matToOrient = ublas::prod(m_matUrlu, matUBinvQVec0);
 				const t_mat matToOrientinv = ublas::prod(matQVec0invUB, m_matUinvrlu);
 
-				// TODO: check: does this work for non-cubic crystals, i.e. non-orthogonal B matrices?
 				m_resoOrient = tl::transform(m_res.reso, matToOrientinv, 1);
 				//m_resoOrient = ublas::prod(m_res.reso, matToOrient);
 				//m_resoOrient = ublas::prod(matToOrientinv, m_resoOrient);
@@ -690,7 +682,7 @@ void ResoDlg::Calc()
 					opts.coords = McNeutronCoords::RLU;
 					if(m_vecMC_HKL.size() != iNumMC)
 						m_vecMC_HKL.resize(iNumMC);
-					mc_neutrons(m_ell4d, iNumMC, opts, m_vecMC_HKL.begin());
+					mc_neutrons<t_vec>(m_ell4d, iNumMC, opts, m_vecMC_HKL.begin());
 				}
 				else
 					m_vecMC_HKL.clear();
@@ -699,7 +691,7 @@ void ResoDlg::Calc()
 				opts.coords = McNeutronCoords::DIRECT;
 				if(m_vecMC_direct.size() != iNumMC)
 					m_vecMC_direct.resize(iNumMC);
-				mc_neutrons(m_ell4d, iNumMC, opts, m_vecMC_direct.begin());
+				mc_neutrons<t_vec>(m_ell4d, iNumMC, opts, m_vecMC_direct.begin());
 			}
 			else
 			{
@@ -1276,7 +1268,7 @@ void ResoDlg::MCGenerate()
 
 	opts.dAngleQVec0 = m_dAngleQVec0;
 	vecNeutrons.resize(iNeutrons);
-	mc_neutrons(m_ell4d, iNeutrons, opts, vecNeutrons.begin());
+	mc_neutrons<t_vec>(m_ell4d, iNeutrons, opts, vecNeutrons.begin());
 
 
 	ofstr.precision(g_iPrec);

@@ -18,6 +18,71 @@ using t_real = t_real_glob;
 
 SicsCache::SicsCache(QSettings* pSettings) : m_pSettings(pSettings)
 {
+	// map device names from settings
+	// first: settings name, second: pointer to string receiving device name
+	std::vector<std::pair<std::string, std::string*>> vecStrings =
+	{
+		{"lattice_a", &m_strSampleLattice[0]},
+		{"lattice_b", &m_strSampleLattice[1]},
+		{"lattice_c", &m_strSampleLattice[2]},
+
+		{"angle_a", &m_strSampleAngles[0]},
+		{"angle_b", &m_strSampleAngles[1]},
+		{"angle_c", &m_strSampleAngles[2]},
+
+		{"orient1_x", &m_strSampleOrient1[0]},
+		{"orient1_y", &m_strSampleOrient1[1]},
+		{"orient1_z", &m_strSampleOrient1[2]},
+
+		{"orient2_x", &m_strSampleOrient2[0]},
+		{"orient2_y", &m_strSampleOrient2[1]},
+		{"orient2_z", &m_strSampleOrient2[2]},
+
+		{"stheta", &m_strSampleTheta},
+		{"s2theta", &m_strSample2Theta},
+
+		{"mtheta", &m_strMonoTheta},
+		{"m2theta", &m_strMono2Theta},
+		{"mono_d", &m_strMonoD},
+
+		{"atheta", &m_strAnaTheta},
+		{"a2theta", &m_strAna2Theta},
+		{"ana_d", &m_strAnaD},
+
+		{"timer", &m_strTimer},
+		{"preset", &m_strPreset},
+		{"counter", &m_strCtr},
+	};
+
+	// fill in device names from settings
+	for(const std::pair<std::string, std::string*>& pair : vecStrings)
+	{
+		std::string strKey = std::string("net/") + pair.first + std::string("_6");
+		if(!m_pSettings->contains(strKey.c_str()))
+			continue;
+
+		*pair.second = m_pSettings->value(strKey.c_str(), pair.second->c_str()).
+			toString().toStdString();
+	}
+
+	// all final device names
+	std::vector<std::string> vecKeys = std::vector<std::string>
+	({
+		m_strSampleLattice[0], m_strSampleLattice[1], m_strSampleLattice[2],
+		m_strSampleAngles[0], m_strSampleAngles[1], m_strSampleAngles[2],
+		m_strSampleOrient1[0], m_strSampleOrient1[1], m_strSampleOrient1[2],
+		m_strSampleOrient2[0], m_strSampleOrient2[1], m_strSampleOrient2[2],
+
+		m_strSampleTheta, m_strSample2Theta,
+		m_strMonoD, m_strMonoTheta, m_strMono2Theta,
+		m_strAnaD, m_strAnaTheta, m_strAna2Theta,
+
+		m_strTimer, m_strPreset, m_strCtr,
+	});
+	
+	for(const std::string& strKey : vecKeys)
+		m_strAllKeys += strKey + "\n";
+
 	m_tcp.add_connect(boost::bind(&SicsCache::slot_connected, this, _1, _2));
 	m_tcp.add_disconnect(boost::bind(&SicsCache::slot_disconnected, this, _1, _2));
 	m_tcp.add_receiver(boost::bind(&SicsCache::slot_receive, this, _1));
@@ -76,13 +141,8 @@ void SicsCache::start_poller()
 
 		while(m_bPollerActive.load())
 		{
-			std::string strMsg;
-			strMsg += "DM\nDA\n";
-			strMsg += "AS\nBS\nCS\nAA\nBB\nCC\n";
-			strMsg += "AX\nAY\nAZ\nBX\nBY\nBZ\n";
-			strMsg += "A2\nA3\nA4\nA6\n";
-
-			m_tcp.write(strMsg);
+			// query all known keys
+			m_tcp.write(m_strAllKeys);
 			std::this_thread::sleep_for(std::chrono::milliseconds(m_iPollRate));
 		}
 	});
@@ -141,13 +201,13 @@ void SicsCache::slot_receive(const std::string& str)
 	boost::to_upper(cacheval.strVal);
 	cacheval.dTimestamp = tl::epoch<t_real>();
 
-	/*// mark special entries
+	// mark special entries
 	if(strKey == m_strTimer)
 		cacheval.ty = CacheValType::TIMER;
 	else if(strKey == m_strPreset)
 		cacheval.ty = CacheValType::PRESET;
 	else if(strKey == m_strCtr)
-		cacheval.ty = CacheValType::COUNTER;*/
+		cacheval.ty = CacheValType::COUNTER;
 
 	m_mapCache[strKey] = cacheval;
 
@@ -159,37 +219,39 @@ void SicsCache::slot_receive(const std::string& str)
 	TriangleOptions triag;
 
 	// monochromator
-	if(tl::str_is_equal<std::string>(strKey, "A2", false))
+	if(tl::str_is_equal<std::string>(strKey, m_strMono2Theta, false))
 	{
 		triag.bChangedMonoTwoTheta = 1;
 		triag.dMonoTwoTheta = tl::d2r(tl::str_to_var<t_real>(strVal));
 	}
 	// analyser
-	else if(tl::str_is_equal<std::string>(strKey, "A6", false))
+	else if(tl::str_is_equal<std::string>(strKey, m_strAna2Theta, false))
 	{
 		triag.bChangedAnaTwoTheta = 1;
 		triag.dAnaTwoTheta = tl::d2r(tl::str_to_var<t_real>(strVal));
 	}
 	// sample
-	else if(tl::str_is_equal<std::string>(strKey, "A4", false))
+	else if(tl::str_is_equal<std::string>(strKey, m_strSample2Theta, false))
 	{
 		triag.bChangedTwoTheta = 1;
 		triag.dTwoTheta = tl::d2r(tl::str_to_var<t_real>(strVal));
 	}
-	else if(tl::str_is_equal<std::string>(strKey, "A3", false))
+	else if(tl::str_is_equal<std::string>(strKey, m_strSampleTheta, false))
 	{
 		triag.bChangedAngleKiVec0 = 1;
 		triag.dAngleKiVec0 = -tl::d2r(tl::str_to_var<t_real>(strVal));
 	}
 	// lattice constants and angles
-	else if(tl::str_is_equal_to_either<std::string>(strKey, {"AS", "BS", "CS", "AA", "BB", "CC"}, false))
+	else if(tl::str_is_equal_to_either<std::string>(strKey,
+		{m_strSampleLattice[0], m_strSampleLattice[1], m_strSampleLattice[2], 
+			m_strSampleAngles[0], m_strSampleAngles[1], m_strSampleAngles[2]}, false))
 	{
-		decltype(m_mapCache)::const_iterator iterAS = m_mapCache.find("AS");
-		decltype(m_mapCache)::const_iterator iterBS = m_mapCache.find("BS");
-		decltype(m_mapCache)::const_iterator iterCS = m_mapCache.find("CS");
-		decltype(m_mapCache)::const_iterator iterAA = m_mapCache.find("AA");
-		decltype(m_mapCache)::const_iterator iterBB = m_mapCache.find("BB");
-		decltype(m_mapCache)::const_iterator iterCC = m_mapCache.find("CC");
+		decltype(m_mapCache)::const_iterator iterAS = m_mapCache.find(m_strSampleLattice[0]);
+		decltype(m_mapCache)::const_iterator iterBS = m_mapCache.find(m_strSampleLattice[1]);
+		decltype(m_mapCache)::const_iterator iterCS = m_mapCache.find(m_strSampleLattice[2]);
+		decltype(m_mapCache)::const_iterator iterAA = m_mapCache.find(m_strSampleAngles[0]);
+		decltype(m_mapCache)::const_iterator iterBB = m_mapCache.find(m_strSampleAngles[1]);
+		decltype(m_mapCache)::const_iterator iterCC = m_mapCache.find(m_strSampleAngles[2]);
 
 		if(iterAS==m_mapCache.end() || iterBS==m_mapCache.end() || iterCS==m_mapCache.end()
 			|| iterAA==m_mapCache.end() || iterBB==m_mapCache.end() || iterCC==m_mapCache.end())
@@ -204,14 +266,16 @@ void SicsCache::slot_receive(const std::string& str)
 		crys.dLatticeAngles[2] = tl::str_to_var<t_real>(iterCC->second.strVal);
 	}
 	// orientation reflexes
-	else if(tl::str_is_equal_to_either<std::string>(strKey, {"AX", "AY", "AZ", "BX", "BY", "BZ"}, false))
+	else if(tl::str_is_equal_to_either<std::string>(strKey,
+		{m_strSampleOrient1[0], m_strSampleOrient1[1], m_strSampleOrient1[2], 
+			m_strSampleOrient2[0], m_strSampleOrient2[1], m_strSampleOrient2[2]}, false))
 	{
-		decltype(m_mapCache)::const_iterator iterAX = m_mapCache.find("AX");
-		decltype(m_mapCache)::const_iterator iterAY = m_mapCache.find("AY");
-		decltype(m_mapCache)::const_iterator iterAZ = m_mapCache.find("AZ");
-		decltype(m_mapCache)::const_iterator iterBX = m_mapCache.find("BX");
-		decltype(m_mapCache)::const_iterator iterBY = m_mapCache.find("BY");
-		decltype(m_mapCache)::const_iterator iterBZ = m_mapCache.find("BZ");
+		decltype(m_mapCache)::const_iterator iterAX = m_mapCache.find(m_strSampleOrient1[0]);
+		decltype(m_mapCache)::const_iterator iterAY = m_mapCache.find(m_strSampleOrient1[1]);
+		decltype(m_mapCache)::const_iterator iterAZ = m_mapCache.find(m_strSampleOrient1[2]);
+		decltype(m_mapCache)::const_iterator iterBX = m_mapCache.find(m_strSampleOrient2[0]);
+		decltype(m_mapCache)::const_iterator iterBY = m_mapCache.find(m_strSampleOrient2[1]);
+		decltype(m_mapCache)::const_iterator iterBZ = m_mapCache.find(m_strSampleOrient2[2]);
 
 		if(iterAX==m_mapCache.end() || iterAY==m_mapCache.end() || iterAZ==m_mapCache.end()
 			|| iterBX==m_mapCache.end() || iterBY==m_mapCache.end() || iterBZ==m_mapCache.end())
@@ -225,12 +289,12 @@ void SicsCache::slot_receive(const std::string& str)
 		crys.dPlane2[1] = tl::str_to_var<t_real>(iterBY->second.strVal);
 		crys.dPlane2[2] = tl::str_to_var<t_real>(iterBZ->second.strVal);
 	}
-	else if(tl::str_is_equal<std::string>(strKey, "DM", false))
+	else if(tl::str_is_equal<std::string>(strKey, m_strMonoD, false))
 	{
 		triag.dMonoD = tl::str_to_var<t_real>(strVal);
 		triag.bChangedMonoD = 1;
 	}
-	else if(tl::str_is_equal<std::string>(strKey, "DA", false))
+	else if(tl::str_is_equal<std::string>(strKey, m_strAnaD, false))
 	{
 		triag.dAnaD = tl::str_to_var<t_real>(strVal);
 		triag.bChangedAnaD = 1;

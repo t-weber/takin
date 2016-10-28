@@ -13,8 +13,9 @@
 
 QFont g_fontGen("DejaVu Sans",10);
 QFont g_fontGfx("DejaVu Sans",10);
-QFont g_fontGL("DejaVu Sans Mono",10);
-
+//QFont g_fontGL("DejaVu Sans Mono",10);
+std::string g_strFontGL("");
+int g_iFontGLSize = 24;
 
 QIcon load_icon(const std::string& strIcon)
 {

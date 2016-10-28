@@ -1,4 +1,4 @@
-/*
+/**
  * gl plotter
  * @author tweber
  * @date 19-may-2013
@@ -11,12 +11,15 @@
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"
 
-#include <GL/glu.h>
+#include <glu.h>
 #include <time.h>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
-// TODO: make fully generic
+#define RENDER_FPS 40
+
+
 using t_real = t_real_glob;
 
 
@@ -27,26 +30,37 @@ using t_real = t_real_glob;
 #endif
 
 
-PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings)
-	: QGLWidget(pParent), m_pSettings(pSettings), m_bEnabled(true),
+void sleep_nano(long ns)
+{
+	timespec ts;
+	ts.tv_nsec = ns;
+	ts.tv_sec = 0;
+	nanosleep(&ts, 0);
+}
+
+PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings, t_real_gl dMouseScale)
+	: t_qglwidget(pParent), m_pSettings(pSettings), m_bEnabled(true),
 		m_mutex(QMutex::Recursive),
 		m_matProj(tl::unit_matrix<tl::t_mat4>(4)), m_matView(tl::unit_matrix<tl::t_mat4>(4))
 {
 	m_dMouseRot[0] = m_dMouseRot[1] = 0.;
-	m_dMouseScale = 25.;
+	m_dMouseScale = dMouseScale;
 	updateViewMatrix();
 
 	setAutoBufferSwap(false);
 	//setUpdatesEnabled(0);
 	doneCurrent();
+#if QT_VER>=5
+	context()->moveToThread((QThread*)this);
+#endif
 	start();		// render thread
 }
 
 PlotGl::~PlotGl()
 {
+	SetEnabled(0);
 	m_bRenderThreadActive = 0;
-	wait(250);
-	terminate();
+	wait();
 }
 
 void PlotGl::SetEnabled(bool b)
@@ -60,7 +74,7 @@ void PlotGl::SetColor(t_real r, t_real g, t_real b, t_real a)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, pfCol);
 }
 
-void PlotGl::SetColor(unsigned int iIdx)
+void PlotGl::SetColor(std::size_t iIdx)
 {
 	static const GLfloat cols[4][4] =
 	{
@@ -100,7 +114,7 @@ void PlotGl::initializeGLThread()
 	glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, vecLightCol);
 
 	unsigned int iLOD = 32;
-	for(unsigned iSphere=0; iSphere<sizeof(m_iLstSphere)/sizeof(*m_iLstSphere); ++iSphere)
+	for(std::size_t iSphere=0; iSphere<sizeof(m_iLstSphere)/sizeof(*m_iLstSphere); ++iSphere)
 	{
 		m_iLstSphere[iSphere] = glGenLists(1);
 
@@ -118,18 +132,10 @@ void PlotGl::initializeGLThread()
 	}
 
 	glActiveTexture(GL_TEXTURE0);
-#if QT_VER >= 5
-	// TODO: get selected font path
-	m_pFont = new tl::GlFontMap(DEF_FONT, g_fontGL.pointSize());
-#else
-	int iPixelSize = g_fontGL.pixelSize();
-	if(iPixelSize < 0)
-	{
-		iPixelSize = g_fontGL.pointSize();
-		tl::log_warn("Using font size:", iPixelSize);
-	}
-	m_pFont = new tl::GlFontMap(g_fontGL.freetypeFace(), iPixelSize);
-#endif
+
+	if(g_strFontGL == "") g_strFontGL = DEF_FONT;
+	if(g_iFontGLSize <= 0) g_iFontGLSize = DEF_FONT_SIZE;
+	m_pFont = new tl::GlFontMap(g_strFontGL.c_str(), g_iFontGLSize);
 
 #if QT_VER>=5
 	QWidget::
@@ -144,7 +150,7 @@ void PlotGl::freeGLThread()
 #endif
 	setMouseTracking(0);
 
-	for(unsigned iSphere=0; iSphere<sizeof(m_iLstSphere)/sizeof(*m_iLstSphere); ++iSphere)
+	for(std::size_t iSphere=0; iSphere<sizeof(m_iLstSphere)/sizeof(*m_iLstSphere); ++iSphere)
 		glDeleteLists(m_iLstSphere[iSphere], 1);
 
 	if(m_pFont) { delete m_pFont; m_pFont = nullptr; }
@@ -152,22 +158,21 @@ void PlotGl::freeGLThread()
 
 void PlotGl::resizeGLThread(int w, int h)
 {
-	if(w<=0) w=1; if(h<=0) h=1;
+	if(w<=0) w=1;
+	if(h<=0) h=1;
 	glViewport(0, 0, w, h);
 
 	glMatrixMode(GL_PROJECTION);
-	m_matProj = tl::perspective_matrix(m_dFOV, double(w)/double(h), 0.1, 100.);
+	m_matProj = tl::perspective_matrix(m_dFOV, t_real_gl(w)/t_real_gl(h), 0.1, 100.);
 	//m_matProj = ortho_matrix(-1.,1.,-1.,1.,0.1,100.);
-	GLdouble glmat[16]; tl::to_gl_array(m_matProj, glmat);
+	t_real_gl glmat[16]; tl::to_gl_array(m_matProj, glmat);
 	glLoadMatrixd(glmat);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
-void PlotGl::tickThread(double dTime)
-{
-}
+void PlotGl::tickThread(t_real_gl dTime) {}
 
 void PlotGl::paintGLThread()
 {
@@ -177,7 +182,7 @@ void PlotGl::paintGLThread()
 	if(!bEnabled) return;
 
 	glMatrixMode(GL_MODELVIEW);
-	GLdouble glmat[16];
+	t_real_gl glmat[16];
 	{
 		std::lock_guard<QMutex> _lck(m_mutex);
 		tl::to_gl_array(m_matView, glmat);
@@ -192,7 +197,7 @@ void PlotGl::paintGLThread()
 		glLineWidth(2.);
 		glColor3d(0., 0., 0.);
 
-		const double dAxisScale = 1.8;
+		const t_real_gl dAxisScale = 1.8;
 		glBegin(GL_LINES);
 			glVertex3d(m_dXMin*dAxisScale, 0., 0.);
 			glVertex3d(m_dXMax*dAxisScale, 0., 0.);
@@ -209,7 +214,7 @@ void PlotGl::paintGLThread()
 	glDisable(GL_TEXTURE_2D);
 
 	std::unique_lock<QMutex> _lck(m_mutex);
-	unsigned int iPltIdx=0;
+	std::size_t iPltIdx = 0;
 	for(const PlotObjGl& obj : m_vecObjs)
 	{
 		int iLOD = 0;
@@ -231,7 +236,7 @@ void PlotGl::paintGLThread()
 		{
 			glTranslated(obj.vecParams[3], obj.vecParams[4], obj.vecParams[5]);
 
-			GLdouble dMatRot[] = {obj.vecParams[6], obj.vecParams[7], obj.vecParams[8], 0.,
+			t_real_gl dMatRot[] = {obj.vecParams[6], obj.vecParams[7], obj.vecParams[8], 0.,
 				obj.vecParams[9], obj.vecParams[10], obj.vecParams[11], 0.,
 				obj.vecParams[12], obj.vecParams[13], obj.vecParams[14], 0.,
 				0., 0., 0., 1. };
@@ -243,7 +248,7 @@ void PlotGl::paintGLThread()
 
 		if(obj.bUseLOD)
 		{
-			double dLenDist = tl::gl_proj_sphere_size(/*dRadius*/1.);
+			t_real_gl dLenDist = tl::gl_proj_sphere_size(/*dRadius*/1.);
 			//std::cout << "proj sphere size: " << dLenDist << std::endl;
 			iLOD = dLenDist * 50.;
 			if(iLOD >= int(sizeof(m_iLstSphere)/sizeof(*m_iLstSphere)))
@@ -302,10 +307,14 @@ void PlotGl::paintGLThread()
 
 void PlotGl::run()
 {
+	static std::atomic<std::size_t> iThread(0);
+	std::size_t iThisThread = ++iThread;
+	tl::log_debug("GL thread ", iThisThread, " started.");
+
 	makeCurrent();
 	initializeGLThread();
 
-	double dTime = 0.;
+	t_real_gl dTime = 0.;
 	while(m_bRenderThreadActive)
 	{
 		if(m_bDoResize)
@@ -321,16 +330,15 @@ void PlotGl::run()
 			paintGLThread();
 		}
 
-		timespec ts;
-		long fps = isVisible() ? 30 : 3;
-		ts.tv_nsec = 1000000000 / fps;
-		ts.tv_sec = 0;
-		dTime += double(ts.tv_nsec) * 1e-9;
-		nanosleep(&ts, 0);
+		long fps = isVisible() ? RENDER_FPS : (RENDER_FPS/10);
+		long lns = long(1e9) / fps;
+		sleep_nano(lns);
+		dTime += t_real_gl(lns) * 1e-9;
 	}
 
+	doneCurrent();
 	freeGLThread();
-	//log_info("gl thread ended.");
+	tl::log_debug("GL thread ", iThisThread, " ended.");
 }
 
 void PlotGl::paintEvent(QPaintEvent *evt)
@@ -352,35 +360,35 @@ void PlotGl::clear()
 	m_vecObjs.clear();
 }
 
-void PlotGl::SetObjectColor(int iObjIdx, const std::vector<t_real>& vecCol)
+void PlotGl::SetObjectColor(std::size_t iObjIdx, const std::vector<t_real>& vecCol)
 {
 	std::lock_guard<QMutex> _lck(m_mutex);
 
-	if(m_vecObjs.size() <= (unsigned int)iObjIdx || iObjIdx<0)
+	if(m_vecObjs.size() <= iObjIdx)
 		return;
 	m_vecObjs[iObjIdx].vecColor = vecCol;
 }
 
-void PlotGl::SetObjectLabel(int iObjIdx, const std::string& strLab)
+void PlotGl::SetObjectLabel(std::size_t iObjIdx, const std::string& strLab)
 {
 	std::lock_guard<QMutex> _lck(m_mutex);
 
-	if(m_vecObjs.size() <= (unsigned int)iObjIdx || iObjIdx<0)
+	if(m_vecObjs.size() <= iObjIdx)
 		return;
 	m_vecObjs[iObjIdx].strLabel = strLab;
 }
 
-void PlotGl::SetObjectUseLOD(int iObjIdx, bool bLOD)
+void PlotGl::SetObjectUseLOD(std::size_t iObjIdx, bool bLOD)
 {
 	std::lock_guard<QMutex> _lck(m_mutex);
 
-	if(m_vecObjs.size() <= (unsigned int)iObjIdx || iObjIdx<0)
+	if(m_vecObjs.size() <= iObjIdx)
 		return;
 	m_vecObjs[iObjIdx].bUseLOD = bLOD;
 }
 
-void PlotGl::PlotSphere(const ublas::vector<double>& vecPos,
-	double dRadius, int iObjIdx)
+void PlotGl::PlotSphere(const ublas::vector<t_real_gl>& vecPos,
+	t_real_gl dRadius, int iObjIdx)
 {
 	if(iObjIdx < 0)
 	{
@@ -406,9 +414,9 @@ void PlotGl::PlotSphere(const ublas::vector<double>& vecPos,
 	}
 }
 
-void PlotGl::PlotEllipsoid(const ublas::vector<double>& widths,
-	const ublas::vector<double>& offsets,
-	const ublas::matrix<double>& rot,
+void PlotGl::PlotEllipsoid(const ublas::vector<t_real_gl>& widths,
+	const ublas::vector<t_real_gl>& offsets,
+	const ublas::matrix<t_real_gl>& rot,
 	int iObjIdx)
 {
 	if(iObjIdx < 0)
@@ -435,9 +443,9 @@ void PlotGl::PlotEllipsoid(const ublas::vector<double>& widths,
 		obj.vecParams[4] = offsets[1];
 		obj.vecParams[5] = offsets[2];
 
-		unsigned int iNum = 6;
-		for(unsigned int i=0; i<3; ++i)
-			for(unsigned int j=0; j<3; ++j)
+		std::size_t iNum = 6;
+		for(std::size_t i=0; i<3; ++i)
+			for(std::size_t j=0; j<3; ++j)
 				obj.vecParams[iNum++] = rot(j,i);
 	}
 }
@@ -447,7 +455,6 @@ void PlotGl::mousePressEvent(QMouseEvent *event)
 	if(event->buttons() & Qt::RightButton)
 	{
 		m_bMouseRotateActive = 1;
-
 		m_dMouseBegin[0] = event->POS_F().x();
 		m_dMouseBegin[1] = event->POS_F().y();
 	}
@@ -473,8 +480,8 @@ void PlotGl::mouseMoveEvent(QMouseEvent *pEvt)
 	bool bUpdateView = 0;
 	if(m_bMouseRotateActive)
 	{
-		double dNewX = pEvt->POS_F().x();
-		double dNewY = pEvt->POS_F().y();
+		t_real_gl dNewX = t_real_gl(pEvt->POS_F().x());
+		t_real_gl dNewY = t_real_gl(pEvt->POS_F().y());
 
 		m_dMouseRot[0] += dNewX - m_dMouseBegin[0];
 		m_dMouseRot[1] += dNewY - m_dMouseBegin[1];
@@ -487,9 +494,9 @@ void PlotGl::mouseMoveEvent(QMouseEvent *pEvt)
 
 	if(m_bMouseScaleActive)
 	{
-		double dNewY = pEvt->POS_F().y();
+		t_real_gl dNewY = t_real_gl(pEvt->POS_F().y());
 
-		m_dMouseScale *= 1.-(dNewY - m_dMouseScaleBegin)/double(height()) * 2.;
+		m_dMouseScale *= 1.-(dNewY - m_dMouseScaleBegin)/t_real_gl(height()) * 2.;
 		m_dMouseScaleBegin = dNewY;
 
 		bUpdateView = 1;
@@ -499,14 +506,26 @@ void PlotGl::mouseMoveEvent(QMouseEvent *pEvt)
 		updateViewMatrix();
 
 
+	m_dMouseX = 2.*pEvt->POS_F().x()/t_real_gl(m_iW) - 1.;
+	m_dMouseY = -(2.*pEvt->POS_F().y()/t_real_gl(m_iH) - 1.);
 
-	m_dMouseX = 2.*pEvt->POS_F().x()/double(m_iW) - 1.;
-	m_dMouseY = -(2.*pEvt->POS_F().y()/double(m_iH) - 1.);
-	//std::cout << m_dMouseX << ", " << m_dMouseY << std::endl;
-
-	bool bEnabled = m_bEnabled.load();
-	if(bEnabled)
+	bool bHasSelected = 0;
+	if(m_bEnabled.load())
+	{
 		mouseSelectObj(m_dMouseX, m_dMouseY);
+
+		for(PlotObjGl& obj : m_vecObjs)
+		{
+			if(obj.bSelected)
+			{
+				m_sigHover(&obj);
+				bHasSelected = 1;
+				break;
+			}
+		}
+	}
+	if(!bHasSelected)
+		m_sigHover(nullptr);
 }
 
 void PlotGl::updateViewMatrix()
@@ -538,26 +557,31 @@ void PlotGl::updateViewMatrix()
 	}
 }
 
-void PlotGl::mouseSelectObj(double dX, double dY)
+void PlotGl::AddHoverSlot(const typename t_sigHover::slot_type& conn)
+{
+	m_sigHover.connect(conn);
+}
+
+void PlotGl::mouseSelectObj(t_real_gl dX, t_real_gl dY)
 {
 	std::lock_guard<QMutex> _lck(m_mutex);
-	tl::Line<double> ray = tl::screen_ray(dX, dY, m_matProj, m_matView);
+	tl::Line<t_real_gl> ray = tl::screen_ray(dX, dY, m_matProj, m_matView);
 
 	for(PlotObjGl& obj : m_vecObjs)
 	{
 		obj.bSelected = 0;
 
-		tl::Quadric<double> *pQuad = nullptr;
-		tl::t_vec3 vecOffs = ublas::zero_vector<double>(3);
+		tl::Quadric<t_real_gl> *pQuad = nullptr;
+		tl::t_vec3 vecOffs = ublas::zero_vector<t_real_gl>(3);
 
 		if(obj.plttype == PLOT_SPHERE)
 		{
-			pQuad = new tl::QuadSphere<double>(obj.vecParams[3]);
+			pQuad = new tl::QuadSphere<t_real_gl>(obj.vecParams[3]);
 			vecOffs = tl::make_vec<tl::t_vec3>({obj.vecParams[0], obj.vecParams[1], obj.vecParams[2]});
 		}
 		else if(obj.plttype == PLOT_ELLIPSOID)
 		{
-			pQuad = new tl::QuadEllipsoid<double>(obj.vecParams[0], obj.vecParams[1], obj.vecParams[2]);
+			pQuad = new tl::QuadEllipsoid<t_real_gl>(obj.vecParams[0], obj.vecParams[1], obj.vecParams[2]);
 
 			vecOffs = tl::make_vec<tl::t_vec3>({obj.vecParams[3], obj.vecParams[4], obj.vecParams[5]});
 			tl::t_mat3 matRot = tl::make_mat<tl::t_mat3>(
@@ -569,10 +593,10 @@ void PlotGl::mouseSelectObj(double dX, double dY)
 
 		pQuad->SetOffset(vecOffs);
 
-		std::vector<double> vecT = pQuad->intersect(ray);
+		std::vector<t_real_gl> vecT = pQuad->intersect(ray);
 		if(vecT.size() > 0)
 		{
-			for(double t : vecT)
+			for(t_real_gl t : vecT)
 			{
 				if(t < 0.) continue; // beyond "near" plane
 				if(t > 1.) continue; // beyond "far" plane
@@ -592,53 +616,3 @@ void PlotGl::SetLabels(const char* pcLabX, const char* pcLabY, const char* pcLab
 	m_strLabels[1] = pcLabY;
 	m_strLabels[2] = pcLabZ;
 }
-
-
-
-/*
-// gcc -std=c++11 -I/usr/include/freetype2 -o tst_gl helper/plotgl.cpp helper/log.cpp helper/gl.cpp -lm -lstdc++ -lQtGui -lQtCore -lQtOpenGL -lGL -lGLU -lX11 -lfreetype
-
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-
-extern "C" int XInitThreads();
-int main(int argc, char **argv)
-{
-	//QuadSphere<double> sph(1.23);
-	//sph.SetOffset(make_vec({0.,0.,0.}));
-	//Line<double> line(make_vec({0.,0.,0.0}), make_vec({0.,0.,1.}));
-	//std::vector<double> vec = sph.intersect(line);
-	//for(double d : vec)
-	//	std::cout << d << ", ";
-	//std::cout << std::endl;
-
-	XInitThreads();
-	QApplication a(argc, argv);
-
-	QDialog dlg;
-	PlotGl *pGl = new PlotGl(&dlg);
-
-	pGl->SetObjectCount(3);
-	pGl->PlotSphere(make_vec({0., 0.5, -0.5}), 0.2, 0);
-	pGl->SetObjectColor(0, {1., 0., 0., 0.5});
-
-	pGl->PlotSphere(make_vec({0., 0., -2.}), 0.4, 1);
-	pGl->SetObjectColor(1, {0., 0., 1., 0.5});
-
-	pGl->PlotEllipsoid(make_vec({0.1, 0.2, 0.3}),
-						make_vec({0., 0.5, 0.}),
-						make_mat({{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}}), 2);
-	pGl->SetObjectColor(2, {0., 1., 0., 0.5});
-
-	pGl->SetMinMax(make_vec({-1.,-1.,-1.}), make_vec({1.,1.,1.}));
-
-	dlg.resize(640,480);
-	QGridLayout *pGrid = new QGridLayout(&dlg);
-	pGrid->addWidget(pGl, 0,0,1,1);
-	dlg.exec();
-
-	delete pGl;
-	return 0;
-}
-*/

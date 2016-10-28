@@ -14,6 +14,9 @@
 
 
 using t_real = t_real_glob;
+static const tl::t_length_si<t_real> angs = tl::get_one_angstrom<t_real>();
+static const tl::t_energy_si<t_real> meV = tl::get_one_meV<t_real>();
+
 
 static inline void usage(const char* pcProg)
 {
@@ -61,11 +64,11 @@ static inline void extract_pos(const char* pcIn, const char* pcOut)
 		t_real dl = arrPos[2];
 		t_real dki = arrPos[3];
 		t_real dkf = arrPos[4];
-		t_real dE = (tl::k2E(dki/tl::angstrom) - tl::k2E(dkf/tl::angstrom))/tl::meV;
+		t_real dE = (tl::k2E(dki/angs) - tl::k2E(dkf/angs))/meV;
 
 		ofstr << std::left << std::setw(20) << dh << " "
-			<< std::left << std::setw(20) << dk << " " 
-			<< std::left << std::setw(20) << dl << " " 
+			<< std::left << std::setw(20) << dk << " "
+			<< std::left << std::setw(20) << dl << " "
 			<< std::left << std::setw(20) << dE << std::endl;
 	}
 

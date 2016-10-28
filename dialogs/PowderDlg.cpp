@@ -20,6 +20,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMimeData>
 
 
 using t_real = t_real_glob;

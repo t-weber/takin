@@ -141,7 +141,8 @@ void ProjLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon, bool bIs
 	dLattConst = 2.*tl::get_pi<t_real>() / dLattConst;
 
 	if(m_proj == LatticeProj::PERSPECTIVE)
-		matPersp = tl::perspective_matrix<t_mat>(tl::d2r(5.), 1., 0.01, 100.);
+		matPersp = tl::perspective_matrix<t_mat>(tl::d2r(t_real(5)),
+			t_real(1), t_real(0.01), t_real(100));
 
 	const std::string strAA = tl::get_spec_char_utf8("AA");
 	bool bModifiedRadii = 0;
@@ -187,8 +188,8 @@ void ProjLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon, bool bIs
 				auto iterPeak = std::find_if(m_vecPeaks.begin(), m_vecPeaks.end(),
 					[dX, dY](const ProjLatticePoint* pPeak) -> bool
 					{
-						return tl::float_equal(pPeak->x(), dX, g_dEpsGfx) &&
-							tl::float_equal(pPeak->y(), dY, g_dEpsGfx);
+						return tl::float_equal<t_real>(pPeak->x(), dX, g_dEpsGfx) &&
+							tl::float_equal<t_real>(pPeak->y(), dY, g_dEpsGfx);
 					});
 
 				ProjLatticePoint *pPeak = nullptr;

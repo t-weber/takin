@@ -1,4 +1,4 @@
-/*
+/**
  * Scattering Triangle Tool
  * @author tweber
  * @date mar-2014
@@ -13,16 +13,49 @@
 using t_real = t_real_glob;
 
 Recip3DDlg::Recip3DDlg(QWidget* pParent, QSettings *pSettings)
-	: QDialog(pParent), m_pPlot(new PlotGl(this, pSettings))
+	: QDialog(pParent, Qt::Tool), m_pSettings(pSettings),
+	m_pStatus(new QStatusBar(this)),
+	m_pPlot(new PlotGl(this, pSettings, 0.25))
 {
-	setWindowFlags(Qt::Tool);
+	m_pPlot->SetEnabled(0);
+
 	setWindowTitle("Reciprocal Space");
+	m_pStatus->setSizeGripEnabled(1);
+	if(m_pSettings)
+	{
+		QFont font;
+		if(m_pSettings->contains("main/font_gen") && font.fromString(m_pSettings->value("main/font_gen", "").toString()))
+			setFont(font);
+
+		if(m_pSettings->contains("recip3d/geo"))
+			restoreGeometry(m_pSettings->value("recip3d/geo").toByteArray());
+		else
+			resize(640, 480);
+	}
+
+	m_pPlot->SetPrec(g_iPrecGfx);
+	m_pPlot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	QGridLayout *gridLayout = new QGridLayout(this);
-	m_pPlot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	gridLayout->setContentsMargins(4, 4, 4, 4);
 	gridLayout->addWidget(m_pPlot, 0, 0, 1, 1);
+	gridLayout->addWidget(m_pStatus, 1, 0, 1, 1);
 
-	resize(640, 480);
+	m_pPlot->AddHoverSlot([this](const PlotObjGl* pObj)
+	{
+		std::string strStatus;
+		if(pObj)
+			strStatus = pObj->strLabel;
+		tl::find_all_and_replace<std::string>(strStatus, "\n", ", ");
+
+		if(strStatus.length())
+			m_pStatus->showMessage(strStatus.c_str());
+		else
+			m_pStatus->clearMessage();
+	});
+
+	m_pPlot->SetLabels("a", "b", "c");
+	m_pPlot->SetEnabled(1);
 }
 
 Recip3DDlg::~Recip3DDlg()
@@ -41,16 +74,14 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 	const SpaceGroup<t_real>* pSpaceGroup = recipcommon.pSpaceGroup;
 	const tl::Plane<t_real>& plane = recipcommon.plane;
 
-
 	const unsigned int iObjCnt = (unsigned int)((m_dMaxPeaks*2 + 1)*
 		(m_dMaxPeaks*2 + 1) * (m_dMaxPeaks*2 + 1));
-	//log_info("Number of objects: ", iObjCnt);
 
 	m_pPlot->SetEnabled(0);
 	m_pPlot->clear();
 	m_pPlot->SetObjectCount(iObjCnt);
 
-	unsigned int iPeakIdx = 0;
+	std::size_t iPeakIdx = 0;
 	const t_real dLimMax = std::numeric_limits<t_real>::max();
 
 	std::vector<t_real> vecMin = {dLimMax, dLimMax, dLimMax},
@@ -78,7 +109,7 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 				t_real dDist = 0.;
 				ublas::vector<t_real> vecDropped = plane.GetDroppedPerp(vecPeak, &dDist);
 
-				std::vector<t_real> vecColor{0., 0., 1., 0.7};
+				std::vector<t_real> vecColor({0., 0., 1., 0.7});
 				if(tl::float_equal<t_real>(dDist, 0., m_dPlaneDistTolerance))
 				{
 					bool bIsDirectBeam = 0;
@@ -102,7 +133,6 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 				ostrLab << "(" << ih << " " << ik << " " << il << ")";
 				m_pPlot->SetObjectLabel(iPeakIdx, ostrLab.str());
 
-				//log_info("Index: ", iPeakIdx);
 				++iPeakIdx;
 			}
 
@@ -111,19 +141,21 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 	m_pPlot->SetEnabled(1);
 }
 
+void Recip3DDlg::closeEvent(QCloseEvent *pEvt)
+{
+	if(m_pSettings)
+		m_pSettings->setValue("recip3d/geo", saveGeometry());
+	QDialog::closeEvent(pEvt);
+}
 
-void Recip3DDlg::hideEvent(QHideEvent *event)
+void Recip3DDlg::hideEvent(QHideEvent *pEvt)
 {
 	if(m_pPlot) m_pPlot->SetEnabled(0);
-
-	//if(m_pSettings)
-	//	m_pSettings->setValue("recip3d/geo", saveGeometry());
+	QDialog::hideEvent(pEvt);
 }
-void Recip3DDlg::showEvent(QShowEvent *event)
+void Recip3DDlg::showEvent(QShowEvent *pEvt)
 {
-	//if(m_pSettings && m_pSettings->contains("recip3d/geo"))
-	//	restoreGeometry(m_pSettings->value("recip3d/geo").toByteArray());
-
+	QDialog::showEvent(pEvt);
 	if(m_pPlot) m_pPlot->SetEnabled(1);
 }
 

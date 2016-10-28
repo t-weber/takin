@@ -212,9 +212,9 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 	m_tofreso.sig_len_mono_sample = xml.Query<t_real>((strXmlRoot + "reso/viol_dist_mono_sample_sig").c_str(), 0.) * cm;
 	m_tofreso.sig_len_sample_det = xml.Query<t_real>((strXmlRoot + "reso/viol_dist_sample_det_sig").c_str(), 0.) * cm;
 
-	m_tofreso.sig_pulse = (xml.Query<t_real>((strXmlRoot + "reso/viol_time_pulse_sig").c_str(), 0.) * 1e-6) * sec;
-	m_tofreso.sig_mono = (xml.Query<t_real>((strXmlRoot + "reso/viol_time_mono_sig").c_str(), 0.) * 1e-6) * sec;
-	m_tofreso.sig_det = (xml.Query<t_real>((strXmlRoot + "reso/viol_time_det_sig").c_str(), 0.) * 1e-6) * sec;
+	m_tofreso.sig_pulse = (xml.Query<t_real>((strXmlRoot + "reso/viol_time_pulse_sig").c_str(), 0.) * t_real(1e-6)) * sec;
+	m_tofreso.sig_mono = (xml.Query<t_real>((strXmlRoot + "reso/viol_time_mono_sig").c_str(), 0.) * t_real(1e-6)) * sec;
+	m_tofreso.sig_det = (xml.Query<t_real>((strXmlRoot + "reso/viol_time_det_sig").c_str(), 0.) * t_real(1e-6)) * sec;
 
 	m_tofreso.twotheta_i = tl::d2r(xml.Query<t_real>((strXmlRoot + "reso/viol_angle_tt_i").c_str(), 0.)) * rads;
 	m_tofreso.angle_outplane_i = tl::d2r(xml.Query<t_real>((strXmlRoot + "reso/viol_angle_ph_i").c_str(), 0.)) * rads;
@@ -513,7 +513,7 @@ Ellipsoid4d<t_real> TASReso::GenerateMC(std::size_t iNum, std::vector<t_vec>& ve
 				iNumNeutr = iNumPerThread + iRemaining;
 
 			tp.AddTask([iterBegin, iNumNeutr, this, &ell4d]()
-				{ mc_neutrons(ell4d, iNumNeutr, this->m_opts, iterBegin); });
+				{ mc_neutrons<t_vec>(ell4d, iNumNeutr, this->m_opts, iterBegin); });
 		}
 
 		tp.StartTasks();
@@ -526,6 +526,6 @@ Ellipsoid4d<t_real> TASReso::GenerateMC(std::size_t iNum, std::vector<t_vec>& ve
 			ell4dret = ell4d;
 	}
 
-	//mc_neutrons(ell4d, iNum, m_opts, vecNeutrons.begin());
+	//mc_neutrons<t_vec>(ell4d, iNum, m_opts, vecNeutrons.begin());
 	return ell4dret;
 }

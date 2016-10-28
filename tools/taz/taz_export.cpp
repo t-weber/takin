@@ -253,7 +253,7 @@ void TazDlg::ExportUCModel()
 		tl::generate_all_atoms<t_mat, t_vec, std::vector>
 			(vecTrafos, vecAtoms,
 			static_cast<const std::vector<std::string>*>(0), matA,
-			-dUCSize*0.5, dUCSize*0.5, g_dEps);
+			-dUCSize*t_real(0.5), dUCSize*t_real(0.5), g_dEps);
 
 	// super cell
 	const std::size_t iSC_NN = 2;

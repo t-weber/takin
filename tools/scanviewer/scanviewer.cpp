@@ -26,6 +26,7 @@
 
 #ifndef NO_FIT
 	#include "tlibs/fit/minuit.h"
+	using tl::t_real_min;
 #endif
 
 
@@ -762,14 +763,21 @@ bool ScanViewerDlg::Fit(t_func&& func,
 	m_vecYErr.reserve(m_vecY.size());
 	for(t_real d : m_vecY)
 	{
-		if(tl::float_equal(d, 0., g_dEps))
+		if(tl::float_equal(d, t_real(0.), g_dEps))
 			d = 1.;
 		m_vecYErr.push_back(std::sqrt(d));
 	}
 
+	std::vector<t_real_min> _vecVals, _vecErrs;
+	_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals);
+	_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
 	bool bOk = tl::fit<iFuncArgs>(func,
-		m_vecX, m_vecY, m_vecYErr,
-		vecParamNames, vecVals, vecErrs, &vecFixed);
+		tl::container_cast<t_real_min, t_real, std::vector>()(m_vecX),
+		tl::container_cast<t_real_min, t_real, std::vector>()(m_vecY),
+		tl::container_cast<t_real_min, t_real, std::vector>()(m_vecYErr),
+		vecParamNames, _vecVals, _vecErrs, &vecFixed);
+	vecVals = tl::container_cast<t_real, t_real_min, std::vector>()(_vecVals);
+	vecErrs = tl::container_cast<t_real, t_real_min, std::vector>()(_vecErrs);
 
 	if(!bOk)
 	{

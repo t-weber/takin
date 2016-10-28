@@ -49,8 +49,9 @@ class EllipseDlg3D : public QDialog
 		virtual ~EllipseDlg3D();
 
 	protected:
-		void hideEvent(QHideEvent *event);
-		void showEvent(QShowEvent *event);
+		virtual void hideEvent(QHideEvent*) override;
+		virtual void showEvent(QShowEvent*) override;
+		virtual void closeEvent(QCloseEvent*) override;
 
 	public slots:
 		void SetParams(const EllipseDlgParams& params);

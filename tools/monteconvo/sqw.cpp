@@ -688,8 +688,10 @@ void SqwMagnon::create()
 		{
 			for(unsigned int iTh=0; iTh<m_iNumPoints; ++iTh)
 			{
-				t_real phi = tl::lerp(0., 2.*tl::get_pi<t_real>(), t_real(iPhi)/t_real(m_iNumPoints));
-				t_real theta = tl::lerp(0., tl::get_pi<t_real>(), t_real(iTh)/t_real(m_iNumPoints));
+				t_real phi = tl::lerp(t_real(0), t_real(2)*tl::get_pi<t_real>(),
+					t_real(iPhi)/t_real(m_iNumPoints));
+				t_real theta = tl::lerp(t_real(0), tl::get_pi<t_real>(),
+					t_real(iTh)/t_real(m_iNumPoints));
 
 				t_real qx, qy, qz;
 				std::tie(qx, qy, qz) = tl::sph_to_cart(q, phi, theta);

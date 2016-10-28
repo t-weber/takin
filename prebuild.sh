@@ -65,6 +65,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/tools/taz/tas_layout.h"
 	"${TAKINROOT}/tools/taz/tof_layout.h"
 	"${TAKINROOT}/tools/taz/recip3d.h"
+	"${TAKINROOT}/tools/taz/real3d.h"
 	"${TAKINROOT}/tools/taz/net.h"
 	"${TAKINROOT}/tools/taz/nicos.h"
 	"${TAKINROOT}/tools/taz/sics.h"

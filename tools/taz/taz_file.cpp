@@ -562,12 +562,12 @@ bool TazDlg::Import(const char* pcFile)
 		if(!pdat)
 			return false;
 
-		std::array<double,3> arrLatt = pdat->GetSampleLattice();
-		std::array<double,3> arrAng = pdat->GetSampleAngles();
+		std::array<t_real_glob,3> arrLatt = pdat->GetSampleLattice();
+		std::array<t_real_glob,3> arrAng = pdat->GetSampleAngles();
 		std::array<bool, 3> arrSenses = pdat->GetScatterSenses();
-		std::array<double, 2> arrD = pdat->GetMonoAnaD();
-		std::array<double, 3> arrPeak0 = pdat->GetScatterPlane0();
-		std::array<double, 3> arrPeak1 = pdat->GetScatterPlane1();
+		std::array<t_real_glob, 2> arrD = pdat->GetMonoAnaD();
+		std::array<t_real_glob, 3> arrPeak0 = pdat->GetScatterPlane0();
+		std::array<t_real_glob, 3> arrPeak1 = pdat->GetScatterPlane1();
 
 		editA->setText(tl::var_to_str(arrLatt[0]).c_str());
 		editB->setText(tl::var_to_str(arrLatt[1]).c_str());
@@ -617,7 +617,7 @@ bool TazDlg::Import(const char* pcFile)
 
 			for(std::size_t iScan=0; iScan<iScanNum; ++iScan)
 			{
-				std::array<double,5> arrScan = pdat->GetScanHKLKiKf(iScan);
+				std::array<t_real_glob,5> arrScan = pdat->GetScanHKLKiKf(iScan);
 				m_pGotoDlg->AddPosToList(arrScan[0],arrScan[1],arrScan[2],arrScan[3],arrScan[4]);
 			}
 		}

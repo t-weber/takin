@@ -24,6 +24,7 @@ class SicsCache : public NetCache
 		QSettings* m_pSettings = 0;
 
 		tl::TcpTxtClient<> m_tcp;
+		std::string m_strAllKeys;
 		t_mapCacheVal m_mapCache;
 
 		std::string m_strUser, m_strPass;
@@ -49,6 +50,16 @@ class SicsCache : public NetCache
 			const std::string& strUser, const std::string& strPass) override;
 		virtual void disconnect() override;
 		virtual void refresh() override;
+
+	protected:
+		// device names
+		std::string m_strSampleName;
+		std::string m_strSampleLattice[3], m_strSampleAngles[3];
+		std::string m_strSampleOrient1[3], m_strSampleOrient2[3];
+		std::string m_strSampleTheta, m_strSample2Theta;
+		std::string m_strMonoTheta, m_strMono2Theta, m_strMonoD;
+		std::string m_strAnaTheta, m_strAna2Theta, m_strAnaD;
+		std::string m_strTimer, m_strPreset, m_strCtr;
 };
 
 #endif

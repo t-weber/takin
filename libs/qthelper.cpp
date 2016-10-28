@@ -400,3 +400,52 @@ void set_zoomer_base(QwtPlotZoomer *pZoomer,
 		pZoomer->setZoomBase(rect);
 	}
 }
+
+
+// ----------------------------------------------------------------------------
+
+
+#if QT_VER>=5
+
+
+#include <QStandardPaths>
+
+std::vector<std::string> get_qt_std_path(QtStdPath path)
+{
+	QStandardPaths::StandardLocation iLoc;
+	switch(path)
+	{
+		case QtStdPath::HOME: iLoc = QStandardPaths::HomeLocation;
+		case QtStdPath::FONTS: iLoc = QStandardPaths::FontsLocation;
+	}
+
+	QStringList lst = QStandardPaths::standardLocations(iLoc);
+
+	std::vector<std::string> vecPaths;
+	for(std::size_t iStr=0; iStr<lst.size(); ++iStr)
+		vecPaths.push_back(lst.at(iStr).toStdString());
+	return vecPaths;
+}
+
+
+#else
+
+
+#include <QDesktopServices>
+
+std::vector<std::string> get_qt_std_path(QtStdPath path)
+{
+	QDesktopServices::StandardLocation iLoc;
+	switch(path)
+	{
+		case QtStdPath::HOME: iLoc = QDesktopServices::HomeLocation;
+		case QtStdPath::FONTS: iLoc = QDesktopServices::FontsLocation;
+	}
+
+	std::vector<std::string> vecPaths;
+	vecPaths.push_back(QDesktopServices::storageLocation(iLoc).toStdString());
+	return vecPaths;
+}
+
+
+#endif

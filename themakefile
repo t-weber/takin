@@ -24,12 +24,12 @@ STD_CPP = -std=c++11
 STD_LIBS = -lstdc++
 #STD_LIBS = -lc++ -lc++abi
 STD_LIBS += -lm
-STD_LIBS += -lpthread -lrt
+STD_LIBS += -lpthread -lrt -lgomp
 
 BOOST_SUFFIX = 
 #BOOST_SUFFIX = -mt
-QWT5_SUFFIX = 
-#QWT5_SUFFIX = -qt4
+#QWT5_SUFFIX = 
+QWT5_SUFFIX = -qt4
 
 # -----------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@ DEFINES += -DQT_VER=$(QT_VER)
 ifeq ($(QT_VER), 5)
 	QT_INC = -I/opt/local/libexec/qt5/include -I/opt/local/libexec/qt5/include/QtCore -I/opt/local/libexec/qt5/include/QtGui -I/opt/local/libexec/qt5/include/QtOpenGL \
 		-I/usr/include/qt5 -I/usr/include/qt5/QtCore -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui \
-		-I/usr/include/QtOpenGL
+		-I/usr/include/qt5/QtOpenGL
 	QT_LIB = -L/opt/local/libexec/qt5/lib -L/usr/lib64/qt5 -L/usr/lib/qt5/lib \
 		-lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg -lQt5Concurrent
 	ifeq ($(USE_3D), 1)
@@ -124,9 +124,13 @@ endif
 
 
 
-INC = ${QT_INC} ${QWT_INC} -I . -I/opt/local/include -I/usr/local/include \
-	-I/opt/include -I/usr/include/freetype2 -I/usr/include/lapacke \
-	-I/usr/include/python2.7 -I/usr/include/root -I/usr/include
+INC = ${QT_INC} ${QWT_INC} -I . -I/opt/local/include -I/opt/local/include/GL \
+	-I/usr/local/include -I/usr/local/include/GL \
+	-I/opt/include  -I/opt/include/GL -I/usr/include/freetype2 \
+	-I/usr/include/lapacke \
+	-I/usr/include/python2.7 -idirafter /usr/include/root \
+	-I/usr/include -I/usr/include/GL
+
 LIB_DIRS = -L/opt/local/lib -L/opt/lib -L/usr/local/lib -L/usr/local/lib64 \
 	-L/usr/lib64 -L/usr/lib64/root -L/usr/lib/x86_64-linux-gnu
 
@@ -169,7 +173,7 @@ endif
 BASIC_LIBS = -lboost_system${BOOST_SUFFIX} -lboost_filesystem${BOOST_SUFFIX}
 
 ifeq ($(USE_3D), 1)
-	GL_LIBS = -lX11 -lGL -lGLU -lfreetype -lfontconfig
+	GL_LIBS = -lX11 -lGL -lGLU -lfreetype
 else
 	GL_LIBS = 
 endif
@@ -274,7 +278,7 @@ OBJ_SFACT = obj/sfact.o obj/spacegroup_clp.o obj/crystalsys_noqt.o obj/globals.o
 
 
 ifeq ($(USE_3D), 1)
-	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/EllipseDlg3D.o
+	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/real3d.o obj/EllipseDlg3D.o
 endif
 
 ifeq ($(USE_NET), 1)
@@ -378,6 +382,8 @@ obj/taz_file.o: tools/taz/taz_file.cpp tools/taz/taz.h
 obj/taz_export.o: tools/taz/taz_export.cpp tools/taz/taz.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/recip3d.o: tools/taz/recip3d.cpp tools/taz/recip3d.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/real3d.o: tools/taz/real3d.cpp tools/taz/real3d.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/scattering_triangle.o: tools/taz/scattering_triangle.cpp tools/taz/scattering_triangle.h tlibs/math/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
