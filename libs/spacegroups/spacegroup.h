@@ -44,6 +44,7 @@ public:
 		: m_iNr(sg.m_iNr), m_strName(sg.m_strName), m_strLaue(sg.m_strLaue),
 		m_strPoint(sg.m_strPoint), m_crystalsys(sg.m_crystalsys),
 		m_strCrystalSysName(sg.m_strCrystalSysName), m_vecTrafos(sg.m_vecTrafos),
+		m_vecCentringTrafos(sg.m_vecCentringTrafos),
 		m_vecInvTrafos(sg.m_vecInvTrafos), m_vecPrimTrafos(sg.m_vecPrimTrafos),
 		m_vecCenterTrafos(sg.m_vecCenterTrafos)
 	{}
@@ -51,6 +52,7 @@ public:
 		: m_iNr(sg.m_iNr), m_strName(std::move(sg.m_strName)), m_strLaue(std::move(sg.m_strLaue)),
 		m_strPoint(std::move(sg.m_strPoint)), m_crystalsys(std::move(sg.m_crystalsys)),
 		m_strCrystalSysName(std::move(sg.m_strCrystalSysName)), m_vecTrafos(std::move(sg.m_vecTrafos)),
+		m_vecCentringTrafos(sg.m_vecCentringTrafos),
 		m_vecInvTrafos(std::move(sg.m_vecInvTrafos)), m_vecPrimTrafos(std::move(sg.m_vecPrimTrafos)),
 		m_vecCenterTrafos(std::move(sg.m_vecCenterTrafos))
 	{}
@@ -66,10 +68,20 @@ public:
 	 */
 	bool HasGenReflection(int h, int k, int l) const
 	{
-		//return is_reflection_allowed<std::vector, t_mat, t_vec>
-		//	(h,k,l, m_vecCentringTrafos);
+		bool bAllowed = 1;
 
-		return is_centering_reflection_allowed<int>(GetName(), h,k,l);
+		if(m_vecCentringTrafos.size()) // calculate from space group
+		{
+			bAllowed = is_reflection_allowed<std::vector, t_mat, t_vec>
+				(h,k,l, m_vecCentringTrafos);
+			//tl::log_debug(h,k,l, " -> ", bAllowed, ", # trafos: ", m_vecCentringTrafos.size());
+		}
+		else	// use pre-calculated rules alternatively
+		{
+			bAllowed = is_centering_reflection_allowed<int>(GetName(), h,k,l);
+		}
+
+		return bAllowed;
 	}
 
 	void SetNr(unsigned int iNr) { m_iNr = iNr; }
