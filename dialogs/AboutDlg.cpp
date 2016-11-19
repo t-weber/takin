@@ -257,6 +257,19 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 		strLicenses += strLic + "\n";
 	}
 	editAllLicenses->setPlainText(strLicenses.c_str());
+
+
+
+	std::string strLitFile = find_resource("LITERATURE");
+	std::ifstream ifstrLit(strLitFile);
+	std::string strLit;
+	while(ifstrLit)
+	{
+		std::string _strLit;
+		std::getline(ifstrLit, _strLit);
+		strLit += _strLit + "\n";
+	}
+	editLiterature->setPlainText(strLit.c_str());
 }
 
 

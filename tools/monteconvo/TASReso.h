@@ -68,6 +68,7 @@ public:
 
 	const EckParams& GetResoParams() const { return m_reso; }
 	const ViolParams& GetTofResoParams() const { return m_tofreso; }
+	const McNeutronOpts<ublas::matrix<t_real_reso>>& GetMCOpts() const { return m_opts; }
 	EckParams& GetResoParams() { return m_reso; }
 	ViolParams& GetTofResoParams() { return m_tofreso; }
 

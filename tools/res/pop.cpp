@@ -11,6 +11,8 @@
  */
 
 #include "pop.h"
+#include "helper.h"
+
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/math.h"
 
@@ -387,8 +389,9 @@ ResoResults calc_pop(const PopParams& pop)
 	}
 
 	// Bragg widths
-	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = sig2fwhm/sqrt(res.reso(i,i));
+	const std::vector<t_real> vecFwhms = calc_bragg_fwhms(res.reso);
+	std::copy(vecFwhms.begin(), vecFwhms.end(), res.dBraggFWHMs);
+
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

@@ -10,6 +10,8 @@
 
 #include "viol.h"
 #include "ellipse.h"
+#include "helper.h"
+
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/geo.h"
 #include "tlibs/math/math.h"
@@ -304,8 +306,8 @@ ResoResults calc_viol(const ViolParams& params)
 	res.dR0 = 0.;   // TODO
 
 	// Bragg widths
-	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = tl::get_SIGMA2FWHM<t_real>()/sqrt(res.reso(i,i));
+	const std::vector<t_real> vecFwhms = calc_bragg_fwhms(res.reso);
+	std::copy(vecFwhms.begin(), vecFwhms.end(), res.dBraggFWHMs);
 
 	res.reso_v = ublas::zero_vector<t_real>(4);
 	res.reso_s = 0.;

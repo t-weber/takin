@@ -1,4 +1,4 @@
-/*
+/**
  * Connection to Sics
  * @author tweber
  * @date 26-aug-2015

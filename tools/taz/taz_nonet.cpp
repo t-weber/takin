@@ -14,4 +14,3 @@ void TazDlg::ShowNetCache() {}
 void TazDlg::NetRefresh() {}
 void TazDlg::Connected(const QString& strHost, const QString& strSrv) {}
 void TazDlg::Disconnected() {}
-void TazDlg::VarsChanged(const CrystalOptions& crys, const TriangleOptions& triag) {}

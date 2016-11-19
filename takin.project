@@ -77,6 +77,7 @@
       <File Name="tlibs/math/powder.h"/>
       <File Name="tlibs/math/kd.h"/>
       <File Name="tlibs/math/atoms.h"/>
+      <File Name="tlibs/math/linalg2_impl.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="net">
       <File Name="tlibs/net/tcp.h"/>
@@ -139,6 +140,8 @@
       <File Name="tools/taz/tof_layout.h"/>
       <File Name="tools/taz/proj_lattice.cpp"/>
       <File Name="tools/taz/proj_lattice.h"/>
+      <File Name="tools/taz/real3d.cpp"/>
+      <File Name="tools/taz/real3d.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="monteconvo">
       <File Name="tools/monteconvo/sqw.cpp"/>
@@ -155,10 +158,14 @@
       <File Name="tools/monteconvo/sqwbase.cpp"/>
       <File Name="tools/monteconvo/sqwfactory.cpp"/>
       <File Name="tools/monteconvo/sqwfactory.h"/>
+      <File Name="tools/monteconvo/sqw_proc.h"/>
+      <File Name="tools/monteconvo/sqw_proc_impl.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="scanviewer">
       <File Name="tools/scanviewer/scanviewer.cpp"/>
       <File Name="tools/scanviewer/scanviewer.h"/>
+      <File Name="tools/scanviewer/FitParamDlg.cpp"/>
+      <File Name="tools/scanviewer/FitParamDlg.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="sglist">
       <File Name="tools/sglist/SgListDlg.cpp"/>
@@ -208,6 +215,10 @@
     <File Name="dialogs/AboutDlg.h"/>
     <File Name="dialogs/DispDlg.cpp"/>
     <File Name="dialogs/DispDlg.h"/>
+    <File Name="dialogs/ScanMonDlg.cpp"/>
+    <File Name="dialogs/ScanMonDlg.h"/>
+    <File Name="dialogs/FavDlg.cpp"/>
+    <File Name="dialogs/FavDlg.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
@@ -262,6 +273,8 @@
         <IncludePath Value="/usr/include/lapacke"/>
         <IncludePath Value="/usr/include/freetype2"/>
         <IncludePath Value="/usr/include/python2.7"/>
+        <IncludePath Value="/usr/include/GL"/>
+        <IncludePath Value="/usr/include/root"/>
         <Preprocessor Value="QWT_VER=6"/>
         <Preprocessor Value="QT_VER=4"/>
         <Preprocessor Value="USE_LAPACK"/>
@@ -280,6 +293,7 @@
         <LibraryPath Value="/usr/lib/x86_64-linux-gnu"/>
         <LibraryPath Value="/usr/local/lib64"/>
         <LibraryPath Value="/usr/local/lib"/>
+        <LibraryPath Value="/usr/lib64/root"/>
         <Library Value="QtCore"/>
         <Library Value="QtGui"/>
         <Library Value="QtSvg"/>
@@ -299,13 +313,14 @@
         <Library Value="blas"/>
         <Library Value="gfortran"/>
         <Library Value="freetype"/>
-        <Library Value="fontconfig"/>
         <Library Value="png"/>
         <Library Value="jpeg"/>
-        <Library Value="clipper-core"/>
+        <Library Value="rt"/>
+        <Library Value="Minuit2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)/.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH]]>
       </Environment>
@@ -360,6 +375,8 @@
         <IncludePath Value="/usr/include/lapacke"/>
         <IncludePath Value="/usr/include/freetype2"/>
         <IncludePath Value="/usr/include/python2.7"/>
+        <IncludePath Value="/usr/include/GL"/>
+        <IncludePath Value="/usr/include/root"/>
         <Preprocessor Value="QWT_VER=6"/>
         <Preprocessor Value="QT_VER=4"/>
         <Preprocessor Value="USE_LAPACK"/>
@@ -376,6 +393,7 @@
         <LibraryPath Value="/usr/lib/x86_64-linux-gnu"/>
         <LibraryPath Value="/usr/local/lib64"/>
         <LibraryPath Value="/usr/local/lib"/>
+        <LibraryPath Value="/usr/lib64/root"/>
         <Library Value="QtCore"/>
         <Library Value="QtGui"/>
         <Library Value="QtSvg"/>
@@ -399,9 +417,12 @@
         <Library Value="png"/>
         <Library Value="jpeg"/>
         <Library Value="clipper-core"/>
+        <Library Value="rt"/>
+        <Library Value="Minuit2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)/.." PauseExecWhenProcTerminates="no" IsGUIProgram="yes" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

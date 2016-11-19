@@ -1,4 +1,4 @@
-/*
+/**
  * Connection to Sics
  * @author tweber
  * @date 26-aug-2015
@@ -79,7 +79,7 @@ SicsCache::SicsCache(QSettings* pSettings) : m_pSettings(pSettings)
 
 		m_strTimer, m_strPreset, m_strCtr,
 	});
-	
+
 	for(const std::string& strKey : vecKeys)
 		m_strAllKeys += strKey + "\n";
 
@@ -165,6 +165,24 @@ void SicsCache::slot_disconnected(const std::string& strHost, const std::string&
 	emit disconnected();
 }
 
+static std::string get_replykey(const std::string& strKey)
+{
+	std::size_t iPos = strKey.rfind("get");
+	if(iPos == std::string::npos)
+		return strKey;
+
+	try
+	{
+		std::string strName = strKey.substr(iPos+3);
+		tl::trim(strName);
+		return strName;
+	}
+	catch(const std::exception&)
+	{
+		return strKey;
+	}
+}
+
 void SicsCache::slot_receive(const std::string& str)
 {
 #ifndef NDEBUG
@@ -202,11 +220,11 @@ void SicsCache::slot_receive(const std::string& str)
 	cacheval.dTimestamp = tl::epoch<t_real>();
 
 	// mark special entries
-	if(strKey == m_strTimer)
+	if(tl::str_contains(strKey, get_replykey(m_strTimer), 0))
 		cacheval.ty = CacheValType::TIMER;
-	else if(strKey == m_strPreset)
+	else if(tl::str_contains(strKey, get_replykey(m_strPreset), 0))
 		cacheval.ty = CacheValType::PRESET;
-	else if(strKey == m_strCtr)
+	else if(tl::str_contains(strKey, get_replykey(m_strCtr), 0))
 		cacheval.ty = CacheValType::COUNTER;
 
 	m_mapCache[strKey] = cacheval;

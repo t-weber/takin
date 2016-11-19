@@ -214,6 +214,23 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_7">
+      <attribute name="title">
+       <string>Literature</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0">
+        <widget class="QPlainTextEdit" name="editLiterature">
+         <property name="lineWrapMode">
+          <enum>QPlainTextEdit::NoWrap</enum>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item row="1" column="0">

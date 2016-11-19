@@ -370,7 +370,7 @@ void NeutronDlg::setupConstants()
 	{
 		std::ostringstream ostrVal;
 		ostrVal << std::scientific;
-		ostrVal << co::gamma_n;		// TODO: replace with a tl::... getter
+		ostrVal << t_real(tl::get_gamma_n<t_real>() * tesla * sec) << " rad/(Ts)";
 
 		Constant constant;
 		constant.strSymbol = "gamma_n";
@@ -395,7 +395,6 @@ void NeutronDlg::setupConstants()
 	{
 		std::ostringstream ostrVal;
 		ostrVal << std::scientific;
-		//ostrVal << co::mu_N;
 		ostrVal << t_real(tl::get_mu_N<t_real>() / meV * tesla) << " meV/T";
 
 		Constant constant;
@@ -436,7 +435,7 @@ void NeutronDlg::setupConstants()
 	{
 		std::ostringstream ostrVal;
 		ostrVal << std::scientific;
-		ostrVal << co::gamma_e;		// TODO: replace with a tl::... getter
+		ostrVal << t_real(tl::get_gamma_e<t_real>() * tesla * sec) << " rad/(Ts)";
 
 		Constant constant;
 		constant.strSymbol = "gamma_e";
@@ -582,6 +581,21 @@ void NeutronDlg::setupConstants()
 		Conversion conv;
 		conv.strName = "B in mT  ->  B in kG";
 		conv.strVal = tl::var_to_str(t_real(millitesla/kilogauss), g_iPrec) + " kG per mT";
+
+		vecConvs.emplace_back(std::move(conv));
+	}
+
+	{
+		Conversion conv;
+		conv.strName = "sigma  ->  HWHM";
+		conv.strVal = tl::var_to_str(tl::get_SIGMA2HWHM<t_real>(), g_iPrec);
+
+		vecConvs.emplace_back(std::move(conv));
+	}
+	{
+		Conversion conv;
+		conv.strName = "HWHM  ->  sigma";
+		conv.strVal = tl::var_to_str(tl::get_HWHM2SIGMA<t_real>(), g_iPrec);
 
 		vecConvs.emplace_back(std::move(conv));
 	}

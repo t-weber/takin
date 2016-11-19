@@ -90,7 +90,6 @@ SpaceGroups<t_real>::SpaceGroups()
 		[](const SpaceGroup<t_real>* sg1, const SpaceGroup<t_real>* sg2) -> bool
 		{ return sg1->GetNr() <= sg2->GetNr(); });
 
-
 	s_strSrc = xml.Query<std::string>("sgroups/source", "");
 	s_strUrl = xml.Query<std::string>("sgroups/source_url", "");
 	m_bOk = 1;

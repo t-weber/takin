@@ -20,6 +20,7 @@
 #include "tlibs/time/chrono.h"
 
 #include "libs/globals.h"
+#include "helper.h"
 #include "mc.h"
 
 #include <QPainter>
@@ -531,56 +532,6 @@ void ResoDlg::Calc()
 				+ tl::get_spec_char_utf8("sup-")
 				+ tl::get_spec_char_utf8("sup3");
 
-			std::ostringstream ostrRes;
-
-			//ostrRes << std::scientific;
-			ostrRes.precision(g_iPrec);
-			ostrRes << "<html><body>\n";
-
-			ostrRes << "<p><b>Correction Factors:</b>\n";
-			ostrRes << "\t<ul><li>Resolution Volume: " << res.dResVol << " meV " << strAA_3 << "</li>\n";
-			ostrRes << "\t<li>R0: " << res.dR0 << "</li></ul></p>\n\n";
-
-			ostrRes << "<p><b>Coherent (Bragg) FWHMs:</b>\n";
-			ostrRes << "\t<ul><li>Q_para: " << res.dBraggFWHMs[0] << " " << strAA_1 << "</li>\n";
-			ostrRes << "\t<li>Q_ortho: " << res.dBraggFWHMs[1] << " " << strAA_1 << "</li>\n";
-			ostrRes << "\t<li>Q_z: " << res.dBraggFWHMs[2] << " " << strAA_1 << "</li>\n";
-			ostrRes << "\t<li>E: " << res.dBraggFWHMs[3] << " meV</li></ul></p>\n\n";
-
-			ostrRes << "<p><b>Incoherent (Vanadium) FWHMs:</b>\n";
-			ostrRes << "\t<ul><li>Q: " << dVanadiumFWHM_Q << " " << strAA_1 << "</li>\n";
-			ostrRes << "\t<li>E: " << dVanadiumFWHM_E << " meV</li></ul></p>\n\n";
-
-			ostrRes << "<p><b>Resolution Matrix (Q_para, Q_ortho, Q_z, E):</b>\n\n";
-			ostrRes << "<blockquote><table border=\"0\" width=\"75%\">\n";
-			for(std::size_t i=0; i<res.reso.size1(); ++i)
-			{
-				ostrRes << "<tr>\n";
-				for(std::size_t j=0; j<res.reso.size2(); ++j)
-					ostrRes << "<td>" << std::setw(g_iPrec*2) << res.reso(i,j) << "</td>";
-				ostrRes << "</tr>\n";
-
-				if(i!=res.reso.size1()-1)
-					ostrRes << "\n";
-			}
-			ostrRes << "</table></blockquote></p>\n";
-
-			ostrRes << "<p><b>Resolution Vector:</b> ";
-			for(std::size_t iVec=0; iVec<res.reso_v.size(); ++iVec)
-			{
-				ostrRes << res.reso_v[iVec];
-				if(iVec != res.reso_v.size()-1)
-					ostrRes << ", ";
-			}
-			ostrRes << "</p>\n";
-
-			ostrRes << "<p><b>Resolution Scalar</b>: " << res.reso_s << "</p>\n";
-
-			ostrRes << "</body></html>";
-
-			editResults->setHtml(QString::fromUtf8(ostrRes.str().c_str()));
-			labelStatus->setText("Calculation successful.");
-
 #ifndef NDEBUG
 			// check against ELASTIC approximation for perp. slope from Shirane p. 268
 			// valid for small mosaicities
@@ -610,43 +561,118 @@ void ResoDlg::Calc()
 			// calculate rlu quadric if a sample is defined
 			if(m_bHasUB)
 			{
-				// hkl crystal system:
-				// Qavg system in 1/A -> rotate back to orient system in 1/A ->
-				// transform to hkl rlu system
-				t_mat matQVec0 = tl::rotation_matrix_2d(-m_dAngleQVec0);
-				tl::resize_unity(matQVec0, 4);
-				const t_mat matQVec0inv = ublas::trans(matQVec0);
+				std::tie(m_resoHKL, m_reso_vHKL, m_Q_avgHKL) =
+					conv_lab_to_rlu<t_mat, t_vec, t_real_reso>
+						(m_dAngleQVec0, m_matUB, m_matUBinv,
+						res.reso, res.reso_v, res.Q_avg);
+				std::tie(m_resoOrient, m_reso_vOrient, m_Q_avgOrient) =
+					conv_lab_to_rlu_orient<t_mat, t_vec, t_real_reso>
+						(m_dAngleQVec0, m_matUB, m_matUBinv,
+						m_matUrlu, m_matUinvrlu,
+						res.reso, res.reso_v, res.Q_avg);
+			}
 
-				const t_mat matUBinvQVec0 = ublas::prod(m_matUBinv, matQVec0);
-				const t_mat matQVec0invUB = ublas::prod(matQVec0inv, m_matUB);
-				m_resoHKL = tl::transform(m_res.reso, matQVec0invUB, 1);
-				//m_resoHKL = ublas::prod(m_res.reso, matUBinvQVec0);
-				//m_resoHKL = ublas::prod(matQVec0invUB, m_resoHKL);
-				m_Q_avgHKL = ublas::prod(matUBinvQVec0, m_res.Q_avg);
+			// print results
+			std::ostringstream ostrRes;
 
-				//std::cout << tl::r2d(m_dAngleQVec0) << std::endl;
-				//std::cout << m_Q_avgHKL << std::endl;
-				//std::cout << m_resoHKL << std::endl;
+			//ostrRes << std::scientific;
+			ostrRes.precision(g_iPrec);
+			ostrRes << "<html><body>\n";
 
+			ostrRes << "<p><b>Correction Factors:</b>\n";
+			ostrRes << "\t<ul><li>Resolution Volume: " << res.dResVol << " meV " << strAA_3 << "</li>\n";
+			ostrRes << "\t<li>R0: " << res.dR0 << "</li></ul></p>\n\n";
 
-				// system of scattering plane: (orient1, orient2, up)
-				// Qavg system in 1/A -> rotate back to orient system in 1/A ->
-				// transform to hkl rlu system -> rotate forward to orient system in rlu
-				const t_mat matToOrient = ublas::prod(m_matUrlu, matUBinvQVec0);
-				const t_mat matToOrientinv = ublas::prod(matQVec0invUB, m_matUinvrlu);
+			ostrRes << "<p><b>Coherent (Bragg) FWHMs:</b>\n";
+			ostrRes << "\t<ul><li>Q_para: " << res.dBraggFWHMs[0] << " " << strAA_1 << "</li>\n";
+			ostrRes << "\t<li>Q_ortho: " << res.dBraggFWHMs[1] << " " << strAA_1 << "</li>\n";
+			ostrRes << "\t<li>Q_z: " << res.dBraggFWHMs[2] << " " << strAA_1 << "</li>\n";
+			if(m_bHasUB)
+			{
+				static const char* pcHkl[] = { "h", "k", "l" };
+				const std::vector<t_real_reso> vecFwhms = calc_bragg_fwhms(m_resoHKL);
 
-				m_resoOrient = tl::transform(m_res.reso, matToOrientinv, 1);
-				//m_resoOrient = ublas::prod(m_res.reso, matToOrient);
-				//m_resoOrient = ublas::prod(matToOrientinv, m_resoOrient);
-				m_Q_avgOrient = ublas::prod(matToOrient, m_res.Q_avg);
-				//std::cout << m_Q_avgOrient << std::endl;
-
-				if(m_res.reso_v.size() == 4)
+				for(unsigned iHkl=0; iHkl<3; ++iHkl)
 				{
-					m_reso_vHKL = ublas::prod(matUBinvQVec0, m_res.reso_v);
-					m_reso_vOrient = ublas::prod(matToOrient, m_res.reso_v);
+					ostrRes << "\t<li>" << pcHkl[iHkl] << ": "
+						<< vecFwhms[iHkl] << " rlu</li>\n";
 				}
 			}
+			ostrRes << "\t<li>E: " << res.dBraggFWHMs[3] << " meV</li></ul></p>\n\n";
+
+			ostrRes << "<p><b>Incoherent (Vanadium) FWHMs:</b>\n";
+			ostrRes << "\t<ul><li>Q: " << dVanadiumFWHM_Q << " " << strAA_1 << "</li>\n";
+			ostrRes << "\t<li>E: " << dVanadiumFWHM_E << " meV</li></ul></p>\n\n";
+
+
+			ostrRes << "<p><b>Resolution Matrix (Q_para, Q_ortho, Q_z, E) in 1/A, meV:</b>\n\n";
+			ostrRes << "<blockquote><table border=\"0\" width=\"75%\">\n";
+			for(std::size_t i=0; i<res.reso.size1(); ++i)
+			{
+				ostrRes << "<tr>\n";
+				for(std::size_t j=0; j<res.reso.size2(); ++j)
+				{
+					t_real_reso dVal = res.reso(i,j);
+					tl::set_eps_0(dVal, g_dEps);
+
+					ostrRes << "<td>" << std::setw(g_iPrec*2) << dVal << "</td>";
+				}
+				ostrRes << "</tr>\n";
+
+				if(i!=res.reso.size1()-1)
+					ostrRes << "\n";
+			}
+			ostrRes << "</table></blockquote></p>\n";
+
+			ostrRes << "<p><b>Resolution Vector in 1/A, meV:</b> ";
+			for(std::size_t iVec=0; iVec<res.reso_v.size(); ++iVec)
+			{
+				ostrRes << res.reso_v[iVec];
+				if(iVec != res.reso_v.size()-1)
+					ostrRes << ", ";
+			}
+			ostrRes << "</p>\n";
+
+			ostrRes << "<p><b>Resolution Scalar</b>: " << res.reso_s << "</p>\n";
+
+
+			if(m_bHasUB)
+			{
+				ostrRes << "<p><b>Resolution Matrix (h, k, l, E) in rlu, meV:</b>\n\n";
+				ostrRes << "<blockquote><table border=\"0\" width=\"75%\">\n";
+				for(std::size_t i=0; i<m_resoHKL.size1(); ++i)
+				{
+					ostrRes << "<tr>\n";
+					for(std::size_t j=0; j<m_resoHKL.size2(); ++j)
+					{
+						t_real_reso dVal = m_resoHKL(i,j);
+						tl::set_eps_0(dVal, g_dEps);
+						ostrRes << "<td>" << std::setw(g_iPrec*2) << dVal << "</td>";
+					}
+					ostrRes << "</tr>\n";
+
+					if(i!=m_resoHKL.size1()-1)
+						ostrRes << "\n";
+				}
+				ostrRes << "</table></blockquote></p>\n";
+
+				ostrRes << "<p><b>Resolution Vector in rlu, meV:</b> ";
+				for(std::size_t iVec=0; iVec<m_reso_vHKL.size(); ++iVec)
+				{
+					ostrRes << m_reso_vHKL[iVec];
+					if(iVec != m_reso_vHKL.size()-1)
+						ostrRes << ", ";
+				}
+				ostrRes << "</p>\n";
+				//ostrRes << "<p><b>Resolution Scalar</b>: " << res.reso_s << "</p>\n";
+			}
+
+
+			ostrRes << "</body></html>";
+
+			editResults->setHtml(QString::fromUtf8(ostrRes.str().c_str()));
+			labelStatus->setText("Calculation successful.");
+
 
 
 			// generate live MC neutrons
@@ -816,7 +842,7 @@ void ResoDlg::EmitResults()
 	params.resoOrient = &m_resoOrient;
 	params.reso_vOrient = &m_reso_vOrient;
 	params.Q_avgOrient = &m_Q_avgOrient;
-	
+
 	params.vecMC_direct = &m_vecMC_direct;
 	params.vecMC_HKL = &m_vecMC_HKL;
 

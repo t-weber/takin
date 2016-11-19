@@ -46,6 +46,7 @@ class NicosCache : public NetCache
 
 		void RefreshKeys();
 		void RegisterKeys();
+		void UnregisterKeys();
 
 	protected:
 		// device names

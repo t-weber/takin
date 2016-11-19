@@ -344,7 +344,7 @@ bool run_job(const std::string& strJob)
 
 
 	// --------------------------------------------------------------------
-	// Resolution files
+	// resolution files
 	std::vector<TASReso> vecResos;
 	for(const std::string& strCurResFile : vecResFiles)
 	{

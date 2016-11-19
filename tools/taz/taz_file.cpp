@@ -305,8 +305,14 @@ bool TazDlg::Load(const char* pcFile)
 
 	CalcPeaks();
 	m_sceneRecip.emitUpdate();
+
 	if(m_pReso)
+	{
 		m_pReso->SetUpdateOn(1,1);
+		//emitSampleParams();
+		m_sceneRecip.emitAllParams();
+		//m_sceneReal.emitAllParams();
+	}
 
 	return true;
 }

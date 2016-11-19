@@ -265,6 +265,35 @@ t_str get_pointgroup(const t_str& str)
 
 
 /**
+ * check allowed Bragg reflections based on centring
+ * see e.g.: http://pd.chem.ucl.ac.uk/pdnn/symm4/centred.htm
+ */
+template<class t_int=int>
+bool is_centering_reflection_allowed(const std::string& strSG, t_int h, t_int k, t_int l)
+{
+	if(strSG.length() == 0) return true;
+
+	const char cCentr = strSG[0];
+	switch(cCentr)
+	{
+		case 'P': return true;
+		case 'I': return tl::is_even(h+k+l);
+		case 'F':
+		{
+			return (tl::is_even(h) && tl::is_even(k) && tl::is_even(l))
+				|| (tl::is_odd(h) && tl::is_odd(k) && tl::is_odd(l));
+		}
+		case 'A': return tl::is_even(k+l);
+		case 'B': return tl::is_even(h+l);
+		case 'C': return tl::is_even(h+k);
+		case 'R': return ((-h+k+l)%3 == 0);
+	}
+
+	return true;
+}
+
+
+/**
  * check allowed Bragg reflections
  * algorithm based on Clipper's HKL_class
  * constructor in clipper/core/coords.cpp by K. Cowtan

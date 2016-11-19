@@ -829,7 +829,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 			std::get<1>(tup) * recipcommon.dir1RLU;
 		veciCent = tl::convert_vec<t_real, int>(vecdCent);
 		if(recipcommon.pSpaceGroup &&
-			!recipcommon.pSpaceGroup->HasReflection(veciCent[0], veciCent[1], veciCent[2]))
+			!recipcommon.pSpaceGroup->HasGenReflection(veciCent[0], veciCent[1], veciCent[2]))
 			continue;
 		break;
 	}
@@ -875,12 +875,17 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 				const t_real k = t_real(ik);
 				const t_real l = t_real(il);
 
+				bool bHasRefl = 1;
+				bool bHasGenRefl = 1;
+
 				if(recipcommon.pSpaceGroup)
 				{
-					if(!recipcommon.pSpaceGroup->HasReflection(ih, ik, il))
-						continue;
+					bHasRefl = recipcommon.pSpaceGroup->HasReflection(ih, ik, il);
+					bHasGenRefl = recipcommon.pSpaceGroup->HasGenReflection(ih, ik, il);
 				}
 
+				if(!bHasGenRefl)
+					continue;
 
 				t_vec vecPeak = m_recip.GetPos(h,k,l);
 				//t_vec vecPeak = matB * tl::make_vec({h,k,l});
@@ -900,7 +905,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 				std::string strStructfact;
 				t_real dF = -1., dFsq = -1.;
 
-				if(recipcommon.CanCalcStructFact() && (bInPlane || bIsPowder))
+				if(bHasRefl && recipcommon.CanCalcStructFact() && (bInPlane || bIsPowder))
 				{
 					std::tie(std::ignore, dF, dFsq) =
 						recipcommon.GetStructFact(vecPeak);
@@ -924,47 +929,49 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 					// (000), i.e. direct beam, also needed for powder
 					if(!bIsPowder || (ih==0 && ik==0 && il==0))
 					{
-						RecipPeak *pPeak = new RecipPeak();
-						if(ih==0 && ik==0 && il==0)
-							pPeak->SetColor(Qt::darkGreen);
-						pPeak->setPos(dX * m_dScaleFactor, dY * m_dScaleFactor);
-						if(dF >= 0.) pPeak->SetRadius(dF);
-						pPeak->setData(TRIANGLE_NODE_TYPE_KEY, NODE_BRAGG);
-
-						std::ostringstream ostrLabel, ostrTip;
-						ostrLabel.precision(g_iPrecGfx);
-						ostrTip.precision(g_iPrecGfx);
-
-						ostrLabel << "(" << ih << " " << ik << " " << il << ")";
-						ostrTip << "(" << ih << " " << ik << " " << il << ") rlu";
-						if(dFsq > -1.)
+						if(bHasRefl)
 						{
-							std::ostringstream ostrStructfact;
-							ostrStructfact.precision(g_iPrecGfx);
-							if(g_bShowFsq)
-								ostrStructfact << "S = " << dFsq;
-							else
-								ostrStructfact << "F = " << dF;
-							strStructfact = ostrStructfact.str();
+							RecipPeak *pPeak = new RecipPeak();
+							if(ih==0 && ik==0 && il==0)
+								pPeak->SetColor(Qt::darkGreen);
+							pPeak->setPos(dX * m_dScaleFactor, dY * m_dScaleFactor);
+							if(dF >= 0.) pPeak->SetRadius(dF);
+							pPeak->setData(TRIANGLE_NODE_TYPE_KEY, NODE_BRAGG);
 
-							ostrLabel << "\n" << strStructfact;
-							ostrTip << "\n" << strStructfact << " fm";
-						}
+							std::ostringstream ostrLabel, ostrTip;
+							ostrLabel.precision(g_iPrecGfx);
+							ostrTip.precision(g_iPrecGfx);
 
-						//if(ih!=0 || ik!=0 || il!=0)
+							ostrLabel << "(" << ih << " " << ik << " " << il << ")";
+							ostrTip << "(" << ih << " " << ik << " " << il << ") rlu";
+							if(dFsq > -1.)
+							{
+								std::ostringstream ostrStructfact;
+								ostrStructfact.precision(g_iPrecGfx);
+								if(g_bShowFsq)
+									ostrStructfact << "S = " << dFsq;
+								else
+									ostrStructfact << "F = " << dF;
+								strStructfact = ostrStructfact.str();
+
+								ostrLabel << "\n" << strStructfact;
+								ostrTip << "\n" << strStructfact << " fm";
+							}
+
 							pPeak->SetLabel(ostrLabel.str().c_str());
 
-						tl::set_eps_0(vecPeak);
-						ostrTip << "\n("
-							<< vecPeak[0] << ", "
-							<< vecPeak[1] << ", "
-							<< vecPeak[2] << ") " << strAA;
+							tl::set_eps_0(vecPeak);
+							ostrTip << "\n("
+								<< vecPeak[0] << ", "
+								<< vecPeak[1] << ", "
+								<< vecPeak[2] << ") " << strAA;
 
-						//ostrTip << "\ndistance to plane: " << dDist << " " << strAA;
-						pPeak->setToolTip(QString::fromUtf8(ostrTip.str().c_str(), ostrTip.str().length()));
+							//ostrTip << "\ndistance to plane: " << dDist << " " << strAA;
+							pPeak->setToolTip(QString::fromUtf8(ostrTip.str().c_str(), ostrTip.str().length()));
 
-						m_vecPeaks.push_back(pPeak);
-						m_scene.addItem(pPeak);
+							m_vecPeaks.push_back(pPeak);
+							m_scene.addItem(pPeak);
+						}
 
 						// 1st BZ
 						if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
@@ -1136,8 +1143,8 @@ void ScatteringTriangle::ClearPeaks()
 std::vector<ScatteringTriangleNode*> ScatteringTriangle::GetNodes()
 {
 	return std::vector<ScatteringTriangleNode*>
-			{ m_pNodeKiQ.get(), m_pNodeKiKf.get(),
-			m_pNodeKfQ.get(), m_pNodeGq.get() };
+		{ m_pNodeKiQ.get(), m_pNodeKiKf.get(),
+		m_pNodeKfQ.get(), m_pNodeGq.get() };
 }
 
 std::vector<std::string> ScatteringTriangle::GetNodeNames() const
@@ -1261,6 +1268,7 @@ void ScatteringTriangle::SnapToNearestPeak(ScatteringTriangleNode* pNode,
 {
 	if(!pNode) return;
 	if(!pNodeOrg) pNodeOrg = pNode;
+	if(!HasPeaks()) return;
 
 	std::tuple<bool, t_real, QPointF> tupNearest =
 		get_nearest_node(pNodeOrg->pos(), pNode, m_scene.items(),
@@ -1425,41 +1433,43 @@ void ScatteringTriangleScene::emitAllParams()
 	std::cout << "q = " << vecqrlu << std::endl;
 	std::cout << "G = " << vecGrlu << std::endl;*/
 
-	for(unsigned int i=0; i<3; ++i)
+	for(unsigned i=0; i<3; ++i)
 	{
-		parms.Q[i] = vecQ[i];
-		parms.Q_rlu[i] = vecQrlu[i];
+		parms.Q[i] = vecQ.size() ? vecQ[i] : 0.;
+		parms.Q_rlu[i] = vecQrlu.size() ? vecQrlu[i] : 0.;
 
-		parms.q[i] = vecq[i];
-		parms.q_rlu[i] = vecqrlu[i];
+		parms.q[i] = vecq.size() ? vecq[i] : 0.;
+		parms.q_rlu[i] = vecqrlu.size() ? vecqrlu[i] : 0.;
 
-		parms.G[i] = vecG[i];
-		parms.G_rlu[i] = vecGrlu[i];
+		parms.G[i] = vecG.size() ? vecG[i] : 0.;
+		parms.G_rlu[i] = vecGrlu.size() ? vecGrlu[i] : 0.;
 
-		parms.orient_0[i] = vec0[i];
-		parms.orient_1[i] = vec1[i];
-		parms.orient_up[i] = vecUp[i];
+		parms.orient_0[i] = vec0.size() ? vec0[i] : 0.;
+		parms.orient_1[i] = vec1.size() ? vec1[i] : 0.;
+		parms.orient_up[i] = vecUp.size() ? vecUp[i] : 0.;
 	}
 
 
 	// nearest node (exact G)
-	parms.G_rlu_accurate[0] = parms.G_rlu_accurate[1] = parms.G_rlu_accurate[2] = 0.;
-	const tl::Kd<t_real>& kd = m_pTri->GetKdLattice();
-	t_vec vecHKLinvA = m_pTri->GetRecipLattice().GetPos(-vecQrlu[0], -vecQrlu[1], -vecQrlu[2]);
-
-	if(kd.GetRootNode())
+	if(vecQrlu.size())
 	{
-		std::vector<t_real> stdvecHKL{vecHKLinvA[0], vecHKLinvA[1], vecHKLinvA[2]};
-		const std::vector<t_real>* pvecNearest = &kd.GetNearestNode(stdvecHKL);
+		parms.G_rlu_accurate[0] = parms.G_rlu_accurate[1] = parms.G_rlu_accurate[2] = 0.;
+		const tl::Kd<t_real>& kd = m_pTri->GetKdLattice();
+		t_vec vecHKLinvA = m_pTri->GetRecipLattice().GetPos(-vecQrlu[0], -vecQrlu[1], -vecQrlu[2]);
 
-		if(pvecNearest)
+		if(kd.GetRootNode())
 		{
-			parms.G_rlu_accurate[0] = (*pvecNearest)[3];
-			parms.G_rlu_accurate[1] = (*pvecNearest)[4];
-			parms.G_rlu_accurate[2] = (*pvecNearest)[5];
+			std::vector<t_real> stdvecHKL{vecHKLinvA[0], vecHKLinvA[1], vecHKLinvA[2]};
+			const std::vector<t_real>* pvecNearest = &kd.GetNearestNode(stdvecHKL);
+
+			if(pvecNearest)
+			{
+				parms.G_rlu_accurate[0] = (*pvecNearest)[3];
+				parms.G_rlu_accurate[1] = (*pvecNearest)[4];
+				parms.G_rlu_accurate[2] = (*pvecNearest)[5];
+			}
 		}
 	}
-
 
 	CheckForSpurions();
 
@@ -1672,7 +1682,6 @@ void ScatteringTriangleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *pEvt)
 	{
 		const t_real dX = pEvt->scenePos().x()/m_pTri->GetScaleFactor();
 		const t_real dY = -pEvt->scenePos().y()/m_pTri->GetScaleFactor();
-
 		t_vec vecHKL = m_pTri->GetHKLFromPlanePos(dX, dY);
 		tl::set_eps_0(vecHKL, g_dEps);
 

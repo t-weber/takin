@@ -823,6 +823,7 @@ TazDlg::TazDlg(QWidget* pParent)
 TazDlg::~TazDlg()
 {
 	//log_debug("In ", __func__, ".");
+	Disconnect();
 	DeleteDialogs();
 
 	// don't delete non-optional sub-modules in DeleteDialogs()

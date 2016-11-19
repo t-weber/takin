@@ -9,6 +9,7 @@
  */
 
 #include "eck.h"
+#include "helper.h"
 
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/math.h"
@@ -244,10 +245,8 @@ ResoResults calc_eck(const EckParams& eck)
 
 	//std::cout << "thetaM = " << t_real(thetam/rads/M_PI*180.) << " deg"<< std::endl;
 	//std::cout << "thetaA = " << t_real(thetaa/rads/M_PI*180.) << " deg"<< std::endl;
-
 	//std::cout << "ki = " << t_real(eck.ki*angs) << ", kf = " << t_real(eck.kf*angs) << std::endl;
 	//std::cout << "Q = " << t_real(eck.Q*angs) << ", E = " << t_real(eck.E/meV) << std::endl;
-
 	//std::cout << "kiQ = " << t_real(ki_Q/rads/M_PI*180.) << " deg"<< std::endl;
 	//std::cout << "kfQ = " << t_real(kf_Q/rads/M_PI*180.) << " deg"<< std::endl;
 	//std::cout << "2theta = " << t_real(twotheta/rads/M_PI*180.) << " deg"<< std::endl;
@@ -441,8 +440,8 @@ ResoResults calc_eck(const EckParams& eck)
 	res.dR0 *= dxsec;
 
 	// Bragg widths
-	for(unsigned int i=0; i<4; ++i)
-		res.dBraggFWHMs[i] = sig2fwhm/sqrt(res.reso(i,i));
+	const std::vector<t_real> vecFwhms = calc_bragg_fwhms(res.reso);
+	std::copy(vecFwhms.begin(), vecFwhms.end(), res.dBraggFWHMs);
 
 	if(tl::is_nan_or_inf(res.dR0) || tl::is_nan_or_inf(res.reso))
 	{

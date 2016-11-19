@@ -61,6 +61,7 @@ protected:
 	const std::vector<Scan>* m_pScans = nullptr;
 	// -------------------------------------------------------------------------
 
+protected:
 	// -------------------------------------------------------------------------
 	// signals
 	public: using t_sigFuncResult = sig::signal<void(t_real_mod h, t_real_mod k, t_real_mod l, 
@@ -83,6 +84,10 @@ protected:
 
 protected:
 	void SetModelParams();
+
+	bool SetTASPos(t_real_mod dX, TASReso& reso) const;
+	TASReso* GetTASReso();
+	const TASReso* GetTASReso() const;
 
 public:
 	SqwFuncModel(std::shared_ptr<SqwBase> pSqw, const TASReso& reso);

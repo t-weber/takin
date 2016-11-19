@@ -32,7 +32,11 @@ bool get_fileprops(const char* pcFile, t_map& mapProps)
 	while(std::getline(ifstr, strLine))
 	{
 		tl::trim(strLine);
+		// only collect lines starting with "#"
 		if(!strLine.size() || strLine[0] != '#')
+			continue;
+		// ignore comments starting with "##"
+		if(strLine.size()>=2 && strLine[0]=='#' && strLine[1]=='#')
 			continue;
 
 		strLine = strLine.substr(1);
@@ -73,7 +77,7 @@ bool get_fileprops(const char* pcFile, t_map& mapProps)
 			std::vector<std::string> vecSuffixes = {"_h", "_k", "_l", "_E"};
 
 			std::size_t iNumCoords = std::min(vecSuffixes.size(), vecHKLE.size());
-			for(unsigned int iCoord=0; iCoord<iNumCoords; ++iCoord)
+			for(std::size_t iCoord=0; iCoord<iNumCoords; ++iCoord)
 			{
 				std::string strNewKey = strKey + vecSuffixes[iCoord];
 				mapProps.insert(t_map::value_type(strNewKey, {vecHKLE[iCoord], 0.}));

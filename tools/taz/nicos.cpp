@@ -99,6 +99,7 @@ void NicosCache::connect(const std::string& strHost, const std::string& strPort,
 
 void NicosCache::disconnect()
 {
+	UnregisterKeys();
 	m_tcp.disconnect();
 }
 
@@ -123,6 +124,8 @@ void NicosCache::ClearKeys()
 
 void NicosCache::RefreshKeys()
 {
+	if(!m_tcp.is_connected()) return;
+
 	std::string strMsg;
 	for(const std::string& strKey : m_vecKeys)
 		strMsg += "@"+strKey+"?\n";
@@ -131,9 +134,21 @@ void NicosCache::RefreshKeys()
 
 void NicosCache::RegisterKeys()
 {
+	if(!m_tcp.is_connected()) return;
+
 	std::string strMsg;
 	for(const std::string& strKey : m_vecKeys)
 		strMsg += "@"+strKey+":\n";
+	m_tcp.write(strMsg);
+}
+
+void NicosCache::UnregisterKeys()
+{
+	if(!m_tcp.is_connected()) return;
+
+	std::string strMsg;
+	for(const std::string& strKey : m_vecKeys)
+		strMsg += strKey+"|\n";
 	m_tcp.write(strMsg);
 }
 

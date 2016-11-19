@@ -101,9 +101,9 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupEdit("net/a2theta_6", "A6", edit6_A6),
 		t_tupEdit("net/ana_d_6", "DA", edit6_DA),
 
-		t_tupEdit("net/timer_6", "counter.Monitor 1", edit6_CurTime),
-		t_tupEdit("net/preset_6", "counter.Preset", edit6_Preset),
-		t_tupEdit("net/counter_6", "counter.Counts", edit6_Counter),
+		t_tupEdit("net/timer_6", "counter getmonitor 1", edit6_CurTime),
+		t_tupEdit("net/preset_6", "counter getpreset", edit6_Preset),
+		t_tupEdit("net/counter_6", "counter getcounts", edit6_Counter),
 
 
 		// misc
