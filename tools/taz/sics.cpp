@@ -63,6 +63,7 @@ SicsCache::SicsCache(QSettings* pSettings) : m_pSettings(pSettings)
 
 		*pair.second = m_pSettings->value(strKey.c_str(), pair.second->c_str()).
 			toString().toStdString();
+		*pair.second = tl::str_to_lower(*pair.second);
 	}
 
 	// all final device names
@@ -214,16 +215,14 @@ void SicsCache::slot_receive(const std::string& str)
 		return;
 	}
 
-
-	const std::string& strKey = pairKeyVal.first;
+	const std::string strKey = tl::str_to_lower(pairKeyVal.first);
 	const std::string& strVal = pairKeyVal.second;
 
 	if(strVal.length() == 0)
 		return;
 
 	CacheVal cacheval;
-	cacheval.strVal = strVal;
-	boost::to_upper(cacheval.strVal);
+	cacheval.strVal = tl::str_to_upper(strVal);
 	cacheval.dTimestamp = tl::epoch<t_real>();
 
 	// mark special entries
