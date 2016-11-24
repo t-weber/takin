@@ -62,7 +62,7 @@ void RealParamDlg::CrystalChanged(const tl::Lattice<t_real>& latt,
 	listAtoms->clear();
 	if(!pAtoms || !pSG) return;
 
-	const int iSC = 2;
+	const unsigned iSC = 3;
 	const t_real dEpsShell = 0.01;
 
 	const std::wstring strAA = tl::get_spec_char_utf16("AA");
@@ -85,6 +85,9 @@ void RealParamDlg::CrystalChanged(const tl::Lattice<t_real>& latt,
 			(vecSymTrafos, vecAtoms, nullptr, matA,
 			t_real(-0.5), t_real(0.5), g_dEps);
 
+		for(t_vec& vecAt : vecAtomsUC) tl::set_eps_0(vecAt, g_dEps);
+		for(t_vec& vecAt : vecAtomsUCFrac) tl::set_eps_0(vecAt, g_dEps);
+
 		// fill list widget
 		std::size_t iCurAtom = 0;
 		for(std::size_t iIdxUC : vecIdxUC)
@@ -103,6 +106,7 @@ void RealParamDlg::CrystalChanged(const tl::Lattice<t_real>& latt,
 			++iCurAtom;
 		}
 
+
 		// all atoms in super cell
 		std::vector<std::complex<t_real>> vecDummy;
 		std::tie(vecAtomsSC, std::ignore, vecIdxSC) =
@@ -116,10 +120,6 @@ void RealParamDlg::CrystalChanged(const tl::Lattice<t_real>& latt,
 		for(const AtomPos<t_real>& atom : *pAtoms)
 		{
 			const std::string& strName = atom.strAtomName;
-			QTreeWidgetItem *pWidParent = new QTreeWidgetItem(treeNN);
-			pWidParent->setText(0, strName.c_str());
-			pWidParent->setExpanded(1);
-
 			const t_vec& vecCentreFrac = atom.vecPos;
 			t_vec vecCentreAA = tl::mult<t_mat, t_vec>(matA, vecCentreFrac);
 			if(tl::is_nan_or_inf(vecCentreFrac) || tl::is_nan_or_inf(vecCentreAA))
@@ -127,21 +127,57 @@ void RealParamDlg::CrystalChanged(const tl::Lattice<t_real>& latt,
 				tl::log_err("Invalid centre.");
 				break;
 			}
+			tl::set_eps_0(vecCentreAA, g_dEps);
+
+			std::wostringstream ostrCentre;
+			ostrCentre.precision(g_iPrec);
+			ostrCentre << "(" << vecCentreAA[0] << ", " << vecCentreAA[1] << ", " << vecCentreAA[2] << ") " << strAA;
+
+
+			QTreeWidgetItem *pWidParent = new QTreeWidgetItem(treeNN);
+			pWidParent->setText(0, (strName + " (nearest)").c_str());
+			pWidParent->setText(1, QString::fromWCharArray(ostrCentre.str().c_str()));
+			pWidParent->setExpanded(1);
+
+			QTreeWidgetItem *pWidParentNN = new QTreeWidgetItem(treeNN);
+			pWidParentNN->setText(0, (strName + " (next-nearest)").c_str());
+			pWidParentNN->setText(1, QString::fromWCharArray(ostrCentre.str().c_str()));
+			pWidParentNN->setExpanded(1);
+
 
 			// neighbours
 			std::vector<std::vector<std::size_t>> vecIdxNN =
 				tl::get_neighbours<t_vec, std::vector, t_real>
 					(vecAtomsSC, vecCentreAA, dEpsShell);
 
+			// nearest neighbour
 			if(vecIdxNN.size() > 1)
 			{
-				// only nearest neighbour
 				for(std::size_t iIdxNN : vecIdxNN[1])
 				{
-					const t_vec vecThisAA = vecAtomsSC[iIdxNN] - vecCentreAA;
+					t_vec vecThisAA = vecAtomsSC[iIdxNN] - vecCentreAA;
+					tl::set_eps_0(vecThisAA, g_dEps);
 					const std::string& strThisAtom = vecNamesSC[iIdxNN];
 
 					QTreeWidgetItem *pWidNN = new QTreeWidgetItem(pWidParent);
+					pWidNN->setText(0, strThisAtom.c_str());
+
+					std::wostringstream ostr;
+					ostr.precision(g_iPrec);
+					ostr << "(" << vecThisAA[0] << ", " << vecThisAA[1] << ", " << vecThisAA[2] << ") " << strAA;
+					pWidNN->setText(1, QString::fromWCharArray(ostr.str().c_str()));
+				}
+			}
+			// next-nearest neighbour
+			if(vecIdxNN.size() > 2)
+			{
+				for(std::size_t iIdxNN : vecIdxNN[2])
+				{
+					t_vec vecThisAA = vecAtomsSC[iIdxNN] - vecCentreAA;
+					tl::set_eps_0(vecThisAA, g_dEps);
+					const std::string& strThisAtom = vecNamesSC[iIdxNN];
+
+					QTreeWidgetItem *pWidNN = new QTreeWidgetItem(pWidParentNN);
 					pWidNN->setText(0, strThisAtom.c_str());
 
 					std::wostringstream ostr;

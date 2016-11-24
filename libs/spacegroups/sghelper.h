@@ -329,42 +329,4 @@ bool is_reflection_allowed(int h, int k, int l, const t_cont<t_mat>& vecTrafos)
 	return true;
 }
 
-/**
- * checks for allowed Bragg reflections (unfinished)
- */
-/*template<template<class...> class t_cont = std::vector,
-	class t_mat = ublas::matrix<double>,
-	class t_vec = ublas::vector<typename t_mat::value_type>>
-bool is_reflection_allowed(int h, int k, int l, const t_cont<t_mat>& vecTrafos)
-{
-	using t_real = typename t_mat::value_type;
-	t_vec vecZero = tl::make_vec({t_real(0), t_real(0), t_real(0), t_real(1)});
-	const constexpr t_real dEps = t_real(1e-6);
-
-	std::vector<t_vec> vecAtoms;
-	vecAtoms.reserve(vecTrafos.size());
-	for(const t_mat& mat : vecTrafos)
-	{
-		t_vec vecAtom = ublas::prod(mat, vecZero);
-		vecAtom.resize(3);
-		for(const t_vec& vec : vecAtoms)
-			if(tl::vec_equal(vec, vecAtom, dEps))
-				continue;
-		vecAtoms.push_back(std::move(vecAtom));
-	}
-
-	t_vec vecHKL = tl::make_vec({t_real(h), t_real(k), t_real(l)});
-	vecHKL *= t_real(2)*tl::get_pi<t_real>();
-	std::complex<t_real> F = tl::structfact<t_real, std::complex<t_real>, t_vec, std::vector>
-		(vecAtoms, vecHKL);
-
-	bool bAllowed = !tl::float_equal(std::abs(F), t_real(0), dEps);
-	bool bAllowed2 = is_reflection_allowed_old(h,k,l, vecTrafos);
-	if(bAllowed != bAllowed2)
-	{
-		tl::log_err("Mismatch: ", h, k, l, ", F=", F, ", #", vecTrafos.size());
-	}
-	return bAllowed;
-}*/
-
 #endif

@@ -8,6 +8,6 @@
 #ifndef __TAZ_VERSION_H__
 #define __TAZ_VERSION_H__
 
-#define TAKIN_VER "1.0.4"
+#define TAKIN_VER "1.0.5"
 
 #endif

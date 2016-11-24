@@ -76,11 +76,18 @@ SicsCache::SicsCache(QSettings* pSettings) : m_pSettings(pSettings)
 		m_strSampleTheta, m_strSample2Theta,
 		m_strMonoD, m_strMonoTheta, m_strMono2Theta,
 		m_strAnaD, m_strAnaTheta, m_strAna2Theta,
-
+	});
+	// all final device names which cannot be queried together
+	std::vector<std::string> vecKeysLine = std::vector<std::string>
+	({
 		m_strTimer, m_strPreset, m_strCtr,
 	});
 
+	m_strAllKeys = "pr ";
 	for(const std::string& strKey : vecKeys)
+		m_strAllKeys += strKey + " ";
+	m_strAllKeys += "\n";
+	for(const std::string& strKey : vecKeysLine)
 		m_strAllKeys += strKey + "\n";
 
 	m_tcp.add_connect(boost::bind(&SicsCache::slot_connected, this, _1, _2));

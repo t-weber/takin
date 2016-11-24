@@ -76,7 +76,7 @@ public:
 				(h,k,l, m_vecCentringTrafos);
 			//tl::log_debug(h,k,l, " -> ", bAllowed, ", # trafos: ", m_vecCentringTrafos.size());
 		}
-		else	// use pre-calculated rules alternatively
+		else	// use equivalent pre-calculated rules alternatively
 		{
 			bAllowed = is_centering_reflection_allowed<int>(GetName(), h,k,l);
 		}
