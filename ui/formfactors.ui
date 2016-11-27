@@ -347,7 +347,7 @@
               <string>g=</string>
              </property>
              <property name="decimals">
-              <number>1</number>
+              <number>2</number>
              </property>
              <property name="singleStep">
               <double>0.500000000000000</double>

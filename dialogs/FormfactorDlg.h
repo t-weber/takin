@@ -49,6 +49,7 @@ protected slots:
 	void MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem *pItemPrev);
 	void RefreshMagAtom();
 	void CalcTermSymbol(const QString& qstr);
+	void Calcg();
 
 	void SearchSLAtom(const QString& qstr);
 	void PlotScatteringLengths();

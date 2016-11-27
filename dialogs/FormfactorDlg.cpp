@@ -37,7 +37,8 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 		m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Wavenumber Q (1/A)");
 		m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Atomic Form Factor f (e-)");
 		if(m_plotwrap->HasTrackerSignal())
-			connect(m_plotwrap->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+			connect(m_plotwrap->GetPicker(), SIGNAL(moved(const QPointF&)),
+				this, SLOT(cursorMoved(const QPointF&)));
 
 		// connections
 		QObject::connect(listAtoms, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
@@ -70,6 +71,8 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 		QObject::connect(editMFilter, SIGNAL(textEdited(const QString&)),
 			this, SLOT(SearchMagAtom(const QString&)));
 
+		for(QDoubleSpinBox* pSpin : {spinL, spinS, spinJ})
+			QObject::connect(pSpin, SIGNAL(valueChanged(double)), this, SLOT(Calcg()));
 		for(QDoubleSpinBox* pSpin : {sping, spinL, spinS, spinJ})
 			QObject::connect(pSpin, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
 
@@ -307,6 +310,16 @@ void FormfactorDlg::RefreshMagAtom()
 }
 
 
+void FormfactorDlg::Calcg()
+{
+	t_real dL = spinL->value();
+	t_real dS = spinS->value();
+	t_real dJ = spinJ->value();
+
+	t_real dg = tl::eff_gJ(dS, dL, dJ);
+	sping->setValue(dg);
+}
+
 void FormfactorDlg::CalcTermSymbol(const QString& qstr)
 {
 	try
@@ -314,7 +327,7 @@ void FormfactorDlg::CalcTermSymbol(const QString& qstr)
 		std::string strOrbitals = qstr.toStdString();
 
 		t_real dS, dL, dJ;
-		std::tie(dS,dL,dJ) = tl::hund(strOrbitals);
+		std::tie(dS, dL, dJ) = tl::hund(strOrbitals);
 
 		spinS->setValue(dS);
 		spinL->setValue(dL);
