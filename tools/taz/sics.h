@@ -42,6 +42,9 @@ class SicsCache : public NetCache
 
 		void start_poller();
 
+	protected:
+		void update_live_plot();
+
 	public:
 		SicsCache(QSettings* pSettings=0);
 		virtual ~SicsCache();
@@ -60,6 +63,7 @@ class SicsCache : public NetCache
 		std::string m_strMonoTheta, m_strMono2Theta, m_strMonoD;
 		std::string m_strAnaTheta, m_strAna2Theta, m_strAnaD;
 		std::string m_strTimer, m_strPreset, m_strCtr;
+		std::string m_strXDat, m_strYDat, m_strXDatReplyKey, m_strYDatReplyKey;
 };
 
 #endif

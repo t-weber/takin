@@ -59,6 +59,8 @@ void TazDlg::ConnectTo(int iSys, const QString& _strHost, const QString& _strPor
 		m_pScanMonDlg = new ScanMonDlg(this, &m_settings);
 
 	m_pNetCacheDlg->ClearAll();
+	m_pScanMonDlg->ClearPlot();
+
 	QObject::connect(m_pNetCache, SIGNAL(updated_cache_value(const std::string&, const CacheVal&)),
 		m_pNetCacheDlg, SLOT(UpdateValue(const std::string&, const CacheVal&)));
 	QObject::connect(m_pNetCache, SIGNAL(updated_cache_value(const std::string&, const CacheVal&)),

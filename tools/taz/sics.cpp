@@ -52,6 +52,8 @@ SicsCache::SicsCache(QSettings* pSettings) : m_pSettings(pSettings)
 		{"timer", &m_strTimer},
 		{"preset", &m_strPreset},
 		{"counter", &m_strCtr},
+		{"xdat", &m_strXDat},
+		{"ydat", &m_strYDat},
 	};
 
 	// fill in device names from settings
@@ -82,6 +84,7 @@ SicsCache::SicsCache(QSettings* pSettings) : m_pSettings(pSettings)
 	std::vector<std::string> vecKeysLine = std::vector<std::string>
 	({
 		m_strTimer, m_strPreset, m_strCtr,
+		m_strXDat, m_strYDat
 	});
 
 	m_strAllKeys = "pr ";
@@ -173,6 +176,32 @@ void SicsCache::slot_disconnected(const std::string& strHost, const std::string&
 	emit disconnected();
 }
 
+static std::string get_firstword(const std::string& strKey, 
+	const std::string& strDelim=std::string(" \t"))
+{
+	std::vector<std::string> vecWords;
+	tl::get_tokens<std::string>(strKey, strDelim, vecWords);
+
+	if(!vecWords.size())
+		return "";
+
+	tl::trim(vecWords[0]);
+	return vecWords[0];
+}
+
+static std::string get_lastword(const std::string& strKey, 
+	const std::string& strDelim=std::string(" \t"))
+{
+	std::vector<std::string> vecWords;
+	tl::get_tokens<std::string>(strKey, strDelim, vecWords);
+
+	if(!vecWords.size())
+		return "";
+
+	tl::trim(vecWords[vecWords.size()-1]);
+	return vecWords[vecWords.size()-1];
+}
+
 static std::string get_replykey(const std::string& strKey)
 {
 	std::size_t iPos = strKey.rfind("get");
@@ -226,18 +255,42 @@ void SicsCache::slot_receive(const std::string& str)
 	cacheval.dTimestamp = tl::epoch<t_real>();
 
 	// mark special entries
-	if(tl::str_contains(strKey, get_replykey(m_strTimer), 0))
+	// query "A getB" gives reply "A.B = ..."
+	if(m_strTimer.size() &&
+		tl::str_contains(strKey, get_replykey(m_strTimer), 0) && 
+		tl::str_contains(strKey, get_firstword(m_strTimer), 0))
+	{
 		cacheval.ty = CacheValType::TIMER;
-	else if(tl::str_contains(strKey, get_replykey(m_strPreset), 0))
+	}
+	else if(m_strPreset.size() &&
+		tl::str_contains(strKey, get_replykey(m_strPreset), 0) && 
+		tl::str_contains(strKey, get_firstword(m_strPreset), 0))
+	{
 		cacheval.ty = CacheValType::PRESET;
-	else if(tl::str_contains(strKey, get_replykey(m_strCtr), 0))
+	}
+	else if(m_strCtr.size() &&
+		tl::str_contains(strKey, get_replykey(m_strCtr), 0) && 
+		tl::str_contains(strKey, get_firstword(m_strCtr), 0))
+	{
 		cacheval.ty = CacheValType::COUNTER;
+	}
+	else if(m_strYDat.size() &&
+		tl::str_contains(strKey, get_replykey(m_strYDat), 0) && 
+		tl::str_contains(strKey, get_firstword(m_strYDat), 0))
+	{
+		// remember actual name of key
+		m_strYDatReplyKey = strKey;
+	}
+	else if(tl::begins_with(strKey, std::string("scan.")))
+	{
+		// remember actual name of key
+		m_strXDatReplyKey = strKey;
+	}
 
 	m_mapCache[strKey] = cacheval;
-
-	//std::cout << strKey << " = " << strVal << std::endl;
 	emit updated_cache_value(strKey, cacheval);
 
+	update_live_plot();
 
 	CrystalOptions crys;
 	TriangleOptions triag;
@@ -330,6 +383,91 @@ void SicsCache::slot_receive(const std::string& str)
 	//	{"A2", "A6", "A4", "A3", "AS", "BS", "CS", "AA", "BB", "CC",
 	//	"AX", "AY", "AZ", "BX", "BY", "BZ", "DM", "DA"}))
 		emit vars_changed(crys, triag);
+}
+
+void SicsCache::update_live_plot()
+{
+	if(m_strXDatReplyKey == "" || m_strYDatReplyKey == "")
+		return;
+
+	// x var name
+	std::string strVarXName = get_lastword(m_strXDatReplyKey, std::string("."));
+	tl::trim(strVarXName);
+	std::string strVarYName = "Counts";
+
+	// find x and y data
+	std::string strX, strY;
+	for(const auto& _val : m_mapCache)
+	{
+		const std::string& strKey = _val.first;
+		const CacheVal& val = _val.second;
+
+		if(strKey == m_strXDatReplyKey)
+			strX = val.strVal;
+		else if(strKey == m_strYDatReplyKey)
+			strY = val.strVal;
+
+		if(strX.size() && strY.size())
+			break;
+	}
+
+	// remove clutter between numbers in string
+	std::vector<std::string> vecstrX, vecstrY;
+	tl::get_tokens<std::string>(strX, std::string(" \t,;()[]{}"), vecstrX);
+	tl::get_tokens<std::string>(strY, std::string(" \t,;()[]{}"), vecstrY);
+
+	// convert to t_real
+	std::vector<t_real> vecX, vecY;
+	for(std::string& str : vecstrX)
+	{
+		tl::trim(str);
+		if(str!="") vecX.push_back(tl::str_to_var<t_real>(str));
+	}
+	for(std::string& str : vecstrY)
+	{
+		tl::trim(str);
+		if(str!="") vecY.push_back(tl::str_to_var<t_real>(str));
+	}
+
+	// convert to internal xml format
+	std::ostringstream ostrPlot;
+	ostrPlot << "<scan>";
+	ostrPlot << "<data>";
+	std::size_t iDatLen = std::min(vecX.size(), vecY.size());
+
+	ostrPlot << "<x_0>";
+	for(std::size_t iDat=0; iDat<iDatLen; ++iDat)
+	{
+		ostrPlot << vecX[iDat];
+		if(iDat != iDatLen-1)
+			ostrPlot << " ";
+	}
+	ostrPlot << "</x_0>";
+
+	ostrPlot << "<y_0>";
+	for(std::size_t iDat=0; iDat<iDatLen; ++iDat)
+	{
+		ostrPlot << vecY[iDat];
+		if(iDat != iDatLen-1)
+			ostrPlot << " ";
+	}
+	ostrPlot << "</y_0>";
+
+	ostrPlot << "</data>";
+
+	ostrPlot << "<vars>"
+		<< "<x_0>" << strVarXName << "</x_0>"
+		<< "<y_0>" << strVarYName << "</y_0>"
+		<< "</vars>";
+	ostrPlot << "</scan>";
+
+	CacheVal cacheval;
+	cacheval.dTimestamp = tl::epoch<t_real>();
+	cacheval.ty = CacheValType::LIVE_PLOT;
+
+	cacheval.strVal = ostrPlot.str();
+	m_mapCache["__liveplot__"] = cacheval;
+	emit updated_cache_value("__liveplot__", cacheval);
 }
 
 #include "sics.moc"

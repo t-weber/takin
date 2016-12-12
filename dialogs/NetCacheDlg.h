@@ -22,7 +22,9 @@ enum class CacheValType : int
 
 	TIMER,
 	PRESET,
-	COUNTER
+	COUNTER,
+
+	LIVE_PLOT,
 };
 
 struct CacheVal

@@ -104,7 +104,8 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupEdit("net/timer_6", "counter getmonitor 1", edit6_CurTime),
 		t_tupEdit("net/preset_6", "counter getpreset", edit6_Preset),
 		t_tupEdit("net/counter_6", "counter getcounts", edit6_Counter),
-
+		t_tupEdit("net/xdat_6", "iscan getvardata 0", edit6_xDat),
+		t_tupEdit("net/ydat_6", "iscan getcounts", edit6_yDat),
 
 		// misc
 		t_tupEdit("gl/font", "", editGLFont),

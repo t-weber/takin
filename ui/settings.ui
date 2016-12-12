@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>468</width>
+    <width>418</width>
     <height>458</height>
    </rect>
   </property>
@@ -17,16 +17,6 @@
    <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -613,6 +603,9 @@
           <string>Sample</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+          </property>
           <property name="horizontalSpacing">
            <number>2</number>
           </property>
@@ -744,6 +737,13 @@
             </property>
            </widget>
           </item>
+          <item row="9" column="0" colspan="2">
+           <widget class="QCheckBox" name="checkSthSttCorr">
+            <property name="text">
+             <string>Couple Theta-2Theta Angles</string>
+            </property>
+           </widget>
+          </item>
           <item row="10" column="0" colspan="2">
            <widget class="QCheckBox" name="checkFlipOrient2">
             <property name="toolTip">
@@ -754,13 +754,6 @@
             </property>
             <property name="checked">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0" colspan="2">
-           <widget class="QCheckBox" name="checkSthSttCorr">
-            <property name="text">
-             <string>Couple Theta-2Theta Angles</string>
             </property>
            </widget>
           </item>
@@ -828,7 +821,7 @@
        <property name="spacing">
         <number>2</number>
        </property>
-       <item row="0" column="0" rowspan="2">
+       <item row="0" column="1" rowspan="3">
         <widget class="QGroupBox" name="groupBox_10">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -989,7 +982,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="4" column="0">
         <widget class="QGroupBox" name="groupBox_11">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1055,10 +1048,10 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="1" rowspan="2">
+       <item row="4" column="1">
         <widget class="QGroupBox" name="groupBox_12">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>1</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -1121,7 +1114,7 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" rowspan="2">
+       <item row="0" column="0" rowspan="3">
         <widget class="QGroupBox" name="groupBox_13">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1184,10 +1177,30 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="edit6_xDat"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="edit6_yDat"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_43">
+            <property name="text">
+             <string>x Data:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_44">
+            <property name="text">
+             <string>y Data:</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
-       <item row="3" column="1" rowspan="2">
+       <item row="5" column="0" colspan="2">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1200,21 +1213,18 @@
          </property>
         </spacer>
        </item>
-       <item row="4" column="0">
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>23</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+     </property>
     </widget>
    </item>
   </layout>
@@ -1256,6 +1266,14 @@
   <tabstop>editCurTime</tabstop>
   <tabstop>editPreset</tabstop>
   <tabstop>editCounter</tabstop>
+  <tabstop>edit6_CurTime</tabstop>
+  <tabstop>edit6_Preset</tabstop>
+  <tabstop>edit6_Counter</tabstop>
+  <tabstop>edit6_xDat</tabstop>
+  <tabstop>edit6_yDat</tabstop>
+  <tabstop>edit6_A1</tabstop>
+  <tabstop>edit6_A2</tabstop>
+  <tabstop>edit6_DM</tabstop>
   <tabstop>edit6_AS</tabstop>
   <tabstop>edit6_BS</tabstop>
   <tabstop>edit6_CS</tabstop>
@@ -1270,15 +1288,9 @@
   <tabstop>edit6_BZ</tabstop>
   <tabstop>edit6_A3</tabstop>
   <tabstop>edit6_A4</tabstop>
-  <tabstop>edit6_A1</tabstop>
-  <tabstop>edit6_A2</tabstop>
-  <tabstop>edit6_DM</tabstop>
   <tabstop>edit6_A5</tabstop>
   <tabstop>edit6_A6</tabstop>
   <tabstop>edit6_DA</tabstop>
-  <tabstop>edit6_CurTime</tabstop>
-  <tabstop>edit6_Preset</tabstop>
-  <tabstop>edit6_Counter</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>

@@ -356,7 +356,7 @@ void set_zoomer_base(QwtPlotZoomer *pZoomer,
 	const std::vector<t_real_qwt>& vecX, const std::vector<t_real_qwt>& vecY,
 	bool bMetaCall)
 {
-	if(!pZoomer)
+	if(!pZoomer || !vecX.size() || !vecY.size())
 		return;
 
 	const auto minmaxX = std::minmax_element(vecX.begin(), vecX.end());
