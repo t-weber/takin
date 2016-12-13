@@ -138,6 +138,8 @@ void SicsCache::disconnect()
 
 void SicsCache::refresh()
 {
+	m_mapCache.clear();
+
 	memset(&m_triagCache, 0, sizeof(m_triagCache));
 	memset(&m_crysCache, 0, sizeof(m_crysCache));
 }
@@ -317,7 +319,7 @@ void SicsCache::slot_receive(const std::string& str)
 	if(tl::str_is_equal<std::string>(strKey, m_strMono2Theta, false))
 	{
 		triag.dMonoTwoTheta = tl::d2r(tl::str_to_var<t_real>(strVal));
-		
+
 		if(!tl::float_equal(triag.dMonoTwoTheta, m_triagCache.dMonoTwoTheta, g_dEps))
 		{
 			triag.bChangedMonoTwoTheta = 1;
@@ -515,6 +517,7 @@ void SicsCache::update_live_plot()
 
 	// convert to internal xml format
 	std::ostringstream ostrPlot;
+	ostrPlot.precision(g_iPrec);
 	ostrPlot << "<scan>";
 	ostrPlot << "<data>";
 
@@ -573,8 +576,8 @@ void SicsCache::update_live_plot()
 	CacheVal cacheval;
 	cacheval.dTimestamp = tl::epoch<t_real>();
 	cacheval.ty = CacheValType::LIVE_PLOT;
-
 	cacheval.strVal = ostrPlot.str();
+
 	m_mapCache["__liveplot__"] = cacheval;
 	emit updated_cache_value("__liveplot__", cacheval);
 }

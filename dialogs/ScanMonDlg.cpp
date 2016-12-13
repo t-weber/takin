@@ -8,6 +8,7 @@
 #include "ScanMonDlg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/file/prop.h"
+#include "tlibs/math/linalg.h"
 
 using t_real = t_real_glob;
 
@@ -145,7 +146,7 @@ void ScanMonDlg::UpdatePlot(const std::string& strVals)
 	tl::Prop<std::string, 0> propScan;
 	if(!propScan.Load(istr, tl::PropType::XML))
 		return;
-	
+
 	int ix = propScan.Query<int>("scan/main_var", 0);
 	std::string strx = "x_" + tl::var_to_str(ix);
 
@@ -154,23 +155,28 @@ void ScanMonDlg::UpdatePlot(const std::string& strVals)
 	std::string strX = propScan.Query<std::string>("scan/data/" + strx);
 	std::string strY = propScan.Query<std::string>("scan/data/y_0");
 
-	m_vecX.clear();
-	m_vecY.clear();
 	m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::xBottom, strXName.c_str());
 	m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::yLeft, strYName.c_str());
 
-	tl::get_tokens<t_real>(strX, std::string(" \t;,"), m_vecX);
-	tl::get_tokens<t_real>(strY, std::string(" \t;,"), m_vecY);
+	std::vector<t_real> vecX, vecY;
+	tl::get_tokens<t_real>(strX, std::string(" \t;,"), vecX);
+	tl::get_tokens<t_real>(strY, std::string(" \t;,"), vecY);
 
-	std::size_t iMinLen = std::min(m_vecX.size(), m_vecY.size());
-	m_vecX.resize(iMinLen);
-	m_vecY.resize(iMinLen);
+	std::size_t iMinLen = std::min(vecX.size(), vecY.size());
+	vecX.resize(iMinLen);
+	vecY.resize(iMinLen);
 
-	set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 0, 0);
-	set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 1, 0);
+	if(!tl::vec_equal(vecX, m_vecX, g_dEps) || !tl::vec_equal(vecY, m_vecY, g_dEps))
+	{
+		m_vecX = vecX;
+		m_vecY = vecY;
 
-	set_zoomer_base(m_plotwrap->GetZoomer(), m_vecX, m_vecY);
-	m_plotwrap->GetPlot()->replot();
+		set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 0, 0);
+		set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 1, 0);
+
+		set_zoomer_base(m_plotwrap->GetZoomer(), m_vecX, m_vecY);
+		m_plotwrap->GetPlot()->replot();
+	}
 }
 
 void ScanMonDlg::ClearPlot()
