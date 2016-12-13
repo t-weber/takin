@@ -54,6 +54,18 @@ struct TriangleOptions
 	t_real_glob dAnaD;
 
 	t_real_glob dAngleKiVec0;
+
+	bool operator==(const TriangleOptions& op) const
+	{
+		if(!tl::float_equal(dTheta, op.dTheta, g_dEps)) return false;
+		if(!tl::float_equal(dTwoTheta, op.dTwoTheta, g_dEps)) return false;
+		if(!tl::float_equal(dAnaTwoTheta, op.dAnaTwoTheta, g_dEps)) return false;
+		if(!tl::float_equal(dMonoTwoTheta, op.dMonoTwoTheta, g_dEps)) return false;
+		if(!tl::float_equal(dMonoD, op.dMonoD, g_dEps)) return false;
+		if(!tl::float_equal(dAnaD, op.dAnaD, g_dEps)) return false;
+		if(!tl::float_equal(dAngleKiVec0, op.dAngleKiVec0, g_dEps)) return false;
+		return true;
+	}
 };
 
 struct CrystalOptions

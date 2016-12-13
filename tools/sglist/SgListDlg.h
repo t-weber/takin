@@ -1,4 +1,4 @@
-/*
+/**
  * Space Group List Dialog
  * @author tweber
  * @date oct-2015
