@@ -147,7 +147,8 @@ void ScanMonDlg::UpdatePlot(const std::string& strVals)
 	if(!propScan.Load(istr, tl::PropType::XML))
 		return;
 
-	int ix = propScan.Query<int>("scan/main_var", 0);
+	int ix = propScan.Query<int>("scan/main_var", -1);
+	if(ix < 0) return;
 	std::string strx = "x_" + tl::var_to_str(ix);
 
 	std::string strXName = propScan.Query<std::string>("scan/vars/" + strx, "x");

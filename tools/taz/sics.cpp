@@ -246,6 +246,8 @@ static std::vector<t_real> get_datarr_from_str(const std::string& str)
 
 void SicsCache::slot_receive(const std::string& str)
 {
+	constexpr const bool bIgnoreError = 1;
+
 #ifndef NDEBUG
 	tl::log_debug("Received: ", str);
 #endif
@@ -254,10 +256,13 @@ void SicsCache::slot_receive(const std::string& str)
 
 	if(str.substr(0, 5) == "ERROR")
 	{
-		tl::log_err("Sics replied with: ", str);
-		tl::log_err("Stopping poller...");
-		m_bPollerActive.store(false);
-		//this->disconnect();
+		if(!bIgnoreError)
+		{
+			tl::log_err("Sics replied with: ", str);
+			tl::log_err("Stopping poller...");
+			m_bPollerActive.store(false);
+			//this->disconnect();
+		}
 		return;
 	}
 
