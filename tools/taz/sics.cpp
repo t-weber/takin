@@ -544,7 +544,7 @@ void SicsCache::update_live_plot()
 			});
 
 			std::ptrdiff_t iNumUniqs = std::distance(vecX2.begin(), iterUniq);
-			if(iNumUniqs > vecX.size()*3/4)		// possibly the main scan var
+			if(iNumUniqs > std::ptrdiff_t(vecX.size()*3/4))		// possibly the main scan var
 				iMainScanVar = ix;
 		}
 

@@ -8,6 +8,7 @@
 #include "taz.h"
 #include "tlibs/string/spec_char.h"
 #include "tlibs/log/log.h"
+#include "tlibs/math/rand.h"
 #include "tlibs/log/debug.h"
 #include "tlibs/time/chrono.h"
 #include "tlibs/version.h"
@@ -129,6 +130,8 @@ int main(int argc, char** argv)
 		std::setlocale(LC_ALL, "C");
 		std::locale::global(std::locale::classic());
 		QLocale::setDefault(QLocale::English);
+
+		tl::init_rand();
 
 		app->setApplicationName("Takin");
 		app->setApplicationVersion(TAKIN_VER);
