@@ -8,6 +8,7 @@
 #include "ConvoDlg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
+#include "tlibs/math/rand.h"
 #include "tlibs/helper/thread.h"
 #include "tlibs/time/stopwatch.h"
 
@@ -435,7 +436,8 @@ void ConvoDlg::Start()
 
 		unsigned int iNumThreads = bForceDeferred ? 0 : std::thread::hardware_concurrency();
 
-		tl::ThreadPool<std::pair<bool, t_real>()> tp(iNumThreads);
+		void (*pThStartFunc)() = []{ tl::init_rand(); };
+		tl::ThreadPool<std::pair<bool, t_real>()> tp(iNumThreads, pThStartFunc);
 		auto& lstFuts = tp.GetFutures();
 
 		for(unsigned int iStep=0; iStep<iNumSteps; ++iStep)

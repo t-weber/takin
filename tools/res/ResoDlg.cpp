@@ -17,6 +17,7 @@
 #include "tlibs/helper/misc.h"
 #include "tlibs/math/math.h"
 #include "tlibs/math/lattice.h"
+#include "tlibs/math/rand.h"
 #include "tlibs/time/chrono.h"
 
 #include "libs/globals.h"

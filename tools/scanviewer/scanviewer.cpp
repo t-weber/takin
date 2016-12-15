@@ -768,16 +768,24 @@ bool ScanViewerDlg::Fit(t_func&& func,
 		m_vecYErr.push_back(std::sqrt(d));
 	}
 
-	std::vector<t_real_min> _vecVals, _vecErrs;
-	_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals);
-	_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
-	bool bOk = tl::fit<iFuncArgs>(func,
-		tl::container_cast<t_real_min, t_real, std::vector>()(m_vecX),
-		tl::container_cast<t_real_min, t_real, std::vector>()(m_vecY),
-		tl::container_cast<t_real_min, t_real, std::vector>()(m_vecYErr),
-		vecParamNames, _vecVals, _vecErrs, &vecFixed);
-	vecVals = tl::container_cast<t_real, t_real_min, std::vector>()(_vecVals);
-	vecErrs = tl::container_cast<t_real, t_real_min, std::vector>()(_vecErrs);
+	bool bOk = 0;
+	try
+	{
+		std::vector<t_real_min> _vecVals, _vecErrs;
+		_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals);
+		_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
+		bOk = tl::fit<iFuncArgs>(func,
+			tl::container_cast<t_real_min, t_real, std::vector>()(m_vecX),
+			tl::container_cast<t_real_min, t_real, std::vector>()(m_vecY),
+			tl::container_cast<t_real_min, t_real, std::vector>()(m_vecYErr),
+			vecParamNames, _vecVals, _vecErrs, &vecFixed);
+		vecVals = tl::container_cast<t_real, t_real_min, std::vector>()(_vecVals);
+		vecErrs = tl::container_cast<t_real, t_real_min, std::vector>()(_vecErrs);
+	}
+	catch(const std::exception& ex)
+	{
+		tl::log_err(ex.what());
+	}
 
 	if(!bOk)
 	{

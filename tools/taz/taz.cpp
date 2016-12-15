@@ -1259,8 +1259,8 @@ void TazDlg::recipParamsChanged(const RecipParams& params)
 	t_real dQx = -params.Q_rlu[0], dQy = -params.Q_rlu[1], dQz = -params.Q_rlu[2];
 	t_real dE = params.dE;
 
-	tl::set_eps_0(dQx); tl::set_eps_0(dQy); tl::set_eps_0(dQz);
-	tl::set_eps_0(dE);
+	tl::set_eps_0(dQx, g_dEps); tl::set_eps_0(dQy, g_dEps); tl::set_eps_0(dQz, g_dEps);
+	tl::set_eps_0(dE, g_dEps);
 
 	std::ostringstream ostrPos;
 	ostrPos.precision(g_iPrecGfx);
@@ -1279,8 +1279,8 @@ void TazDlg::recipParamsChanged(const RecipParams& params)
 void TazDlg::RecipCoordsChanged(t_real dh, t_real dk, t_real dl,
 	bool bHasNearest, t_real dNearestH, t_real dNearestK, t_real dNearestL)
 {
-	tl::set_eps_0(dh); tl::set_eps_0(dk); tl::set_eps_0(dl);
-	tl::set_eps_0(dNearestH); tl::set_eps_0(dNearestK); tl::set_eps_0(dNearestL);
+	tl::set_eps_0(dh, g_dEps); tl::set_eps_0(dk, g_dEps); tl::set_eps_0(dl, g_dEps);
+	tl::set_eps_0(dNearestH, g_dEps); tl::set_eps_0(dNearestK, g_dEps); tl::set_eps_0(dNearestL, g_dEps);
 
 	std::ostringstream ostrPos;
 	ostrPos.precision(g_iPrecGfx);
@@ -1296,8 +1296,8 @@ void TazDlg::RecipCoordsChanged(t_real dh, t_real dk, t_real dl,
 void TazDlg::RealCoordsChanged(t_real dh, t_real dk, t_real dl,
 	bool bHasNearest, t_real dNearestH, t_real dNearestK, t_real dNearestL)
 {
-	tl::set_eps_0(dh); tl::set_eps_0(dk); tl::set_eps_0(dl);
-	tl::set_eps_0(dNearestH); tl::set_eps_0(dNearestK); tl::set_eps_0(dNearestL);
+	tl::set_eps_0(dh, g_dEps); tl::set_eps_0(dk, g_dEps); tl::set_eps_0(dl, g_dEps);
+	tl::set_eps_0(dNearestH, g_dEps); tl::set_eps_0(dNearestK, g_dEps); tl::set_eps_0(dNearestL, g_dEps);
 
 	std::ostringstream ostrPos;
 	ostrPos.precision(g_iPrecGfx);

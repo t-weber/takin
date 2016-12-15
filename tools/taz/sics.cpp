@@ -537,10 +537,10 @@ void SicsCache::update_live_plot()
 		if(iMainScanVar < 0)	// no main scan var found yet
 		{
 			std::vector<t_real> vecX2(vecX.size());
-			auto iterUniq = std::unique_copy(vecX.begin(), vecX.end(), vecX2.begin(), 
+			auto iterUniq = std::unique_copy(vecX.begin(), vecX.end(), vecX2.begin(),
 				[](t_real r1, t_real r2) -> bool
 			{
-				return tl::float_equal(r1, r2, g_dEps);
+				return tl::float_equal(r1, r2, g_dEpsGfx);
 			});
 
 			std::ptrdiff_t iNumUniqs = std::distance(vecX2.begin(), iterUniq);

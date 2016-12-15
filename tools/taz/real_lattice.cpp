@@ -260,7 +260,7 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 					ostrTip << "(" << ih << " " << ik << " " << il << ")";
 					pPeak->SetLabel(ostrTip.str().c_str());
 
-					tl::set_eps_0(vecPeak);
+					tl::set_eps_0(vecPeak, g_dEps);
 					ostrTip << " frac\n";
 					ostrTip << "("
 							<< vecPeak[0] << ", "

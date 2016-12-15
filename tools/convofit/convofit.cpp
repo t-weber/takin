@@ -48,7 +48,8 @@ std::string g_strOutFileSuffix;
 
 bool run_job(const std::string& strJob)
 {
-	tl::init_rand();
+	const unsigned iSeed = tl::get_rand_seed();
+	tl::init_rand_seed(iSeed);
 
 	// Parameters
 	tl::Prop<std::string> prop;
@@ -151,6 +152,7 @@ bool run_job(const std::string& strJob)
 
 	unsigned iNumNeutrons = prop.Query<unsigned>("montecarlo/neutrons", 1000);
 	unsigned iNumSample = prop.Query<unsigned>("montecarlo/sample_positions", 1);
+	bool bRecycleMC = prop.Query<bool>("montecarlo/recycle_neutrons", 1);
 
 	if(g_iNumNeutrons > 0)
 		iNumNeutrons = g_iNumNeutrons;
@@ -436,7 +438,7 @@ bool run_job(const std::string& strJob)
 		}
 	});
 	mod.AddParamsChangedSlot(
-	[&vecModTmpX, &vecModTmpY, bPlotIntermediate](const std::string& strDescr)
+	[&vecModTmpX, &vecModTmpY, bPlotIntermediate, iSeed, bRecycleMC](const std::string& strDescr)
 	{
 		tl::log_info("Changed model parameters: ", strDescr);
 
@@ -445,6 +447,11 @@ bool run_job(const std::string& strJob)
 			vecModTmpX.clear();
 			vecModTmpY.clear();
 		}
+
+		// do we use the same MC neutrons again?
+		if(bRecycleMC)
+			tl::init_rand_seed(iSeed);
+		tl::log_debug("Resetting random seed to ", iSeed, ".");
 	});
 
 

@@ -57,13 +57,12 @@ void mc_neutrons(const Ellipsoid4d<typename t_vec::value_type>& ell4d,
 	std::size_t iNum, const McNeutronOpts<t_mat>& opts, t_iter iterResult)
 {
 	using t_real = typename t_vec::value_type;
-
-	static bool bInited = 0;
+	/*static bool bInited = 0;
 	if(!bInited)
 	{
 		tl::init_rand();
 		bInited = 1;
-	}
+	}*/
 
 	t_vec vecTrans = tl::make_vec<t_vec>({ell4d.x_offs, ell4d.y_offs, ell4d.z_offs, ell4d.w_offs});
 	const t_mat& rot = ell4d.rot;
