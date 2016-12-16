@@ -7,10 +7,16 @@
 
 #include "sqwfactory.h"
 #include "sqw.h"
-#ifndef NO_PY
+
+#if !defined(NO_PY) || defined(USE_JL)
 	#include "sqw_proc.h"
 	#include "sqw_proc_impl.h"
+#endif
+#ifndef NO_PY
 	#include "sqw_py.h"
+#endif
+#ifdef USE_JL
+	#include "sqw_jl.h"
 #endif
 
 #include "tlibs/log/log.h"
@@ -56,9 +62,16 @@ static t_mapSqw g_mapSqw =
 		{ return std::make_shared<SqwProc<SqwPy>>(strCfgFile.c_str()); },
 		"Python Model" } },
 #endif
+#ifdef USE_JL
+	{ "jl", t_mapSqw::mapped_type {
+		[](const std::string& strCfgFile) -> std::shared_ptr<SqwBase>
+		//{ return std::make_shared<SqwJl>(strCfgFile.c_str()); },
+		{ return std::make_shared<SqwProc<SqwJl>>(strCfgFile.c_str()); },
+		"Julia Model" } },
+#endif
 	{ "elastic", t_mapSqw::mapped_type {
 		[](const std::string& strCfgFile) -> std::shared_ptr<SqwBase>
-		{ return std::make_shared<SqwElast>(strCfgFile.c_str()); }, 
+		{ return std::make_shared<SqwElast>(strCfgFile.c_str()); },
 		"Elastic Model" } },
 };
 

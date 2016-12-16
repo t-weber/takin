@@ -147,6 +147,15 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrFeat << "</li>";
 
 	ostrFeat << "<li>";
+#if defined NO_JL || !defined USE_JL
+	ostrFeat << "<font color=\"#ff0000\"><b>Disabled</b></font>";
+#else
+	ostrFeat << "<b>Enabled</b>";
+#endif
+	ostrFeat << " support for Julia scripting.";
+	ostrFeat << "</li>";
+
+	ostrFeat << "<li>";
 #if defined NO_3D || !defined USE_3D
 	ostrFeat << "<font color=\"#ff0000\"><b>Disabled</b></font>";
 #else
