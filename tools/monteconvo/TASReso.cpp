@@ -139,6 +139,10 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 		m_reso.flags |= CALC_R0;
 	else
 		m_reso.flags &= ~CALC_R0;
+	if(xml.Query<int>((strXmlRoot + "reso/use_resvol").c_str(), 1))
+		m_reso.flags |= CALC_RESVOL;
+	else
+		m_reso.flags &= ~CALC_RESVOL;
 
 	m_reso.dmono_sense = (xml.Query<int>((strXmlRoot+"reso/mono_scatter_sense").c_str(), 0) ? +1. : -1.);
 	m_reso.dana_sense = (xml.Query<int>((strXmlRoot+"reso/ana_scatter_sense").c_str(), 0) ? +1. : -1.);
@@ -445,19 +449,16 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		if(m_algo == ResoAlgo::CN)
 		{
 			//tl::log_info("Algorithm: Cooper-Nathans (TAS)");
-			m_reso.flags &= ~CALC_R0;
 			resores_cur = calc_cn(m_reso);
 		}
 		else if(m_algo == ResoAlgo::POP)
 		{
 			//tl::log_info("Algorithm: Popovici (TAS)");
-			//m_reso.flags |= CALC_R0;
 			resores_cur = calc_pop(m_reso);
 		}
 		else if(m_algo == ResoAlgo::ECK)
 		{
 			//tl::log_info("Algorithm: Eckold-Sobolev (TAS)");
-			m_reso.flags |= CALC_R0;
 			resores_cur = calc_eck(m_reso);
 		}
 		else if(m_algo == ResoAlgo::VIOL)
@@ -527,5 +528,30 @@ Ellipsoid4d<t_real> TASReso::GenerateMC(std::size_t iNum, std::vector<t_vec>& ve
 	}
 
 	//mc_neutrons<t_vec>(ell4d, iNum, m_opts, vecNeutrons.begin());
+	return ell4dret;
+}
+
+Ellipsoid4d<t_real> TASReso::GenerateMC_deferred(std::size_t iNum, std::vector<t_vec>& vecNeutrons) const
+{
+	// number of iterations over random sample positions
+	std::size_t iIter = m_res.size();
+	if(vecNeutrons.size() != iNum*iIter)
+		vecNeutrons.resize(iNum*iIter);
+
+	Ellipsoid4d<t_real> ell4dret;
+	for(std::size_t iCurIter = 0; iCurIter<iIter; ++iCurIter)
+	{
+		const ResoResults& resores = m_res[iCurIter];
+
+		Ellipsoid4d<t_real> ell4d = calc_res_ellipsoid4d<t_real>(
+			resores.reso, resores.reso_v, resores.reso_s, resores.Q_avg);
+
+		std::vector<t_vec>::iterator iterBegin = vecNeutrons.begin() + iCurIter*iNum;
+		mc_neutrons<t_vec>(ell4d, iNum, m_opts, iterBegin);
+
+		if(iCurIter == 0)
+			ell4dret = ell4d;
+	}
+
 	return ell4dret;
 }

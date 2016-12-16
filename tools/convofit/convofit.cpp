@@ -158,7 +158,6 @@ bool run_job(const std::string& strJob)
 		iNumNeutrons = g_iNumNeutrons;
 
 	std::string strResAlgo = prop.Query<std::string>("resolution/algorithm", "pop");
-	bool bUseR0 = prop.Query<bool>("resolution/use_r0", 0);
 	bool bResFocMonoV = prop.Query<bool>("resolution/focus_mono_v", 0);
 	bool bResFocMonoH = prop.Query<bool>("resolution/focus_mono_h", 0);
 	bool bResFocAnaV = prop.Query<bool>("resolution/focus_ana_v", 0);
@@ -380,9 +379,6 @@ bool run_job(const std::string& strJob)
 			reso.SetOptimalFocus(ResoFocus(iFoc));
 		}
 
-		if(bUseR0 && !(reso.GetResoParams().flags & CALC_R0))
-			tl::log_warn("Resolution R0 requested, but not calculated, using raw ellipsoid volume.");
-
 		reso.SetRandomSamplePos(iNumSample);
 		vecResos.emplace_back(std::move(reso));
 	}
@@ -450,8 +446,10 @@ bool run_job(const std::string& strJob)
 
 		// do we use the same MC neutrons again?
 		if(bRecycleMC)
+		{
 			tl::init_rand_seed(iSeed);
-		tl::log_debug("Resetting random seed to ", iSeed, ".");
+			tl::log_debug("Resetting random seed to ", iSeed, ".");
+		}
 	});
 
 
@@ -461,7 +459,8 @@ bool run_job(const std::string& strJob)
 
 	tl::log_info("Number of neutrons: ", iNumNeutrons, ".");
 	mod.SetNumNeutrons(iNumNeutrons);
-	mod.SetUseR0(bUseR0);
+	// execution has to be in a determined order to recycle the same neutrons
+	mod.SetUseThreads(!bRecycleMC);
 
 	if(bTempOverride)
 	{
@@ -552,10 +551,11 @@ bool run_job(const std::string& strJob)
 
 
 	minuit::MnStrategy strat(iStrat);
+	strat.SetStorageLevel(1);
 	/*strat.SetGradientStepTolerance(1.);
-	strat.SetGradientTolerance(0.2);
+	strat.SetGradientTolerance(1.);
 	strat.SetHessianStepTolerance(1.);
-	strat.SetHessianG2Tolerance(0.2);*/
+	strat.SetHessianG2Tolerance(1.);*/
 
 	std::unique_ptr<minuit::MnApplication> pmini;
 	if(strMinimiser == "simplex")

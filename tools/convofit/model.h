@@ -39,6 +39,7 @@ protected:
 	std::vector<TASReso> m_vecResos;
 	//TASReso m_reso;
 	unsigned int m_iNumNeutrons = 1000;
+	bool m_bUseThreads = 1;
 
 	ublas::vector<t_real_mod> m_vecScanOrigin;	// hklE
 	ublas::vector<t_real_mod> m_vecScanDir;		// hklE
@@ -52,8 +53,6 @@ protected:
 
 	std::string m_strTempParamName = "T";
 	std::string m_strFieldParamName = "";
-
-	bool m_bUseR0 = false;
 
 	// -------------------------------------------------------------------------
 	// optional, for multi-fits
@@ -125,6 +124,7 @@ public:
 	void SetReso(const TASReso& reso) { /*m_reso = reso;*/ m_vecResos = {reso}; }
 	void SetResos(const std::vector<TASReso>& vecResos) { m_vecResos = vecResos; }
 	void SetNumNeutrons(unsigned int iNum) { m_iNumNeutrons = iNum; }
+	void SetUseThreads(bool b) { m_bUseThreads = b; }
 
 	void SetScanOrigin(t_real_mod h, t_real_mod k, t_real_mod l, t_real_mod E)
 	{ m_vecScanOrigin = tl::make_vec({h,k,l,E}); }
@@ -144,8 +144,6 @@ public:
 	{ SetMinuitParams(state.Parameters()); }
 
 	bool Save(const char *pcFile, t_real_mod dXMin, t_real_mod dXMax, std::size_t) const;
-
-	void SetUseR0(bool bR0) { m_bUseR0 = bR0; }
 
 	SqwBase* GetSqwBase() { return m_pSqw.get(); }
 };

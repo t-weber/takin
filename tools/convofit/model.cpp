@@ -70,7 +70,11 @@ tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x) const
 
 	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + t_real(x)*m_vecScanDir;
 	std::vector<ublas::vector<t_real_reso>> vecNeutrons;
-	Ellipsoid4d<t_real_reso> elli = reso.GenerateMC(m_iNumNeutrons, vecNeutrons);
+	Ellipsoid4d<t_real_reso> elli;
+	if(m_bUseThreads)
+		elli = reso.GenerateMC(m_iNumNeutrons, vecNeutrons);
+	else
+		elli = reso.GenerateMC_deferred(m_iNumNeutrons, vecNeutrons);
 
 	t_real dS = 0.;
 	t_real dhklE_mean[4] = {0., 0., 0., 0.};
@@ -87,9 +91,9 @@ tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x) const
 	for(int i=0; i<4; ++i)
 		dhklE_mean[i] /= t_real(m_iNumNeutrons);
 
-	if(m_bUseR0)
+	if(reso.GetResoParams().flags & CALC_RESVOL)
 		dS *= reso.GetResoResults().dResVol;
-	if(m_bUseR0 && (reso.GetResoParams().flags & CALC_R0))
+	if(reso.GetResoParams().flags & CALC_R0)
 		dS *= reso.GetResoResults().dR0;
 
 	if(m_psigFuncResult)
@@ -108,6 +112,7 @@ SqwFuncModel* SqwFuncModel::copy() const
 	pMod->m_vecScanOrigin = this->m_vecScanOrigin;
 	pMod->m_vecScanDir = this->m_vecScanDir;
 	pMod->m_iNumNeutrons = this->m_iNumNeutrons;
+	pMod->m_bUseThreads = this->m_bUseThreads;
 	pMod->m_dScale = this->m_dScale;
 	pMod->m_dOffs = this->m_dOffs;
 	pMod->m_dScaleErr = this->m_dScaleErr;
@@ -117,7 +122,6 @@ SqwFuncModel* SqwFuncModel::copy() const
 	pMod->m_vecModelErrs = this->m_vecModelErrs;
 	pMod->m_strTempParamName = this->m_strTempParamName;
 	pMod->m_strFieldParamName = this->m_strFieldParamName;
-	pMod->m_bUseR0 = this->m_bUseR0;
 	pMod->m_iCurParamSet = this->m_iCurParamSet;
 	pMod->m_pScans = this->m_pScans;
 	pMod->m_psigFuncResult = this->m_psigFuncResult;

@@ -59,6 +59,7 @@ public:
 		const ublas::vector<t_real_reso>& vec1, const ublas::vector<t_real_reso>& vec2);
 	bool SetHKLE(t_real_reso h, t_real_reso k, t_real_reso l, t_real_reso E);
 	Ellipsoid4d<t_real_reso> GenerateMC(std::size_t iNum, std::vector<ublas::vector<t_real_reso>>&) const;
+	Ellipsoid4d<t_real_reso> GenerateMC_deferred(std::size_t iNum, std::vector<ublas::vector<t_real_reso>>&) const;
 
 	void SetKiFix(bool bKiFix) { m_bKiFix = bKiFix; }
 	void SetKFix(t_real_reso dKFix) { m_dKFix = dKFix; }

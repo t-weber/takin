@@ -19,6 +19,17 @@ namespace ublas = boost::numeric::ublas;
 
 using t_real_reso = ::t_real_glob;
 
+enum ResoFlags : std::size_t
+{
+	CALC_R0     = 1<<0,
+	CALC_RESVOL	= 1<<1,
+
+	CALC_KI3    = 1<<2,
+	CALC_KF3    = 1<<3,
+
+	CALC_KFKI   = 1<<4,
+};
+
 struct ResoResults
 {
 	bool bOk;

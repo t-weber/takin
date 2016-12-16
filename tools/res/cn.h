@@ -23,17 +23,6 @@ namespace units = boost::units;
 namespace codata = boost::units::si::constants::codata;
 
 
-enum ResoFlags : std::size_t
-{
-	CALC_R0		= 1<<0,
-
-	CALC_KI3	= 1<<1,
-	CALC_KF3	= 1<<2,
-
-	CALC_KFKI	= 1<<3,
-};
-
-
 /**
  * TAS parameters in fwhm
  */
@@ -78,7 +67,7 @@ struct CNParams
 	t_real_reso dmono_refl;
 	t_real_reso dana_effic;
 
-	std::size_t flags = CALC_R0 | CALC_KI3 | CALC_KF3 | CALC_KFKI;
+	std::size_t flags = CALC_R0 | CALC_RESVOL | CALC_KI3 | CALC_KF3 | CALC_KFKI;
 };
 
 extern ResoResults calc_cn(const CNParams& cn);

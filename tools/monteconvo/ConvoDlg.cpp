@@ -304,7 +304,6 @@ void ConvoDlg::Start()
 		t_stopwatch watch;
 		watch.start();
 
-		const bool bUseR0 = true;
 		const unsigned int iNumNeutrons = spinNeutrons->value();
 		const unsigned int iNumSampleSteps = spinSampleSteps->value();
 
@@ -495,9 +494,9 @@ void ConvoDlg::Start()
 				for(int i=0; i<4; ++i)
 					dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
 
-				if(bUseR0)
+				if(localreso.GetResoParams().flags & CALC_RESVOL)
 					dS *= localreso.GetResoResults().dResVol;
-				if(bUseR0 && (localreso.GetResoParams().flags & CALC_R0))
+				if(localreso.GetResoParams().flags & CALC_R0)
 					dS *= localreso.GetResoResults().dR0;
 
 				return std::pair<bool, t_real>(true, dS);

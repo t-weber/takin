@@ -50,7 +50,7 @@ SqwJl::SqwJl(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	if(!m_pSqw)
 	{
 		m_bOk = 0;
-		tl::log_err("Script has no TakinSqw function.");
+		tl::log_err("Julia script has no TakinSqw function.");
 		return;
 	}
 	else
@@ -61,7 +61,7 @@ SqwJl::SqwJl(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	if(m_pInit)
 		jl_call0((jl_function_t*)m_pInit);
 	else
-		tl::log_warn("Script has no TakinInit function.");
+		tl::log_warn("Julia script has no TakinInit function.");
 }
 
 SqwJl::~SqwJl()
@@ -74,7 +74,7 @@ t_real SqwJl::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 {
 	if(!m_bOk)
 	{
-		tl::log_err("Interpreter has not initialised, cannot query S(q,w).");
+		tl::log_err("Julia interpreter has not initialised, cannot query S(q,w).");
 		return t_real(0);
 	}
 
@@ -93,7 +93,7 @@ std::vector<SqwBase::t_var> SqwJl::GetVars() const
 	std::vector<SqwBase::t_var> vecVars;
 	if(!m_bOk)
 	{
-		tl::log_err("Interpreter has not initialised, cannot get variables.");
+		tl::log_err("Julia interpreter has not initialised, cannot get variables.");
 		return vecVars;
 	}
 
@@ -126,8 +126,8 @@ std::vector<SqwBase::t_var> SqwJl::GetVars() const
 		if(!pFld) continue;
 		std::string strType = jl_typeof_str(pFld);
 		if(strType.length() == 0) continue;
-		if(strType[0] == '#' || strType == "Module") continue;	// filer funcs and mods
-		
+		if(strType[0] == '#' || strType == "Module") continue;	// filter funcs and mods
+
 		// value
 		jl_value_t* pFldPr = jl_call1(pPrint, pFld);
 		if(!pFldPr) continue;
@@ -149,12 +149,37 @@ void SqwJl::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 {
 	if(!m_bOk)
 	{
-		tl::log_err("Interpreter has not initialised, cannot set variables.");
+		tl::log_err("Julia interpreter has not initialised, cannot set variables.");
 		return;
 	}
-	
-	// TODO
-	tl::log_err("unimplemented");
+
+	std::ostringstream ostrEval;
+	for(const SqwBase::t_var& var : vecVars)
+	{
+		const std::string& strName = std::get<0>(var);
+		const std::string& strType = std::get<1>(var);
+		const std::string& strValue = std::get<2>(var);
+
+		if(!strName.length()) continue;
+
+		ostrEval << strName << " = ";
+
+		if(strType.length())
+		{
+			// if a type is given, filter out some names
+			if(strType[0] == '#' || strType == "Module")
+				continue;
+
+			// with cast
+			ostrEval << strType << "(" << strValue << ");\n";
+		}
+		else
+		{
+			//without cast
+			ostrEval << strValue << ";\n";
+		}
+	}
+	jl_eval_string(ostrEval.str().c_str());
 }
 
 
