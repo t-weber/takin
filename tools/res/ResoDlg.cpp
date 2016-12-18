@@ -989,7 +989,7 @@ void ResoDlg::Save(std::map<std::string, std::string>& mapConf, const std::strin
 
 	mapConf[strXmlRoot + "reso/use_guide"] = groupGuide->isChecked() ? "1" : "0";
 
-	mapConf[strXmlRoot + "reso/comment"] = textComment->toPlainText().toStdString();
+	mapConf[strXmlRoot + "meta/comment"] = textComment->toPlainText().toStdString();
 	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real_reso>(tl::epoch<t_real_reso>());
 }
 
@@ -1046,7 +1046,7 @@ void ResoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 	boost::optional<int> obGroupVal = xml.QueryOpt<int>(strXmlRoot+"reso/use_guide");
 	if(obGroupVal) groupGuide->setChecked(*obGroupVal);
 
-	textComment->setText(xml.Query<std::string>(strXmlRoot+"reso/comment").c_str());
+	textComment->setText(xml.Query<std::string>(strXmlRoot+"meta/comment").c_str());
 	t_real_reso dTimestamp = xml.Query<t_real_reso>(strXmlRoot+"meta/timestamp");
 	editTimestamp->setText(tl::epoch_to_str(dTimestamp).c_str());
 

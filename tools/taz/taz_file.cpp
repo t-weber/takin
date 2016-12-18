@@ -444,7 +444,7 @@ bool TazDlg::Save()
 
 	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real_glob>(tl::epoch<t_real_glob>());
 	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
-	mapConf[strXmlRoot + "meta/comment"] = "Created with Takin.";
+	mapConf[strXmlRoot + "meta/info"] = "Created with Takin.";
 
 
 	if(m_pReso) m_pReso->Save(mapConf, strXmlRoot);
