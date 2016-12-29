@@ -122,12 +122,20 @@ std::shared_ptr<SqwBase> construct_sqw(const std::string& strName,
 #include <boost/dll/shared_library.hpp>
 #include <boost/dll/import.hpp>
 
+namespace so = boost::dll;
+
+// tracking modules for refcounting
+static std::vector<std::shared_ptr<so::shared_library>> g_vecMods;
+
+void unload_sqw_plugins()
+{
+	for(auto& pMod : g_vecMods)
+		pMod->unload();
+	g_vecMods.clear();
+}
+
 void load_sqw_plugins()
 {
-	namespace so = boost::dll;
-	// tracking modules for refcounting
-	static std::vector<std::shared_ptr<so::shared_library>> g_vecMods;
-
 	static bool bPluginsLoaded = 0;
 	if(bPluginsLoaded) return;
 
@@ -154,7 +162,6 @@ void load_sqw_plugins()
 				const std::string& strTakVer = std::get<0>(tupInfo);
 				const std::string& strModIdent = std::get<1>(tupInfo);
 				const std::string& strModLongName = std::get<2>(tupInfo);
-				tl::log_debug("Module ident: ", strModIdent);
 
 				if(strTakVer != TAKIN_VER)
 				{
@@ -176,7 +183,8 @@ void load_sqw_plugins()
 
 
 				g_vecMods.push_back(pmod);
-				tl::log_info("Loaded plugin: ", strPlugin);
+				tl::log_info("Loaded plugin: ", strPlugin,
+					" -> ", strModIdent, " (\"", strModLongName, "\").");
 			}
 			catch(const std::exception& ex)
 			{
@@ -189,6 +197,10 @@ void load_sqw_plugins()
 }
 
 #else
+
+void unload_sqw_plugins()
+{
+}
 
 void load_sqw_plugins()
 {

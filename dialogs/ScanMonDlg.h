@@ -14,6 +14,7 @@
 
 #include "libs/globals.h"
 #include "libs/qthelper.h"
+#include "libs/qwthelper.h"
 #include "NetCacheDlg.h"
 
 

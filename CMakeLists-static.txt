@@ -172,9 +172,10 @@ add_executable(takin
 	tools/taz/nicos.cpp tools/taz/sics.cpp tools/taz/taz_net.cpp
 
 	tools/res/cn.cpp tools/res/pop.cpp tools/res/eck.cpp tools/res/viol.cpp tools/res/simple.cpp
-	tools/res/ResoDlg.cpp
+	tools/res/ResoDlg.cpp tools/res/ResoDlg_file.cpp
 
-	tools/monteconvo/ConvoDlg.cpp tools/monteconvo/SqwParamDlg.cpp tools/monteconvo/TASReso.cpp
+	tools/monteconvo/ConvoDlg.cpp tools/monteconvo/ConvoDlg_file.cpp
+	tools/monteconvo/SqwParamDlg.cpp tools/monteconvo/TASReso.cpp
 	tools/monteconvo/sqw.cpp tools/monteconvo/sqwbase.cpp tools/monteconvo/sqwfactory.cpp
 	${SRCS_PY}
 
@@ -192,7 +193,7 @@ add_executable(takin
 
 	libs/spacegroups/spacegroup.cpp tools/sglist/SgListDlg.cpp
 	libs/globals.cpp libs/globals_qt.cpp libs/spacegroups/crystalsys.cpp
-	libs/formfactors/formfact.cpp libs/qthelper.cpp
+	libs/formfactors/formfact.cpp libs/qthelper.cpp libs/qwthelper.cpp
 
 	${SRCS_3D}
 

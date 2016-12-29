@@ -5,6 +5,11 @@
 # @date dec-2016
 #
 
+
+# TODO: import constant
+kB = 1.23
+
+
 # example dispersion
 function disp_ferro(q, D, offs)
 	return D*q^2. + offs
@@ -17,6 +22,29 @@ function gauss(x, x0, sig, amp)
 end
 
 
+# Bose factor
+function bose(E, T)
+	n = 1./(exp(abs(E)/(kB*T)) - 1.)
+	if E >= 0.
+		n += 1.
+	end
+	return n
+end
+
+# Bose factor which is cut off below Ecut
+function bose_cutoff(E, T, Ecut=0.02)
+	Ecut = abs(Ecut)
+
+	b = 0.
+	if abs(E) < Ecut
+		b = bose(sign(E)*Ecut, T)
+	else
+		b = bose(E, T)
+	end
+
+	return b
+end
+
 
 # global variables which can be accessed / changed by Takin
 g_G = vec([1., 1., 0.])	# Bragg peak
@@ -28,6 +56,8 @@ g_S0 = 10.				# intensity
 g_inc_sig = 0.02	# incoherent width
 g_inc_amp = 10.		# incoherent intensity
 
+g_T = 100.			# temperature
+g_bose_cut = 0.02	# Bose cutoff
 
 
 # the init function is called after Takin has changed a global variable
@@ -37,7 +67,7 @@ end
 
 
 # called for every Monte-Carlo point
-function TakinSqw(h::Float64, k::Float64, l::Float64, E::Float64)
+function TakinSqw(h::Float64, k::Float64, l::Float64, E::Float64)::Float64
 	#println("Calling TakinSqw(", h, ", ", k, ", ", l, ", ", E, ") -> ", S)
 	Q = vec([h,k,l])
 	q = vecnorm(Q - g_G)
@@ -48,6 +78,8 @@ function TakinSqw(h::Float64, k::Float64, l::Float64, E::Float64)
 	S_m = gauss(E, -E_peak, g_sig, g_S0)
 	incoh = gauss(E, 0., g_inc_sig, g_inc_amp)
 
-	S = S_p + S_m + incoh
+	b = 1.
+	#b = bose_cutoff(E, g_T, g_bose_cut)
+	S = (S_p + S_m)*b + incoh
 	return Float64(S)
 end

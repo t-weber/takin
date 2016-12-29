@@ -15,7 +15,6 @@
 #ifndef NO_PY
 	#include "sqw_py.h"
 #endif
-#include "TASReso.h"
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
@@ -25,11 +24,14 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMenuBar>
 #include <QMenu>
 
 
 using t_real = t_real_reso;
 using t_stopwatch = tl::Stopwatch<t_real>;
+
+static constexpr const t_real g_dEpsRlu = 1e-3;
 
 
 ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
@@ -37,6 +39,37 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 		m_pSett(pSett)
 {
 	setupUi(this);
+
+	// -------------------------------------------------------------------------
+	// widgets
+	m_vecSpinBoxes = { spinStartH, spinStartK, spinStartL, spinStartE,
+		spinStopH, spinStopK, spinStopL, spinStopE,
+		spinStopH2, spinStopK2, spinStopL2, spinStopE2,
+		spinKfix,
+	};
+
+	m_vecSpinNames = {
+		"monteconvo/h_from", "monteconvo/k_from", "monteconvo/l_from", "monteconvo/E_from",
+		"monteconvo/h_to", "monteconvo/k_to", "monteconvo/l_to", "monteconvo/E_to",
+		"monteconvo/h_to_2", "monteconvo/k_to_2", "monteconvo/l_to_2", "monteconvo/E_to_2",
+		"monteconvo/kfix",
+	};
+
+	m_vecIntSpinBoxes = { spinNeutrons, spinSampleSteps, spinStepCnt };
+	m_vecIntSpinNames = { "monteconvo/neutron_count", "monteconvo/sample_step_count", "monteconvo/step_count" };
+
+	m_vecEditBoxes = { editCrys, editRes, editSqw, editScan, editScale, editOffs };
+	m_vecEditNames = { "monteconvo/crys", "monteconvo/instr", "monteconvo/sqw_conf",
+		"monteconvo/scanfile", "monteconvo/S_scale", "monteconvo/S_offs" };
+
+	m_vecComboBoxes = { comboAlgo, comboFixedK, comboFocMono, comboFocAna };
+	m_vecComboNames = { "monteconvo/algo", "monteconvo/fixedk", "monteconvo/mono_foc",
+		"monteconvo/ana_foc" };
+
+	m_vecCheckBoxes = { checkScan, check2dMap };
+	m_vecCheckNames = { "monteconvo/has_scanfile", "monteconvo/scan_2d" };
+	// -------------------------------------------------------------------------
+
 	if(m_pSett)
 	{
 		QFont font;
@@ -46,12 +79,14 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 
 	btnStart->setIcon(load_icon("res/icons/media-playback-start.svg"));
 	btnStop->setIcon(load_icon("res/icons/media-playback-stop.svg"));
-	btnSaveResult->setIcon(load_icon("res/icons/document-save-as.svg"));
 
 
 	m_plotwrap.reset(new QwtPlotWrapper(plot, 3, true));
 	m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::xBottom, "");
 	m_plotwrap->GetPlot()->setAxisTitle(QwtPlot::yLeft, "S (a.u.)");
+
+	m_plotwrap2d.reset(new QwtPlotWrapper(plot2d, 1, 0, 0, 1));
+	m_plotwrap2d->GetPlot()->setAxisTitle(QwtPlot::yRight, "S (a.u.)");
 
 
 	// --------------------------------------------------------------------
@@ -106,6 +141,89 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	// --------------------------------------------------------------------
 
 
+	// --------------------------------------------------------------------
+	// menu bar
+	QMenuBar* pMenuBar = new QMenuBar(this);
+	this->layout()->setMenuBar(pMenuBar);
+
+
+	// file menu
+	QMenu *pMenuFile = new QMenu("File", this);
+
+	QAction *pLoad = new QAction("Load Configuration...", this);
+	pLoad->setIcon(load_icon("res/icons/document-open.svg"));
+	pMenuFile->addAction(pLoad);
+
+	QAction *pSaveAs = new QAction("Save Configuration...", this);
+	pSaveAs->setIcon(load_icon("res/icons/document-save-as.svg"));
+	pMenuFile->addAction(pSaveAs);
+
+	pMenuFile->addSeparator();
+
+	QAction *pExit = new QAction("Exit", this);
+	pExit->setIcon(load_icon("res/icons/system-log-out.svg"));
+	pMenuFile->addAction(pExit);
+
+
+	// results menu
+	QMenu *pMenuPlots = new QMenu("Results", this);
+
+	m_pLiveResults = new QAction("Live Results", this);
+	m_pLiveResults->setCheckable(1);
+	m_pLiveResults->setChecked(0);
+	pMenuPlots->addAction(m_pLiveResults);
+
+	m_pLivePlots = new QAction("Live Plots", this);
+	m_pLivePlots->setCheckable(1);
+	m_pLivePlots->setChecked(1);
+	pMenuPlots->addAction(m_pLivePlots);
+
+	pMenuPlots->addSeparator();
+
+	QAction *pExportPlot = new QAction("Export Plot Data...", this);
+	pMenuPlots->addAction(pExportPlot);
+
+	QAction *pExportPlotGpl = new QAction("Export Plot to Gnuplot...", this);
+	pMenuPlots->addAction(pExportPlotGpl);
+
+	pMenuPlots->addSeparator();
+
+	QAction *pExportPlot2d = new QAction("Export 2D Plot Data...", this);
+	pMenuPlots->addAction(pExportPlot2d);
+
+	QAction *pExportPlot2dGpl = new QAction("Export 2D Plot to Gnuplot...", this);
+	pMenuPlots->addAction(pExportPlot2dGpl);
+
+	pMenuPlots->addSeparator();
+
+	QAction *pSaveResults = new QAction("Save Results...", this);
+	pSaveResults->setIcon(load_icon("res/icons/document-save-as.svg"));
+	pMenuPlots->addAction(pSaveResults);
+
+	// help menu
+	QMenu *pMenuHelp = new QMenu("Help", this);
+
+	QAction *pAbout = new QAction("About...", this);
+	pAbout->setIcon(load_icon("res/icons/dialog-information.svg"));
+	pMenuHelp->addAction(pAbout);
+
+
+	pMenuBar->addMenu(pMenuFile);
+	pMenuBar->addMenu(pMenuPlots);
+	pMenuBar->addMenu(pMenuHelp);
+
+
+	QObject::connect(pExit, SIGNAL(triggered()), this, SLOT(accept()));
+	QObject::connect(pLoad, SIGNAL(triggered()), this, SLOT(Load()));
+	QObject::connect(pSaveAs, SIGNAL(triggered()), this, SLOT(Save()));
+	QObject::connect(pExportPlot, SIGNAL(triggered()), m_plotwrap.get(), SLOT(SavePlot()));
+	QObject::connect(pExportPlot2d, SIGNAL(triggered()), m_plotwrap2d.get(), SLOT(SavePlot()));
+	QObject::connect(pExportPlotGpl, SIGNAL(triggered()), m_plotwrap.get(), SLOT(ExportGpl()));
+	QObject::connect(pExportPlot2dGpl, SIGNAL(triggered()), m_plotwrap2d.get(), SLOT(ExportGpl()));
+	QObject::connect(pSaveResults, SIGNAL(triggered()), this, SLOT(SaveResult()));
+	QObject::connect(pAbout, SIGNAL(triggered()), this, SLOT(ShowAboutDlg()));
+	// --------------------------------------------------------------------
+
 
 	m_pSqwParamDlg = new SqwParamDlg(this, m_pSett);
 	QObject::connect(this, SIGNAL(SqwLoaded(const std::vector<SqwBase::t_var>&)),
@@ -117,7 +235,7 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	QObject::connect(m_pFavDlg, SIGNAL(ChangePos(const struct FavHklPos&)),
 		this, SLOT(ChangePos(const struct FavHklPos&)));
 
-	QObject::connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(ButtonBoxClicked(QAbstractButton*)));
+	//QObject::connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(ButtonBoxClicked(QAbstractButton*)));
 
 	QObject::connect(btnBrowseCrys, SIGNAL(clicked()), this, SLOT(browseCrysFiles()));
 	QObject::connect(btnBrowseRes, SIGNAL(clicked()), this, SLOT(browseResoFiles()));
@@ -125,9 +243,7 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	QObject::connect(btnBrowseScan, SIGNAL(clicked()), this, SLOT(browseScanFiles()));
 
 	QObject::connect(btnFav, SIGNAL(clicked()), this, SLOT(ShowFavourites()));
-
 	QObject::connect(btnSqwParams, SIGNAL(clicked()), this, SLOT(showSqwParamDlg()));
-	QObject::connect(btnSaveResult, SIGNAL(clicked()), this, SLOT(SaveResult()));
 
 	QObject::connect(comboSqw, SIGNAL(currentIndexChanged(int)), this, SLOT(SqwModelChanged(int)));
 	QObject::connect(editSqw, SIGNAL(textChanged(const QString&)), this, SLOT(createSqwModel(const QString&)));
@@ -139,6 +255,7 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	QObject::connect(btnStart, SIGNAL(clicked()), this, SLOT(Start()));
 	QObject::connect(btnStop, SIGNAL(clicked()), this, SLOT(Stop()));
 
+	QObject::connect(checkScan, SIGNAL(toggled(bool)), this, SLOT(scanCheckToggled(bool)));
 
 	QObject::connect(pHK, SIGNAL(triggered()), this, SLOT(ChangeHK()));
 	QObject::connect(pHL, SIGNAL(triggered()), this, SLOT(ChangeHL()));
@@ -162,58 +279,19 @@ ConvoDlg::~ConvoDlg()
 		m_pth = nullptr;
 	}
 
-	if(m_pSqwParamDlg)
-	{
-		delete m_pSqwParamDlg;
-		m_pSqwParamDlg = nullptr;
-	}
+	if(m_pSqwParamDlg) { delete m_pSqwParamDlg; m_pSqwParamDlg = nullptr; }
+	if(m_pFavDlg) { delete m_pFavDlg; m_pFavDlg = nullptr; }
+	if(m_pSqw) m_pSqw.reset();
 
-	if(m_pFavDlg)
-	{
-		delete m_pFavDlg;
-		m_pFavDlg = nullptr;
-	}
-}
-
-
-void ConvoDlg::SaveResult()
-{
-	QFileDialog::Option fileopt = QFileDialog::Option(0);
-	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
-		fileopt = QFileDialog::DontUseNativeDialog;
-
-	QString strDirLast = ".";
-	if(m_pSett)
-		strDirLast = m_pSett->value("convo/last_dir_result", ".").toString();
-
-	QString strFile = QFileDialog::getSaveFileName(this,
-		"Save Scan", strDirLast, "Data Files (*.dat *.DAT)", nullptr, fileopt);
-
-	if(strFile == "")
-		return;
-
-	std::string strFile1 = strFile.toStdString();
-	std::string strDir = tl::get_dir(strFile1);
-
-	std::ofstream ofstr(strFile1);
-	if(!ofstr)
-	{
-		QMessageBox::critical(this, "Error", "Could not open file.");
-		return;
-	}
-
-	std::string strResult = textResult->toPlainText().toStdString();
-	ofstr.write(strResult.c_str(), strResult.size());
-
-	if(m_pSett)
-		m_pSett->setValue("convo/last_dir_result", QString(strDir.c_str()));
+	unload_sqw_plugins();
 }
 
 
 void ConvoDlg::SqwModelChanged(int)
 {
 	editSqw->clear();
-	emit SqwLoaded(std::vector<SqwBase::t_var>{});
+	createSqwModel("");
+	//emit SqwLoaded(std::vector<SqwBase::t_var>{});
 }
 
 void ConvoDlg::createSqwModel(const QString& qstrFile)
@@ -230,8 +308,8 @@ void ConvoDlg::createSqwModel(const QString& qstrFile)
 
 	if(strSqwFile == "")
 	{
-		QMessageBox::critical(this, "Error", "No S(q,w) config file given.");
-		return;
+		tl::log_warn("No S(q,w) config file given.");
+		//return;
 	}
 
 #ifdef NO_PY
@@ -250,7 +328,9 @@ void ConvoDlg::createSqwModel(const QString& qstrFile)
 	}
 
 	if(m_pSqw && m_pSqw->IsOk())
+	{
 		emit SqwLoaded(m_pSqw->GetVars());
+	}
 	else
 	{
 		QMessageBox::critical(this, "Error", "Could not create S(q,w).");
@@ -272,13 +352,37 @@ void ConvoDlg::SqwParamsChanged(const std::vector<SqwBase::t_var>& vecVars)
 }
 
 
-void ConvoDlg::Start()
+// -----------------------------------------------------------------------------
+
+ResoFocus ConvoDlg::GetFocus() const
 {
+	const int iFocMono = comboFocMono->currentIndex();
+	const int iFocAna = comboFocAna->currentIndex();
+
+	unsigned ifocMode = unsigned(ResoFocus::FOC_NONE);
+	if(iFocMono == 1) ifocMode |= unsigned(ResoFocus::FOC_MONO_H);	// horizontal
+	else if(iFocMono == 2) ifocMode |= unsigned(ResoFocus::FOC_MONO_V);	// vertical
+	else if(iFocMono == 3) ifocMode |= unsigned(ResoFocus::FOC_MONO_V)|unsigned(ResoFocus::FOC_MONO_H);		// both
+	if(iFocAna == 1) ifocMode |= unsigned(ResoFocus::FOC_ANA_H);	// horizontal
+	else if(iFocAna == 2) ifocMode |= unsigned(ResoFocus::FOC_ANA_V);	// vertical
+	else if(iFocAna == 3) ifocMode |= unsigned(ResoFocus::FOC_ANA_V)|unsigned(ResoFocus::FOC_ANA_H);		// both
+
+	return ResoFocus(ifocMode);
+}
+
+/**
+ * create 1d scan
+ */
+void ConvoDlg::Start1D()
+{
+	m_atStop.store(false);
+
 	bool bUseScan = m_bUseScan && checkScan->isChecked();
 	t_real dScale = tl::str_to_var<t_real>(editScale->text().toStdString());
 	t_real dOffs = tl::str_to_var<t_real>(editOffs->text().toStdString());
 
-	m_atStop.store(false);
+	bool bLiveResults = m_pLiveResults->isChecked();
+	bool bLivePlots = m_pLivePlots->isChecked();
 
 	btnStart->setEnabled(false);
 	tabSettings->setEnabled(false);
@@ -286,13 +390,12 @@ void ConvoDlg::Start()
 	tabWidget->setCurrentWidget(tabPlot);
 
 	bool bForceDeferred = false;
-	/*std::string strSqwIdent = comboSqw->itemData(comboSqw->currentIndex()).toString().toStdString();
-	if(strSqwIdent == "py")
-		bForceDeferred = true;*/
-	Qt::ConnectionType connty = bForceDeferred ? Qt::ConnectionType::DirectConnection
-			: Qt::ConnectionType::BlockingQueuedConnection;
+	Qt::ConnectionType connty = bForceDeferred
+		? Qt::ConnectionType::DirectConnection
+		: Qt::ConnectionType::BlockingQueuedConnection;
 
-	std::function<void()> fkt = [this, connty, bForceDeferred, bUseScan, dScale, dOffs]
+	std::function<void()> fkt = [this, connty, bForceDeferred, bUseScan,
+	dScale, dOffs, bLiveResults, bLivePlots]
 	{
 		std::function<void()> fktEnableButtons = [this]
 		{
@@ -319,22 +422,22 @@ void ConvoDlg::Start()
 
 		std::string strScanVar = "";
 		std::vector<t_real> *pVecScanX = nullptr;
-		if(!tl::float_equal(spinStartH->value(), spinStopH->value(), 0.0001))
+		if(!tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu))
 		{
 			pVecScanX = &vecH;
 			strScanVar = "h (rlu)";
 		}
-		else if(!tl::float_equal(spinStartK->value(), spinStopK->value(), 0.0001))
+		else if(!tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu))
 		{
 			pVecScanX = &vecK;
 			strScanVar = "k (rlu)";
 		}
-		else if(!tl::float_equal(spinStartL->value(), spinStopL->value(), 0.0001))
+		else if(!tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu))
 		{
 			pVecScanX = &vecL;
 			strScanVar = "l (rlu)";
 		}
-		else if(!tl::float_equal(spinStartE->value(), spinStopE->value(), 0.0001))
+		else if(!tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu))
 		{
 			pVecScanX = &vecE;
 			strScanVar = "E (meV)";
@@ -346,10 +449,9 @@ void ConvoDlg::Start()
 			return;
 		}
 
-		//QMetaObject::invokeMethod(plot, "setAxisTitle",
-		//	Q_ARG(int, QwtPlot::xBottom),
-		//	Q_ARG(const QString&, QString(strScanVar.c_str())));
-		//plot->setAxisTitle(QwtPlot::xBottom, strScanVar.c_str());
+		QMetaObject::invokeMethod(m_plotwrap.get(), "setAxisTitle",
+			Q_ARG(int, QwtPlot::xBottom),
+			Q_ARG(const QString&, QString(strScanVar.c_str())));
 
 
 		TASReso reso;
@@ -384,20 +486,7 @@ void ConvoDlg::Start()
 		reso.SetAlgo(ResoAlgo(comboAlgo->currentIndex()+1));
 		reso.SetKiFix(comboFixedK->currentIndex()==0);
 		reso.SetKFix(spinKfix->value());
-
-		const int iFocMono = comboFocMono->currentIndex();
-		const int iFocAna = comboFocAna->currentIndex();
-
-		unsigned ifocMode = unsigned(ResoFocus::FOC_NONE);
-		if(iFocMono == 1) ifocMode |= unsigned(ResoFocus::FOC_MONO_H);	// horizontal
-		else if(iFocMono == 2) ifocMode |= unsigned(ResoFocus::FOC_MONO_V);	// vertical
-		else if(iFocMono == 3) ifocMode |= unsigned(ResoFocus::FOC_MONO_V)|unsigned(ResoFocus::FOC_MONO_H);		// both
-		if(iFocAna == 1) ifocMode |= unsigned(ResoFocus::FOC_ANA_H);	// horizontal
-		else if(iFocAna == 2) ifocMode |= unsigned(ResoFocus::FOC_ANA_V);	// vertical
-		else if(iFocAna == 3) ifocMode |= unsigned(ResoFocus::FOC_ANA_V)|unsigned(ResoFocus::FOC_ANA_H);		// both
-
-		ResoFocus focMode = ResoFocus(ifocMode);
-		reso.SetOptimalFocus(focMode);
+		reso.SetOptimalFocus(GetFocus());
 
 
 		if(m_pSqw == nullptr || !m_pSqw->IsOk())
@@ -452,53 +541,59 @@ void ConvoDlg::Start()
 			{
 				if(m_atStop.load()) return std::pair<bool, t_real>(false, 0.);
 
-				TASReso localreso = reso;
-				localreso.SetRandomSamplePos(iNumSampleSteps);
-				std::vector<ublas::vector<t_real>> vecNeutrons;
-
-				try
-				{
-					if(!localreso.SetHKLE(dCurH, dCurK, dCurL, dCurE))
-					{
-						std::ostringstream ostrErr;
-						ostrErr << "Invalid crystal position: (" <<
-							dCurH << " " << dCurK << " " << dCurL << ") rlu, "
-							<< dCurE << " meV.";
-						throw tl::Err(ostrErr.str().c_str());
-					}
-				}
-				catch(const std::exception& ex)
-				{
-					//QMessageBox::critical(this, "Error", ex.what());
-					tl::log_err(ex.what());
-					return std::pair<bool, t_real>(false, 0.);
-				}
-
-				Ellipsoid4d<t_real> elli =
-					localreso.GenerateMC(iNumNeutrons, vecNeutrons);
-
 				t_real dS = 0.;
 				t_real dhklE_mean[4] = {0., 0., 0., 0.};
 
-				for(const ublas::vector<t_real>& vecHKLE : vecNeutrons)
-				{
-					if(m_atStop.load()) return std::pair<bool, t_real>(false, 0.);
-
-					dS += (*m_pSqw)(vecHKLE[0], vecHKLE[1], vecHKLE[2], vecHKLE[3]);
-
-					for(int i=0; i<4; ++i)
-						dhklE_mean[i] += vecHKLE[i];
+				if(iNumNeutrons == 0)
+				{	// if no neutrons are given, just plot the unconvoluted S(q,w)
+					dS += (*m_pSqw)(dCurH, dCurK, dCurL, dCurE);
 				}
+				else
+				{	// convolution
+					TASReso localreso = reso;
+					localreso.SetRandomSamplePos(iNumSampleSteps);
+					std::vector<ublas::vector<t_real>> vecNeutrons;
 
-				dS /= t_real(iNumNeutrons*iNumSampleSteps);
-				for(int i=0; i<4; ++i)
-					dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
+					try
+					{
+						if(!localreso.SetHKLE(dCurH, dCurK, dCurL, dCurE))
+						{
+							std::ostringstream ostrErr;
+							ostrErr << "Invalid crystal position: (" <<
+								dCurH << " " << dCurK << " " << dCurL << ") rlu, "
+								<< dCurE << " meV.";
+							throw tl::Err(ostrErr.str().c_str());
+						}
+					}
+					catch(const std::exception& ex)
+					{
+						//QMessageBox::critical(this, "Error", ex.what());
+						tl::log_err(ex.what());
+						return std::pair<bool, t_real>(false, 0.);
+					}
 
-				if(localreso.GetResoParams().flags & CALC_RESVOL)
-					dS *= localreso.GetResoResults().dResVol;
-				if(localreso.GetResoParams().flags & CALC_R0)
-					dS *= localreso.GetResoResults().dR0;
+					Ellipsoid4d<t_real> elli =
+						localreso.GenerateMC(iNumNeutrons, vecNeutrons);
 
+					for(const ublas::vector<t_real>& vecHKLE : vecNeutrons)
+					{
+						if(m_atStop.load()) return std::pair<bool, t_real>(false, 0.);
+
+						dS += (*m_pSqw)(vecHKLE[0], vecHKLE[1], vecHKLE[2], vecHKLE[3]);
+
+						for(int i=0; i<4; ++i)
+							dhklE_mean[i] += vecHKLE[i];
+					}
+
+					dS /= t_real(iNumNeutrons*iNumSampleSteps);
+					for(int i=0; i<4; ++i)
+						dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
+
+					if(localreso.GetResoParams().flags & CALC_RESVOL)
+						dS *= localreso.GetResoResults().dResVol;
+					if(localreso.GetResoParams().flags & CALC_R0)
+						dS *= localreso.GetResoResults().dR0;
+				}
 				return std::pair<bool, t_real>(true, dS);
 			});
 		}
@@ -519,9 +614,13 @@ void ConvoDlg::Start()
 			}
 
 			std::pair<bool, t_real> pairS = fut.get();
-			if(!pairS.first)
-				break;
+			if(!pairS.first) break;
 			t_real dS = pairS.second;
+			if(tl::is_nan_or_inf(dS))
+			{
+				dS = t_real(0);
+				tl::log_warn("S(q,w) is invalid.");
+			}
 
 			ostrOut.precision(g_iPrec);
 			ostrOut << std::left << std::setw(g_iPrec*2) << vecH[iStep] << " "
@@ -530,34 +629,40 @@ void ConvoDlg::Start()
 				<< std::left << std::setw(g_iPrec*2) << vecE[iStep] << " "
 				<< std::left << std::setw(g_iPrec*2) << dS << "\n";
 
-
 			m_vecQ.push_back((*pVecScanX)[iStep]);
 			m_vecS.push_back(dS);
-			m_vecScaledS.push_back(dS*dScale + dOffs);
+	 		m_vecScaledS.push_back(dS*dScale + dOffs);
 
 			static const std::vector<t_real> vecNull;
+			bool bIsLastStep = (iStep == lstFuts.size()-1);
 
-			set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 0, false);
-			set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 1, false);
-			if(bUseScan)
-				set_qwt_data<t_real_reso>()(*m_plotwrap, m_scan.vecX, m_scan.vecCts, 2, false);
-			else
-				set_qwt_data<t_real_reso>()(*m_plotwrap, vecNull, vecNull, 2, false);
+			if(bLivePlots || bIsLastStep)
+			{
+				set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 0, false);
+				set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 1, false);
+				if(bUseScan)
+					set_qwt_data<t_real_reso>()(*m_plotwrap, m_scan.vecX, m_scan.vecCts, 2, false);
+				else
+					set_qwt_data<t_real_reso>()(*m_plotwrap, vecNull, vecNull, 2, false);
 
-			//set_zoomer_base(m_plotwrap->GetZoomer(), m_vecQ, m_vecScaledS, true);
-			QMetaObject::invokeMethod(m_plotwrap->GetPlot(), "replot", connty);
+				if(bIsLastStep)
+					set_zoomer_base(m_plotwrap->GetZoomer(), m_vecQ, m_vecScaledS, true, m_plotwrap.get());
+				QMetaObject::invokeMethod(m_plotwrap.get(), "doUpdate", connty);
+			}
 
-			QMetaObject::invokeMethod(textResult, "setPlainText", connty,
-				Q_ARG(const QString&, QString(ostrOut.str().c_str())));
+			if(bLiveResults || bIsLastStep)
+			{
+				QMetaObject::invokeMethod(textResult, "setPlainText", connty,
+					Q_ARG(const QString&, QString(ostrOut.str().c_str())));
+			}
 
 			QMetaObject::invokeMethod(progress, "setValue", Q_ARG(int, iStep+1));
 			QMetaObject::invokeMethod(editStopTime, "setText",
 				Q_ARG(const QString&, QString(watch.GetEstStopTimeStr(t_real(iStep+1)/t_real(iNumSteps)).c_str())));
-
 			++iStep;
 		}
 
-		ostrOut << "# ---------------- EOF ----------------\n";
+		ostrOut << "# ------------------------- EOF -------------------------\n";
 
 		QMetaObject::invokeMethod(textResult, "setPlainText", connty,
 			Q_ARG(const QString&, QString(ostrOut.str().c_str())));
@@ -579,12 +684,439 @@ void ConvoDlg::Start()
 	}
 }
 
+/**
+ * create 2d map
+ */
+void ConvoDlg::Start2D()
+{
+	m_atStop.store(false);
+
+	bool bLiveResults = m_pLiveResults->isChecked();
+	bool bLivePlots = m_pLivePlots->isChecked();
+
+	btnStart->setEnabled(false);
+	tabSettings->setEnabled(false);
+	btnStop->setEnabled(true);
+	tabWidget->setCurrentWidget(tabPlot2d);
+
+	bool bForceDeferred = false;
+	Qt::ConnectionType connty = bForceDeferred
+		? Qt::ConnectionType::DirectConnection
+		: Qt::ConnectionType::BlockingQueuedConnection;
+
+	std::function<void()> fkt = [this, connty, bForceDeferred, bLiveResults, bLivePlots]
+	{
+		std::function<void()> fktEnableButtons = [this]
+		{
+			QMetaObject::invokeMethod(btnStop, "setEnabled", Q_ARG(bool, false));
+			QMetaObject::invokeMethod(tabSettings, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
+		};
+
+		t_stopwatch watch;
+		watch.start();
+
+		const unsigned int iNumNeutrons = spinNeutrons->value();
+		const unsigned int iNumSampleSteps = spinSampleSteps->value();
+
+		const unsigned int iNumSteps = std::sqrt(spinStepCnt->value());
+		const t_real dStartHKL[] =
+		{
+			spinStartH->value(), spinStartK->value(),
+			spinStartL->value(), spinStartE->value()
+		};
+		const t_real dDeltaHKL1[] =
+		{
+			(spinStopH->value() - spinStartH->value()) / t_real(iNumSteps+1),
+			(spinStopK->value() - spinStartK->value()) / t_real(iNumSteps+1),
+			(spinStopL->value() - spinStartL->value()) / t_real(iNumSteps+1),
+			(spinStopE->value() - spinStartE->value()) / t_real(iNumSteps+1)
+		};
+		const t_real dDeltaHKL2[] =
+		{
+			(spinStopH2->value() - spinStartH->value()) / t_real(iNumSteps+1),
+			(spinStopK2->value() - spinStartK->value()) / t_real(iNumSteps+1),
+			(spinStopL2->value() - spinStartL->value()) / t_real(iNumSteps+1),
+			(spinStopE2->value() - spinStartE->value()) / t_real(iNumSteps+1)
+		};
+
+
+		// -------------------------------------------------------------------------
+		// find axis labels and ranges
+		std::string strScanVar1 = "";
+		t_real dStart1, dStop1;
+		if(!tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu))
+		{
+			strScanVar1 = "h (rlu)";
+			dStart1 = spinStartH->value();
+			dStop1 = spinStopH->value();
+		}
+		else if(!tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu))
+		{
+			strScanVar1 = "k (rlu)";
+			dStart1 = spinStartK->value();
+			dStop1 = spinStopK->value();
+		}
+		else if(!tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu))
+		{
+			strScanVar1 = "l (rlu)";
+			dStart1 = spinStartL->value();
+			dStop1 = spinStopL->value();
+		}
+		else if(!tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu))
+		{
+			strScanVar1 = "E (meV)";
+			dStart1 = spinStartE->value();
+			dStop1 = spinStopE->value();
+		}
+
+		std::string strScanVar2 = "";
+		t_real dStart2, dStop2;
+		if(!tl::float_equal(spinStartH->value(), spinStopH2->value(), g_dEpsRlu))
+		{
+			strScanVar2 = "h (rlu)";
+			dStart2 = spinStartH->value();
+			dStop2 = spinStopH2->value();
+		}
+		else if(!tl::float_equal(spinStartK->value(), spinStopK2->value(), g_dEpsRlu))
+		{
+			strScanVar2 = "k (rlu)";
+			dStart2 = spinStartK->value();
+			dStop2 = spinStopK2->value();
+		}
+		else if(!tl::float_equal(spinStartL->value(), spinStopL2->value(), g_dEpsRlu))
+		{
+			strScanVar2 = "l (rlu)";
+			dStart2 = spinStartL->value();
+			dStop2 = spinStopL2->value();
+		}
+		else if(!tl::float_equal(spinStartE->value(), spinStopE2->value(), g_dEpsRlu))
+		{
+			strScanVar2 = "E (meV)";
+			dStart2 = spinStartE->value();
+			dStop2 = spinStopE2->value();
+		}
+
+		QMetaObject::invokeMethod(m_plotwrap2d.get(), "setAxisTitle",
+		Q_ARG(int, QwtPlot::xBottom),
+		Q_ARG(const QString&, QString(strScanVar1.c_str())));
+
+		QMetaObject::invokeMethod(m_plotwrap2d.get(), "setAxisTitle",
+		Q_ARG(int, QwtPlot::yLeft),
+		Q_ARG(const QString&, QString(strScanVar2.c_str())));
+		// -------------------------------------------------------------------------
+
+
+		TASReso reso;
+		if(!reso.LoadRes(editRes->text().toStdString().c_str()))
+		{
+			//QMessageBox::critical(this, "Error", "Could not load resolution file.");
+			fktEnableButtons();
+			return;
+		}
+
+		if(!reso.LoadLattice(editCrys->text().toStdString().c_str()))
+		{
+			//QMessageBox::critical(this, "Error", "Could not load crystal file.");
+			fktEnableButtons();
+			return;
+		}
+
+		reso.SetAlgo(ResoAlgo(comboAlgo->currentIndex()+1));
+		reso.SetKiFix(comboFixedK->currentIndex()==0);
+		reso.SetKFix(spinKfix->value());
+		reso.SetOptimalFocus(GetFocus());
+
+		if(m_pSqw == nullptr || !m_pSqw->IsOk())
+		{
+			//QMessageBox::critical(this, "Error", "No valid S(q,w) model loaded.");
+			fktEnableButtons();
+			return;
+		}
+
+
+		std::ostringstream ostrOut;
+		ostrOut << "#\n";
+		ostrOut << "# Format: h k l E S\n";
+		ostrOut << "# MC Neutrons: " << iNumNeutrons << "\n";
+		ostrOut << "# MC Sample Steps: " << iNumSampleSteps << "\n";
+		ostrOut << "#\n";
+
+		QMetaObject::invokeMethod(editStartTime2d, "setText",
+			Q_ARG(const QString&, QString(watch.GetStartTimeStr().c_str())));
+
+		QMetaObject::invokeMethod(progress, "setMaximum", Q_ARG(int, iNumSteps*iNumSteps));
+		QMetaObject::invokeMethod(progress, "setValue", Q_ARG(int, 0));
+
+		QMetaObject::invokeMethod(textResult, "clear", connty);
+
+		// raster width & height
+		m_plotwrap2d->GetRaster()->Init(iNumSteps, iNumSteps);
+		m_plotwrap2d->GetRaster()->SetXRange(dStart1, dStop1);
+		m_plotwrap2d->GetRaster()->SetYRange(dStart2, dStop2);
+		set_zoomer_base(m_plotwrap2d->GetZoomer(),
+			dStart1, dStop1, dStop2, dStart2,
+			true, m_plotwrap2d.get());
+
+		std::vector<t_real> vecH; vecH.reserve(iNumSteps*iNumSteps);
+		std::vector<t_real> vecK; vecK.reserve(iNumSteps*iNumSteps);
+		std::vector<t_real> vecL; vecL.reserve(iNumSteps*iNumSteps);
+		std::vector<t_real> vecE; vecE.reserve(iNumSteps*iNumSteps);
+
+		for(unsigned int iStepY=0; iStepY<iNumSteps; ++iStepY)
+		{
+			for(unsigned int iStepX=0; iStepX<iNumSteps; ++iStepX)
+			{
+				vecH.push_back(dStartHKL[0] + dDeltaHKL2[0]*t_real(iStepY) + dDeltaHKL1[0]*t_real(iStepX));
+				vecK.push_back(dStartHKL[1] + dDeltaHKL2[1]*t_real(iStepY) + dDeltaHKL1[1]*t_real(iStepX));
+				vecL.push_back(dStartHKL[2] + dDeltaHKL2[2]*t_real(iStepY) + dDeltaHKL1[2]*t_real(iStepX));
+				vecE.push_back(dStartHKL[3] + dDeltaHKL2[3]*t_real(iStepY) + dDeltaHKL1[3]*t_real(iStepX));
+			}
+		}
+
+		unsigned int iNumThreads = bForceDeferred ? 0 : std::thread::hardware_concurrency();
+
+		void (*pThStartFunc)() = []{ tl::init_rand(); };
+		tl::ThreadPool<std::pair<bool, t_real>()> tp(iNumThreads, pThStartFunc);
+		auto& lstFuts = tp.GetFutures();
+
+		for(unsigned int iStep=0; iStep<iNumSteps*iNumSteps; ++iStep)
+		{
+			t_real dCurH = vecH[iStep];
+			t_real dCurK = vecK[iStep];
+			t_real dCurL = vecL[iStep];
+			t_real dCurE = vecE[iStep];
+
+			tp.AddTask(
+			[&reso, dCurH, dCurK, dCurL, dCurE, iNumNeutrons, iNumSampleSteps, this]()
+				-> std::pair<bool, t_real>
+			{
+				if(m_atStop.load()) return std::pair<bool, t_real>(false, 0.);
+
+				t_real dS = 0.;
+				t_real dhklE_mean[4] = {0., 0., 0., 0.};
+
+				if(iNumNeutrons == 0)
+				{	// if no neutrons are given, just plot the unconvoluted S(q,w)
+					dS += (*m_pSqw)(dCurH, dCurK, dCurL, dCurE);
+				}
+				else
+				{	// convolution
+					TASReso localreso = reso;
+					localreso.SetRandomSamplePos(iNumSampleSteps);
+					std::vector<ublas::vector<t_real>> vecNeutrons;
+
+					try
+					{
+						if(!localreso.SetHKLE(dCurH, dCurK, dCurL, dCurE))
+						{
+							std::ostringstream ostrErr;
+							ostrErr << "Invalid crystal position: (" <<
+								dCurH << " " << dCurK << " " << dCurL << ") rlu, "
+								<< dCurE << " meV.";
+							throw tl::Err(ostrErr.str().c_str());
+						}
+					}
+					catch(const std::exception& ex)
+					{
+						//QMessageBox::critical(this, "Error", ex.what());
+						tl::log_err(ex.what());
+						return std::pair<bool, t_real>(false, 0.);
+					}
+
+					Ellipsoid4d<t_real> elli =
+						localreso.GenerateMC(iNumNeutrons, vecNeutrons);
+
+					for(const ublas::vector<t_real>& vecHKLE : vecNeutrons)
+					{
+						if(m_atStop.load()) return std::pair<bool, t_real>(false, 0.);
+
+						dS += (*m_pSqw)(vecHKLE[0], vecHKLE[1], vecHKLE[2], vecHKLE[3]);
+
+						for(int i=0; i<4; ++i)
+							dhklE_mean[i] += vecHKLE[i];
+					}
+
+					dS /= t_real(iNumNeutrons*iNumSampleSteps);
+					for(int i=0; i<4; ++i)
+						dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
+
+					if(localreso.GetResoParams().flags & CALC_RESVOL)
+						dS *= localreso.GetResoResults().dResVol;
+					if(localreso.GetResoParams().flags & CALC_R0)
+						dS *= localreso.GetResoResults().dR0;
+				}
+				return std::pair<bool, t_real>(true, dS);
+			});
+		}
+
+		tp.StartTasks();
+
+		auto iterTask = tp.GetTasks().begin();
+		unsigned int iStep = 0;
+		for(auto &fut : lstFuts)
+		{
+			if(m_atStop.load()) break;
+
+			// deferred (in main thread), eval this task manually
+			if(iNumThreads == 0)
+			{
+				(*iterTask)();
+				++iterTask;
+			}
+
+			std::pair<bool, t_real> pairS = fut.get();
+			if(!pairS.first) break;
+			t_real dS = pairS.second;
+			if(tl::is_nan_or_inf(dS))
+			{
+				dS = t_real(0);
+				tl::log_warn("S(q,w) is invalid.");
+			}
+
+			ostrOut.precision(g_iPrec);
+			ostrOut << std::left << std::setw(g_iPrec*2) << vecH[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << vecK[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << vecL[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << vecE[iStep] << " "
+				<< std::left << std::setw(g_iPrec*2) << dS << "\n";
+
+			m_plotwrap2d->GetRaster()->SetPixel(iStep%iNumSteps, iStep/iNumSteps, t_real_qwt(dS));
+
+			bool bIsLastStep = (iStep == lstFuts.size()-1);
+
+			if(bLivePlots || bIsLastStep)
+			{
+				m_plotwrap2d->GetRaster()->SetZRange();
+
+				QMetaObject::invokeMethod(m_plotwrap2d.get(), "scaleColorBar", connty);
+				QMetaObject::invokeMethod(m_plotwrap2d.get(), "doUpdate", connty);
+			}
+
+			if(bLiveResults || bIsLastStep)
+			{
+				QMetaObject::invokeMethod(textResult, "setPlainText", connty,
+					Q_ARG(const QString&, QString(ostrOut.str().c_str())));
+			}
+
+			QMetaObject::invokeMethod(progress, "setValue", Q_ARG(int, iStep+1));
+			QMetaObject::invokeMethod(editStopTime2d, "setText",
+				Q_ARG(const QString&, QString(watch.GetEstStopTimeStr(t_real(iStep+1)/t_real(iNumSteps*iNumSteps)).c_str())));
+
+			++iStep;
+		}
+
+		ostrOut << "# ------------------------- EOF -------------------------\n";
+
+		QMetaObject::invokeMethod(textResult, "setPlainText", connty,
+			Q_ARG(const QString&, QString(ostrOut.str().c_str())));
+
+		watch.stop();
+		QMetaObject::invokeMethod(editStopTime2d, "setText",
+			Q_ARG(const QString&, QString(watch.GetStopTimeStr().c_str())));
+
+		fktEnableButtons();
+	};
+
+
+	if(bForceDeferred)
+		fkt();
+	else
+	{
+		if(m_pth) { if(m_pth->joinable()) m_pth->join(); delete m_pth; }
+		m_pth = new std::thread(std::move(fkt));
+	}
+}
+
+
+/**
+ * start 1d or 2d scan
+ */
+void ConvoDlg::Start()
+{
+	if(check2dMap->isChecked())
+		Start2D();
+	else
+		Start1D();
+}
 
 void ConvoDlg::Stop()
 {
 	m_atStop.store(true);
 }
 
+
+// -----------------------------------------------------------------------------
+
+
+void ConvoDlg::ShowFavourites()
+{
+	m_pFavDlg->show();
+	m_pFavDlg->activateWindow();
+}
+
+void ConvoDlg::UpdateCurFavPos()
+{
+	FavHklPos pos;
+	pos.dhstart = spinStartH->value();
+	pos.dkstart = spinStartK->value();
+	pos.dlstart = spinStartL->value();
+	pos.dEstart = spinStartE->value();
+	pos.dhstop = spinStopH->value();
+	pos.dkstop = spinStopK->value();
+	pos.dlstop = spinStopL->value();
+	pos.dEstop = spinStopE->value();
+
+	m_pFavDlg->UpdateCurPos(pos);
+}
+
+void ConvoDlg::ChangePos(const struct FavHklPos& pos)
+{
+	spinStartH->setValue(pos.dhstart);
+	spinStartK->setValue(pos.dkstart);
+	spinStartL->setValue(pos.dlstart);
+	spinStartE->setValue(pos.dEstart);
+	spinStopH->setValue(pos.dhstop);
+	spinStopK->setValue(pos.dkstop);
+	spinStopL->setValue(pos.dlstop);
+	spinStopE->setValue(pos.dEstop);
+}
+
+
+// -----------------------------------------------------------------------------
+
+
+static void SwapSpin(QDoubleSpinBox* pS1, QDoubleSpinBox* pS2)
+{
+	double dVal = pS1->value();
+	pS1->setValue(pS2->value());
+	pS2->setValue(dVal);
+}
+
+void ConvoDlg::ChangeHK()
+{
+	SwapSpin(spinStartH, spinStartK);
+	SwapSpin(spinStopH, spinStopK);
+}
+void ConvoDlg::ChangeHL()
+{
+	SwapSpin(spinStartH, spinStartL);
+	SwapSpin(spinStopH, spinStopL);
+}
+void ConvoDlg::ChangeKL()
+{
+	SwapSpin(spinStartK, spinStartL);
+	SwapSpin(spinStopK, spinStopL);
+}
+
+
+// -----------------------------------------------------------------------------
+
+void ConvoDlg::scanCheckToggled(bool bChecked)
+{
+	if(bChecked)
+		scanFileChanged(editScan->text());
+}
 
 void ConvoDlg::scanFileChanged(const QString& qstrFile)
 {
@@ -647,160 +1179,6 @@ void ConvoDlg::scaleChanged()
 
 // -----------------------------------------------------------------------------
 
-void ConvoDlg::browseCrysFiles()
-{
-	QFileDialog::Option fileopt = QFileDialog::Option(0);
-	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
-		fileopt = QFileDialog::DontUseNativeDialog;
-
-	QString strDirLast = ".";
-	if(m_pSett)
-		strDirLast = m_pSett->value("convo/last_dir_crys", ".").toString();
-	QString strFile = QFileDialog::getOpenFileName(this,
-		"Open Crystal File...", strDirLast, "Takin files (*.taz *.TAZ)",
-		nullptr, fileopt);
-	if(strFile == "")
-		return;
-
-	editCrys->setText(strFile);
-
-	std::string strDir = tl::get_dir(strFile.toStdString());
-	if(m_pSett)
-		m_pSett->setValue("convo/last_dir_crys", QString(strDir.c_str()));
-}
-
-void ConvoDlg::browseResoFiles()
-{
-	QFileDialog::Option fileopt = QFileDialog::Option(0);
-	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
-		fileopt = QFileDialog::DontUseNativeDialog;
-
-	QString strDirLast = ".";
-	if(m_pSett)
-		strDirLast = m_pSett->value("convo/last_dir_reso", ".").toString();
-	QString strFile = QFileDialog::getOpenFileName(this,
-		"Open Resolution File...", strDirLast, "Takin files (*.taz *.TAZ)",
-		nullptr, fileopt);
-	if(strFile == "")
-		return;
-
-	editRes->setText(strFile);
-
-	std::string strDir = tl::get_dir(strFile.toStdString());
-	if(m_pSett)
-		m_pSett->setValue("convo/last_dir_reso", QString(strDir.c_str()));
-}
-
-void ConvoDlg::browseSqwFiles()
-{
-	QFileDialog::Option fileopt = QFileDialog::Option(0);
-	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
-		fileopt = QFileDialog::DontUseNativeDialog;
-
-	QString strDirLast = ".";
-	if(m_pSett)
-		strDirLast = m_pSett->value("convo/last_dir_sqw", ".").toString();
-	QString strFile = QFileDialog::getOpenFileName(this,
-		"Open S(q,w) File...", strDirLast, "All S(q,w) files (*.dat *.DAT *.py *.PY *.jl *.JL)",
-		nullptr, fileopt);
-	if(strFile == "")
-		return;
-
-	editSqw->setText(strFile);
-
-	std::string strDir = tl::get_dir(strFile.toStdString());
-	if(m_pSett)
-		m_pSett->setValue("convo/last_dir_sqw", QString(strDir.c_str()));
-}
-
-void ConvoDlg::browseScanFiles()
-{
-	QFileDialog::Option fileopt = QFileDialog::Option(0);
-	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
-		fileopt = QFileDialog::DontUseNativeDialog;
-
-	QString strDirLast = ".";
-	if(m_pSett)
-		strDirLast = m_pSett->value("convo/last_dir_scan", ".").toString();
-	QString strFile = QFileDialog::getOpenFileName(this,
-		"Open S(q,w) File...", strDirLast, "All scan files (*.dat *.DAT *.scn *.SCN)",
-		nullptr, fileopt);
-	if(strFile == "")
-		return;
-
-	editScan->setText(strFile);
-
-	std::string strDir = tl::get_dir(strFile.toStdString());
-	if(m_pSett)
-		m_pSett->setValue("convo/last_dir_scan", QString(strDir.c_str()));
-}
-
-
-// -----------------------------------------------------------------------------
-
-
-void ConvoDlg::ShowFavourites()
-{
-	m_pFavDlg->show();
-	m_pFavDlg->activateWindow();
-}
-
-void ConvoDlg::UpdateCurFavPos()
-{
-	FavHklPos pos;
-	pos.dhstart = spinStartH->value();
-	pos.dkstart = spinStartK->value();
-	pos.dlstart = spinStartL->value();
-	pos.dEstart = spinStartE->value();
-	pos.dhstop = spinStopH->value();
-	pos.dkstop = spinStopK->value();
-	pos.dlstop = spinStopL->value();
-	pos.dEstop = spinStopE->value();
-
-	m_pFavDlg->UpdateCurPos(pos);
-}
-
-void ConvoDlg::ChangePos(const struct FavHklPos& pos)
-{
-	spinStartH->setValue(pos.dhstart);
-	spinStartK->setValue(pos.dkstart);
-	spinStartL->setValue(pos.dlstart);
-	spinStartE->setValue(pos.dEstart);
-	spinStopH->setValue(pos.dhstop);
-	spinStopK->setValue(pos.dkstop);
-	spinStopL->setValue(pos.dlstop);
-	spinStopE->setValue(pos.dEstop);
-}
-
-// -----------------------------------------------------------------------------
-
-
-static void SwapSpin(QDoubleSpinBox* pS1, QDoubleSpinBox* pS2)
-{
-	double dVal = pS1->value();
-	pS1->setValue(pS2->value());
-	pS2->setValue(dVal);
-}
-
-void ConvoDlg::ChangeHK()
-{
-	SwapSpin(spinStartH, spinStartK);
-	SwapSpin(spinStopH, spinStopK);
-}
-void ConvoDlg::ChangeHL()
-{
-	SwapSpin(spinStartH, spinStartL);
-	SwapSpin(spinStopH, spinStopL);
-}
-void ConvoDlg::ChangeKL()
-{
-	SwapSpin(spinStartK, spinStartL);
-	SwapSpin(spinStopK, spinStopL);
-}
-
-
-// -----------------------------------------------------------------------------
-
 
 void ConvoDlg::showSqwParamDlg()
 {
@@ -808,111 +1186,18 @@ void ConvoDlg::showSqwParamDlg()
 	m_pSqwParamDlg->activateWindow();
 }
 
-void ConvoDlg::LoadSettings()
+
+#include "libs/version.h"
+
+void ConvoDlg::ShowAboutDlg()
 {
-	if(m_pSett)
-	{
-		if(m_pSett->contains("monteconvo/geo"))
-			restoreGeometry(m_pSett->value("monteconvo/geo").toByteArray());
+	std::ostringstream ostrAbout;
+	ostrAbout << "Takin/Monteconvo version " << TAKIN_VER << ".\n";
+	ostrAbout << "Written by Tobias Weber <tobias.weber@tum.de>,\n";
+	ostrAbout << "2015 - 2016.\n";
 
-		if(m_pSett->contains("monteconvo/algo"))
-			comboAlgo->setCurrentIndex(m_pSett->value("monteconvo/algo").toInt());
-		if(m_pSett->contains("monteconvo/fixedk"))
-			comboFixedK->setCurrentIndex(m_pSett->value("monteconvo/fixedk").toInt());
-		if(m_pSett->contains("monteconvo/mono_foc"))
-			comboFocMono->setCurrentIndex(m_pSett->value("monteconvo/mono_foc").toInt());
-		if(m_pSett->contains("monteconvo/ana_foc"))
-			comboFocAna->setCurrentIndex(m_pSett->value("monteconvo/ana_foc").toInt());
-		if(m_pSett->contains("monteconvo/sqw"))
-			comboSqw->setCurrentIndex(comboSqw->findData(m_pSett->value("monteconvo/sqw").toString()));
-
-		if(m_pSett->contains("monteconvo/crys"))
-			editCrys->setText(m_pSett->value("monteconvo/crys").toString());
-		if(m_pSett->contains("monteconvo/instr"))
-			editRes->setText(m_pSett->value("monteconvo/instr").toString());
-		if(m_pSett->contains("monteconvo/sqw_conf"))
-			editSqw->setText(m_pSett->value("monteconvo/sqw_conf").toString());
-		if(m_pSett->contains("monteconvo/scanfile"))
-			editScan->setText(m_pSett->value("monteconvo/scanfile").toString());
-
-		if(m_pSett->contains("monteconvo/h_from"))
-			spinStartH->setValue(m_pSett->value("monteconvo/h_from").toDouble());
-		if(m_pSett->contains("monteconvo/k_from"))
-			spinStartK->setValue(m_pSett->value("monteconvo/k_from").toDouble());
-		if(m_pSett->contains("monteconvo/l_from"))
-			spinStartL->setValue(m_pSett->value("monteconvo/l_from").toDouble());
-		if(m_pSett->contains("monteconvo/E_from"))
-			spinStartE->setValue(m_pSett->value("monteconvo/E_from").toDouble());
-		if(m_pSett->contains("monteconvo/h_to"))
-			spinStopH->setValue(m_pSett->value("monteconvo/h_to").toDouble());
-		if(m_pSett->contains("monteconvo/k_to"))
-			spinStopK->setValue(m_pSett->value("monteconvo/k_to").toDouble());
-		if(m_pSett->contains("monteconvo/l_to"))
-			spinStopL->setValue(m_pSett->value("monteconvo/l_to").toDouble());
-		if(m_pSett->contains("monteconvo/E_to"))
-			spinStopE->setValue(m_pSett->value("monteconvo/E_to").toDouble());
-
-		if(m_pSett->contains("monteconvo/S_scale"))
-			editScale->setText(m_pSett->value("monteconvo/S_scale").toString());
-		if(m_pSett->contains("monteconvo/S_offs"))
-			editOffs->setText(m_pSett->value("monteconvo/S_offs").toString());
-
-		if(m_pSett->contains("monteconvo/kfix"))
-			spinKfix->setValue(m_pSett->value("monteconvo/kfix").toDouble());
-		if(m_pSett->contains("monteconvo/neutron_count"))
-			spinNeutrons->setValue(m_pSett->value("monteconvo/neutron_count").toInt());
-		if(m_pSett->contains("monteconvo/sample_step_count"))
-			spinSampleSteps->setValue(m_pSett->value("monteconvo/sample_step_count").toInt());
-		if(m_pSett->contains("monteconvo/step_count"))
-			spinStepCnt->setValue(m_pSett->value("monteconvo/step_count").toInt());
-	}
+	QMessageBox::about(this, "About Monteconvo", ostrAbout.str().c_str());
 }
 
-void ConvoDlg::showEvent(QShowEvent *pEvt)
-{
-	//LoadSettings();
-	QDialog::showEvent(pEvt);
-}
-
-void ConvoDlg::ButtonBoxClicked(QAbstractButton *pBtn)
-{
-	if(pBtn == buttonBox->button(QDialogButtonBox::Close))
-	{
-		if(m_pSett)
-		{
-			m_pSett->setValue("monteconvo/geo", saveGeometry());
-
-			m_pSett->setValue("monteconvo/algo", comboAlgo->currentIndex());
-			m_pSett->setValue("monteconvo/fixedk", comboFixedK->currentIndex());
-			m_pSett->setValue("monteconvo/mono_foc", comboFocMono->currentIndex());
-			m_pSett->setValue("monteconvo/ana_foc", comboFocAna->currentIndex());
-			m_pSett->setValue("monteconvo/sqw", comboSqw->itemData(comboSqw->currentIndex()).toString());
-
-			m_pSett->setValue("monteconvo/crys", editCrys->text());
-			m_pSett->setValue("monteconvo/instr", editRes->text());
-			m_pSett->setValue("monteconvo/sqw_conf", editSqw->text());
-			m_pSett->setValue("monteconvo/scanfile", editScan->text());
-
-			m_pSett->setValue("monteconvo/h_from", spinStartH->value());
-			m_pSett->setValue("monteconvo/k_from", spinStartK->value());
-			m_pSett->setValue("monteconvo/l_from", spinStartL->value());
-			m_pSett->setValue("monteconvo/E_from", spinStartE->value());
-			m_pSett->setValue("monteconvo/h_to", spinStopH->value());
-			m_pSett->setValue("monteconvo/k_to", spinStopK->value());
-			m_pSett->setValue("monteconvo/l_to", spinStopL->value());
-			m_pSett->setValue("monteconvo/E_to", spinStopE->value());
-
-			m_pSett->setValue("monteconvo/S_scale", editScale->text());
-			m_pSett->setValue("monteconvo/S_offs", editOffs->text());
-
-			m_pSett->setValue("monteconvo/kfix", spinKfix->value());
-			m_pSett->setValue("monteconvo/neutron_count", spinNeutrons->value());
-			m_pSett->setValue("monteconvo/sample_step_count", spinSampleSteps->value());
-			m_pSett->setValue("monteconvo/step_count", spinStepCnt->value());
-		}
-
-		QDialog::accept();
-	}
-}
 
 #include "ConvoDlg.moc"

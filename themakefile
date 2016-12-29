@@ -13,8 +13,8 @@ USE_IOSTR = 1
 USE_BOOST_REGEX = 0
 USE_GIL = 1
 USE_PY = 1
-USE_JL = 0
-USE_PLUGINS = 0
+USE_JL = 1
+USE_PLUGINS = 1
 USE_FADDEEVA = 0
 USE_CPP11_ABI = 1
 
@@ -31,6 +31,7 @@ BOOST_SUFFIX =
 #BOOST_SUFFIX = -mt
 #QWT5_SUFFIX = 
 QWT5_SUFFIX = -qt4
+#QWT5_SUFFIX = 5-qt4
 
 # -----------------------------------------------------------------------------
 
@@ -125,7 +126,7 @@ ifeq ($(QWT_VER), 6)
 		QWT_LIB = -L/usr/local/qwt/lib -lqwt
 	endif
 else
-	QWT_INC = -I/usr/include/qwt5 -I/usr/include/qwt-qt4 -I/usr/local/qwt/include
+	QWT_INC = -I/usr/include/qwt5 -I/usr/include/qwt-qt4 -I/usr/include/qwt5-qt4 -I/usr/local/qwt/include
 	QWT_LIB = -L/usr/local/qwt/lib -lqwt${QWT5_SUFFIX}
 endif
 
@@ -254,15 +255,15 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/SpurionDlg.o obj/NeutronDlg.o \
 	obj/crystalsys.o obj/formfact.o \
 	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
-	obj/ResoDlg.o obj/loadinstr.o obj/recent.o obj/globals.o \
-	obj/globals_qt.o obj/qthelper.o \
+	obj/ResoDlg.o obj/ResoDlg_file.o obj/loadinstr.o obj/recent.o obj/globals.o \
+	obj/globals_qt.o obj/qthelper.o obj/qwthelper.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} \
-	obj/tasreso.o obj/ConvoDlg.o obj/SqwParamDlg.o \
+	obj/tasreso.o obj/ConvoDlg.o obj/ConvoDlg_file.o obj/SqwParamDlg.o \
 	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
 	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o
 
 OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
-	obj/qthelper.o obj/globals.o obj/globals_qt.o
+	obj/qthelper.o obj/qwthelper.o obj/globals.o obj/globals_qt.o
 
 OBJ_MONTECONVO = obj/log.o obj/debug.o obj/sqw.o obj/sqwbase.o \
 	obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} obj/cn.o obj/pop.o obj/eck.o obj/viol.o \
@@ -276,12 +277,13 @@ OBJ_CONVOSERIES = obj/scanseries.o obj/log.o obj/debug.o
 
 OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 	obj/spec_char.o obj/reso_res_main.o \
-	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o obj/ResoDlg.o \
+	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
+	obj/ResoDlg.o obj/ResoDlg_file.o \
 	obj/linalg2.o obj/globals.o obj/globals_qt.o
 
 OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
-	obj/spec_char.o obj/FitParamDlg.o \
+	obj/qwthelper.o obj/spec_char.o obj/FitParamDlg.o \
 	obj/globals.o obj/globals_qt.o
 
 OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o \
@@ -291,7 +293,7 @@ OBJ_GENTAB = obj/spacegroup_clp.o obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
 	obj/debug.o
 
 OBJ_SFACT = obj/sfact.o obj/spacegroup_clp.o obj/crystalsys_noqt.o obj/globals.o \
-	obj/formfact.o obj/log.o obj/debug.o
+	obj/formfact.o obj/log.o obj/debug.o obj/rand.o
 
 
 ifeq ($(USE_3D), 1)
@@ -332,7 +334,8 @@ monteconvo: ${OBJ_MONTECONVO} obj/globals.o obj/mconv_main.o
 		${BASIC_LIBS} ${QT_LIB} ${PY_LIBS} ${JL_LIBS} ${LAPACK_LIBS} ${DL_LIBS} ${STD_LIBS}
 	${STRIP} monteconvo
 
-xmonteconvo: ${OBJ_MONTECONVO} obj/xmconv_main.o obj/ConvoDlg.o obj/FavDlg.o obj/qthelper.o \
+xmonteconvo: ${OBJ_MONTECONVO} obj/xmconv_main.o obj/ConvoDlg.o obj/ConvoDlg_file.o\
+	obj/FavDlg.o obj/qthelper.o obj/qwthelper.o \
 	obj/globals.o obj/globals_qt.o obj/SqwParamDlg.o obj/convo_scan.o obj/loadinstr.o \
 	obj/spec_char.o
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/xmonteconvo $+ \
@@ -430,6 +433,8 @@ obj/globals_qt.o: libs/globals_qt.cpp libs/globals_qt.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/qthelper.o: libs/qthelper.cpp libs/qthelper.h
 	${CC} ${FLAGS} -c -o $@ $<
+obj/qwthelper.o: libs/qwthelper.cpp libs/qwthelper.h
+	${CC} ${FLAGS} -c -o $@ $<
 obj/PowderDlg.o: dialogs/PowderDlg.cpp dialogs/PowderDlg.h tlibs/math/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/DispDlg.o: dialogs/DispDlg.cpp dialogs/DispDlg.h tlibs/math/nn.h
@@ -506,7 +511,11 @@ obj/simple.o: tools/res/simple.cpp tools/res/simple.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/ResoDlg.o: tools/res/ResoDlg.cpp tools/res/ResoDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
+obj/ResoDlg_file.o: tools/res/ResoDlg_file.cpp tools/res/ResoDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
 obj/ConvoDlg.o: tools/monteconvo/ConvoDlg.cpp tools/monteconvo/ConvoDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/ConvoDlg_file.o: tools/monteconvo/ConvoDlg_file.cpp tools/monteconvo/ConvoDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/SqwParamDlg.o: tools/monteconvo/SqwParamDlg.cpp tools/monteconvo/SqwParamDlg.h
 	${CC} ${FLAGS} -c -o $@ $<

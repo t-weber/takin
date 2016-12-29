@@ -19,6 +19,7 @@
 #include <qwt_plot_curve.h>
 
 #include "libs/qthelper.h"
+#include "libs/qwthelper.h"
 #include "libs/globals.h"
 
 

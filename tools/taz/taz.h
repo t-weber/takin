@@ -176,6 +176,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 	protected:
 		void InitReso();
 		void InitGoto();
+		void InitResoConv();
 
 		void RotatePlane(unsigned iAxis, t_real_glob dAngle);
 

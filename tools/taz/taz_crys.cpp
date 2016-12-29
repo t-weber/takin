@@ -679,11 +679,15 @@ void TazDlg::ShowResoEllipses()
 	m_pEllipseDlg->activateWindow();
 }
 
-void TazDlg::ShowResoConv()
+void TazDlg::InitResoConv()
 {
 	if(!m_pConvoDlg)
 		m_pConvoDlg = new ConvoDlg(this, &m_settings);
+}
 
+void TazDlg::ShowResoConv()
+{
+	InitResoConv();
 	m_pConvoDlg->show();
 	m_pConvoDlg->activateWindow();
 }

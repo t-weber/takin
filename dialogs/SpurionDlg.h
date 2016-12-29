@@ -15,6 +15,7 @@
 #include "ui/ui_spurions.h"
 #include "RecipParamDlg.h"
 #include "libs/qthelper.h"
+#include "libs/qwthelper.h"
 #include "libs/globals.h"
 
 

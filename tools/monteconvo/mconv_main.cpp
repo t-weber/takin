@@ -1,4 +1,4 @@
-/*
+/**
  * monte carlo convolution tool
  * @author tweber
  * @date jun-2015

@@ -16,6 +16,7 @@
 
 #include "tlibs/file/loadinstr.h"
 #include "libs/qthelper.h"
+#include "libs/qwthelper.h"
 #include "libs/globals.h"
 #include "ui/ui_scanviewer.h"
 #include "FitParamDlg.h"

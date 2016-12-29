@@ -10,6 +10,8 @@ bin/*
 !bin/.dir
 obj/*
 !obj/.dir
+plugins/*
+!plugins/.dir
 perf.data
 perf.data.old
 gmon.out

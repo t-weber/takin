@@ -6,22 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>513</width>
-    <height>561</height>
+    <width>505</width>
+    <height>559</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Convolution</string>
+   <string>Resolution Convolution</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="margin">
-    <number>8</number>
+    <number>6</number>
    </property>
    <property name="spacing">
-    <number>6</number>
+    <number>4</number>
    </property>
    <item row="1" column="0">
     <widget class="QProgressBar" name="progress">
@@ -33,22 +33,6 @@
      </property>
      <property name="value">
       <number>0</number>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
      </property>
     </widget>
    </item>
@@ -72,13 +56,16 @@
      </property>
      <widget class="QWidget" name="tabSettings">
       <attribute name="title">
-       <string>Settings</string>
+       <string>Configuration</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_6">
-       <property name="margin">
-        <number>4</number>
+       <property name="horizontalSpacing">
+        <number>2</number>
        </property>
-       <property name="spacing">
+       <property name="verticalSpacing">
+        <number>0</number>
+       </property>
+       <property name="margin">
         <number>2</number>
        </property>
        <item row="1" column="0">
@@ -91,13 +78,19 @@
            <number>4</number>
           </property>
           <property name="verticalSpacing">
-           <number>2</number>
+           <number>0</number>
           </property>
           <property name="margin">
            <number>4</number>
           </property>
           <item row="2" column="0">
            <widget class="QLabel" name="label_12">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>M. Focus:</string>
             </property>
@@ -105,6 +98,12 @@
           </item>
           <item row="2" column="3">
            <widget class="QLabel" name="label_13">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>A. Focus:</string>
             </property>
@@ -114,7 +113,7 @@
            <widget class="QComboBox" name="comboFocMono">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>2</horstretch>
+              <horstretch>4</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -144,7 +143,7 @@
            <widget class="QComboBox" name="comboAlgo">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>2</horstretch>
+              <horstretch>4</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -177,7 +176,7 @@
            <widget class="QComboBox" name="comboFixedK">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>2</horstretch>
+              <horstretch>4</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -211,6 +210,12 @@
           </item>
           <item row="1" column="3">
            <widget class="QLabel" name="label_11">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>k_fix (1/Å):</string>
             </property>
@@ -231,7 +236,7 @@
              <string/>
             </property>
             <property name="minimum">
-             <number>1</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>999999999</number>
@@ -275,6 +280,12 @@
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_10">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Mode:</string>
             </property>
@@ -364,7 +375,7 @@
            <number>4</number>
           </property>
           <property name="verticalSpacing">
-           <number>2</number>
+           <number>0</number>
           </property>
           <property name="margin">
            <number>4</number>
@@ -441,7 +452,7 @@
            <number>4</number>
           </property>
           <property name="verticalSpacing">
-           <number>2</number>
+           <number>0</number>
           </property>
           <property name="margin">
            <number>4</number>
@@ -541,7 +552,7 @@
            <number>4</number>
           </property>
           <property name="verticalSpacing">
-           <number>2</number>
+           <number>0</number>
           </property>
           <property name="margin">
            <number>4</number>
@@ -577,19 +588,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>To:</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spinStartL">
             <property name="sizePolicy">
@@ -618,90 +616,24 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QDoubleSpinBox" name="spinStartE">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>E (meV)</string>
-            </property>
-            <property name="prefix">
-             <string>E = </string>
-            </property>
-            <property name="decimals">
-             <number>4</number>
-            </property>
-            <property name="minimum">
-             <double>-9999.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>9999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
+          <item row="3" column="3">
+           <widget class="QPushButton" name="btnActions">
+            <property name="text">
+             <string>Actions</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QDoubleSpinBox" name="spinStopL">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>l (rlu)</string>
-            </property>
-            <property name="prefix">
-             <string>l = </string>
-            </property>
-            <property name="decimals">
-             <number>4</number>
-            </property>
-            <property name="minimum">
-             <double>-9999.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>9999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
+          <item row="3" column="4">
+           <widget class="QPushButton" name="btnFav">
+            <property name="text">
+             <string>Positions...</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QDoubleSpinBox" name="spinStopE">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>E (meV)</string>
-            </property>
-            <property name="prefix">
-             <string>E = </string>
-            </property>
-            <property name="decimals">
-             <number>4</number>
-            </property>
-            <property name="minimum">
-             <double>-9999.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>9999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>10.000000000000000</double>
+          <item row="3" column="2">
+           <widget class="QCheckBox" name="check2dMap">
+            <property name="text">
+             <string>2D Map</string>
             </property>
            </widget>
           </item>
@@ -801,6 +733,106 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>To:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QDoubleSpinBox" name="spinStartE">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>E (meV)</string>
+            </property>
+            <property name="prefix">
+             <string>E = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QDoubleSpinBox" name="spinStopL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>l (rlu)</string>
+            </property>
+            <property name="prefix">
+             <string>l = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QDoubleSpinBox" name="spinStopE">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>E (meV)</string>
+            </property>
+            <property name="prefix">
+             <string>E = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="sizePolicy">
@@ -814,7 +846,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QSpinBox" name="spinStepCnt">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -833,7 +865,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_5">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -846,17 +878,119 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="spinStopH2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="prefix">
+             <string>h = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>3.800000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QDoubleSpinBox" name="spinStopK2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="prefix">
+             <string>k = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>4.200000000000000</double>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="3">
-           <widget class="QPushButton" name="btnActions">
-            <property name="text">
-             <string>Actions</string>
+           <widget class="QDoubleSpinBox" name="spinStopL2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="prefix">
+             <string>l = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
             </property>
            </widget>
           </item>
           <item row="2" column="4">
-           <widget class="QPushButton" name="btnFav">
+           <widget class="QDoubleSpinBox" name="spinStopE2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="prefix">
+             <string>E = </string>
+            </property>
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-9999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_18">
             <property name="text">
-             <string>Positions...</string>
+             <string>To 2:</string>
             </property>
            </widget>
           </item>
@@ -900,32 +1034,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>348</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="btnSaveResult">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Save...</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabPlot">
@@ -933,11 +1041,14 @@
        <string>Plot</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <property name="margin">
+       <property name="horizontalSpacing">
         <number>4</number>
        </property>
-       <property name="spacing">
-        <number>6</number>
+       <property name="verticalSpacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>4</number>
        </property>
        <item row="0" column="0" colspan="4">
         <widget class="QwtPlot" name="plot">
@@ -1013,6 +1124,59 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabPlot2d">
+      <attribute name="title">
+       <string>2D Plot</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_9">
+       <property name="horizontalSpacing">
+        <number>4</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>4</number>
+       </property>
+       <item row="0" column="0" colspan="4">
+        <widget class="QwtPlot" name="plot2d"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Start:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="editStartTime2d">
+         <property name="toolTip">
+          <string>Start time.</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Stop:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="editStopTime2d">
+         <property name="toolTip">
+          <string>Estimated stop time.</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item row="1" column="2">
@@ -1068,14 +1232,17 @@
   <tabstop>spinStopK</tabstop>
   <tabstop>spinStopL</tabstop>
   <tabstop>spinStopE</tabstop>
+  <tabstop>spinStopH2</tabstop>
+  <tabstop>spinStopK2</tabstop>
+  <tabstop>spinStopL2</tabstop>
+  <tabstop>spinStopE2</tabstop>
   <tabstop>spinStepCnt</tabstop>
+  <tabstop>check2dMap</tabstop>
   <tabstop>btnActions</tabstop>
   <tabstop>btnFav</tabstop>
   <tabstop>btnStart</tabstop>
   <tabstop>btnStop</tabstop>
-  <tabstop>buttonBox</tabstop>
   <tabstop>textResult</tabstop>
-  <tabstop>btnSaveResult</tabstop>
   <tabstop>editScale</tabstop>
   <tabstop>editOffs</tabstop>
   <tabstop>editStartTime</tabstop>
@@ -1083,38 +1250,6 @@
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>ConvoDlg</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>ConvoDlg</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>checkScan</sender>
    <signal>toggled(bool)</signal>
@@ -1304,6 +1439,70 @@
     <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>check2dMap</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinStopH2</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>222</x>
+     <y>518</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>114</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>check2dMap</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinStopK2</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>222</x>
+     <y>518</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>222</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>check2dMap</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinStopL2</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>222</x>
+     <y>518</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>330</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>check2dMap</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinStopE2</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>222</x>
+     <y>518</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>438</x>
+     <y>488</y>
     </hint>
    </hints>
   </connection>

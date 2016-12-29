@@ -209,32 +209,6 @@ SqwBase* SqwKdTree::shallow_copy() const
 
 //------------------------------------------------------------------------------
 
-template<class t_vec>
-static std::string vec_to_str(const t_vec& vec)
-{
-	std::ostringstream ostr;
-	for(const typename t_vec::value_type& t : vec)
-		ostr << t << " ";
-	return ostr.str();
-}
-
-template<class t_vec>
-static t_vec str_to_vec(const std::string& str)
-{
-	typedef typename t_vec::value_type T;
-
-	std::vector<T> vec0;
-	tl::get_tokens<T, std::string, std::vector<T>>(str, " \t", vec0);
-
-	t_vec vec(vec0.size());
-	for(unsigned int i=0; i<vec0.size(); ++i)
-		vec[i] = vec0[i];
-	return vec;
-}
-
-
-//------------------------------------------------------------------------------
-
 
 t_real SqwPhonon::disp(t_real dq, t_real da, t_real df)
 {
@@ -504,34 +478,34 @@ std::vector<SqwBase::t_var> SqwPhonon::GetVars() const
 
 	vecVars.push_back(SqwBase::t_var{"num_qs", "uint", tl::var_to_str(m_iNumqs)});
 	vecVars.push_back(SqwBase::t_var{"num_arc", "uint", tl::var_to_str(m_iNumArc)});
-	vecVars.push_back(SqwBase::t_var{"arc_max", "t_real", tl::var_to_str(m_dArcMax)});
+	vecVars.push_back(SqwBase::t_var{"arc_max", "real", tl::var_to_str(m_dArcMax)});
 
 	vecVars.push_back(SqwBase::t_var{"G", "vector", vec_to_str(m_vecBragg)});
 	vecVars.push_back(SqwBase::t_var{"TA1", "vector", vec_to_str(m_vecTA1)});
 	vecVars.push_back(SqwBase::t_var{"TA2", "vector", vec_to_str(m_vecTA2)});
 
-	vecVars.push_back(SqwBase::t_var{"LA_amp", "t_real", tl::var_to_str(m_dLA_amp)});
-	vecVars.push_back(SqwBase::t_var{"LA_freq", "t_real", tl::var_to_str(m_dLA_freq)});
-	vecVars.push_back(SqwBase::t_var{"LA_E_HWHM", "t_real", tl::var_to_str(m_dLA_E_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"LA_q_HWHM", "t_real", tl::var_to_str(m_dLA_q_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"LA_S0", "t_real", tl::var_to_str(m_dLA_S0)});
+	vecVars.push_back(SqwBase::t_var{"LA_amp", "real", tl::var_to_str(m_dLA_amp)});
+	vecVars.push_back(SqwBase::t_var{"LA_freq", "real", tl::var_to_str(m_dLA_freq)});
+	vecVars.push_back(SqwBase::t_var{"LA_E_HWHM", "real", tl::var_to_str(m_dLA_E_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"LA_q_HWHM", "real", tl::var_to_str(m_dLA_q_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"LA_S0", "real", tl::var_to_str(m_dLA_S0)});
 
-	vecVars.push_back(SqwBase::t_var{"TA1_amp", "t_real", tl::var_to_str(m_dTA1_amp)});
-	vecVars.push_back(SqwBase::t_var{"TA1_freq", "t_real", tl::var_to_str(m_dTA1_freq)});
-	vecVars.push_back(SqwBase::t_var{"TA1_E_HWHM", "t_real", tl::var_to_str(m_dTA1_E_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"TA1_q_HWHM", "t_real", tl::var_to_str(m_dTA1_q_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"TA1_S0", "t_real", tl::var_to_str(m_dTA1_S0)});
+	vecVars.push_back(SqwBase::t_var{"TA1_amp", "real", tl::var_to_str(m_dTA1_amp)});
+	vecVars.push_back(SqwBase::t_var{"TA1_freq", "real", tl::var_to_str(m_dTA1_freq)});
+	vecVars.push_back(SqwBase::t_var{"TA1_E_HWHM", "real", tl::var_to_str(m_dTA1_E_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"TA1_q_HWHM", "real", tl::var_to_str(m_dTA1_q_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"TA1_S0", "real", tl::var_to_str(m_dTA1_S0)});
 
-	vecVars.push_back(SqwBase::t_var{"TA2_amp", "t_real", tl::var_to_str(m_dTA2_amp)});
-	vecVars.push_back(SqwBase::t_var{"TA2_freq", "t_real", tl::var_to_str(m_dTA2_freq)});
-	vecVars.push_back(SqwBase::t_var{"TA2_E_HWHM", "t_real", tl::var_to_str(m_dTA2_E_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"TA2_q_HWHM", "t_real", tl::var_to_str(m_dTA2_q_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"TA2_S0", "t_real", tl::var_to_str(m_dTA2_S0)});
+	vecVars.push_back(SqwBase::t_var{"TA2_amp", "real", tl::var_to_str(m_dTA2_amp)});
+	vecVars.push_back(SqwBase::t_var{"TA2_freq", "real", tl::var_to_str(m_dTA2_freq)});
+	vecVars.push_back(SqwBase::t_var{"TA2_E_HWHM", "real", tl::var_to_str(m_dTA2_E_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"TA2_q_HWHM", "real", tl::var_to_str(m_dTA2_q_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"TA2_S0", "real", tl::var_to_str(m_dTA2_S0)});
 
-	vecVars.push_back(SqwBase::t_var{"inc_amp", "t_real", tl::var_to_str(m_dIncAmp)});
-	vecVars.push_back(SqwBase::t_var{"inc_sig", "t_real", tl::var_to_str(m_dIncSig)});
+	vecVars.push_back(SqwBase::t_var{"inc_amp", "real", tl::var_to_str(m_dIncAmp)});
+	vecVars.push_back(SqwBase::t_var{"inc_sig", "real", tl::var_to_str(m_dIncSig)});
 
-	vecVars.push_back(SqwBase::t_var{"T", "t_real", tl::var_to_str(m_dT)});
+	vecVars.push_back(SqwBase::t_var{"T", "real", tl::var_to_str(m_dT)});
 
 	return vecVars;
 }
@@ -810,16 +784,16 @@ std::vector<SqwBase::t_var> SqwMagnon::GetVars() const
 	vecVars.push_back(SqwBase::t_var{"G", "vector", vec_to_str(m_vecBragg)});
 	vecVars.push_back(SqwBase::t_var{"disp", "uint", tl::var_to_str(m_iWhichDisp)});
 
-	vecVars.push_back(SqwBase::t_var{"D", "t_real", tl::var_to_str(m_dD)});
-	vecVars.push_back(SqwBase::t_var{"offs", "t_real", tl::var_to_str(m_dOffs)});
-	vecVars.push_back(SqwBase::t_var{"E_HWHM", "t_real", tl::var_to_str(m_dE_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"q_HWHM", "t_real", tl::var_to_str(m_dq_HWHM)});
-	vecVars.push_back(SqwBase::t_var{"S0", "t_real", tl::var_to_str(m_dS0)});
+	vecVars.push_back(SqwBase::t_var{"D", "real", tl::var_to_str(m_dD)});
+	vecVars.push_back(SqwBase::t_var{"offs", "real", tl::var_to_str(m_dOffs)});
+	vecVars.push_back(SqwBase::t_var{"E_HWHM", "real", tl::var_to_str(m_dE_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"q_HWHM", "real", tl::var_to_str(m_dq_HWHM)});
+	vecVars.push_back(SqwBase::t_var{"S0", "real", tl::var_to_str(m_dS0)});
 
-	vecVars.push_back(SqwBase::t_var{"inc_amp", "t_real", tl::var_to_str(m_dIncAmp)});
-	vecVars.push_back(SqwBase::t_var{"inc_sig", "t_real", tl::var_to_str(m_dIncSig)});
+	vecVars.push_back(SqwBase::t_var{"inc_amp", "real", tl::var_to_str(m_dIncAmp)});
+	vecVars.push_back(SqwBase::t_var{"inc_sig", "real", tl::var_to_str(m_dIncSig)});
 
-	vecVars.push_back(SqwBase::t_var{"T", "t_real", tl::var_to_str(m_dT)});
+	vecVars.push_back(SqwBase::t_var{"T", "real", tl::var_to_str(m_dT)});
 
 	return vecVars;
 }

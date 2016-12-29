@@ -265,6 +265,7 @@ bool TazDlg::Load(const char* pcFile)
 	}
 
 
+	// goto dialog
 	if(m_pGotoDlg)
 		m_pGotoDlg->ClearList();
 
@@ -276,11 +277,20 @@ bool TazDlg::Load(const char* pcFile)
 	}
 
 
+	// reso dialog
 	if(xml.Exists((strXmlRoot + "reso").c_str()))
 	{
 		InitReso();
 		m_pReso->SetUpdateOn(0,0);
 		m_pReso->Load(xml, strXmlRoot);
+	}
+
+
+	// convo dialog
+	if(xml.Exists((strXmlRoot + "monteconvo").c_str()))
+	{
+		InitResoConv();
+		m_pConvoDlg->Load(xml, strXmlRoot);
 	}
 
 
@@ -447,7 +457,9 @@ bool TazDlg::Save()
 	mapConf[strXmlRoot + "meta/info"] = "Created with Takin.";
 
 
+	// dialogs
 	if(m_pReso) m_pReso->Save(mapConf, strXmlRoot);
+	if(m_pConvoDlg) m_pConvoDlg->Save(mapConf, strXmlRoot);
 	if(m_pGotoDlg) m_pGotoDlg->Save(mapConf, strXmlRoot);
 
 

@@ -95,6 +95,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/dialogs/FormfactorDlg.h"
 	"${TAKINROOT}/dialogs/AboutDlg.h"
 	"${TAKINROOT}/dialogs/DispDlg.h"
+	"${TAKINROOT}/libs/qwthelper.h"
 )
 
 for hfile in ${hfiles[@]}; do

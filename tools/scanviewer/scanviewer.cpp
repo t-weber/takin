@@ -380,7 +380,7 @@ set grid
 set xrange [%%MINX%%:%%MAXX%%]
 set yrange [%%MINY%%:%%MAXY%%]
 
-plot "-" using 1:2:3 pt 7 with yerrorbars title "Data"
+plot "-" using ($1):($2):(sqrt($2)) pointtype 7 with yerrorbars title "Data"
 %%POINTS%%
 end)RAWSTR";
 
@@ -393,13 +393,13 @@ end)RAWSTR";
 	t_real dMaxErrY = *std::max_element(vecYErr.begin(), vecYErr.end());
 
 	std::ostringstream ostrPoints;
+	ostrPoints.precision(g_iPrec);
 
 	for(std::size_t i=0; i<std::min(m_vecX.size(), m_vecY.size()); ++i)
 	{
-		ostrPoints << m_vecX[i]
-			<< " " << m_vecY[i]
-			<< " " << std::sqrt(m_vecY[i])
-			<< "\n";
+		ostrPoints
+			<< std::left << std::setw(g_iPrec*2) << m_vecX[i] << " "
+			<< std::left << std::setw(g_iPrec*2) << m_vecY[i] << "\n";
 	}
 
 	tl::find_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
@@ -474,6 +474,9 @@ plt.show())RAWSTR";
 	t_real dMaxErrY = *std::max_element(vecYErr.begin(), vecYErr.end());
 
 	std::ostringstream ostrX, ostrY, ostrYErr;
+	ostrX.precision(g_iPrec);
+	ostrY.precision(g_iPrec);
+	ostrYErr.precision(g_iPrec);
 
 	for(std::size_t i=0; i<std::min(m_vecX.size(), m_vecY.size()); ++i)
 	{
@@ -594,6 +597,9 @@ R"RAWSTR(void scan_plot()
 	t_real dMaxErrY = *std::max_element(vecYErr.begin(), vecYErr.end());
 
 	std::ostringstream ostrX, ostrY, ostrYErr;
+	ostrX.precision(g_iPrec);
+	ostrY.precision(g_iPrec);
+	ostrYErr.precision(g_iPrec);
 
 	for(std::size_t i=0; i<std::min(m_vecX.size(), m_vecY.size()); ++i)
 	{

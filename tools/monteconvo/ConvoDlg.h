@@ -14,14 +14,20 @@
 #include <atomic>
 #include <memory>
 
+#include "ui/ui_monteconvo.h"
+
 #include "libs/qthelper.h"
+#include "libs/qwthelper.h"
+#include "tlibs/file/prop.h"
+
 #include "sqwfactory.h"
+
 #include "tools/res/defs.h"
 #include "tools/convofit/scan.h"
 
-#include "SqwParamDlg.h"
-#include "ui/ui_monteconvo.h"
 #include "dialogs/FavDlg.h"
+#include "SqwParamDlg.h"
+#include "TASReso.h"
 
 
 class ConvoDlg : public QDialog, Ui::ConvoDlg
@@ -36,14 +42,35 @@ protected:
 
 	std::shared_ptr<SqwBase> m_pSqw;
 	std::vector<t_real_reso> m_vecQ, m_vecS, m_vecScaledS;
-	std::unique_ptr<QwtPlotWrapper> m_plotwrap;
+	std::unique_ptr<QwtPlotWrapper> m_plotwrap, m_plotwrap2d;
 
 	bool m_bUseScan = 0;
 	Scan m_scan;
 
 protected:
+	std::vector<QDoubleSpinBox*> m_vecSpinBoxes;
+	std::vector<QSpinBox*> m_vecIntSpinBoxes;
+	std::vector<QLineEdit*> m_vecEditBoxes;
+	std::vector<QComboBox*> m_vecComboBoxes;
+	std::vector<QCheckBox*> m_vecCheckBoxes;
+
+	std::vector<std::string> m_vecSpinNames, m_vecIntSpinNames, m_vecEditNames,
+		m_vecComboNames, m_vecCheckNames;
+
+	QAction *m_pLiveResults = nullptr, *m_pLivePlots = nullptr;
+
+protected:
 	void LoadSettings();
 	virtual void showEvent(QShowEvent *pEvt) override;
+
+	ResoFocus GetFocus() const;
+
+	void Start1D();
+	void Start2D();
+
+public:
+	void Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot);
+	void Save(std::map<std::string, std::string>& mapConf, const std::string& strXmlRoot);
 
 protected slots:
 	void showSqwParamDlg();
@@ -58,6 +85,7 @@ protected slots:
 	void SqwParamsChanged(const std::vector<SqwBase::t_var>&);
 
 	void scanFileChanged(const QString& qstrFile);
+	void scanCheckToggled(bool);
 	void scaleChanged();
 
 	void SaveResult();
@@ -73,7 +101,12 @@ protected slots:
 	void UpdateCurFavPos();
 	void ChangePos(const struct FavHklPos& pos);
 
-	void ButtonBoxClicked(QAbstractButton *pBtn);
+	virtual void accept() override;
+
+	void Load();
+	void Save();
+
+	void ShowAboutDlg();
 
 public:
 	ConvoDlg(QWidget* pParent=0, QSettings* pSett=0);

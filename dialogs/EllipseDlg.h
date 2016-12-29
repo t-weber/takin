@@ -22,6 +22,7 @@
 #include "tools/res/pop.h"
 #include "ui/ui_ellipses.h"
 #include "libs/qthelper.h"
+#include "libs/qwthelper.h"
 
 
 struct EllipseDlgParams
