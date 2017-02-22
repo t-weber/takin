@@ -8,13 +8,24 @@
 #include "sqw_py.h"
 #include "tlibs/string/string.h"
 #include "tlibs/log/log.h"
+#include "tlibs/file/file.h"
+
+#include <boost/python/stl_iterator.hpp>
 
 using t_real = t_real_reso;
 
 #define MAX_PARAM_VAL_SIZE 128
 
+
 SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 {
+	if(!tl::file_exists(pcFile))
+	{
+		tl::log_err("Could not find Python script file: \"", pcFile, "\".");
+		m_bOk = 0;
+		return;
+	}
+
 	std::string strFile = pcFile;
 	std::string strDir = tl::get_dir(strFile);
 	std::string strMod = tl::get_file_noext(tl::get_file(strFile));
@@ -48,7 +59,7 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 			if(!!pycwd)
 				pycwd(strDir.c_str());
 			else
-				tl::log_warn("Cannot set script working directory.");
+				tl::log_warn("Cannot set python script working directory.");
 		}
 
 		// import takin functions
@@ -57,7 +68,7 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 		m_Sqw = moddict["TakinSqw"];
 		m_bOk = !!m_Sqw;
 		if(!m_bOk)
-			tl::log_err("Script has no TakinSqw function.");
+			tl::log_err("Python script has no TakinSqw function.");
 
 		try	// optional stuff
 		{
@@ -68,8 +79,13 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 			}
 			else
 			{
-				tl::log_warn("Script has no TakinInit function.");
+				tl::log_warn("Python script has no TakinInit function.");
 			}
+
+			if(moddict.has_key("TakinDisp"))
+				m_disp = moddict["TakinDisp"];
+			else
+				tl::log_warn("Python script has no TakinDisp function.");
 		}
 		catch(const py::error_already_set& ex) {}
 	}
@@ -97,6 +113,65 @@ SqwPy::~SqwPy()
 }
 
 
+/**
+ * E(Q)
+ */
+std::tuple<std::vector<t_real>, std::vector<t_real>>
+	SqwPy::disp(t_real dh, t_real dk, t_real dl) const
+{
+	if(!m_bOk)
+	{
+		tl::log_err("Interpreter has not initialised, cannot query S(q,w).");
+		return std::make_tuple(std::vector<t_real>(), std::vector<t_real>());
+	}
+
+
+	std::lock_guard<std::mutex> lock(*m_pmtx);
+
+	std::vector<t_real> vecEs, vecWs;
+
+	try
+	{
+		if(!!m_disp)
+		{
+			py::object lst = m_disp(dh, dk, dl);
+			py::stl_input_iterator<py::object> iterLst(lst);
+			py::stl_input_iterator<py::object> endLst;
+
+			if(iterLst != endLst)
+			{
+				py::object _vecE = *iterLst;
+				py::stl_input_iterator<t_real> iterE(_vecE);
+				py::stl_input_iterator<t_real> endE;
+
+				while(iterE != endE)
+					vecEs.push_back(*iterE++);
+			}
+
+			if(++iterLst != endLst)
+			{
+				py::object _vecW = *iterLst;
+				py::stl_input_iterator<t_real> iterW(_vecW);
+				py::stl_input_iterator<t_real> endW;
+
+				while(iterW != endW)
+					vecWs.push_back(*iterW++);
+			}
+		}
+	}
+	catch(const py::error_already_set& ex)
+	{
+		PyErr_Print();
+		PyErr_Clear();
+	}
+
+	return std::make_tuple(vecEs, vecWs);
+}
+
+
+/**
+ * S(Q,E)
+ */
 t_real SqwPy::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 {
 	if(!m_bOk)
@@ -104,6 +179,7 @@ t_real SqwPy::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 		tl::log_err("Interpreter has not initialised, cannot query S(q,w).");
 		return t_real(0);
 	}
+
 
 	std::lock_guard<std::mutex> lock(*m_pmtx);
 	try
@@ -120,6 +196,9 @@ t_real SqwPy::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 }
 
 
+/**
+ * Gets model variables.
+ */
 std::vector<SqwBase::t_var> SqwPy::GetVars() const
 {
 	std::vector<SqwBase::t_var> vecVars;
@@ -139,6 +218,10 @@ std::vector<SqwBase::t_var> SqwPy::GetVars() const
 			std::string strName = py::extract<std::string>(dict.items()[i][0]);
 			if(strName.length() == 0) continue;
 			if(strName[0] == '_') continue;
+
+			// filter out non-prefixed variables
+			if(m_strVarPrefix.size() && strName.substr(0,m_strVarPrefix.size()) != m_strVarPrefix)
+				continue;
 
 			// type
 			std::string strType = py::extract<std::string>(dict.items()[i][1]
@@ -174,6 +257,9 @@ std::vector<SqwBase::t_var> SqwPy::GetVars() const
 }
 
 
+/**
+ * Sets model variables.
+ */
 void SqwPy::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 {
 	if(!m_bOk)
@@ -262,6 +348,7 @@ SqwBase* SqwPy::shallow_copy() const
 	pSqw->m_mod = this->m_mod;
 	pSqw->m_Sqw = this->m_Sqw;
 	pSqw->m_Init = this->m_Init;
+	pSqw->m_disp = this->m_disp;
 
 	return pSqw;
 }

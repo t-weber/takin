@@ -25,6 +25,7 @@ using t_real = t_real_reso;
 
 // -----------------------------------------------------------------------------
 // file operations
+
 void ConvoDlg::Load()
 {
 	const std::string strXmlRoot("taz/");
@@ -57,6 +58,7 @@ void ConvoDlg::Load()
 	if(m_pSett)
 		m_pSett->setValue("monteconvo/last_dir", QString(strDir.c_str()));
 }
+
 
 void ConvoDlg::Save()
 {
@@ -94,8 +96,11 @@ void ConvoDlg::Save()
 		m_pSett->setValue("monteconvo/last_dir", QString(strDir.c_str()));
 }
 
+
 void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 {
+	m_bAllowSqwReinit = 0;
+
 	for(std::size_t iSpinBox=0; iSpinBox<m_vecSpinBoxes.size(); ++iSpinBox)
 	{
 		boost::optional<t_real> odSpinVal = xml.QueryOpt<t_real>(strXmlRoot+m_vecSpinNames[iSpinBox]);
@@ -106,15 +111,15 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 		boost::optional<int> odSpinVal = xml.QueryOpt<int>(strXmlRoot+m_vecIntSpinNames[iSpinBox]);
 		if(odSpinVal) m_vecIntSpinBoxes[iSpinBox]->setValue(*odSpinVal);
 	}
-	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
-	{
-		boost::optional<std::string> odEditVal = xml.QueryOpt<std::string>(strXmlRoot+m_vecEditNames[iEditBox]);
-		if(odEditVal) m_vecEditBoxes[iEditBox]->setText((*odEditVal).c_str());
-	}
 	for(std::size_t iCombo=0; iCombo<m_vecComboBoxes.size(); ++iCombo)
 	{
 		boost::optional<int> oiComboIdx = xml.QueryOpt<int>(strXmlRoot+m_vecComboNames[iCombo]);
 		if(oiComboIdx) m_vecComboBoxes[iCombo]->setCurrentIndex(*oiComboIdx);
+	}
+	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
+	{
+		boost::optional<std::string> odEditVal = xml.QueryOpt<std::string>(strXmlRoot+m_vecEditNames[iEditBox]);
+		if(odEditVal) m_vecEditBoxes[iEditBox]->setText((*odEditVal).c_str());
 	}
 	for(std::size_t iCheck=0; iCheck<m_vecCheckBoxes.size(); ++iCheck)
 	{
@@ -124,7 +129,26 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 
 	if(m_pFavDlg)
 		m_pFavDlg->Load(xml, strXmlRoot + "monteconvo/");
+
+	boost::optional<std::string> opSqw = xml.QueryOpt<std::string>(strXmlRoot + "monteconvo/sqw");
+	if(opSqw)
+	{
+		QString qstrSqw = (*opSqw).c_str();
+		comboSqw->setCurrentIndex(comboSqw->findData(qstrSqw));
+
+		m_bAllowSqwReinit = 1;
+		QString qstrSqwConf = xml.Query<std::string>(strXmlRoot + "monteconvo/sqw_conf", "").c_str();
+		createSqwModel(qstrSqwConf);
+
+		if(m_pSqw)
+		{
+			load_sqw_params(m_pSqw.get(), xml, strXmlRoot + "monteconvo/");
+			emit SqwLoaded(m_pSqw->GetVars());
+		}
+	}
+	m_bAllowSqwReinit = 1;
 }
+
 
 void ConvoDlg::Save(std::map<std::string, std::string>& mapConf, const std::string& strXmlRoot)
 {
@@ -157,9 +181,19 @@ void ConvoDlg::Save(std::map<std::string, std::string>& mapConf, const std::stri
 
 	if(m_pFavDlg)
 		m_pFavDlg->Save(mapConf, strXmlRoot + "monteconvo/");
+	if(m_pSqw)
+	{
+		save_sqw_params(m_pSqw.get(), mapConf, strXmlRoot + "monteconvo/");
+		mapConf[strXmlRoot + "monteconvo/sqw"] = 
+			comboSqw->itemData(comboSqw->currentIndex()).toString().toStdString();
+	}
 
 	//mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
 }
+
+
+// -----------------------------------------------------------------------------
+
 
 void ConvoDlg::SaveResult()
 {
@@ -201,6 +235,7 @@ void ConvoDlg::SaveResult()
 void ConvoDlg::LoadSettings()
 {
 	if(!m_pSett) return;
+	m_bAllowSqwReinit = 0;
 
 	for(std::size_t iSpinBox=0; iSpinBox<m_vecSpinBoxes.size(); ++iSpinBox)
 	{
@@ -214,17 +249,21 @@ void ConvoDlg::LoadSettings()
 			continue;
 		m_vecIntSpinBoxes[iSpinBox]->setValue(m_pSett->value(m_vecIntSpinNames[iSpinBox].c_str()).value<int>());
 	}
-	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
-	{
-		if(!m_pSett->contains(m_vecEditNames[iEditBox].c_str()))
-			continue;
-		m_vecEditBoxes[iEditBox]->setText(m_pSett->value(m_vecEditNames[iEditBox].c_str()).toString());
-	}
 	for(std::size_t iCombo=0; iCombo<m_vecComboBoxes.size(); ++iCombo)
 	{
 		if(!m_pSett->contains(m_vecComboNames[iCombo].c_str()))
 			continue;
 		m_vecComboBoxes[iCombo]->setCurrentIndex(m_pSett->value(m_vecComboNames[iCombo].c_str()).value<int>());
+	}
+
+	if(m_pSett->contains("monteconvo/sqw"))
+		comboSqw->setCurrentIndex(comboSqw->findData(m_pSett->value("monteconvo/sqw").toString()));
+
+	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
+	{
+		if(!m_pSett->contains(m_vecEditNames[iEditBox].c_str()))
+			continue;
+		m_vecEditBoxes[iEditBox]->setText(m_pSett->value(m_vecEditNames[iEditBox].c_str()).toString());
 	}
 	for(std::size_t iCheckBox=0; iCheckBox<m_vecCheckBoxes.size(); ++iCheckBox)
 	{
@@ -233,8 +272,14 @@ void ConvoDlg::LoadSettings()
 		m_vecCheckBoxes[iCheckBox]->setChecked(m_pSett->value(m_vecCheckNames[iCheckBox].c_str()).value<bool>());
 	}
 
-	if(m_pSett->contains("monteconvo/sqw"))
-		comboSqw->setCurrentIndex(comboSqw->findData(m_pSett->value("monteconvo/sqw").toString()));
+	//if(editSqw->text() != "")
+	{
+		m_bAllowSqwReinit = 1;
+		createSqwModel(editSqw->text());
+	}
+	m_bAllowSqwReinit = 1;
+
+
 	if(m_pSett->contains("monteconvo/geo"))
 		restoreGeometry(m_pSett->value("monteconvo/geo").toByteArray());
 }

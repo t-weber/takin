@@ -1,1 +1,1 @@
-takin-data/res/
+takin-data/res

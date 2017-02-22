@@ -46,6 +46,18 @@ class FitParamDlg : public QDialog, Ui::FitParamDlg
 		t_real_glob GetOffsErr() const { return tl::str_to_var<t_real_glob>(editOffsErr->text().toStdString()); }
 		bool GetOffsFixed() const { return checkOffs->isChecked(); }
 
+		t_real_glob GetSlope() const { return tl::str_to_var<t_real_glob>(editSlope->text().toStdString()); }
+		t_real_glob GetSlopeErr() const { return tl::str_to_var<t_real_glob>(editSlopeErr->text().toStdString()); }
+		bool GetSlopeFixed() const { return checkSlope->isChecked(); }
+
+		t_real_glob GetFreq() const { return tl::str_to_var<t_real_glob>(editFreq->text().toStdString()); }
+		t_real_glob GetFreqErr() const { return tl::str_to_var<t_real_glob>(editFreqErr->text().toStdString()); }
+		bool GetFreqFixed() const { return checkFreq->isChecked(); }
+
+		t_real_glob GetPhase() const { return tl::str_to_var<t_real_glob>(editPhase->text().toStdString()); }
+		t_real_glob GetPhaseErr() const { return tl::str_to_var<t_real_glob>(editPhaseErr->text().toStdString()); }
+		bool GetPhaseFixed() const { return checkPhase->isChecked(); }
+
 
 		void SetAmp(t_real_glob d) { editAmp->setText(tl::var_to_str(d, g_iPrec).c_str()); }
 		void SetAmpErr(t_real_glob d) { editAmpErr->setText(tl::var_to_str(d, g_iPrec).c_str()); }
@@ -61,6 +73,15 @@ class FitParamDlg : public QDialog, Ui::FitParamDlg
 
 		void SetOffs(t_real_glob d) { editOffs->setText(tl::var_to_str(d, g_iPrec).c_str()); }
 		void SetOffsErr(t_real_glob d) { editOffsErr->setText(tl::var_to_str(d, g_iPrec).c_str()); }
+
+		void SetSlope(t_real_glob d) { editSlope->setText(tl::var_to_str(d, g_iPrec).c_str()); }
+		void SetSlopeErr(t_real_glob d) { editSlopeErr->setText(tl::var_to_str(d, g_iPrec).c_str()); }
+
+		void SetFreq(t_real_glob d) { editFreq->setText(tl::var_to_str(d, g_iPrec).c_str()); }
+		void SetFreqErr(t_real_glob d) { editFreqErr->setText(tl::var_to_str(d, g_iPrec).c_str()); }
+
+		void SetPhase(t_real_glob d) { editPhase->setText(tl::var_to_str(d, g_iPrec).c_str()); }
+		void SetPhaseErr(t_real_glob d) { editPhaseErr->setText(tl::var_to_str(d, g_iPrec).c_str()); }
 
 
 		bool WantParams() const { return checkUseParams->isChecked(); }

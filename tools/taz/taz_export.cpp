@@ -1,4 +1,4 @@
-/*
+/**
  * exports
  * @author tweber
  * @date dec-2015

@@ -14,9 +14,10 @@ USE_BOOST_REGEX = 0
 USE_GIL = 1
 USE_PY = 1
 USE_JL = 1
-USE_PLUGINS = 1
-USE_FADDEEVA = 0
+USE_PLUGINS = 0
+USE_FADDEEVA = 1
 USE_CPP11_ABI = 1
+USE_FRAMEWORKS = 0
 
 
 STD_CPP = -std=c++11
@@ -25,7 +26,9 @@ STD_CPP = -std=c++11
 STD_LIBS = -lstdc++
 #STD_LIBS = -lc++ -lc++abi
 STD_LIBS += -lm
-STD_LIBS += -lpthread -lrt -lgomp
+ifeq ($(USE_FRAMEWORKS), 0)
+	STD_LIBS += -lpthread -lrt -lgomp
+endif
 
 BOOST_SUFFIX = 
 #BOOST_SUFFIX = -mt
@@ -95,52 +98,139 @@ DEFINES += -DQT_VER=$(QT_VER)
 # -----------------------------------------------------------------------------
 
 
-ifeq ($(QT_VER), 5)
-	QT_INC = -I/opt/local/libexec/qt5/include -I/opt/local/libexec/qt5/include/QtCore -I/opt/local/libexec/qt5/include/QtGui -I/opt/local/libexec/qt5/include/QtOpenGL \
-		-I/usr/include/qt5 -I/usr/include/qt5/QtCore -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui \
-		-I/usr/include/qt5/QtOpenGL
-	QT_LIB = -L/opt/local/libexec/qt5/lib -L/usr/lib64/qt5 -L/usr/lib/qt5/lib \
-		-lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg -lQt5Concurrent
-	ifeq ($(USE_3D), 1)
-		QT_LIB += -lQt5OpenGL
+# TODO: find and add -I[gl dir]/Frameworks/OpenGL.framework/Headers
+ifeq ($(QT_VER), 5)	# qt 5
+	QT_INC = -I/usr/local/opt/qt5/Frameworks/QtOpenGL.framework/Versions/5/Headers \
+			-I/usr/local/opt/qt5/Frameworks/QtWidgets.framework/Versions/5/Headers \
+			-I/usr/local/opt/qt5/Frameworks/QtCore.framework/Versions/5/Headers \
+			-I/usr/local/opt/qt5/Frameworks/QtGui.framework/Versions/5/Headers \
+			-I/usr/local/opt/qt5/include \
+			-I/opt/local/libexec/qt5/include \
+			-I/opt/local/libexec/qt5/include/QtCore \
+			-I/opt/local/libexec/qt5/include/QtGui \
+			-I/opt/local/libexec/qt5/include/QtOpenGL \
+			-I/usr/include/qt5 \
+			-I/usr/include/qt5/QtCore \
+			-I/usr/include/qt5/QtWidgets \
+			-I/usr/include/qt5/QtGui \
+			-I/usr/include/qt5/QtOpenGL
+
+#TODO: find and add -F[gldir]/Frameworks/
+	QT_LIB = -L/opt/local/libexec/qt5/lib \
+			-L/usr/lib64/qt5 \
+			-L/usr/lib/qt5/lib
+	ifeq ($(USE_FRAMEWORKS), 0)
+			QT_LIB += -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg -lQt5Concurrent
+	else
+			QT_LIB += -F/usr/local/opt/qt5/lib \
+				-framework QtWidgets -framework QtGui \
+				-framework QtCore -framework QtSvg \
+				-framework QtConcurrent
 	endif
-else
-	QT_INC = -I/opt/local/libexec/qt4/include -I/opt/local/libexec/qt4/include/QtCore -I/opt/local/libexec/qt4/include/QtGui -I/opt/local/libexec/qt4/include/QtOpenGL \
-		-I/usr/include/qt4 -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui -I/usr/include/qt4/QtOpenGL \
-		-I/usr/include/QtCore -I/usr/include/QtGui -I/usr/include/QtOpenGL
-	QT_LIB = -L/opt/local/libexec/qt4/lib -L/usr/lib64/qt4 -L/usr/lib/qt4/lib \
-		-lQtCore -lQtGui -lQtSvg
-        ifeq ($(USE_3D), 1)
-                QT_LIB += -lQtOpenGL
-        endif
+
+	ifeq ($(USE_3D), 1)
+		ifeq ($(USE_FRAMEWORKS), 0)
+			QT_LIB += -lQt5OpenGL
+		else
+			QT_LIB += -framework OpenGL -framework QtOpenGL
+		endif
+	endif
+
+else	# qt4
+
+	QT_INC = -I/usr/local/opt/qt4/Frameworks/QtOpenGL.framework/Versions/4/Headers \
+			-I/usr/local/opt/qt4/Frameworks/QtWidgets.framework/Versions/4/Headers \
+			-I/usr/local/opt/qt4/Frameworks/QtCore.framework/Versions/4/Headers \
+			-I/usr/local/opt/qt4/Frameworks/QtGui.framework/Versions/4/Headers \
+			-I/usr/local/opt/qt4/include \
+			-I/opt/local/libexec/qt4/include \
+			-I/opt/local/libexec/qt4/include/QtCore \
+			-I/opt/local/libexec/qt4/include/QtGui \
+			-I/opt/local/libexec/qt4/include/QtOpenGL \
+			-I/usr/include/qt4 \
+			-I/usr/include/qt4/QtCore \
+			-I/usr/include/qt4/QtGui \
+			-I/usr/include/qt4/QtOpenGL \
+			-I/usr/include/QtCore \
+			-I/usr/include/QtGui \
+			-I/usr/include/QtOpenGL
+
+	QT_LIB = -L/opt/local/libexec/qt4/lib -L/usr/lib64/qt4 -L/usr/lib/qt4/lib
+
+	ifeq ($(USE_FRAMEWORKS), 0)
+			QT_LIB += -lQtCore -lQtGui -lQtSvg
+	else
+			QT_LIB += -F/usr/local/opt/qt4/lib \
+				-framework QtGui -framework QtCore -framework QtSvg
+	endif
+
+	ifeq ($(USE_3D), 1)
+		ifeq ($(USE_FRAMEWORKS), 0)
+			QT_LIB += -lQtOpenGL
+		else
+			QT_LIB += -framework OpenGL -framework QtOpenGL			
+		endif
+	endif
 endif
+
 
 ifeq ($(QWT_VER), 6)
 	ifeq ($(QT_VER), 5)
-		QWT_INC = -I/opt/local/libexec/qt5/include/qwt \
-			-I/usr/include/qt5/qwt -I/usr/include/qwt-qt5
-		QWT_LIB = -lqwt-qt5
+		QWT_INC = -I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
+			-I/opt/local/libexec/qt5/include/qwt \
+			-I/usr/include/qt5/qwt \
+			-I/usr/include/qwt-qt5
+		ifeq ($(USE_FRAMEWORKS), 0)
+			QWT_LIB = -lqwt-qt5
+		else
+			QWT_LIB = -F/usr/local/opt/qwt/lib -framework qwt
+		endif
 	else
-		QWT_INC = -I/opt/local/libexec/qt4/include/qwt \
-			-I/usr/include/qwt6 -I/usr/include/qwt -I/usr/include/qwt-qt4 -I/usr/local/qwt/include
-		QWT_LIB = -L/usr/local/qwt/lib -lqwt
+		QWT_INC = -I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
+			-I/opt/local/libexec/qt4/include/qwt \
+			-I/usr/include/qwt6 \
+			-I/usr/include/qwt \
+			-I/usr/include/qwt-qt4 \
+			-I/usr/local/qwt/include
+		ifeq ($(USE_FRAMEWORKS), 0)
+			QWT_LIB = -L/usr/local/qwt/lib -lqwt
+		else
+			QWT_LIB = -F/usr/local/opt/qwt/lib -framework qwt
+		endif
 	endif
 else
-	QWT_INC = -I/usr/include/qwt5 -I/usr/include/qwt-qt4 -I/usr/include/qwt5-qt4 -I/usr/local/qwt/include
-	QWT_LIB = -L/usr/local/qwt/lib -lqwt${QWT5_SUFFIX}
+	QWT_INC = -I/usr/local/opt/qwt/lib/qwt.framework/Versions/5/Headers \
+		-I/usr/include/qwt5 \
+		-I/usr/include/qwt-qt4 \
+		-I/usr/include/qwt5-qt4 \
+		-I/usr/local/qwt/include
+	ifeq ($(USE_FRAMEWORKS), 0)
+		QWT_LIB = -L/usr/local/qwt/lib -lqwt${QWT5_SUFFIX}
+	else
+		QWT_LIB = -F/usr/local/opt/qwt/lib -framework qwt
+	endif
 endif
 
 
 
-INC = ${QT_INC} ${QWT_INC} -I . -I/opt/local/include -I/opt/local/include/GL \
+INC = ${QT_INC} ${QWT_INC} -I . \
+	-I/usr/local/opt/minuit2/include/Minuit2 \
+	-I/opt/local/include -I/opt/local/include/GL \
 	-I/usr/local/include -I/usr/local/include/GL \
-	-I/opt/include  -I/opt/include/GL -I/usr/include/freetype2 \
+	-I/opt/include  -I/opt/include/GL \
+	-I/usr/local/opt/freetype/include/freetype2 \
+	-I/usr/include/freetype2 \
 	-I/usr/include/lapacke \
+	-I/usr/local/opt/python/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
 	-I/usr/include/python2.7 -idirafter /usr/include/root \
 	-I/usr/include -I/usr/include/GL
 
-LIB_DIRS = -L/opt/local/lib -L/opt/lib -L/usr/local/lib -L/usr/local/lib64 \
-	-L/usr/lib64 -L/usr/lib64/root -L/usr/lib/x86_64-linux-gnu
+LIB_DIRS = -L/usr/local/opt/minuit2/lib/ \
+	-L/usr/local/opt/freetype/lib \
+	-L/opt/local/lib -L/opt/lib \
+	-L/usr/local/lib -L/usr/local/lib64 \
+	-L/usr/lib64 -L/usr/lib64/root \
+	-L/usr/lib/x86_64-linux-gnu
 
 
 
@@ -159,6 +249,11 @@ ifeq ($(DO_DEBUG), 0)
 else
 	FLAGS = ${INC} ${STD_CPP} -rdynamic -ggdb -DDEBUG -Wall -Wall -Wpedantic -Wextra -Weffc++ -fPIC ${DEFINES}
 	STRIP = echo Retaining debug symbols of 
+endif
+
+ifeq ($(CC), clang)
+	# workaround for boost-gil/clang incompatibility
+	FLAGS += -Wno-c++11-narrowing
 endif
 
 
@@ -180,11 +275,22 @@ endif
 # actually: boost libs...
 BASIC_LIBS = -lboost_system${BOOST_SUFFIX} -lboost_filesystem${BOOST_SUFFIX}
 
+ifeq ($(USE_FRAMEWORKS), 0)
+	X11_LIBS = -lX11
+else
+	X11_LIBS = 
+endif
+
 ifeq ($(USE_3D), 1)
-	GL_LIBS = -lX11 -lGL -lGLU -lfreetype
+	ifeq ($(USE_FRAMEWORKS), 0)
+		GL_LIBS = ${X11_LIBS} -lGL -lGLU -lfreetype
+	else
+		GL_LIBS = ${X11_LIBS} -lfreetype
+	endif
 else
 	GL_LIBS = 
 endif
+
 
 ifeq ($(USE_IOSTR), 1)
 	BASIC_LIBS += -lboost_iostreams${BOOST_SUFFIX}
@@ -203,7 +309,11 @@ else
 endif
 
 ifeq ($(USE_PY), 1)
-	PY_LIBS = -lboost_python${BOOST_SUFFIX} -lpython2.7
+#	ifeq ($(USE_FRAMEWORKS), 0)
+		PY_LIBS = -lboost_python${BOOST_SUFFIX} -lpython2.7
+#	else
+#		PY_LIBS = -lboost_python${BOOST_SUFFIX} -F /usr/local/opt/python/Frameworks -framework Python
+#	endif
 	PY_OBJS = obj/sqw_py.o 
 else
 	PY_LIBS =
@@ -260,7 +370,7 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} \
 	obj/tasreso.o obj/ConvoDlg.o obj/ConvoDlg_file.o obj/SqwParamDlg.o \
 	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
-	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o
+	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o
 
 OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
 	obj/qthelper.o obj/qwthelper.o obj/globals.o obj/globals_qt.o
@@ -284,7 +394,7 @@ OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
 	obj/qwthelper.o obj/spec_char.o obj/FitParamDlg.o \
-	obj/globals.o obj/globals_qt.o
+	obj/globals.o obj/globals_qt.o obj/rand.o
 
 OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o \
 	obj/log.o obj/debug.o obj/globals.o obj/globals_qt.o
@@ -317,7 +427,7 @@ OBJ_TAZ += obj/SgListDlg.o obj/spacegroup.o
 .PHONY: all clean #doc
 
 all: takin  montereso  monteconvo xmonteconvo posextract \
-	scanviewer  gentab sglist sfact  convofit convoseries reso
+	scanviewer gentab sglist sfact convofit convoseries reso
 
 
 takin: ${OBJ_COMMON} ${OBJ_TAZ}
@@ -357,7 +467,7 @@ posextract: obj/posextract.o obj/loadinstr.o obj/log.o obj/debug.o
 
 reso: ${OBJ_RESO}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/reso $+ \
-		${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS} -lX11 ${STD_LIBS}
+		${QT_LIB} ${BASIC_LIBS} ${LAPACK_LIBS} ${X11_LIBS} ${STD_LIBS}
 	${STRIP} reso
 
 scanviewer: ${OBJ_SCANVIEWER}
@@ -567,6 +677,9 @@ obj/scanviewer.o: tools/scanviewer/scanviewer.cpp tools/scanviewer/scanviewer.h
 obj/FitParamDlg.o: tools/scanviewer/FitParamDlg.cpp tools/scanviewer/FitParamDlg.h
 	${CC} ${FLAGS} ${FAD_DEFS} -c -o $@ $<
 
+obj/ScanPosDlg.o: tools/scanpos/ScanPosDlg.cpp tools/scanpos/ScanPosDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+
 obj/gentab.o: tools/gentab/gentab.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 
@@ -582,7 +695,6 @@ obj/sfact.o: tools/sggen/sfact.cpp
 
 obj/AboutDlg.o: dialogs/AboutDlg.cpp dialogs/AboutDlg.h
 	${CC} ${FLAGS} ${FAD_DEFS} -c -o $@ $<
-
 
 # -----------------------------------------------------------------------------
 

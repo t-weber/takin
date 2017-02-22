@@ -1,4 +1,4 @@
-/*
+/**
  * TAS tool
  * @author tweber
  * @date feb-2015
@@ -677,4 +677,13 @@ void TazDlg::ShowScanViewer()
 
 	m_pScanViewer->show();
 	m_pScanViewer->activateWindow();
+}
+
+void TazDlg::ShowScanPos()
+{
+	if(!m_pScanPos)
+		m_pScanPos = new ScanPosDlg(this, &m_settings);
+
+	m_pScanPos->show();
+	m_pScanPos->activateWindow();
 }

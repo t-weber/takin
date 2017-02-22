@@ -8,6 +8,7 @@
 #include "sqw_jl.h"
 #include "tlibs/string/string.h"
 #include "tlibs/log/log.h"
+#include "tlibs/file/file.h"
 #include <julia.h>
 
 using t_real = t_real_reso;
@@ -16,6 +17,13 @@ using t_real = t_real_reso;
 
 SqwJl::SqwJl(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 {
+	if(!tl::file_exists(pcFile))
+	{
+		tl::log_err("Could not find Julia script file: \"", pcFile, "\".");
+		m_bOk = 0;
+		return;
+	}
+
 	std::string strFile = pcFile;
 	std::string strDir = tl::get_dir(strFile);
 	const bool bSetScriptCWD = 1;
@@ -46,6 +54,9 @@ SqwJl::SqwJl(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	// import takin functions
 	m_pInit = jl_get_function(jl_main_module, "TakinInit");
 	m_pSqw = jl_get_function(jl_main_module, "TakinSqw");
+	m_pDisp = jl_get_function(jl_main_module, "TakinDisp");
+
+	PrintExceptions();
 
 	if(!m_pSqw)
 	{
@@ -57,6 +68,9 @@ SqwJl::SqwJl(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	{
 		m_bOk = 1;
 	}
+
+	if(!m_pDisp)
+		tl::log_warn("Julia script has no TakinDisp function.");
 
 	if(m_pInit)
 		jl_call0((jl_function_t*)m_pInit);
@@ -70,6 +84,86 @@ SqwJl::~SqwJl()
 }
 
 
+/**
+ * Checks for and prints possible exceptions
+ */
+void SqwJl::PrintExceptions() const
+{
+	jl_value_t* pEx = jl_exception_occurred();
+	if(pEx)
+	{
+		std::string strEx;
+		jl_value_t *pExStr = nullptr;
+
+		jl_function_t *pPrint = jl_get_function(jl_base_module, "string");
+		if(pPrint)
+			pExStr = jl_call1(pPrint, pEx);
+		if(pExStr)
+			strEx = jl_string_ptr(pExStr);
+
+		if(strEx != "")
+			tl::log_err("Julia error: ", strEx, ".");
+		else
+			tl::log_err("Unknown Julia error occurred.");
+	}
+
+	jl_exception_clear();
+}
+
+
+/**
+ * E(Q)
+ */
+std::tuple<std::vector<t_real>, std::vector<t_real>>
+	SqwJl::disp(t_real dh, t_real dk, t_real dl) const
+{
+	if(!m_bOk)
+	{
+		tl::log_err("Julia interpreter has not initialised, cannot query S(q,w).");
+		return std::make_tuple(std::vector<t_real>(), std::vector<t_real>());
+	}
+
+	std::lock_guard<std::mutex> lock(*m_pmtx);
+	std::vector<t_real> vecE, vecW;
+
+	if(m_pDisp)
+	{
+		jl_value_t *phkl[3] = { jl_box_float64(dh), jl_box_float64(dk), jl_box_float64(dl) };
+		jl_array_t *pEW = reinterpret_cast<jl_array_t*>(jl_call((jl_function_t*)m_pDisp, phkl, 3));
+
+		if(jl_array_len(pEW) != 2)
+		{
+			tl::log_err("TakinDisp has to return [arrEnergies, arrWeights].");
+			return std::make_tuple(vecE, vecW);
+		}
+
+		jl_array_t *parrE = reinterpret_cast<jl_array_t*>(jl_arrayref(pEW, 0));
+		jl_array_t *parrW = reinterpret_cast<jl_array_t*>(jl_arrayref(pEW, 1));
+
+		std::size_t iSizeE = jl_array_len(parrE);
+		std::size_t iSizeW = jl_array_len(parrW);
+
+		if(iSizeE != iSizeW)
+			tl::log_warn("Size mismatch between energies and weights array in Julia script.");
+
+		for(std::size_t iElem=0; iElem<std::min(iSizeE, iSizeW); ++iElem)
+		{
+			t_real dE = jl_unbox_float64(jl_arrayref(parrE, iElem));
+			t_real dW = jl_unbox_float64(jl_arrayref(parrE, iElem));
+
+			vecE.push_back(dE);
+			vecW.push_back(dW);
+		}
+	}
+
+	PrintExceptions();
+	return std::make_tuple(vecE, vecW);
+}
+
+
+/**
+ * S(Q,E)
+ */
 t_real SqwJl::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 {
 	if(!m_bOk)
@@ -84,6 +178,8 @@ t_real SqwJl::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 		{ jl_box_float64(dh), jl_box_float64(dk),
 		jl_box_float64(dl), jl_box_float64(dE) };
 	jl_value_t *pSqw = jl_call((jl_function_t*)m_pSqw, phklE, 4);
+
+	PrintExceptions();
 	return t_real(jl_unbox_float64(pSqw));
 }
 
@@ -121,6 +217,10 @@ std::vector<SqwBase::t_var> SqwJl::GetVars() const
 		std::string strName = jl_symbol_name(pSym);
 		if(strName.length() == 0) continue;
 
+		// filter out non-prefixed variables
+		if(m_strVarPrefix.size() && strName.substr(0,m_strVarPrefix.size()) != m_strVarPrefix)
+			continue;
+
 		// type
 		jl_value_t* pFld = jl_call2(pGetField, (jl_value_t*)jl_main_module, (jl_value_t*)pSym);
 		if(!pFld) continue;
@@ -141,6 +241,7 @@ std::vector<SqwBase::t_var> SqwJl::GetVars() const
 		vecVars.push_back(var);
 	}
 
+	PrintExceptions();
 	return vecVars;
 }
 
@@ -180,6 +281,8 @@ void SqwJl::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 		}
 	}
 	jl_eval_string(ostrEval.str().c_str());
+
+	PrintExceptions();
 }
 
 
@@ -190,6 +293,7 @@ SqwBase* SqwJl::shallow_copy() const
 
 	pSqw->m_pInit = this->m_pInit;
 	pSqw->m_pSqw = this->m_pSqw;
+	pSqw->m_pDisp = this->m_pDisp;
 	pSqw->m_pmtx = this->m_pmtx;
 
 	return pSqw;

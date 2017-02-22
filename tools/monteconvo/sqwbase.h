@@ -10,6 +10,7 @@
 
 #include <string>
 #include <tuple>
+#include <vector>
 #include <memory>
 
 #include "../res/defs.h"
@@ -29,10 +30,22 @@ protected:
 	bool m_bOk = false;
 
 public:
+	/**
+	 * E(Q) dispersion and spectral weight function (optional)
+	 * return [energies, weights]
+	 */
+	virtual std::tuple<std::vector<t_real_reso>, std::vector<t_real_reso>>
+		disp(t_real_reso dh, t_real_reso dk, t_real_reso dl) const
+	{ return std::tuple<std::vector<t_real_reso>, std::vector<t_real_reso>>({}, {}); }
+
+	// S(Q,E) dynamical structure factor function
 	virtual t_real_reso operator()(t_real_reso dh, t_real_reso dk, t_real_reso dl, t_real_reso dE) const = 0;
 	virtual bool IsOk() const { return m_bOk; }
 
+	// return model variables
 	virtual std::vector<t_var> GetVars() const = 0;
+
+	// set model variables
 	virtual void SetVars(const std::vector<t_var>&) = 0;
 	virtual bool SetVarIfAvail(const std::string& strKey, const std::string& strNewVal);
 

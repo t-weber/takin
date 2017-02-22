@@ -10,11 +10,8 @@
 
 //#define USE_RTREE
 
-#include <string>
-#include <unordered_map>
 #include <list>
-#include <tuple>
-#include <memory>
+#include <unordered_map>
 #include <boost/numeric/ublas/vector.hpp>
 
 #include "tlibs/math/math.h"
@@ -101,7 +98,7 @@ private:
 	SqwPhonon() {};
 
 protected:
-	static t_real_reso disp(t_real_reso dq, t_real_reso da, t_real_reso df);
+	static t_real_reso phonon_disp(t_real_reso dq, t_real_reso da, t_real_reso df);
 
 	void create();
 	void destroy();
@@ -156,6 +153,43 @@ public:
 };
 
 
+/**
+ * even simpler phonon model
+ */
+class SqwPhononSingleBranch : public SqwBase
+{
+private:
+	SqwPhononSingleBranch() {};
+
+protected:
+	static t_real_reso phonon_disp(t_real_reso dq, t_real_reso da, t_real_reso df);
+
+protected:
+	ublas::vector<t_real_reso> m_vecBragg;
+
+	t_real_reso m_damp=20., m_dfreq=M_PI/2., m_dHWHM=0.1, m_dS0=1.;
+	t_real_reso m_dIncAmp=0., m_dIncSig=0.1;
+	t_real_reso m_dT = 100.;
+
+public:
+	SqwPhononSingleBranch(const char* pcFile);
+
+	virtual ~SqwPhononSingleBranch() = default;
+
+	virtual std::tuple<std::vector<t_real_reso>, std::vector<t_real_reso>>
+		disp(t_real_reso dh, t_real_reso dk, t_real_reso dl) const override;
+	virtual t_real_reso
+		operator()(t_real_reso dh, t_real_reso dk, t_real_reso dl, t_real_reso dE) const override;
+
+	const ublas::vector<t_real_reso>& GetBragg() const { return m_vecBragg; }
+
+	virtual std::vector<SqwBase::t_var> GetVars() const override;
+	virtual void SetVars(const std::vector<SqwBase::t_var>&) override;
+
+	virtual SqwBase* shallow_copy() const override;
+};
+
+
 // -----------------------------------------------------------------------------
 
 
@@ -171,23 +205,12 @@ protected:
 	static t_real_reso ferro_disp(t_real_reso dq, t_real_reso dD, t_real_reso doffs);
 	static t_real_reso antiferro_disp(t_real_reso dq, t_real_reso dD, t_real_reso doffs);
 
-	void create();
-	void destroy();
-
 protected:
-#ifdef USE_RTREE
-	std::shared_ptr<tl::Rt<t_real_reso, 3, RT_ELEMS>> m_rt;
-#else
-	std::shared_ptr<tl::Kd<t_real_reso>> m_kd;
-#endif
-
 	unsigned short m_iWhichDisp = 0;		// 0: ferro, 1: antiferro
-	unsigned int m_iNumPoints = 100;
-
 	ublas::vector<t_real_reso> m_vecBragg;
 
 	t_real_reso m_dD = 1., m_dOffs = 0.;
-	t_real_reso m_dE_HWHM = 0.1, m_dq_HWHM = 0.1;
+	t_real_reso m_dE_HWHM = 0.1;
 	t_real_reso m_dS0 = 1.;
 
 	t_real_reso m_dIncAmp = 0., m_dIncSig = 0.1;
@@ -197,6 +220,8 @@ public:
 	SqwMagnon(const char* pcFile);
 	virtual ~SqwMagnon() = default;
 
+	virtual std::tuple<std::vector<t_real_reso>, std::vector<t_real_reso>>
+		disp(t_real_reso dh, t_real_reso dk, t_real_reso dl) const override;
 	virtual t_real_reso operator()(t_real_reso dh, t_real_reso dk, t_real_reso dl, t_real_reso dE) const override;
 
 	const ublas::vector<t_real_reso>& GetBragg() const { return m_vecBragg; }
@@ -206,5 +231,6 @@ public:
 
 	virtual SqwBase* shallow_copy() const override;
 };
+
 
 #endif

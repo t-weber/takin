@@ -103,16 +103,16 @@ void NetCacheDlg::UpdateValue(const std::string& strKey, const CacheVal& val)
 
 	for(iRow=0; iRow < tableCache->rowCount(); ++iRow)
 	{
-		if(tableCache->item(iRow, 0)->text() == qstrKey)
+		if(tableCache->item(iRow, ITEM_KEY)->text() == qstrKey)
 		{
-			pItem = tableCache->item(iRow, 0);
+			pItem = tableCache->item(iRow, ITEM_KEY);
 			break;
 		}
 	}
 
 	if(pItem) 	// update items
 	{
-		tableCache->item(iRow, 1)->setText(qstrVal);
+		tableCache->item(iRow, ITEM_VALUE)->setText(qstrVal);
 		dynamic_cast<QTableWidgetItemWrapper<t_real>*>(tableCache->item(iRow, ITEM_TIMESTAMP))->
 			SetValue(val.dTimestamp);
 		dynamic_cast<QTableWidgetItemWrapper<t_real>*>(tableCache->item(iRow, ITEM_AGE))->
@@ -182,5 +182,6 @@ void NetCacheDlg::ClearAll()
 	tableCache->clearContents();
 	tableCache->setRowCount(0);
 }
+
 
 #include "NetCacheDlg.moc"

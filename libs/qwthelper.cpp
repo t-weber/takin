@@ -238,7 +238,7 @@ QwtPlotWrapper::~QwtPlotWrapper()
 
 
 void QwtPlotWrapper::SetData(const std::vector<t_real_qwt>& vecX, const std::vector<t_real_qwt>& vecY,
-	unsigned int iCurve, bool bReplot, bool bCopy)
+	unsigned int iCurve, bool bReplot, bool bCopy, const std::vector<t_real_qwt>* pvecYErr)
 {
 	std::lock_guard<decltype(m_mutex)> lock(m_mutex);
 
@@ -254,10 +254,11 @@ void QwtPlotWrapper::SetData(const std::vector<t_real_qwt>& vecX, const std::vec
 		if(iCurve >= m_vecDataPtrs.size())
 			m_vecDataPtrs.resize(iCurve+1);
 
-		m_vecDataPtrs[iCurve].first = &vecX;
-		m_vecDataPtrs[iCurve].second = &vecY;
+		std::get<0>(m_vecDataPtrs[iCurve]) = &vecX;
+		std::get<1>(m_vecDataPtrs[iCurve]) = &vecY;
+		std::get<2>(m_vecDataPtrs[iCurve]) = pvecYErr;
 	}
-	else		// copy data
+	else		// copy data, TODO: errorbars
 	{
 #if QWT_VER>=6
 		m_vecCurves[iCurve]->setSamples(vecX.data(), vecY.data(), std::min(vecX.size(), vecY.size()));
@@ -308,7 +309,7 @@ void QwtPlotWrapper::SavePlot() const
 	ofstrDat << "#\n";
 	ofstrDat << "# comment: Created with Takin version " << TAKIN_VER << ".\n";
 	ofstrDat << "# timestamp: " << tl::var_to_str<t_real_qwt>(dEpoch)
-		<< " (" << tl::epoch_to_str<t_real_qwt>(dEpoch) << ")\n";
+		<< " (" << tl::epoch_to_str<t_real_qwt>(dEpoch) << ").\n";
 	ofstrDat << "# title: " << m_pPlot->title().text().toStdString() << "\n";
 	ofstrDat << "# x_label: " << m_pPlot->axisTitle(QwtPlot::xBottom).text().toStdString() << "\n";
 	ofstrDat << "# y_label: " << m_pPlot->axisTitle(QwtPlot::yLeft).text().toStdString() << "\n";
@@ -341,21 +342,31 @@ void QwtPlotWrapper::SavePlot() const
 		std::size_t iDataSet=0;
 		for(const auto& pairVecs : m_vecDataPtrs)
 		{
+			const std::vector<t_real_qwt>* pVecX = std::get<0>(pairVecs);
+			const std::vector<t_real_qwt>* pVecY = std::get<1>(pairVecs);
+			const std::vector<t_real_qwt>* pVecYErr = std::get<2>(pairVecs);
+
+			const std::size_t iSize = std::min(pVecX->size(), pVecY->size());
+			// if no data points are available, skip the curve
+			if(!iSize) continue;
+
+
 			if(m_vecDataPtrs.size() > 1)
 				ofstrDat << "## -------------------------------- begin of dataset " << (iDataSet+1)
 					<< " --------------------------------\n";
-
-			const std::vector<t_real_qwt>* pVecX = pairVecs.first;
-			const std::vector<t_real_qwt>* pVecY = pairVecs.second;
-
-			const std::size_t iSize = std::min(pVecX->size(), pVecY->size());
 
 			for(std::size_t iCur=0; iCur<iSize; ++iCur)
 			{
 				ofstrDat << std::left << std::setw(g_iPrec*2)
 					<< pVecX->operator[](iCur) << " ";
 				ofstrDat << std::left << std::setw(g_iPrec*2)
-					<< pVecY->operator[](iCur) << "\n";
+					<< pVecY->operator[](iCur) << " ";
+				if(pVecYErr)
+				{
+					ofstrDat << std::left << std::setw(g_iPrec*2)
+						<< pVecYErr->operator[](iCur) << " ";
+				}
+				ofstrDat << "\n";
 			}
 
 			if(m_vecDataPtrs.size() > 1)
@@ -397,7 +408,7 @@ void QwtPlotWrapper::ExportGpl() const
 	ofstrDat << "#\n";
 	ofstrDat << "# comment: Created with Takin version " << TAKIN_VER << ".\n";
 	ofstrDat << "# timestamp: " << tl::var_to_str<t_real_qwt>(dEpoch)
-		<< " (" << tl::epoch_to_str<t_real_qwt>(dEpoch) << ")\n";
+		<< " (" << tl::epoch_to_str<t_real_qwt>(dEpoch) << ").\n";
 	ofstrDat << "#\n";
 	ofstrDat << "\n";
 
@@ -420,22 +431,22 @@ void QwtPlotWrapper::ExportGpl() const
 		t_real_qwt dZMin = m_pRaster->GetZMin();
 		t_real_qwt dZMax = m_pRaster->GetZMax();
 
-		t_real_qwt dXScale = (dXMax-dXMin)/t_real_qwt(iWidth-1);
-		t_real_qwt dYScale = (dYMax-dYMin)/t_real_qwt(iHeight-1);
+		t_real_qwt dXScale = (dXMax-dXMin)/t_real_qwt(iWidth);
+		t_real_qwt dYScale = (dYMax-dYMin)/t_real_qwt(iHeight);
 
-		ofstrDat << "xmin = " << dXMin << "\n";
-		ofstrDat << "xmax = " << dXMax << "\n";
 		ofstrDat << "xscale = " << dXScale << "\n";
-		ofstrDat << "ymin = " << dYMin << "\n";
-		ofstrDat << "ymax = " << dYMax << "\n";
 		ofstrDat << "yscale = " << dYScale << "\n";
+		ofstrDat << "xmin = " << dXMin+dXScale*0.5 << "\n";
+		ofstrDat << "xmax = " << dXMax+dXScale*0.5 << "\n";
+		ofstrDat << "ymin = " << dYMin+dYScale*0.5 << "\n";
+		ofstrDat << "ymax = " << dYMax+dYScale*0.5 << "\n";
 		ofstrDat << "zmin = " << dZMin << "\n";
 		ofstrDat << "zmax = " << dZMax << "\n";
 		ofstrDat << "zscale = 1.\n";
 		ofstrDat << "\n";
 
-		ofstrDat << "set xrange [xmin : xmax]\n";
-		ofstrDat << "set yrange [ymin : ymax]\n";
+		ofstrDat << "set xrange [xmin-xscale*0.5 : xmax-xscale*0.5]\n";
+		ofstrDat << "set yrange [ymin-yscale*0.5 : ymax-yscale*0.5]\n";
 		ofstrDat << "set cbrange [zmin : zmax]\n";
 		ofstrDat << "\n";
 
@@ -446,7 +457,7 @@ void QwtPlotWrapper::ExportGpl() const
 		ofstrDat << "\n";
 
 		ofstrDat << "plot \"-\" "
-			<< "using (xmin + $1*xscale):(ymin + $2*yscale):($3*zscale) "
+			<< "using (xmin + $1*xscale) : (ymin + $2*yscale) : ($3*zscale) "
 			<< "matrix with image\n";
 
 		for(std::size_t iY=0; iY<m_pRaster->GetHeight(); ++iY)
@@ -469,6 +480,12 @@ void QwtPlotWrapper::ExportGpl() const
 		const std::size_t iNumCurves = m_vecDataPtrs.size();
 		for(std::size_t iCurve=0; iCurve<iNumCurves; ++iCurve)
 		{
+			// if no data points are available, skip the curve
+			const std::vector<t_real_qwt>* pVecX = std::get<0>(m_vecDataPtrs[iCurve]);
+			const std::vector<t_real_qwt>* pVecY = std::get<1>(m_vecDataPtrs[iCurve]);
+			const std::size_t iSize = std::min(pVecX->size(), pVecY->size());
+			if(!iSize) continue;
+
 			// points or lines?
 			if(m_vecCurves[iCurve]->style() /*& QwtPlotCurve::CurveStyle::Lines*/
 				== QwtPlotCurve::CurveStyle::Lines)
@@ -478,29 +495,47 @@ void QwtPlotWrapper::ExportGpl() const
 			}
 			else
 			{
-				ofstrDat << "\t\"-\" using ($1):($2*scale) with points pointtype 7 title \"dataset "
-					<< (iCurve+1) << "\"";
-				//ofstrDat << ", \\\n#\t\"-\" using ($1):($2*scale):(sqrt($2*scale)) with yerrorbars pointtype 7 title \"dataset "
-				//	<< (iCurve+1) << "\"";
+				if(std::get<2>(m_vecDataPtrs[iCurve]))	// with errorbars?
+				{
+					ofstrDat << "\t\"-\" using ($1):($2*scale):($3*scale) "
+						<< "with yerrorbars pointtype 7 title \"dataset "
+						<< (iCurve+1) << "\"";
+				}
+				else	// without errorbars
+				{
+					ofstrDat << "\t\"-\" using ($1):($2*scale) "
+						<< "with points pointtype 7 title \"dataset "
+						<< (iCurve+1) << "\"";
+				}
 			}
 
+			// TODO: doesn't work if following curves are defined and empty
 			if(iCurve < iNumCurves-1) ofstrDat << ", \\";
 			ofstrDat << "\n";
 		}
 
 		for(const auto& pairVecs : m_vecDataPtrs)
 		{
-			const std::vector<t_real_qwt>* pVecX = pairVecs.first;
-			const std::vector<t_real_qwt>* pVecY = pairVecs.second;
+			const std::vector<t_real_qwt>* pVecX = std::get<0>(pairVecs);
+			const std::vector<t_real_qwt>* pVecY = std::get<1>(pairVecs);
+			const std::vector<t_real_qwt>* pVecYErr = std::get<2>(pairVecs);
 
+			// if no data points are available, skip the curve
 			const std::size_t iSize = std::min(pVecX->size(), pVecY->size());
+			if(!iSize) continue;
 
 			for(std::size_t iCur=0; iCur<iSize; ++iCur)
 			{
 				ofstrDat << std::left << std::setw(g_iPrec*2)
 					<< pVecX->operator[](iCur) << " ";
 				ofstrDat << std::left << std::setw(g_iPrec*2)
-					<< pVecY->operator[](iCur) << "\n";
+					<< pVecY->operator[](iCur) << " ";
+				if(pVecYErr)
+				{
+					ofstrDat << std::left << std::setw(g_iPrec*2)
+						<< pVecYErr->operator[](iCur) << " ";
+				}
+				ofstrDat << "\n";
 			}
 
 			ofstrDat << "end\n";
@@ -566,17 +601,23 @@ void QwtPlotWrapper::doUpdate()
 
 void MyQwtRasterData::SetXRange(t_real_qwt dMin, t_real_qwt dMax)
 {
+	t_real_qwt dOffs = 0.5*(dMax-dMin)/t_real_qwt(m_iW);
+	dMin -= dOffs; dMax -= dOffs;
+
 	m_dXRange[0] = dMin; m_dXRange[1] = dMax;
 #if QWT_VER>=6
-	setInterval(Qt::XAxis, QwtInterval(dMin, dMax));
+	setInterval(Qt::XAxis, QwtInterval(dMin, dMax, QwtInterval::ExcludeMaximum));
 #endif
 }
 
 void MyQwtRasterData::SetYRange(t_real_qwt dMin, t_real_qwt dMax)
 {
+	t_real_qwt dOffs = 0.5*(dMax-dMin)/t_real_qwt(m_iH);
+	dMin -= dOffs; dMax -= dOffs;
+
 	m_dYRange[0] = dMin; m_dYRange[1] = dMax;
 #if QWT_VER>=6
-	setInterval(Qt::YAxis, QwtInterval(dMin, dMax));
+	setInterval(Qt::YAxis, QwtInterval(dMin, dMax, QwtInterval::ExcludeMaximum));
 #endif
 }
 
@@ -602,8 +643,12 @@ void MyQwtRasterData::SetZRange()	// automatically determined range
 
 t_real_qwt MyQwtRasterData::value(t_real_qwt dx, t_real_qwt dy) const
 {
-	if(dx<m_dXRange[0] || dy<m_dYRange[0] ||
-		dx>=m_dXRange[1] || dy>=m_dYRange[1])
+	t_real_qwt dXMin = std::min(m_dXRange[0], m_dXRange[1]);
+	t_real_qwt dXMax = std::max(m_dXRange[0], m_dXRange[1]);
+	t_real_qwt dYMin = std::min(m_dYRange[0], m_dYRange[1]);
+	t_real_qwt dYMax = std::max(m_dYRange[0], m_dYRange[1]);
+
+	if(dx<dXMin || dy<dYMin || dx>=dXMax || dy>=dYMax)
 		return t_real_qwt(0);
 
 	std::size_t iX = tl::tic_trafo_inv(m_iW, m_dXRange[0], m_dXRange[1], 0, dx);
@@ -699,6 +744,10 @@ void set_zoomer_base(QwtPlotZoomer *pZoomer,
 	}
 }
 
+
+/**
+ * calculate zoom rectangle from x and y data points
+ */
 void set_zoomer_base(QwtPlotZoomer *pZoomer,
 	const std::vector<t_real_qwt>& vecX, const std::vector<t_real_qwt>& vecY,
 	bool bMetaCall, QwtPlotWrapper* pPlotWrap)
@@ -726,6 +775,46 @@ void set_zoomer_base(QwtPlotZoomer *pZoomer,
 	set_zoomer_base(pZoomer,
 		dminmax[0],dminmax[1],dminmax[2],dminmax[3],
 		bMetaCall, pPlotWrap);
+}
+
+
+/**
+ * calculate zoom rectangle from sets of x and y data points
+ */
+void set_zoomer_base(QwtPlotZoomer *pZoomer,
+	const std::vector<std::vector<t_real_qwt>>& vecvecX, 
+	const std::vector<std::vector<t_real_qwt>>& vecvecY,
+	bool bMetaCall, QwtPlotWrapper* pPlotWrap)
+{
+	if(!pZoomer || !vecvecX.size() || !vecvecY.size())
+		return;
+
+	std::vector<t_real_qwt> vecX, vecY;
+	for(std::size_t iVec=0; iVec<vecvecX.size(); ++iVec)
+	{
+		vecX.insert(vecX.end(), vecvecX[iVec].begin(), vecvecX[iVec].end());
+		vecY.insert(vecY.end(), vecvecY[iVec].begin(), vecvecY[iVec].end());
+	}
+
+	set_zoomer_base(pZoomer, vecX, vecY, bMetaCall, pPlotWrap);
+}
+
+/**
+ * calculate zoom rectangle from x and a set of y data points
+ */
+void set_zoomer_base(QwtPlotZoomer *pZoomer,
+	const std::vector<t_real_qwt>& vecX, 
+	const std::vector<std::vector<t_real_qwt>>& vecvecY,
+	bool bMetaCall, QwtPlotWrapper* pPlotWrap)
+{
+	if(!pZoomer || !vecX.size() || !vecvecY.size())
+		return;
+
+	std::vector<t_real_qwt> vecY;
+	for(std::size_t iVec=0; iVec<vecvecY.size(); ++iVec)
+		vecY.insert(vecY.end(), vecvecY[iVec].begin(), vecvecY[iVec].end());
+
+	set_zoomer_base(pZoomer, vecX, vecY, bMetaCall, pPlotWrap);
 }
 
 

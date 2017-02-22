@@ -279,8 +279,8 @@ void TofLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 
 
 
-	std::unique_ptr<QLineF> plineQ;
-	std::unique_ptr<QPointF> pptQ;
+	std::unique_ptr<QLineF> plineQ(nullptr);
+	std::unique_ptr<QPointF> pptQ(nullptr);
 	// Q vector direction visible?
 	if(this->m_bRealQVisible)
 	{

@@ -9,6 +9,7 @@
 #define __QWT_HELPER_H__
 
 #include <vector>
+#include <tuple>
 #include <string>
 #include <type_traits>
 #include <mutex>
@@ -115,7 +116,11 @@ protected:
 	QwtPlotSpectrogram *m_pSpec = nullptr;	// 2d plot
 
 	bool m_bHasDataPtrs = 1;
-	std::vector<std::pair<const std::vector<t_real_qwt>*, const std::vector<t_real_qwt>*>> m_vecDataPtrs;
+	std::vector<std::tuple<
+		const std::vector<t_real_qwt>*,		// x data
+		const std::vector<t_real_qwt>*,		// y data
+		const std::vector<t_real_qwt>*		// y error
+			>> m_vecDataPtrs;
 	MyQwtRasterData *m_pRaster = nullptr;
 
 public:
@@ -131,7 +136,8 @@ public:
 	bool HasTrackerSignal() const;
 
 	void SetData(const std::vector<t_real_qwt>& vecX, const std::vector<t_real_qwt>& vecY,
-		unsigned int iCurve=0, bool bReplot=1, bool bCopy=0);
+		unsigned int iCurve=0, bool bReplot=1, bool bCopy=0,
+		const std::vector<t_real_qwt>* pvecYErr = nullptr);
 
 	std::mutex& GetMutex() { return m_mutex; }
 
@@ -153,28 +159,35 @@ public slots:
 template<typename t_real, bool bSetDirectly=std::is_same<t_real, t_real_qwt>::value>
 struct set_qwt_data
 {
-	void operator()(QwtPlotWrapper& plot, const std::vector<t_real>& vecX, const std::vector<t_real>& vecY,
-		unsigned int iCurve=0, bool bReplot=1) {}
+	void operator()(QwtPlotWrapper& plot,
+		const std::vector<t_real>& vecX, const std::vector<t_real>& vecY,
+		unsigned int iCurve = 0, bool bReplot = 1,
+		const std::vector<t_real>* pvecYErr = nullptr) {}
 };
 
 // same types -> set data directly
 template<typename t_real>
 struct set_qwt_data<t_real, 1>
 {
-	void operator()(QwtPlotWrapper& plot, const std::vector<t_real>& vecX, const std::vector<t_real>& vecY,
-		unsigned int iCurve=0, bool bReplot=1)
+	void operator()(QwtPlotWrapper& plot,
+		const std::vector<t_real>& vecX, const std::vector<t_real>& vecY,
+		unsigned int iCurve = 0, bool bReplot = 1,
+		const std::vector<t_real>* pvecYErr = nullptr)
 	{
 		// copy pointers
-		plot.SetData(vecX, vecY, iCurve, bReplot, false);
+		plot.SetData(vecX, vecY, iCurve, bReplot, false, pvecYErr);
 	}
 };
 
 // different types -> copy & convert data first
+// TODO: errorbars
 template<typename t_real>
 struct set_qwt_data<t_real, 0>
 {
-	void operator()(QwtPlotWrapper& plot, const std::vector<t_real>& vecX, const std::vector<t_real>& vecY,
-		unsigned int iCurve=0, bool bReplot=1)
+	void operator()(QwtPlotWrapper& plot,
+		const std::vector<t_real>& vecX, const std::vector<t_real>& vecY,
+		unsigned int iCurve = 0, bool bReplot = 1,
+		const std::vector<t_real>* pvecYErr = nullptr)
 	{
 		std::vector<t_real_qwt> vecNewX, vecNewY;
 		vecNewX.reserve(vecX.size());
@@ -198,6 +211,16 @@ extern void set_zoomer_base(QwtPlotZoomer *pZoomer,
 
 extern void set_zoomer_base(QwtPlotZoomer *pZoomer,
 	const std::vector<t_real_qwt>& vecX, const std::vector<t_real_qwt>& vecY,
+	bool bMetaCall=false, QwtPlotWrapper* pPlotWrap=nullptr);
+
+extern void set_zoomer_base(QwtPlotZoomer *pZoomer,
+	const std::vector<std::vector<t_real_qwt>>& vecvecX,
+	const std::vector<std::vector<t_real_qwt>>& vecvecY,
+	bool bMetaCall=false, QwtPlotWrapper* pPlotWrap=nullptr);
+
+extern void set_zoomer_base(QwtPlotZoomer *pZoomer,
+	const std::vector<t_real_qwt>& vecX,
+	const std::vector<std::vector<t_real_qwt>>& vecvecY,
 	bool bMetaCall=false, QwtPlotWrapper* pPlotWrap=nullptr);
 
 

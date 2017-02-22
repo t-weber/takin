@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>359</width>
-    <height>220</height>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,28 +38,65 @@
       <property name="spacing">
        <number>2</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="editSig"/>
+      </item>
+      <item row="5" column="3">
+       <widget class="QLineEdit" name="editSlopeErr"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLineEdit" name="editSigErr"/>
+      </item>
+      <item row="5" column="4">
+       <widget class="QCheckBox" name="checkSlope">
         <property name="text">
-         <string>x Mean:</string>
+         <string>Fixed</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="editX0"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_2">
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_13">
         <property name="text">
-         <string>±</string>
+         <string>Frequency:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Slope:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="3">
        <widget class="QLineEdit" name="editX0Err"/>
       </item>
-      <item row="0" column="4">
-       <widget class="QCheckBox" name="checkX0">
+      <item row="4" column="2">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>±</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLineEdit" name="editOffsErr"/>
+      </item>
+      <item row="1" column="4">
+       <widget class="QCheckBox" name="checkSig">
+        <property name="text">
+         <string>Fixed</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>±</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="4">
+       <widget class="QCheckBox" name="checkFreq">
         <property name="text">
          <string>Fixed</string>
         </property>
@@ -72,50 +109,66 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="editSig"/>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="editX0"/>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="label_3">
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_7">
         <property name="text">
          <string>±</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QLineEdit" name="editSigErr"/>
-      </item>
-      <item row="1" column="4">
-       <widget class="QCheckBox" name="checkSig">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Fixed</string>
+         <string>x Mean:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>HWHM:</string>
-        </property>
-       </widget>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="editSlope"/>
+      </item>
+      <item row="6" column="3">
+       <widget class="QLineEdit" name="editFreqErr"/>
       </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="editHWHM"/>
       </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="label_5">
+      <item row="2" column="3">
+       <widget class="QLineEdit" name="editHWHMErr"/>
+      </item>
+      <item row="4" column="4">
+       <widget class="QCheckBox" name="checkOffs">
+        <property name="text">
+         <string>Fixed</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="label_12">
         <property name="text">
          <string>±</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="3">
-       <widget class="QLineEdit" name="editHWHMErr"/>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="editOffs"/>
       </item>
-      <item row="2" column="4">
-       <widget class="QCheckBox" name="checkHWHM">
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Fixed</string>
+         <string>±</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="editAmp"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>y Offset:</string>
         </property>
        </widget>
       </item>
@@ -126,13 +179,27 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="editAmp"/>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="editFreq"/>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="label_7">
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_3">
         <property name="text">
          <string>±</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QCheckBox" name="checkX0">
+        <property name="text">
+         <string>Fixed</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>HWHM:</string>
         </property>
        </widget>
       </item>
@@ -146,32 +213,46 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_10">
+      <item row="2" column="4">
+       <widget class="QCheckBox" name="checkHWHM">
         <property name="text">
-         <string>y Offset:</string>
+         <string>Fixed</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="editOffs"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="label_9">
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_5">
         <property name="text">
          <string>±</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
-       <widget class="QLineEdit" name="editOffsErr"/>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Phase:</string>
+        </property>
+       </widget>
       </item>
-      <item row="4" column="4">
-       <widget class="QCheckBox" name="checkOffs">
+      <item row="7" column="2">
+       <widget class="QLabel" name="label_16">
+        <property name="text">
+         <string>±</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="4">
+       <widget class="QCheckBox" name="checkPhase">
         <property name="text">
          <string>Fixed</string>
         </property>
        </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="editPhase"/>
+      </item>
+      <item row="7" column="3">
+       <widget class="QLineEdit" name="editPhaseErr"/>
       </item>
      </layout>
     </widget>
@@ -230,6 +311,15 @@
   <tabstop>editOffs</tabstop>
   <tabstop>editOffsErr</tabstop>
   <tabstop>checkOffs</tabstop>
+  <tabstop>editSlope</tabstop>
+  <tabstop>editSlopeErr</tabstop>
+  <tabstop>checkSlope</tabstop>
+  <tabstop>editFreq</tabstop>
+  <tabstop>editFreqErr</tabstop>
+  <tabstop>checkFreq</tabstop>
+  <tabstop>editPhase</tabstop>
+  <tabstop>editPhaseErr</tabstop>
+  <tabstop>checkPhase</tabstop>
   <tabstop>checkUseParams</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>

@@ -12,8 +12,8 @@ then
 
 	if [ ${GCC_VER[0]} -le 4 ] && [ ${GCC_VER[1]} -lt 8 ]
 	then
-    		echo -e "\t... which is not compatible with Takin.\n\t\tAt least version 4.8 is needed."
-	        exit -1;
+			echo -e "\t... which is not compatible with Takin.\n\t\tAt least version 4.8 is needed."
+			#exit -1;	# continue anyway...
 	fi
 fi
 

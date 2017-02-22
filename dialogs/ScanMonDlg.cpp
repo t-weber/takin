@@ -175,7 +175,9 @@ void ScanMonDlg::UpdatePlot(const std::string& strVals)
 		set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 0, 0);
 		set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 1, 0);
 
-		set_zoomer_base(m_plotwrap->GetZoomer(), m_vecX, m_vecY);
+		set_zoomer_base(m_plotwrap->GetZoomer(),
+			tl::container_cast<t_real_qwt, t_real, std::vector>()(m_vecX),
+			tl::container_cast<t_real_qwt, t_real, std::vector>()(m_vecY));
 		m_plotwrap->GetPlot()->replot();
 	}
 }

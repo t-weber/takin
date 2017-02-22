@@ -133,7 +133,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 
 	m_vecCombos =
 	{
-		t_tupCombo("main/sfact_sq", 1, comboSFact),
+		t_tupCombo("main/sfact_sq", 0, comboSFact),
 	};
 
 	spinPrecGen->setMaximum(std::numeric_limits<t_real>::max_digits10);

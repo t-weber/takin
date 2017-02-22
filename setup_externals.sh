@@ -1,8 +1,12 @@
 #!/bin/bash
 
-GTAR="$(which gnutar)"
+GTAR="$(which gtar)"
 if [ $? -ne 0 ]; then
-	GTAR="$(which tar)"
+	GTAR="$(which gnutar)"
+
+	if [ $? -ne 0 ]; then
+		GTAR="$(which tar)"
+	fi
 fi
 
 FINDQWT=http://cmake.org/Wiki/images/2/27/FindQwt.cmake

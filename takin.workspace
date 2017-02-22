@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="takin" Database="">
+<CodeLite_Workspace Name="takin" Database="" Version="10.0.0">
   <Environment>
     <![CDATA[]]>
   </Environment>
@@ -9,12 +9,14 @@
   <Project Name="monteconvo" Path="monteconvo.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
       <Project Name="takin" ConfigName="Debug"/>
       <Project Name="scanviewer" ConfigName="Debug"/>
       <Project Name="montereso" ConfigName="Debug"/>
       <Project Name="monteconvo" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="no">
+      <Environment/>
       <Project Name="takin" ConfigName="Release"/>
       <Project Name="scanviewer" ConfigName="Release"/>
       <Project Name="montereso" ConfigName="Release"/>

@@ -10,7 +10,6 @@
 
 #include "tools/monteconvo/sqwbase.h"
 #include "tlibs/math/linalg.h"
-#include <tuple>
 
 class SqwMod : public SqwBase
 {
@@ -20,8 +19,21 @@ class SqwMod : public SqwBase
 		using t_vec = tl::ublas::vector<t_real>;
 
 	protected:
+		// temperature for Bose factor
 		t_real m_dT = t_real(100);
-		t_real m_dSigma = t_real(0.05);
+
+		// peak width for creation and annihilation
+		t_real m_dSigma[2] = { t_real(0.05), t_real(0.05) };
+		bool m_bUseSingleSigma = 0;
+
+		// S(q,E) scaling factor
+		t_real m_dS0 = t_real(1.);
+
+		// incoherent amplitude and width
+		t_real m_dIncAmp = t_real(0.);
+		t_real m_dIncSigma = t_real(0.05);
+
+		// Brillouin zone centre
 		t_vec m_vecG;
 
 	public:
@@ -29,9 +41,8 @@ class SqwMod : public SqwBase
 		SqwMod(const std::string& strCfgFile);
 		virtual ~SqwMod();
 
-		std::tuple<t_real, t_real>
-		dispersion(t_real dh, t_real dk, t_real dl) const;
-
+		virtual std::tuple<std::vector<t_real>, std::vector<t_real>>
+			disp(t_real dh, t_real dk, t_real dl) const override;
 		virtual t_real operator()(t_real dh, t_real dk, t_real dl, t_real dE) const override;
 
 		virtual std::vector<t_var> GetVars() const override;

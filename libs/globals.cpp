@@ -39,13 +39,15 @@ static std::vector<std::string> s_vecInstallPaths =
 };
 
 
-void add_resource_path(const std::string& strPath)
+void add_resource_path(const std::string& strPath, bool bToBack)
 {
-	s_vecInstallPaths.push_back(strPath);
+	if(bToBack)
+		s_vecInstallPaths.push_back(strPath);
+	else	// insert at beginning, after "."
+		s_vecInstallPaths.insert(s_vecInstallPaths.begin()+1, strPath);
 }
 
-std::string find_resource(const std::string& strFile,
-	bool bLogErr)
+std::string find_resource(const std::string& strFile, bool bLogErr)
 {
 	for(const std::string& strPrefix : s_vecInstallPaths)
 	{
@@ -60,23 +62,25 @@ std::string find_resource(const std::string& strFile,
 	}
 
 	if(bLogErr)
-		tl::log_err("Could not load resource file \"", strFile, "\".");
+		tl::log_err("Could not find resource file \"", strFile, "\".");
 	return "";
 }
 
-std::string find_resource_dir(const std::string& strDir,
-	bool bLogErr)
+std::vector<std::string> find_resource_dirs(const std::string& strDir, bool bLogErr)
 {
+	std::vector<std::string> vecDirs;
+
 	for(const std::string& strPrefix : s_vecInstallPaths)
 	{
 		std::string _strDir = strPrefix + "/" + strDir;
 		if(tl::dir_exists(_strDir.c_str()))
-			return _strDir;
+			vecDirs.push_back(_strDir);
 	}
 
-	if(bLogErr)
-		tl::log_err("Could not load resource directory \"", strDir, "\".");
-	return "";
+	if(bLogErr && vecDirs.size()==0)
+		tl::log_err("Could not find resource directory \"", strDir, "\".");
+
+	return vecDirs;
 }
 
 // -----------------------------------------------------------------------------

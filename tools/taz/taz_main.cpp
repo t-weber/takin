@@ -30,6 +30,7 @@
 #include <QMetaType>
 #include <QDir>
 #include <QMessageBox>
+#include <QSplashScreen>
 
 
 #ifdef Q_WS_X11
@@ -72,6 +73,14 @@ static inline void sys_err(const SysErr& err)
 }
 
 
+static void show_splash_msg(QApplication *pApp, QSplashScreen *pSplash, const std::string &strMsg)
+{
+	QColor colSplash(0xff, 0xcc, 0x00);
+	pSplash->showMessage(strMsg.c_str(), Qt::AlignCenter, colSplash);
+	pApp->processEvents();
+}
+
+
 #define TAKIN_CHECK " Please check if Takin is correctly installed and the current working directory is set to the Takin main directory."
 
 int main(int argc, char** argv)
@@ -104,14 +113,14 @@ int main(int argc, char** argv)
 		BOOST_SCOPE_EXIT_END
 
 
-		//std::string strLog = QDir::homePath().toStdString();
 		std::string strLog = QDir::tempPath().toStdString();
 		strLog += "/takin.log";
 		std::ofstream ofstrLog(strLog, std::ios_base::out|std::ios_base::app);
 		if(add_logfile(&ofstrLog, 1))
 			tl::log_info("Logging to file \"", strLog, "\".");
 
-		tl::log_info("Starting up Takin version ", TAKIN_VER, ".");
+		const std::string strStarting = "Starting up Takin version " TAKIN_VER ".";
+		tl::log_info(strStarting);
 		tl::log_debug("Using ", sizeof(t_real_glob)*8, " bit ", tl::get_typename<t_real_glob>(), "s as internal data type.");
 
 
@@ -127,6 +136,7 @@ int main(int argc, char** argv)
 		qRegisterMetaType<CacheVal>("CacheVal");
 
 		std::unique_ptr<QApplication> app(new QApplication(argc, argv));
+
 		std::setlocale(LC_ALL, "C");
 		std::locale::global(std::locale::classic());
 		QLocale::setDefault(QLocale::English);
@@ -135,9 +145,13 @@ int main(int argc, char** argv)
 
 		app->setApplicationName("Takin");
 		app->setApplicationVersion(TAKIN_VER);
-		std::string strApp = app->applicationDirPath().toStdString();
-		tl::log_info("Application path: ", strApp);
 
+		std::string strHome = QDir::homePath().toStdString() + "/.takin";
+		std::string strApp = app->applicationDirPath().toStdString();
+		tl::log_info("Program path: ", strApp);
+		tl::log_info("Home path: ", strHome);
+
+		add_resource_path(strHome, 0);
 		add_resource_path(strApp);
 		add_resource_path(strApp + "/..");
 		add_resource_path(strApp + "/resources");
@@ -147,6 +161,20 @@ int main(int argc, char** argv)
 
 		app->addLibraryPath((strApp + "/../lib/plugins").c_str());
 		app->addLibraryPath((strApp + "/lib/plugins").c_str());
+
+
+		// ------------------------------------------------------------
+		// splash screen
+		QPixmap pixSplash = load_pixmap("res/icons/takin.svg");
+		pixSplash = pixSplash.scaled(pixSplash.size().width()*0.55, pixSplash.size().height()*0.55);
+		std::unique_ptr<QSplashScreen> pSplash(new QSplashScreen(pixSplash));
+		QFont fontSplash = pSplash->font();
+		fontSplash.setPixelSize(14);
+		fontSplash.setBold(1);
+		pSplash->setFont(fontSplash);
+
+		pSplash->show();
+		show_splash_msg(app.get(), pSplash.get(), strStarting);
 
 
 		// ------------------------------------------------------------
@@ -242,10 +270,11 @@ int main(int argc, char** argv)
 		}
 #endif
 
-		std::unique_ptr<TazDlg> dlg(new TazDlg(0));
+		std::unique_ptr<TazDlg> pDlg(new TazDlg(0));
+		pSplash->finish(pDlg.get());
 		if(argc > 1)
-			dlg->Load(argv[1]);
-		dlg->show();
+			pDlg->Load(argv[1]);
+		pDlg->show();
 		int iRet = app->exec();
 
 
@@ -263,5 +292,6 @@ int main(int argc, char** argv)
 		tl::log_crit("Exception: ", ex.what());
 		tl::log_backtrace();
 	}
+
 	return -1;
 }

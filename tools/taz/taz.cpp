@@ -334,12 +334,14 @@ TazDlg::TazDlg(QWidget* pParent)
 	pMenuFile->addSeparator();
 
 	QAction *pSettings = new QAction("Settings...", this);
+	pSettings->setMenuRole(QAction::PreferencesRole);
 	pSettings->setIcon(load_icon("res/icons/preferences-system.svg"));
 	pMenuFile->addAction(pSettings);
 
 	pMenuFile->addSeparator();
 
 	QAction *pExit = new QAction("Exit", this);
+	pExit->setMenuRole(QAction::QuitRole);
 	pExit->setIcon(load_icon("res/icons/system-log-out.svg"));
 	pMenuFile->addAction(pExit);
 
@@ -593,6 +595,9 @@ TazDlg::TazDlg(QWidget* pParent)
 	QAction *pScanViewer = new QAction("Scan Viewer...", this);
 	pMenuTools->addAction(pScanViewer);
 
+	QAction *pScanPos = new QAction("Scan Positions Plot...", this);
+	pMenuTools->addAction(pScanPos);
+
 
 
 	// --------------------------------------------------------------------------------
@@ -612,11 +617,13 @@ TazDlg::TazDlg(QWidget* pParent)
 	pMenuHelp->addSeparator();
 
 	QAction *pAboutQt = new QAction("About Qt...", this);
+	pAboutQt->setMenuRole(QAction::AboutQtRole);
 	//pAboutQt->setIcon(QIcon::fromTheme("help-about"));
 	pMenuHelp->addAction(pAboutQt);
 
 	//pMenuHelp->addSeparator();
 	QAction *pAbout = new QAction("About Takin...", this);
+	pAbout->setMenuRole(QAction::AboutRole);
 	pAbout->setIcon(load_icon("res/icons/dialog-information.svg"));
 	pMenuHelp->addAction(pAbout);
 
@@ -624,6 +631,8 @@ TazDlg::TazDlg(QWidget* pParent)
 
 	// --------------------------------------------------------------------------------
 	QMenuBar *pMenuBar = new QMenuBar(this);
+	pMenuBar->setNativeMenuBar(m_settings.value("main/native_dialogs", 1).toBool());
+
 	pMenuBar->addMenu(pMenuFile);
 	pMenuBar->addMenu(m_pMenuViewRecip);
 	pMenuBar->addMenu(m_pMenuViewReal);
@@ -642,6 +651,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	QObject::connect(pSaveAs, SIGNAL(triggered()), this, SLOT(SaveAs()));
 	QObject::connect(pImport, SIGNAL(triggered()), this, SLOT(Import()));
 	QObject::connect(pScanViewer, SIGNAL(triggered()), this, SLOT(ShowScanViewer()));
+	QObject::connect(pScanPos, SIGNAL(triggered()), this, SLOT(ShowScanPos()));
 	QObject::connect(pSettings, SIGNAL(triggered()), this, SLOT(ShowSettingsDlg()));
 	QObject::connect(pExit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -852,6 +862,7 @@ void TazDlg::DeleteDialogs()
 	if(m_pDWDlg) { delete m_pDWDlg; m_pDWDlg = 0; }
 	if(m_pDynPlaneDlg) { delete m_pDynPlaneDlg; m_pDynPlaneDlg = 0; }
 	if(m_pScanViewer) { delete m_pScanViewer; m_pScanViewer = nullptr; }
+	if(m_pScanPos) { delete m_pScanPos; m_pScanPos = nullptr; }
 	if(m_pAtomsDlg) { delete m_pAtomsDlg; m_pAtomsDlg = nullptr; }
 
 #if !defined NO_3D

@@ -148,7 +148,7 @@ int main(int argc, char** argv)
 			!tl::file_exists(ostrModFile.str().c_str()))
 			break;
 
-		tl::log_info("Processing dataset ", iNr, ".");
+		tl::log_info("Processing dataset ", iNr, ": \"", strOutDir, "/[sc|mod]", iNr, ".dat\".");
 
 		t_map map;
 		get_fileprops(ostrScFile.str().c_str(), map);

@@ -1,4 +1,4 @@
-/*
+/**
  * 3D Ellipsoid Dialog
  * @author Tobias Weber
  * @date may-2013, 29-apr-2014

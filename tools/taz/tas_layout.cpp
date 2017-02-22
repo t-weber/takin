@@ -384,8 +384,8 @@ void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 
 
 
-	QLineF *plineQ = nullptr;
-	QPointF *pptQ = nullptr;
+	std::unique_ptr<QLineF> plineQ(nullptr);
+	std::unique_ptr<QPointF> pptQ(nullptr);
 	// Q vector direction visible?
 	if(this->m_bRealQVisible)
 	{
@@ -398,8 +398,8 @@ void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 		vecQ *= (m_dLenMonoSample + m_dLenSampleAna)/2.;	// some arbitrary length
 		vecQ *= m_dScaleFactor * m_dZoom;
 
-		pptQ = new QPointF(vec_to_qpoint(vecSample + vecQ));
-		plineQ = new QLineF(ptSample, *pptQ);
+		pptQ.reset(new QPointF(vec_to_qpoint(vecSample + vecQ)));
+		plineQ.reset(new QLineF(ptSample, *pptQ));
 
 		painter->setPen(Qt::red);
 		painter->drawLine(*plineQ);
@@ -477,8 +477,8 @@ void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 
 
 	// arrow heads
-	const QLineF* pLines_arrow[] = {&lineKi, &lineKf, plineQ, &lineSrcMono, &lineAnaDet};
-	const QPointF* pPoints_arrow[] = {&ptSample, &ptAna, pptQ, &ptMono, &ptDet};
+	const QLineF* pLines_arrow[] = {&lineKi, &lineKf, plineQ.get(), &lineSrcMono, &lineAnaDet};
+	const QPointF* pPoints_arrow[] = {&ptSample, &ptAna, pptQ.get(), &ptMono, &ptDet};
 	QColor colArrowHead[] = {Qt::black, Qt::black, Qt::red, Qt::gray, Qt::gray};
 	for(std::size_t i=0; i<sizeof(pLines_arrow)/sizeof(*pLines_arrow); ++i)
 	{
@@ -503,9 +503,6 @@ void TasLayout::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidge
 	}
 
 	painter->setPen(penOrig);
-
-	if(plineQ) delete plineQ;
-	if(pptQ) delete pptQ;
 }
 
 

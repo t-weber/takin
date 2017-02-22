@@ -10,6 +10,8 @@
 
 #include <QDialog>
 #include <QSettings>
+#include <QMenuBar>
+
 #include <thread>
 #include <atomic>
 #include <memory>
@@ -37,11 +39,14 @@ protected:
 	std::atomic<bool> m_atStop;
 
 	QSettings *m_pSett = nullptr;
+	QMenuBar *m_pMenuBar = nullptr;
 	SqwParamDlg *m_pSqwParamDlg = nullptr;
 	FavDlg *m_pFavDlg = nullptr;
 
+	bool m_bAllowSqwReinit = 1;
 	std::shared_ptr<SqwBase> m_pSqw;
 	std::vector<t_real_reso> m_vecQ, m_vecS, m_vecScaledS;
+	std::vector<std::vector<t_real_reso>> m_vecvecQ, m_vecvecE, m_vecvecW;
 	std::unique_ptr<QwtPlotWrapper> m_plotwrap, m_plotwrap2d;
 
 	bool m_bUseScan = 0;
@@ -65,6 +70,7 @@ protected:
 
 	ResoFocus GetFocus() const;
 
+	void ClearPlot1D();
 	void Start1D();
 	void Start2D();
 
@@ -90,8 +96,9 @@ protected slots:
 
 	void SaveResult();
 
-	void Start();
-	void Stop();
+	void Start();		// convolution
+	void StartDisp();	// plot dispersion
+	void Stop();		// stop convo
 
 	void ChangeHK();
 	void ChangeHL();

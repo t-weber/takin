@@ -368,7 +368,7 @@
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Dynamical Structure Factor S(Q,ω)</string>
+          <string>Dynamical Structure Factor S(Q,E)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
           <property name="horizontalSpacing">

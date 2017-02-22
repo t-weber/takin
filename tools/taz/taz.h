@@ -39,6 +39,7 @@
 #include "tools/res/ResoDlg.h"
 #include "tools/monteconvo/ConvoDlg.h"
 #include "tools/scanviewer/scanviewer.h"
+#include "tools/scanpos/ScanPosDlg.h"
 #include "dialogs/SpurionDlg.h"
 #include "dialogs/NeutronDlg.h"
 #include "dialogs/GotoDlg.h"
@@ -157,6 +158,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		AboutDlg *m_pAboutDlg = nullptr;
 
 		ScanViewerDlg *m_pScanViewer = nullptr;
+		ScanPosDlg *m_pScanPos = nullptr;
 
 #if !defined NO_NET
 		SrvDlg *m_pSrvDlg = nullptr;
@@ -197,6 +199,10 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		bool Load(const char* pcFile);
 		bool Import(const char* pcFile);
 
+	protected:
+		void ExportSceneSVG(QGraphicsScene& scene);
+		void emitSampleParams();
+
 	protected slots:
 		void CalcPeaks();
 		void CalcPeaksRecip();
@@ -229,6 +235,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		bool Import();
 
 		void ShowScanViewer();
+		void ShowScanPos();
 
 		bool LoadFile(const QString& strFile);
 		bool ImportFile(const QString& strFile);
@@ -299,10 +306,6 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void RecipNodeEvent(bool bStarted);
 		void RealNodeEvent(bool bStarted);
 		void TofNodeEvent(bool bStarted);
-
-	protected:
-		void ExportSceneSVG(QGraphicsScene& scene);
-		void emitSampleParams();
 
 	signals:
 		void ResoParamsChanged(const ResoParams& resoparams);

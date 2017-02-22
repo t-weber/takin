@@ -26,6 +26,7 @@
 
 #ifndef NO_FIT
 	#include "tlibs/fit/minuit.h"
+	//#include "tlibs/fit/swarm.h"
 	using tl::t_real_min;
 #endif
 
@@ -95,12 +96,15 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	ScanViewerDlg *pThis = this;
 	QObject::connect(editPath, &QLineEdit::textEdited, pThis, &ScanViewerDlg::ChangedPath);
 	QObject::connect(listFiles, &QListWidget::currentItemChanged, pThis, &ScanViewerDlg::FileSelected);
+	QObject::connect(editSearch, &QLineEdit::textEdited, pThis, &ScanViewerDlg::SearchProps);
 	QObject::connect(btnBrowse, &QToolButton::clicked, pThis, &ScanViewerDlg::SelectDir);
 #ifndef NO_FIT
 	QObject::connect(btnParam, &QToolButton::clicked, pThis, &ScanViewerDlg::ShowFitParams);
 	QObject::connect(btnGauss, &QToolButton::clicked, pThis, &ScanViewerDlg::FitGauss);
 	QObject::connect(btnLorentz, &QToolButton::clicked, pThis, &ScanViewerDlg::FitLorentz);
 	QObject::connect(btnVoigt, &QToolButton::clicked, pThis, &ScanViewerDlg::FitVoigt);
+	QObject::connect(btnLine, &QToolButton::clicked, pThis, &ScanViewerDlg::FitLine);
+	QObject::connect(btnSine, &QToolButton::clicked, pThis, &ScanViewerDlg::FitSine);
 #endif
 	QObject::connect(comboX, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::XAxisSelected);
 	QObject::connect(comboY, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::YAxisSelected);
@@ -113,12 +117,16 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	//	this, SLOT(FileSelected()));
 	QObject::connect(listFiles, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
 		this, SLOT(FileSelected(QListWidgetItem*, QListWidgetItem*)));
+	QObject::connect(editSearch, SIGNAL(textEdited(const QString&)),
+		this, SLOT(SearchProps(const QString&)));
 	QObject::connect(btnBrowse, SIGNAL(clicked(bool)), this, SLOT(SelectDir()));
 #ifndef NO_FIT
 	QObject::connect(btnParam, SIGNAL(clicked(bool)), this, SLOT(ShowFitParams()));
 	QObject::connect(btnGauss, SIGNAL(clicked(bool)), this, SLOT(FitGauss()));
 	QObject::connect(btnLorentz, SIGNAL(clicked(bool)), this, SLOT(FitLorentz()));
 	QObject::connect(btnVoigt, SIGNAL(clicked(bool)), this, SLOT(FitVoigt()));
+	QObject::connect(btnLine, SIGNAL(clicked(bool)), this, SLOT(FitLine()));
+	QObject::connect(btnSine, SIGNAL(clicked(bool)), this, SLOT(FitSine()));
 #endif
 	QObject::connect(comboX, SIGNAL(currentIndexChanged(const QString&)),
 		this, SLOT(XAxisSelected(const QString&)));
@@ -142,6 +150,8 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	btnGauss->setEnabled(false);
 	btnLorentz->setEnabled(false);
 	btnVoigt->setEnabled(false);
+	btnLine->setEnabled(false);
+	btnSine->setEnabled(false);
 #endif
 
 #ifndef HAS_COMPLEX_ERF
@@ -159,11 +169,13 @@ ScanViewerDlg::~ScanViewerDlg()
 	if(m_pFitParamDlg) { delete m_pFitParamDlg; m_pFitParamDlg = nullptr; }
 }
 
+
 void ScanViewerDlg::closeEvent(QCloseEvent* pEvt)
 {
 	m_settings.setValue("geo", saveGeometry());
 	QDialog::closeEvent(pEvt);
 }
+
 
 void ScanViewerDlg::ClearPlot()
 {
@@ -203,6 +215,9 @@ void ScanViewerDlg::ClearPlot()
 	m_plotwrap->GetPlot()->replot();
 }
 
+/**
+ * new scan directory selected
+ */
 void ScanViewerDlg::SelectDir()
 {
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
@@ -219,9 +234,13 @@ void ScanViewerDlg::SelectDir()
 	}
 }
 
+
 void ScanViewerDlg::XAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::YAxisSelected(const QString& strLab) { PlotScan(); }
 
+/**
+ * new file selected
+ */
 void ScanViewerDlg::FileSelected(QListWidgetItem *pItem, QListWidgetItem *pItemPrev)
 {
 	//QListWidgetItem *pItem = listFiles->currentItem();
@@ -282,6 +301,18 @@ void ScanViewerDlg::FileSelected(QListWidgetItem *pItem, QListWidgetItem *pItemP
 	ShowProps();
 	PlotScan();
 }
+
+
+/**
+ * highlights a scan property field
+ */
+void ScanViewerDlg::SearchProps(const QString& qstr)
+{
+	QList<QTableWidgetItem*> lstItems = tableProps->findItems(qstr, Qt::MatchContains);
+	if(lstItems.size())
+		tableProps->setCurrentItem(lstItems[0]);
+}
+
 
 void ScanViewerDlg::PlotScan()
 {
@@ -345,6 +376,10 @@ void ScanViewerDlg::PlotScan()
 	GenerateExternal(comboExport->currentIndex());
 }
 
+
+/**
+ * convert to external plotter format
+ */
 void ScanViewerDlg::GenerateExternal(int iLang)
 {
 	textRoot->clear();
@@ -363,6 +398,10 @@ void ScanViewerDlg::GenerateExternal(int iLang)
 		tl::log_err("Unknown external language.");
 }
 
+
+/**
+ * convert to gnuplot
+ */
 void ScanViewerDlg::GenerateForGnuplot()
 {
 	const std::string& strTitle = m_strCmd;
@@ -414,6 +453,10 @@ end)RAWSTR";
 	textRoot->setText(strPySrc.c_str());
 }
 
+
+/**
+ * convert to python
+ */
 void ScanViewerDlg::GenerateForPython()
 {
 	const std::string& strTitle = m_strCmd;
@@ -499,6 +542,10 @@ plt.show())RAWSTR";
 	textRoot->setText(strPySrc.c_str());
 }
 
+
+/**
+ * convert to hermelin
+ */
 void ScanViewerDlg::GenerateForHermelin()
 {
     std::string strStoatSrc =
@@ -555,6 +602,10 @@ main(args)
 	textRoot->setText(strStoatSrc.c_str());
 }
 
+
+/**
+ * convert to Roots
+ */
 void ScanViewerDlg::GenerateForRoot()
 {
 	const std::string& strTitle = m_strCmd;
@@ -622,6 +673,10 @@ R"RAWSTR(void scan_plot()
 	textRoot->setText(strRootSrc.c_str());
 }
 
+
+/**
+ * save selected property key for later
+ */
 void ScanViewerDlg::PropSelected(QTableWidgetItem *pItem, QTableWidgetItem *pItemPrev)
 {
 	if(!pItem)
@@ -640,6 +695,10 @@ void ScanViewerDlg::PropSelected(QTableWidgetItem *pItem, QTableWidgetItem *pIte
 	}
 }
 
+
+/**
+ * save selected property key for later
+ */
 void ScanViewerDlg::ShowProps()
 {
 	if(m_pInstr==nullptr || !m_bDoUpdate)
@@ -696,6 +755,10 @@ void ScanViewerDlg::ShowProps()
 		tableProps->selectRow(0);
 }
 
+
+/**
+ * new directory entered
+ */
 void ScanViewerDlg::ChangedPath()
 {
 	listFiles->clear();
@@ -716,6 +779,10 @@ void ScanViewerDlg::ChangedPath()
 	}
 }
 
+
+/**
+ * re-populate file list
+ */
 void ScanViewerDlg::UpdateFileList()
 {
 	listFiles->clear();
@@ -755,6 +822,9 @@ void ScanViewerDlg::ShowFitParams()
 	m_pFitParamDlg->activateWindow();
 }
 
+/**
+ * fit a function to data points
+ */
 template<std::size_t iFuncArgs, class t_func>
 bool ScanViewerDlg::Fit(t_func&& func,
 	const std::vector<std::string>& vecParamNames,
@@ -787,6 +857,9 @@ bool ScanViewerDlg::Fit(t_func&& func,
 			vecParamNames, _vecVals, _vecErrs, &vecFixed);
 		vecVals = tl::container_cast<t_real, t_real_min, std::vector>()(_vecVals);
 		vecErrs = tl::container_cast<t_real, t_real_min, std::vector>()(_vecErrs);
+
+		//bOk = tl::swarmfit<t_real, iFuncArgs>(func, m_vecX, m_vecY, m_vecYErr,
+		//	vecParamNames, vecVals, vecErrs/*, &vecFixed*/);
 	}
 	catch(const std::exception& ex)
 	{
@@ -820,6 +893,102 @@ bool ScanViewerDlg::Fit(t_func&& func,
 	PlotScan();
 	return true;
 }
+
+
+void ScanViewerDlg::FitLine()
+{
+	auto func = [](t_real x, t_real m, t_real offs) -> t_real { return m*x + offs; };
+	constexpr std::size_t iFuncArgs = 3;
+
+	t_real_glob dSlope = m_pFitParamDlg->GetSlope(),	dSlopeErr = m_pFitParamDlg->GetSlopeErr();
+	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),		dOffsErr = m_pFitParamDlg->GetOffsErr();
+
+	bool bSlopeFixed = m_pFitParamDlg->GetSlopeFixed();
+	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+
+	// automatic parameter determination
+	if(!m_pFitParamDlg->WantParams())
+	{
+		auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
+		auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
+
+		dSlope = (*minmaxY.second - *minmaxY.first) / (*minmaxX.second - *minmaxX.first);
+		dOffs = *minmaxY.first;
+
+		dSlopeErr = dSlope * 0.1;
+		dOffsErr = dOffs * 0.1;
+
+		bSlopeFixed = bOffsFixed = 0;
+	}
+
+	std::vector<std::string> vecParamNames = { "slope", "offs" };
+	std::vector<t_real> vecVals = { dSlope, dOffs };
+	std::vector<t_real> vecErrs = { dSlopeErr, dOffsErr };
+	std::vector<bool> vecFixed = { bSlopeFixed, bOffsFixed };
+
+	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
+		return;
+
+	for(t_real &d : vecErrs)
+		d = std::abs(d);
+
+	m_pFitParamDlg->SetSlope(vecVals[0]);	m_pFitParamDlg->SetSlopeErr(vecErrs[0]);
+	m_pFitParamDlg->SetOffs(vecVals[1]);	m_pFitParamDlg->SetOffsErr(vecErrs[1]);
+}
+
+
+void ScanViewerDlg::FitSine()
+{
+	auto func = [](t_real x, t_real amp, t_real freq, t_real phase, t_real offs) -> t_real
+		{ return amp*std::sin(freq*x + phase) + offs; };
+	constexpr std::size_t iFuncArgs = 5;
+
+	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
+	t_real_glob dFreq = m_pFitParamDlg->GetFreq(),	dFreqErr = m_pFitParamDlg->GetFreqErr();
+	t_real_glob dPhase = m_pFitParamDlg->GetPhase(),dPhaseErr = m_pFitParamDlg->GetPhaseErr();
+	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),	dOffsErr = m_pFitParamDlg->GetOffsErr();
+
+	bool bAmpFixed = m_pFitParamDlg->GetAmpFixed();
+	bool bFreqFixed = m_pFitParamDlg->GetFreqFixed();
+	bool bPhaseFixed = m_pFitParamDlg->GetPhaseFixed();
+	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+
+	// automatic parameter determination
+	if(!m_pFitParamDlg->WantParams())
+	{
+		auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
+		auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
+
+		dFreq = t_real(2.*M_PI) / (*minmaxX.second - *minmaxX.first);
+		dOffs = *minmaxY.first + (*minmaxY.second - *minmaxY.first)*0.5;
+		dAmp = *minmaxY.second - dOffs;
+		dPhase = 0.;
+
+		dFreqErr = dFreq * 0.1;
+		dOffsErr = dOffs * 0.1;
+		dAmpErr = dAmp * 0.1;
+		dPhaseErr = M_PI;
+
+		bAmpFixed = bFreqFixed = bPhaseFixed = bOffsFixed = 0;
+	}
+
+	std::vector<std::string> vecParamNames = { "amp", "freq", "phase",  "offs" };
+	std::vector<t_real> vecVals = { dAmp, dFreq, dPhase, dOffs };
+	std::vector<t_real> vecErrs = { dAmpErr, dFreqErr, dPhaseErr, dOffsErr };
+	std::vector<bool> vecFixed = { bAmpFixed, bFreqFixed, bPhaseFixed, bOffsFixed };
+
+	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
+		return;
+
+	for(t_real &d : vecErrs)
+		d = std::abs(d);
+
+	m_pFitParamDlg->SetAmp(vecVals[0]);		m_pFitParamDlg->SetAmpErr(vecErrs[0]);
+	m_pFitParamDlg->SetFreq(vecVals[1]);	m_pFitParamDlg->SetFreqErr(vecErrs[1]);
+	m_pFitParamDlg->SetPhase(vecVals[2]);	m_pFitParamDlg->SetPhaseErr(vecErrs[2]);
+	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
+}
+
 
 void ScanViewerDlg::FitGauss()
 {
@@ -871,6 +1040,7 @@ void ScanViewerDlg::FitGauss()
 	m_pFitParamDlg->SetAmp(vecVals[2]);		m_pFitParamDlg->SetAmpErr(vecErrs[2]);
 	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
 }
+
 
 void ScanViewerDlg::FitLorentz()
 {
@@ -993,6 +1163,8 @@ void ScanViewerDlg::ShowFitParams() {}
 void ScanViewerDlg::FitGauss() {}
 void ScanViewerDlg::FitLorentz() {}
 void ScanViewerDlg::FitVoigt() {}
+void ScanViewerDlg::FitLine() {}
+void ScanViewerDlg::FitSine() {}
 
 #endif
 

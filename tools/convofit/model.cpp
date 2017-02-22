@@ -321,6 +321,8 @@ bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax, std::siz
 		ofstr << "## Data columns: (1) scan axis, (2) intensity";
 		ofstr << ", (3) Bragg Qx (rlu), (4) Bragg Qy (rlu), (5) Bragg Qz (rlu), (6) Bragg E (meV)\n";
 
+		std::vector<t_real> vecFWHMs[4];
+
 		for(std::size_t i=0; i<iNum; ++i)
 		{
 			t_real dX = tl::lerp(dXMin, dXMax, t_real(i)/t_real(iNum-1));
@@ -344,11 +346,22 @@ bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax, std::siz
 				 resores.reso, resores.reso_v, resores.Q_avg);
 
 			const std::vector<t_real> vecFwhms = calc_bragg_fwhms(resoHKL);
+			for(int iFwhm=0; iFwhm<4; ++iFwhm)
+				vecFWHMs[iFwhm].push_back(vecFwhms[iFwhm]);
+
 			for(t_real dFwhm : vecFwhms)
 				ofstr << std::left << std::setw(NUM_PREC*2) << dFwhm << " ";
 			ofstr << "\n";
 		}
 
+		for(int iFwhm=0; iFwhm<4; ++iFwhm)
+		{
+			t_real dSig = tl::mean_value(vecFWHMs[iFwhm]);
+			t_real dDSig = tl::std_dev(vecFWHMs[iFwhm]);
+			ofstr << "# " << "bragg_sig_" << iFwhm << " = "
+				<< dSig*tl::get_FWHM2SIGMA<t_real>() << " +- "
+				<< dDSig*tl::get_FWHM2SIGMA<t_real>() << "\n";
+		}
 	}
 	catch(const std::exception& ex)
 	{

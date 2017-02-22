@@ -46,7 +46,12 @@ function bose_cutoff(E, T, Ecut=0.02)
 end
 
 
+
+# -----------------------------------------------------------------------------
+
+#
 # global variables which can be accessed / changed by Takin
+#
 g_G = vec([1., 1., 0.])	# Bragg peak
 g_D = 50.				# magnon stiffness
 g_offs = 0.				# energy gap
@@ -60,22 +65,43 @@ g_T = 100.			# temperature
 g_bose_cut = 0.02	# Bose cutoff
 
 
-# the init function is called after Takin has changed a global variable
+
+# -----------------------------------------------------------------------------
+
+#
+# the init function is called after Takin has changed a global variable (optional)
+#
 function TakinInit()
 	println("Calling TakinInit")
 end
 
 
-# called for every Monte-Carlo point
-function TakinSqw(h::Float64, k::Float64, l::Float64, E::Float64)::Float64
-	#println("Calling TakinSqw(", h, ", ", k, ", ", l, ", ", E, ") -> ", S)
+#
+# dispersion E(Q) and weight factor (optional)
+#
+function TakinDisp(h::Float64, k::Float64, l::Float64)
+	# momentum
 	Q = vec([h,k,l])
+	# reduced momentum
 	q = vecnorm(Q - g_G)
 
+	# energy
 	E_peak = disp_ferro(q, g_D, g_offs)
+	# weight
+	w_peak = 1.
+	return [[E_peak, -E_peak], [w_peak, w_peak]]
+end
 
-	S_p = gauss(E, E_peak, g_sig, g_S0)
-	S_m = gauss(E, -E_peak, g_sig, g_S0)
+
+#
+# called for every Monte-Carlo point
+#
+function TakinSqw(h::Float64, k::Float64, l::Float64, E::Float64)::Float64
+	#println("Calling TakinSqw(", h, ", ", k, ", ", l, ", ", E, ") -> ", S)
+	Es, ws = TakinDisp(h,k,l)
+
+	S_p = gauss(E, Es[1], g_sig, g_S0*ws[1])
+	S_m = gauss(E, Es[2], g_sig, g_S0*ws[2])
 	incoh = gauss(E, 0., g_inc_sig, g_inc_amp)
 
 	b = 1.
@@ -83,3 +109,11 @@ function TakinSqw(h::Float64, k::Float64, l::Float64, E::Float64)::Float64
 	S = (S_p + S_m)*b + incoh
 	return Float64(S)
 end
+
+
+
+# -----------------------------------------------------------------------------
+# test
+#
+#println(TakinSqw(1., 1., 0., 0.))
+#

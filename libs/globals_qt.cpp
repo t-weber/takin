@@ -25,3 +25,12 @@ QIcon load_icon(const std::string& strIcon)
 
 	return QIcon();
 }
+
+QPixmap load_pixmap(const std::string& strIcon)
+{
+	std::string strFile = find_resource(strIcon);
+	if(strFile != "")
+		return QPixmap(strFile.c_str());
+
+	return QPixmap();
+}

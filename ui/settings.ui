@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
-    <height>458</height>
+    <width>446</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -345,7 +345,7 @@
              <string>Structure Factor</string>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <item>
              <property name="text">
@@ -365,7 +365,7 @@
        <item row="0" column="1">
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
-          <string>Dialogs</string>
+          <string>GUI</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <property name="margin">
@@ -387,7 +387,7 @@
           <item row="0" column="0">
            <widget class="QCheckBox" name="checkNativeDlg">
             <property name="text">
-             <string>Prefer Native Dialogs</string>
+             <string>Prefer Native UI</string>
             </property>
            </widget>
           </item>

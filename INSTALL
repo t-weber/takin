@@ -11,6 +11,9 @@ system's package manager or directly from the given URLs:
 	* Minuit 2: http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/release/download.html
 
 
+Set up takin data files and tlibs library:
+	* ./setup_tlibs.sh
+
 Set up other external dependencies:
 	* ./setup_externals.sh
 

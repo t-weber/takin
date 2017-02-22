@@ -1,4 +1,4 @@
-/*
+/**
  * Ellipse Dialog
  * @author Tobias Weber
  * @date 2013 - 2016
