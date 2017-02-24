@@ -96,7 +96,7 @@ EllipseDlg::~EllipseDlg()
 void EllipseDlg::SetTitle(const char* pcTitle)
 {
 	QString strTitle = m_pcTitle;
-	strTitle += " -- ";
+	strTitle += " - ";
 	strTitle += pcTitle;
 	this->setWindowTitle(strTitle);
 }

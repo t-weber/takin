@@ -10,6 +10,7 @@
 
 #include <QDialog>
 #include <QSettings>
+#include <QFileSystemWatcher>
 #include <string>
 #include <vector>
 #include <memory>
@@ -26,6 +27,8 @@ class ScanViewerDlg : public QDialog, Ui::ScanViewerDlg
 { Q_OBJECT
 protected:
 	QSettings m_settings;
+
+	std::unique_ptr<QFileSystemWatcher> m_pWatcher;
 	std::string m_strCurDir, m_strCurFile;
 	std::string m_strSelectedKey;
 	std::vector<std::string> m_vecExts;
@@ -72,6 +75,7 @@ protected slots:
 	void PropSelected(QTableWidgetItem *pItem, QTableWidgetItem *pItemPrev);
 	void SelectDir();
 	void ChangedPath();
+	void DirWasModified(const QString&);
 	void SearchProps(const QString&);
 
 	void XAxisSelected(const QString&);

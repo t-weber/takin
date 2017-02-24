@@ -26,7 +26,7 @@
 
 #ifndef NO_FIT
 	#include "tlibs/fit/minuit.h"
-	//#include "tlibs/fit/swarm.h"
+	#include "tlibs/fit/swarm.h"
 	using tl::t_real_min;
 #endif
 
@@ -775,7 +775,37 @@ void ScanViewerDlg::ChangedPath()
 			m_strCurDir += fs::path::preferred_separator;
 		UpdateFileList();
 
+		// watch directory for changes
+		m_pWatcher.reset(new QFileSystemWatcher(this));
+		m_pWatcher->addPath(m_strCurDir.c_str());
+		QObject::connect(m_pWatcher.get(), SIGNAL(directoryChanged(const QString&)),
+			this, SLOT(DirWasModified(const QString&)));
+
 		m_settings.setValue("last_dir", QString(m_strCurDir.c_str()));
+	}
+}
+
+
+/**
+ * the current directory has been modified externally
+ */
+void ScanViewerDlg::DirWasModified(const QString& strDir)
+{
+	// get currently selected item
+	QString strTxt;
+	const QListWidgetItem *pCur = listFiles->currentItem();
+	if(pCur)
+		strTxt = pCur->text();
+
+	UpdateFileList();
+
+	// re-select previously selected item
+	if(pCur)
+	{
+		QList<QListWidgetItem*> lstItems = listFiles->findItems(
+			strTxt, Qt::MatchExactly);
+		if(lstItems.size())
+			listFiles->setCurrentItem(*lstItems.begin(), QItemSelectionModel::SelectCurrent);
 	}
 }
 
@@ -848,6 +878,21 @@ bool ScanViewerDlg::Fit(t_func&& func,
 	try
 	{
 		std::vector<t_real_min> _vecVals, _vecErrs;
+
+		if(checkSwarm->isChecked())
+		{
+			_vecVals = vecVals;
+			_vecErrs = vecErrs;
+
+			bool bSwarmOk = tl::swarmfit<t_real, iFuncArgs>
+				(func, m_vecX, m_vecY, m_vecYErr, vecParamNames, _vecVals, _vecErrs);
+			if(bSwarmOk)
+			{
+				vecVals = _vecVals;
+				vecErrs = _vecErrs;
+			}
+		}
+
 		_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals);
 		_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
 		bOk = tl::fit<iFuncArgs>(func,
@@ -857,9 +902,6 @@ bool ScanViewerDlg::Fit(t_func&& func,
 			vecParamNames, _vecVals, _vecErrs, &vecFixed);
 		vecVals = tl::container_cast<t_real, t_real_min, std::vector>()(_vecVals);
 		vecErrs = tl::container_cast<t_real, t_real_min, std::vector>()(_vecErrs);
-
-		//bOk = tl::swarmfit<t_real, iFuncArgs>(func, m_vecX, m_vecY, m_vecYErr,
-		//	vecParamNames, vecVals, vecErrs/*, &vecFixed*/);
 	}
 	catch(const std::exception& ex)
 	{
@@ -868,7 +910,7 @@ bool ScanViewerDlg::Fit(t_func&& func,
 
 	if(!bOk)
 	{
-		QMessageBox::critical(this, "Error", "Could not fit function.");
+		QMessageBox::critical(this, "Error", "Could not fit function. Please set or improve the initial parameters.");
 		return false;
 	}
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
-    <height>443</height>
+    <width>689</width>
+    <height>442</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -2301,14 +2301,14 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Pulse:</string>
+             <string>Pulse Δt:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spinTofPulseSig">
             <property name="prefix">
-             <string>Δt = </string>
+             <string/>
             </property>
             <property name="suffix">
              <string> μs</string>
@@ -2336,14 +2336,14 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Mono.:</string>
+             <string>Mono. Δt:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="spinTofMonoSig">
             <property name="prefix">
-             <string>Δt = </string>
+             <string/>
             </property>
             <property name="suffix">
              <string> μs</string>
@@ -2371,14 +2371,14 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Detector:</string>
+             <string>Det. Δt:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="spinTofDetSig">
             <property name="prefix">
-             <string>Δt = </string>
+             <string/>
             </property>
             <property name="suffix">
              <string> μs</string>

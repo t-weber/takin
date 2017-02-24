@@ -197,6 +197,13 @@
                 </property>
                </widget>
               </item>
+              <item row="1" column="0">
+               <widget class="QCheckBox" name="checkSwarm">
+                <property name="text">
+                 <string>Swarm Pre-Fitter</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -673,6 +680,7 @@
   <tabstop>btnVoigt</tabstop>
   <tabstop>btnLine</tabstop>
   <tabstop>btnSine</tabstop>
+  <tabstop>checkSwarm</tabstop>
   <tabstop>comboX</tabstop>
   <tabstop>comboY</tabstop>
   <tabstop>editTitle</tabstop>
@@ -694,9 +702,9 @@
   <tabstop>editPlaneY1</tabstop>
   <tabstop>editPlaneY2</tabstop>
   <tabstop>tableProps</tabstop>
-  <tabstop>editSearch</tabstop>
   <tabstop>comboExport</tabstop>
   <tabstop>textRoot</tabstop>
+  <tabstop>editSearch</tabstop>
  </tabstops>
  <resources/>
  <connections/>

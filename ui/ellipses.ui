@@ -79,7 +79,7 @@
          <string>Center Ellipses on Coordinate Origin</string>
         </property>
         <property name="text">
-         <string>Center</string>
+         <string>Centre</string>
         </property>
         <property name="checked">
          <bool>true</bool>
