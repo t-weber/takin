@@ -101,6 +101,7 @@ void NetCacheDlg::UpdateValue(const std::string& strKey, const CacheVal& val)
 	QString qstrVal = val.strVal.c_str();
 	//tl::log_debug("updating net cache: ", strKey, ", ", val.strVal);
 
+	// look for item with qstrKey
 	for(iRow=0; iRow < tableCache->rowCount(); ++iRow)
 	{
 		if(tableCache->item(iRow, ITEM_KEY)->text() == qstrKey)

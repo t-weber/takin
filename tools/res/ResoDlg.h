@@ -12,6 +12,7 @@
 #include <QDialog>
 #include <QLabel>
 
+#include <memory>
 #include <vector>
 #include <map>
 #include <string>
@@ -31,6 +32,7 @@
 #include "dialogs/RecipParamDlg.h"
 #include "dialogs/RealParamDlg.h"
 #include "dialogs/EllipseDlg.h"
+#include "dialogs/TOFDlg.h"
 
 
 // parameters that are not already in RealParams or RecipParams
@@ -108,6 +110,9 @@ protected:
 	bool m_bUpdateOnRealEvent = 1;
 	bool m_bUpdateOnRecipEvent = 1;
 
+	std::unique_ptr<TOFDlg> m_pTOFDlg;
+
+
 	ResoAlgo GetSelectedAlgo() const;
 	void SetSelectedAlgo(ResoAlgo algo);
 
@@ -120,6 +125,8 @@ public:
 protected slots:
 	void Calc();
 	void AlgoChanged();
+
+	void ShowTOFCalcDlg();
 
 	void SaveRes();
 	void LoadRes();

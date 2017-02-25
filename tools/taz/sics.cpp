@@ -587,4 +587,5 @@ void SicsCache::update_live_plot()
 	emit updated_cache_value("__liveplot__", cacheval);
 }
 
+
 #include "sics.moc"

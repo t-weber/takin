@@ -525,18 +525,17 @@ bool TazDlg::Import()
 	const bool bShowPreview = m_settings.value("main/dlg_previews", true).toBool();
 	QString strDirLast = m_settings.value("main/last_import_dir", ".").toString();
 
-	QFileDialog *pdlg = nullptr;
+	std::unique_ptr<QFileDialog> pdlg;
 	if(bShowPreview)
 	{
-		pdlg = new FilePreviewDlg(this, "Import Data File...", &m_settings);
+		pdlg.reset(new FilePreviewDlg(this, "Import Data File...", &m_settings));
 		pdlg->setOptions(QFileDialog::DontUseNativeDialog);
 	}
 	else
 	{
-		pdlg = new QFileDialog(this, "Import Data File...");
+		pdlg.reset(new QFileDialog(this, "Import Data File..."));
 		pdlg->setOptions(fileopt);
 	}
-	std::unique_ptr<QFileDialog> ptrdlg(pdlg);
 
 	pdlg->setDirectory(strDirLast);
 	pdlg->setFileMode(QFileDialog::ExistingFile);

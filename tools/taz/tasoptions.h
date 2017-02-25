@@ -66,6 +66,13 @@ struct TriangleOptions
 		if(!tl::float_equal(dAngleKiVec0, op.dAngleKiVec0, g_dEps)) return false;
 		return true;
 	}
+
+	bool IsAnythingChanged() const
+	{
+		return bChangedTheta || bChangedTwoTheta || bChangedAnaTwoTheta ||
+			bChangedMonoTwoTheta || bChangedMonoD || bChangedAnaD ||
+			bChangedAngleKiVec0;
+	}
 };
 
 struct CrystalOptions
@@ -75,6 +82,7 @@ struct CrystalOptions
 	bool bChangedSpacegroup = 0;
 	bool bChangedPlane1 = 0;
 	bool bChangedPlane2 = 0;
+	bool bChangedSampleName = 0;
 
 	t_real_glob dLattice[3];
 	t_real_glob dLatticeAngles[3];
@@ -83,6 +91,14 @@ struct CrystalOptions
 	t_real_glob dPlane2[3];
 
 	std::string strSampleName;
+
+	bool IsAnythingChanged() const
+	{
+		return bChangedLattice || bChangedLatticeAngles ||
+			bChangedSpacegroup || bChangedPlane1 || bChangedPlane2 ||
+			bChangedSampleName;
+	}
+
 };
 
 

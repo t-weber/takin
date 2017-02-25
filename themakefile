@@ -14,7 +14,7 @@ USE_BOOST_REGEX = 0
 USE_GIL = 1
 USE_PY = 1
 USE_JL = 1
-USE_PLUGINS = 0
+USE_PLUGINS = 1
 USE_FADDEEVA = 1
 USE_CPP11_ABI = 1
 USE_FRAMEWORKS = 0
@@ -362,7 +362,7 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/DispDlg.o obj/FavDlg.o \
 	obj/SettingsDlg.o obj/DWDlg.o obj/DynPlaneDlg.o obj/FormfactorDlg.o \
 	obj/FilePreviewDlg.o obj/AtomsDlg.o \
-	obj/SpurionDlg.o obj/NeutronDlg.o \
+	obj/SpurionDlg.o obj/NeutronDlg.o obj/TOFDlg.o \
 	obj/crystalsys.o obj/formfact.o \
 	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
 	obj/ResoDlg.o obj/ResoDlg_file.o obj/loadinstr.o obj/recent.o obj/globals.o \
@@ -388,8 +388,8 @@ OBJ_CONVOSERIES = obj/scanseries.o obj/log.o obj/debug.o
 OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 	obj/spec_char.o obj/reso_res_main.o \
 	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
-	obj/ResoDlg.o obj/ResoDlg_file.o \
-	obj/linalg2.o obj/globals.o obj/globals_qt.o
+	obj/ResoDlg.o obj/ResoDlg_file.o obj/TOFDlg.o \
+	obj/linalg2.o obj/globals.o obj/globals_qt.o obj/eval.o
 
 OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
@@ -560,6 +560,8 @@ obj/DynPlaneDlg.o: dialogs/DynPlaneDlg.cpp dialogs/DynPlaneDlg.h
 obj/FormfactorDlg.o: dialogs/FormfactorDlg.cpp dialogs/FormfactorDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/NeutronDlg.o: dialogs/NeutronDlg.cpp dialogs/NeutronDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/TOFDlg.o: dialogs/TOFDlg.cpp dialogs/TOFDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/SrvDlg.o: dialogs/SrvDlg.cpp dialogs/SrvDlg.h
 	${CC} ${FLAGS} -c -o $@ $<

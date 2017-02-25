@@ -176,6 +176,8 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(ButtonBoxClicked(QAbstractButton*)));
 	connect(btnSave, SIGNAL(clicked()), this, SLOT(SaveRes()));
 	connect(btnLoad, SIGNAL(clicked()), this, SLOT(LoadRes()));
+	connect(btnTOFCalc, SIGNAL(clicked()), this, SLOT(ShowTOFCalcDlg()));
+
 
 	m_bDontCalc = 0;
 	RefreshQEPos();
@@ -1100,6 +1102,16 @@ void ResoDlg::AlgoChanged()
 	labelAlgoRef->setOpenExternalLinks(1);
 }
 
+
+// --------------------------------------------------------------------------------
+
+void ResoDlg::ShowTOFCalcDlg()
+{
+	if(!m_pTOFDlg)
+		m_pTOFDlg.reset(new TOFDlg(this, m_pSettings));
+	m_pTOFDlg->show();
+	m_pTOFDlg->activateWindow();
+}
 
 // --------------------------------------------------------------------------------
 

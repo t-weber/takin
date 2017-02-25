@@ -61,36 +61,39 @@ NeutronDlg::NeutronDlg(QWidget* pParent, QSettings *pSett)
 
 
 
-	std::vector<QLineEdit*> editsDir = {editBraggDirN, editBraggDirLam, editBraggDirD, editBraggDirT, editBraggDirTT};
-	std::vector<QLineEdit*> editsReci = {editBraggReciN, editBraggReciLam, editBraggReciQ, editBraggReciT, editBraggReciTT};
-	std::vector<QRadioButton*> radioDir = {/*radioBraggDirN,*/ radioBraggDirLam, radioBraggDirD, radioBraggDirTT};
-	std::vector<QRadioButton*> radioReci = {/*radioBraggReciN,*/ radioBraggReciLam, radioBraggReciQ, radioBraggReciTT};
+	std::vector<QLineEdit*> editsReci = { editBraggReciN, editBraggReciLam, 
+		editBraggReciK, editBraggReciQ, editBraggRecid, editBraggReciT, editBraggReciTT };
+	std::vector<QRadioButton*> radioReci = { /*radioBraggReciN,*/ radioBraggReciLam, 
+		radioBraggReciQ, radioBraggReciTT };
 
-	QObject::connect(editBraggDirT, SIGNAL(textEdited(const QString&)), this, SLOT(RealThetaEdited()));
 	QObject::connect(editBraggReciT, SIGNAL(textEdited(const QString&)), this, SLOT(RecipThetaEdited()));
-	QObject::connect(editBraggDirTT, SIGNAL(textEdited(const QString&)), this, SLOT(RealTwoThetaEdited()));
 	QObject::connect(editBraggReciTT, SIGNAL(textEdited(const QString&)), this, SLOT(RecipTwoThetaEdited()));
 
-	for(QLineEdit* pEdit : editsDir)
-		QObject::connect(pEdit, SIGNAL(textEdited(const QString&)), this, SLOT(CalcBraggReal()));
+	QObject::connect(editBraggReciLam, SIGNAL(textEdited(const QString&)), this, SLOT(RecipLamEdited()));
+	QObject::connect(editBraggReciK, SIGNAL(textEdited(const QString&)), this, SLOT(RecipKEdited()));
+
+	QObject::connect(editBraggReciQ, SIGNAL(textEdited(const QString&)), this, SLOT(RecipGEdited()));
+	QObject::connect(editBraggRecid, SIGNAL(textEdited(const QString&)), this, SLOT(RecipDEdited()));
+
 	for(QLineEdit* pEdit : editsReci)
 		QObject::connect(pEdit, SIGNAL(textEdited(const QString&)), this, SLOT(CalcBraggRecip()));
-	for(QRadioButton* pRadio : radioDir)
-	{
-		QObject::connect(pRadio, SIGNAL(toggled(bool)), this, SLOT(EnableRealEdits()));
-		QObject::connect(pRadio, SIGNAL(toggled(bool)), this, SLOT(CalcBraggReal()));
-	}
 	for(QRadioButton* pRadio : radioReci)
 	{
 		QObject::connect(pRadio, SIGNAL(toggled(bool)), this, SLOT(EnableRecipEdits()));
 		QObject::connect(pRadio, SIGNAL(toggled(bool)), this, SLOT(CalcBraggRecip()));
 	}
+
 	QObject::connect(editEval, SIGNAL(textEdited(const QString&)), this, SLOT(Eval(const QString&)));
 
 
-	EnableRealEdits();
 	EnableRecipEdits();
-	CalcBraggReal();
+
+	// fill inital values
+	SetEditTT(editBraggReciT, editBraggReciTT);
+	SetEditK(editBraggReciLam, editBraggReciK);
+	SetEditD(editBraggReciQ, editBraggRecid);
+
+	// calculate initial values
 	CalcBraggRecip();
 
 
@@ -122,7 +125,7 @@ void NeutronDlg::CalcNeutronLam()
 {
 	std::string strInput = editLam->text().toStdString();
 
-	tl::t_length_si<t_real> lam_n = tl::str_to_var<t_real>(strInput) * angs;
+	tl::t_length_si<t_real> lam_n = tl::str_to_var_parse<t_real>(strInput) * angs;
 
 	tl::t_wavenumber_si<t_real> k_n = tl::lam2k(lam_n);
 	tl::t_momentum_si<t_real> p_n = tl::lam2p(lam_n);
@@ -140,7 +143,7 @@ void NeutronDlg::CalcNeutronk()
 {
 	std::string strInput = editK->text().toStdString();
 
-	tl::t_wavenumber_si<t_real> k_n = tl::str_to_var<t_real>(strInput) / angs;
+	tl::t_wavenumber_si<t_real> k_n = tl::str_to_var_parse<t_real>(strInput) / angs;
 	tl::t_length_si<t_real> lam_n = tl::k2lam(k_n);
 	tl::t_momentum_si<t_real> p_n = tl::lam2p(lam_n);
 	tl::t_energy_si<t_real> E_n = p_n*p_n / (t_real(2.)*tl::get_m_n<t_real>());
@@ -157,7 +160,7 @@ void NeutronDlg::CalcNeutronv()
 {
 	std::string strInput = editV->text().toStdString();
 
-	tl::t_velocity_si<t_real> v_n = tl::str_to_var<t_real>(strInput) * meter / sec;
+	tl::t_velocity_si<t_real> v_n = tl::str_to_var_parse<t_real>(strInput) * meter / sec;
 	tl::t_wavenumber_si<t_real> k_n = tl::v2k(v_n);
 	tl::t_length_si<t_real> lam_n = tl::k2lam(k_n);
 	tl::t_momentum_si<t_real> p_n = tl::lam2p(lam_n);
@@ -176,7 +179,7 @@ void NeutronDlg::CalcNeutronE()
 	std::string strInput = editE->text().toStdString();
 
 	bool bImag = 0;
-	tl::t_energy_si<t_real> E_n = tl::str_to_var<t_real>(strInput) * meV;
+	tl::t_energy_si<t_real> E_n = tl::str_to_var_parse<t_real>(strInput) * meV;
 	tl::t_wavenumber_si<t_real> k_n = tl::E2k(E_n, bImag);
 	tl::t_length_si<t_real> lam_n = tl::k2lam(k_n);
 	tl::t_momentum_si<t_real> p_n = tl::lam2p(lam_n);
@@ -194,7 +197,7 @@ void NeutronDlg::CalcNeutronOm()
 	std::string strInput = editOm->text().toStdString();
 
 	bool bImag = 0;
-	tl::t_energy_si<t_real> E_n = tl::str_to_var<t_real>(strInput) / ps * tl::get_hbar<t_real>();
+	tl::t_energy_si<t_real> E_n = tl::str_to_var_parse<t_real>(strInput) / ps * tl::get_hbar<t_real>();
 	tl::t_wavenumber_si<t_real> k_n = tl::E2k(E_n, bImag);
 	tl::t_length_si<t_real> lam_n = tl::k2lam(k_n);
 	tl::t_momentum_si<t_real> p_n = tl::lam2p(lam_n);
@@ -212,7 +215,7 @@ void NeutronDlg::CalcNeutronF()
 	std::string strInput = editF->text().toStdString();
 
 	bool bImag = 0;
-	tl::t_energy_si<t_real> E_n = tl::str_to_var<t_real>(strInput) / ps * tl::get_h<t_real>();
+	tl::t_energy_si<t_real> E_n = tl::str_to_var_parse<t_real>(strInput) / ps * tl::get_h<t_real>();
 	tl::t_wavenumber_si<t_real> k_n = tl::E2k(E_n, bImag);
 	tl::t_length_si<t_real> lam_n = tl::k2lam(k_n);
 	tl::t_momentum_si<t_real> p_n = tl::lam2p(lam_n);
@@ -230,7 +233,7 @@ void NeutronDlg::CalcNeutronT()
 	std::string strInput = editT->text().toStdString();
 
 	bool bImag;
-	tl::t_temperature_si<t_real> T_n = tl::str_to_var<t_real>(strInput) * kelvin;
+	tl::t_temperature_si<t_real> T_n = tl::str_to_var_parse<t_real>(strInput) * kelvin;
 	tl::t_energy_si<t_real> E_n = T_n * tl::get_kB<t_real>();
 	tl::t_wavenumber_si<t_real> k_n = tl::E2k(E_n, bImag);
 	tl::t_length_si<t_real> lam_n = tl::k2lam(k_n);
@@ -671,41 +674,30 @@ void NeutronDlg::setupConstants()
 
 // -----------------------------------------------------------------------------
 
-void NeutronDlg::EnableRealEdits()
-{
-	//void (QLineEdit::*pFunc)(bool) = &QLineEdit::setDisabled;
-	void (QLineEdit::*pFunc)(bool) = &QLineEdit::setReadOnly;
-
-	(editBraggDirLam->*pFunc)(0);
-	(editBraggDirD->*pFunc)(0);
-	(editBraggDirT->*pFunc)(0);
-	(editBraggDirTT->*pFunc)(0);
-
-	if(radioBraggDirLam->isChecked())
-		(editBraggDirLam->*pFunc)(1);
-	else if(radioBraggDirD->isChecked())
-		(editBraggDirD->*pFunc)(1);
-	else if(radioBraggDirTT->isChecked())
-	{
-		(editBraggDirT->*pFunc)(1);
-		(editBraggDirTT->*pFunc)(1);
-	}
-}
-
 void NeutronDlg::EnableRecipEdits()
 {
 	//void (QLineEdit::*pFunc)(bool) = &QLineEdit::setDisabled;
 	void (QLineEdit::*pFunc)(bool) = &QLineEdit::setReadOnly;
 
 	(editBraggReciLam->*pFunc)(0);
+	(editBraggReciK->*pFunc)(0);
+
 	(editBraggReciQ->*pFunc)(0);
+	(editBraggRecid->*pFunc)(0);
+
 	(editBraggReciT->*pFunc)(0);
 	(editBraggReciTT->*pFunc)(0);
 
 	if(radioBraggReciLam->isChecked())
+	{
 		(editBraggReciLam->*pFunc)(1);
+		(editBraggReciK->*pFunc)(1);
+	}
 	else if(radioBraggReciQ->isChecked())
+	{
 		(editBraggReciQ->*pFunc)(1);
+		(editBraggRecid->*pFunc)(1);
+	}
 	else if(radioBraggReciTT->isChecked())
 	{
 		(editBraggReciT->*pFunc)(1);
@@ -714,71 +706,75 @@ void NeutronDlg::EnableRecipEdits()
 }
 
 
+
+// -----------------------------------------------------------------------------
+
 void NeutronDlg::SetEditTT(QLineEdit *pEditT, QLineEdit *pEditTT)
 {
 	std::string strT = pEditT->text().toStdString();
-	t_real dT = tl::str_to_var<t_real>(strT);
+	t_real dT = tl::str_to_var_parse<t_real>(strT);
 	std::string strTT = tl::var_to_str(dT*2., g_iPrec);
 	pEditTT->setText(strTT.c_str());
 }
 
-void NeutronDlg::RealThetaEdited() { SetEditTT(editBraggDirT, editBraggDirTT); }
-void NeutronDlg::RecipThetaEdited() { SetEditTT(editBraggReciT, editBraggReciTT); }
-
-
 void NeutronDlg::SetEditT(QLineEdit *pEditT, QLineEdit *pEditTT)
 {
 	std::string strTT = pEditTT->text().toStdString();
-	t_real dTT = tl::str_to_var<t_real>(strTT);
+	t_real dTT = tl::str_to_var_parse<t_real>(strTT);
 	std::string strT = tl::var_to_str(dTT*0.5, g_iPrec);
 	pEditT->setText(strT.c_str());
 }
 
-void NeutronDlg::RealTwoThetaEdited() { SetEditT(editBraggDirT, editBraggDirTT); }
+
+void NeutronDlg::SetEditK(QLineEdit *pEditLam, QLineEdit *pEditK)
+{
+	std::string strLam = pEditLam->text().toStdString();
+	tl::t_length_si<t_real> lam = tl::str_to_var_parse<t_real>(strLam) * angs;
+	t_real dK = tl::lam2k(lam) * angs;
+	std::string strK = tl::var_to_str(dK, g_iPrec);
+	pEditK->setText(strK.c_str());
+}
+
+void NeutronDlg::SetEditLam(QLineEdit *pEditLam, QLineEdit *pEditK)
+{
+	std::string strK = pEditK->text().toStdString();
+	tl::t_wavenumber_si<t_real> k = tl::str_to_var_parse<t_real>(strK) / angs;
+	t_real dLam = tl::k2lam(k) / angs;
+	std::string strLam = tl::var_to_str(dLam, g_iPrec);
+	pEditLam->setText(strLam.c_str());
+}
+
+
+void NeutronDlg::SetEditG(QLineEdit *pEditG, QLineEdit *pEditD)
+{
+	std::string strD = pEditD->text().toStdString();
+	tl::t_length_si<t_real> d = tl::str_to_var_parse<t_real>(strD) * angs;
+	t_real dG = tl::d2G(d) * angs;
+	std::string strG = tl::var_to_str(dG, g_iPrec);
+	pEditG->setText(strG.c_str());
+}
+
+void NeutronDlg::SetEditD(QLineEdit *pEditG, QLineEdit *pEditD)
+{
+	std::string strG = pEditG->text().toStdString();
+	tl::t_wavenumber_si<t_real> G = tl::str_to_var_parse<t_real>(strG) / angs;
+	t_real dD = tl::G2d(G) / angs;
+	std::string strD = tl::var_to_str(dD, g_iPrec);
+	pEditD->setText(strD.c_str());
+}
+
+void NeutronDlg::RecipThetaEdited() { SetEditTT(editBraggReciT, editBraggReciTT); }
 void NeutronDlg::RecipTwoThetaEdited() { SetEditT(editBraggReciT, editBraggReciTT); }
 
+void NeutronDlg::RecipLamEdited() { SetEditK(editBraggReciLam, editBraggReciK); }
+void NeutronDlg::RecipKEdited() { SetEditLam(editBraggReciLam, editBraggReciK); }
 
-void NeutronDlg::CalcBraggReal()
-{
-	std::string strN = editBraggDirN->text().toStdString();
-	std::string strLam = editBraggDirLam->text().toStdString();
-	std::string strD = editBraggDirD->text().toStdString();
-	std::string strTT = editBraggDirTT->text().toStdString();
+void NeutronDlg::RecipGEdited() { SetEditD(editBraggReciQ, editBraggRecid); }
+void NeutronDlg::RecipDEdited() { SetEditG(editBraggReciQ, editBraggRecid); }
 
-	int iOrder = tl::str_to_var<int>(strN);
-	tl::t_length_si<t_real> lam = tl::str_to_var<t_real>(strLam)*angs;
-	tl::t_length_si<t_real> d = tl::str_to_var<t_real>(strD)*angs;
-	tl::t_angle_si<t_real> tt = tl::d2r(tl::str_to_var<t_real>(strTT))*rads;
+// -----------------------------------------------------------------------------
 
-	if(radioBraggDirLam->isChecked())
-	{
-		lam = tl::bragg_real_lam(d, tt, t_real(iOrder));
-		std::string strLam = tl::var_to_str(t_real(lam/angs), g_iPrec);
-		editBraggDirLam->setText(strLam.c_str());
-	}
-	else if(radioBraggDirD->isChecked())
-	{
-		d = tl::bragg_real_d(lam, tt, t_real(iOrder));
-		std::string strD = tl::var_to_str(t_real(d/angs), g_iPrec);
-		editBraggDirD->setText(strD.c_str());
-	}
-	else if(radioBraggDirTT->isChecked())
-	{
-		try
-		{
-			tt = tl::bragg_real_twotheta(d, lam, t_real(iOrder));
-			std::string strTT = tl::var_to_str<t_real>(tl::r2d(tt/rads), g_iPrec);
-			std::string strT = tl::var_to_str<t_real>(tl::r2d(t_real(0.5)*tt/rads), g_iPrec);
-			editBraggDirTT->setText(strTT.c_str());
-			editBraggDirT->setText(strT.c_str());
-		}
-		catch(const std::exception& ex)
-		{
-			editBraggDirTT->setText(ex.what());
-			editBraggDirT->setText(ex.what());
-		}
-	}
-}
+
 
 void NeutronDlg::CalcBraggRecip()
 {
@@ -787,30 +783,58 @@ void NeutronDlg::CalcBraggRecip()
 	std::string strQ = editBraggReciQ->text().toStdString();
 	std::string strTT = editBraggReciTT->text().toStdString();
 
-	int iOrder = tl::str_to_var<int>(strN);
-	tl::t_length_si<t_real> lam = tl::str_to_var<t_real>(strLam)*angs;
-	tl::t_wavenumber_si<t_real> Q = tl::str_to_var<t_real>(strQ)/angs;
-	tl::t_angle_si<t_real> tt = tl::d2r(tl::str_to_var<t_real>(strTT))*rads;
+	int iOrder = tl::str_to_var_parse<int>(strN);
+	tl::t_length_si<t_real> lam = tl::str_to_var_parse<t_real>(strLam)*angs;
+	tl::t_wavenumber_si<t_real> Q = tl::str_to_var_parse<t_real>(strQ)/angs;
+	tl::t_angle_si<t_real> tt = tl::d2r(tl::str_to_var_parse<t_real>(strTT))*rads;
 
 	if(radioBraggReciLam->isChecked())
 	{
-		lam = tl::bragg_recip_lam(Q, tt, t_real(iOrder));
-		std::string strLam = tl::var_to_str(t_real(lam/angs), g_iPrec);
-		editBraggReciLam->setText(strLam.c_str());
+		try
+		{
+			lam = tl::bragg_recip_lam(Q, tt, t_real(iOrder));
+			t_real dK = tl::lam2k(lam) * angs;
+
+			std::string strLam = tl::var_to_str(t_real(lam/angs), g_iPrec);
+			std::string strK = tl::var_to_str(dK, g_iPrec);
+
+			editBraggReciLam->setText(strLam.c_str());
+			editBraggReciK->setText(strK.c_str());
+		}
+		catch(const std::exception& ex)
+		{
+			editBraggReciLam->setText(ex.what());
+			editBraggReciK->setText(ex.what());
+		}
 	}
 	else if(radioBraggReciQ->isChecked())
 	{
-		Q = tl::bragg_recip_Q(lam, tt, t_real(iOrder));
-		std::string strQ = tl::var_to_str(t_real(Q*angs), g_iPrec);
-		editBraggReciQ->setText(strQ.c_str());
+		try
+		{
+			Q = tl::bragg_recip_Q(lam, tt, t_real(iOrder));
+			t_real dD = tl::G2d(Q) / angs;
+
+			std::string strQ = tl::var_to_str(t_real(Q*angs), g_iPrec);
+			std::string strD = tl::var_to_str(dD, g_iPrec);
+
+			editBraggReciQ->setText(strQ.c_str());
+			editBraggRecid->setText(strD.c_str());
+		}
+		catch(const std::exception& ex)
+		{
+			editBraggReciQ->setText(ex.what());
+			editBraggRecid->setText(ex.what());
+		}
 	}
 	else if(radioBraggReciTT->isChecked())
 	{
 		try
 		{
 			tt = tl::bragg_recip_twotheta(Q, lam, t_real(iOrder));
+	
 			std::string strTT = tl::var_to_str<t_real>(tl::r2d(tt/rads), g_iPrec);
 			std::string strT = tl::var_to_str<t_real>(tl::r2d(t_real(0.5)*tt/rads), g_iPrec);
+
 			editBraggReciTT->setText(strTT.c_str());
 			editBraggReciT->setText(strT.c_str());
 		}
@@ -855,5 +879,6 @@ void NeutronDlg::showEvent(QShowEvent *pEvt)
 {
 	QDialog::showEvent(pEvt);
 }
+
 
 #include "NeutronDlg.moc"

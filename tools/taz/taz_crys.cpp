@@ -328,9 +328,10 @@ void TazDlg::CalcPeaks()
 
 void TazDlg::VarsChanged(const CrystalOptions& crys, const TriangleOptions& triag)
 {
+	// update crystal
 	bool bRecalcPeaks = 0;
 
-	if(crys.strSampleName != "")
+	if(crys.bChangedSampleName)
 		editDescr->setText(tl::trimmed(crys.strSampleName).c_str());
 
 	if(crys.bChangedLattice)
@@ -421,6 +422,10 @@ void TazDlg::VarsChanged(const CrystalOptions& crys, const TriangleOptions& tria
 	}
 
 
+	// ------------------------------------------------------------------------
+
+
+	// update scattering triangle
 	if(triag.bChangedMonoD)
 	{
 		QString qstr = QString::number(triag.dMonoD);
@@ -430,6 +435,7 @@ void TazDlg::VarsChanged(const CrystalOptions& crys, const TriangleOptions& tria
 			UpdateDs();
 		}
 	}
+
 	if(triag.bChangedAnaD)
 	{
 		QString qstr = QString::number(triag.dAnaD);
@@ -445,16 +451,16 @@ void TazDlg::VarsChanged(const CrystalOptions& crys, const TriangleOptions& tria
 	if(triag.bChangedTwoTheta && !checkSenseS->isChecked())
 		const_cast<TriangleOptions&>(triag).dTwoTheta = -triag.dTwoTheta;
 
-	//if(triag.bChangedTwoTheta)
-	//	tl::log_info("2theta: ", triag.dTwoTheta/M_PI*180.);
+	if(triag.IsAnythingChanged() /*|| crys.IsAnythingChanged()*/)
+	{
+		m_sceneReal.triangleChanged(triag);
+		m_sceneReal.emitUpdate(triag);
+		//m_sceneReal.emitAllParams();
 
-	m_sceneReal.triangleChanged(triag);
-	m_sceneReal.emitUpdate(triag);
-	//m_sceneReal.emitAllParams();
-
-	UpdateMonoSense();
-	UpdateAnaSense();
-	UpdateSampleSense();
+		UpdateMonoSense();
+		UpdateAnaSense();
+		UpdateSampleSense();
+	}
 
 	if(triag.bChangedAngleKiVec0)
 	{

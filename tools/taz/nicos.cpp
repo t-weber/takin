@@ -300,6 +300,7 @@ void NicosCache::slot_receive(const std::string& str)
 	else if(strKey == m_strSampleName)
 	{
 		crys.strSampleName = tl::get_py_string(strVal);
+		crys.bChangedSampleName = 1;
 	}
 	else if(strKey == m_strSampleTheta || strKey == m_strSamplePsi0)
 	{}

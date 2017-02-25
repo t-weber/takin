@@ -42,10 +42,16 @@ int main(int argc, char** argv)
 		tl::Prop<> prop;
 		if(prop.Load("replies.ini"))
 		{
-			std::string strKey = strMsg;
-			std::string strVal = prop.Query<std::string>("replies/" + strMsg, "0");
+			std::vector<std::string> vecMsg;
+			tl::get_tokens<std::string>(strMsg, std::string(" ,"), vecMsg);
+			for(std::string& strTok : vecMsg)
+			{
+				tl::trim(strTok);
+				if(strTok == "") continue;
 
-			server.write(strKey + "=" + strVal + "\n");
+				std::string strVal = prop.Query<std::string>("replies/" + strTok, "0");
+				server.write(strTok + "=" + strVal + "\n");
+			}
 		}
 	});
 

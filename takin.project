@@ -69,8 +69,6 @@
       <File Name="tlibs/math/bz.h"/>
       <File Name="tlibs/math/quat.h"/>
       <File Name="tlibs/math/geo.h"/>
-      <File Name="tlibs/math/neutrons.hpp"/>
-      <File Name="tlibs/math/mieze.hpp"/>
       <File Name="tlibs/math/funcmod.h"/>
       <File Name="tlibs/math/math.h"/>
       <File Name="tlibs/math/dft.h"/>
@@ -78,6 +76,9 @@
       <File Name="tlibs/math/kd.h"/>
       <File Name="tlibs/math/atoms.h"/>
       <File Name="tlibs/math/linalg2_impl.h"/>
+      <File Name="tlibs/math/units.h"/>
+      <File Name="tlibs/math/mieze.h"/>
+      <File Name="tlibs/math/neutrons.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="net">
       <File Name="tlibs/net/tcp.h"/>
@@ -233,6 +234,8 @@
     <File Name="dialogs/ScanMonDlg.h"/>
     <File Name="dialogs/FavDlg.cpp"/>
     <File Name="dialogs/FavDlg.h"/>
+    <File Name="dialogs/TOFDlg.cpp"/>
+    <File Name="dialogs/TOFDlg.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
