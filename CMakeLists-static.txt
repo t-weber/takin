@@ -5,7 +5,6 @@
 # @license GPLv2
 #
 
-
 project(takin)
 cmake_minimum_required(VERSION 3.0)
 
