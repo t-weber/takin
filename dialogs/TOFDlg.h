@@ -28,6 +28,9 @@ class TOFDlg : public QDialog, Ui::TofCalcDlg
 		void CalcChopper();
 		void EnableChopperEdits();
 
+		void CalcDiv();
+		void EnableDivEdits();
+
 	protected:
 		virtual void showEvent(QShowEvent *pEvt) override;
 		virtual void accept() override;

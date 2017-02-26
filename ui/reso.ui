@@ -2088,7 +2088,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Pulse to Mono.:</string>
+             <string>Pulse → Mono.:</string>
             </property>
            </widget>
           </item>
@@ -2120,7 +2120,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Mono. to Sample:</string>
+             <string>Mono. → Sample:</string>
             </property>
            </widget>
           </item>
@@ -2152,7 +2152,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Sample to Det.:</string>
+             <string>Sample → Det.:</string>
             </property>
            </widget>
           </item>
@@ -2193,7 +2193,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_69">
             <property name="text">
-             <string>Pulse to Mono.:</string>
+             <string>Pulse → Mono. Δx:</string>
             </property>
            </widget>
           </item>
@@ -2219,7 +2219,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_70">
             <property name="text">
-             <string>Mono. to Sample:</string>
+             <string>Mono. → Sample Δx:</string>
             </property>
            </widget>
           </item>
@@ -2245,7 +2245,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_71">
             <property name="text">
-             <string>Sample to Det.:</string>
+             <string>Sample → Det. Δx:</string>
             </property>
            </widget>
           </item>

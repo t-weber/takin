@@ -129,7 +129,7 @@ QwtPlotWrapper::QwtPlotWrapper(QwtPlot *pPlot,
 		auto create_colmap = []() -> QwtLinearColorMap*
 		{
 			QwtLinearColorMap *pCol = new QwtLinearColorMap();
-			pCol->setColorInterval(QColor(0x00, 0x00, 0xff), QColor(0xff, 0x00, 0x00));
+			pCol->setColorInterval(QColor(0xff,0xff,0xff), QColor(0x00,0x00,0x00));
 			return pCol;
 		};
 
@@ -450,7 +450,8 @@ void QwtPlotWrapper::ExportGpl() const
 		ofstrDat << "set cbrange [zmin : zmax]\n";
 		ofstrDat << "\n";
 
-		ofstrDat << "set palette defined (0 \"#0000ff\", 1 \"#ff0000\")\n";
+		//ofstrDat << "set palette defined (0 \"#0000ff\", 1 \"#ff0000\")\n";
+		ofstrDat << "set palette defined (0 \"#ffffff\", 1 \"#000000\")\n";
 		ofstrDat << "set tics out scale 0.75\n";
 		ofstrDat << "unset key\n";
 		ofstrDat << "set size ratio 1\n";
