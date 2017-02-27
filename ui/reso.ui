@@ -1967,6 +1967,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spinTofPulseSig">
+            <property name="toolTip">
+             <string>Calculate from chopper frequency.</string>
+            </property>
             <property name="prefix">
              <string/>
             </property>
@@ -2002,6 +2005,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="spinTofMonoSig">
+            <property name="toolTip">
+             <string>Calculate from chopper frequency.</string>
+            </property>
             <property name="prefix">
              <string/>
             </property>
@@ -2037,6 +2043,9 @@
           </item>
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="spinTofDetSig">
+            <property name="toolTip">
+             <string>Calculate from detector time resolution.</string>
+            </property>
             <property name="prefix">
              <string/>
             </property>
@@ -2402,6 +2411,9 @@
        </item>
        <item row="1" column="1">
         <widget class="QGroupBox" name="groupBox_24">
+         <property name="toolTip">
+          <string>Calculate either from collimation or from critical reflection angle of the guide.</string>
+         </property>
          <property name="title">
           <string>Angular Acceptances</string>
          </property>
