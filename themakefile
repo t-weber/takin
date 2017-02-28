@@ -18,6 +18,7 @@ USE_PLUGINS = 1
 USE_FADDEEVA = 1
 USE_CPP11_ABI = 1
 USE_FRAMEWORKS = 0
+NON_STANDALONE_MINUIT_HACK = 0
 
 
 STD_CPP = -std=c++11
@@ -30,16 +31,28 @@ ifeq ($(USE_FRAMEWORKS), 0)
 	STD_LIBS += -lpthread -lrt -lgomp
 endif
 
+
+
 BOOST_SUFFIX = 
 #BOOST_SUFFIX = -mt
 #QWT5_SUFFIX = 
 QWT5_SUFFIX = -qt4
 #QWT5_SUFFIX = 5-qt4
 
+
 # -----------------------------------------------------------------------------
 
 
 DEFINES = -DNO_JPEG -DNO_TIFF
+
+
+LIB_MIN = -lMinuit2
+
+# libCore is only used for the error handler in the non-standalone minuit
+ifeq ($(NON_STANDALONE_MINUIT_HACK), 1)
+	LIB_MIN += -lCore
+	DEFINES += -DNON_STANDALONE_MINUIT
+endif
 
 ifeq ($(IS_UNSTABLE), 1)
 	DEFINES += -DIS_EXPERIMENTAL_BUILD
@@ -431,7 +444,7 @@ all: takin  montereso  monteconvo xmonteconvo posextract \
 
 
 takin: ${OBJ_COMMON} ${OBJ_TAZ}
-	${CC} ${FLAGS} ${FAD_DEFS} ${LIB_DIRS} -o bin/takin $+ -lMinuit2 ${LIBS_TAZ}
+	${CC} ${FLAGS} ${FAD_DEFS} ${LIB_DIRS} -o bin/takin $+ ${LIB_MIN} ${LIBS_TAZ}
 	${STRIP} bin/takin
 
 montereso: ${OBJ_COMMON} ${OBJ_MONTERESO}
@@ -455,7 +468,7 @@ xmonteconvo: ${OBJ_MONTECONVO} obj/xmconv_main.o obj/ConvoDlg.o obj/ConvoDlg_fil
 
 convofit: ${OBJ_CONVOFIT}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/convofit $+ \
-		-lMinuit2 ${BASIC_LIBS} -lboost_program_options ${PY_LIBS} ${JL_LIBS} \
+		${LIB_MIN} ${BASIC_LIBS} -lboost_program_options ${PY_LIBS} ${JL_LIBS} \
 		${LAPACK_LIBS} ${DL_LIBS} ${STD_LIBS}
 	${STRIP} convofit
 convoseries: ${OBJ_CONVOSERIES}
@@ -472,7 +485,7 @@ reso: ${OBJ_RESO}
 
 scanviewer: ${OBJ_SCANVIEWER}
 	${CC} ${FLAGS} ${FAD_DEFS} ${LIB_DIRS} -o bin/scanviewer $+ \
-		-lMinuit2 ${FAD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} ${STD_LIBS}
+		${LIB_MIN} ${FAD_LIBS} ${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} ${STD_LIBS}
 	${STRIP} scanviewer
 
 sglist: ${OBJ_SGLIST}
