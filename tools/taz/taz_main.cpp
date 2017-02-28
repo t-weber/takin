@@ -33,6 +33,15 @@
 #include <QSplashScreen>
 
 
+#ifdef NON_STANDALONE_MINUIT
+	//#include <root/TError.h>
+	void SetErrorHandler(void (*)(int, bool, const char*, const char*));
+#else
+	// dummy handler
+	void SetErrorHandler(void (*)(int, bool, const char*, const char*)) {}
+#endif
+
+
 #ifdef Q_WS_X11
 	extern "C" int XInitThreads();
 #endif
@@ -111,6 +120,10 @@ int main(int argc, char** argv)
 			thSig.join();
 		}
 		BOOST_SCOPE_EXIT_END
+
+
+		// only for non-standalone minuit
+		SetErrorHandler([](int, bool, const char*, const char* pcMsg) { tl::log_err(pcMsg); });
 
 
 		std::string strLog = QDir::tempPath().toStdString();

@@ -30,6 +30,23 @@ TOFDlg::TOFDlg(QWidget* pParent, QSettings *pSett)
 {
 	setupUi(this);
 
+	// -------------------------------------------------------------------------
+	// all ui elements
+	m_vecRadioNames = { "tof_calc/calc_chopper_l", "tof_calc/calc_chopper_r",
+		"tof_calc/calc_chopper_om", "tof_calc/calc_chopper_t",
+		"tof_calc/calc_div_l", "tof_calc/calc_div_w", "tof_calc/calc_div_ang" };
+	m_vecEditNames = { "tof_calc/chopper_l", "tof_calc/chopper_r",
+		"tof_calc/chopper_om", "tof_calc/chopper_t",
+		"tof_calc/div_l", "tof_calc/div_w", "tof_calc/div_ang" };
+	m_vecCheckNames = { "tof_calc/counter_rot" };
+
+	m_vecRadioBoxes = { radioChopperL, radioChopperR, radioChopperOm, radioChopperT,
+		radioDivL, radioDivW, radioDivAng };
+	m_vecEditBoxes = { editChopperL, editChopperR, editChopperOm, editChopperT, 
+		editDivL, editDivW, editDivAng };
+	m_vecCheckBoxes = { checkChopperCounterRot };
+
+
 	if(m_pSettings)
 	{
 		QFont font;
@@ -38,6 +55,8 @@ TOFDlg::TOFDlg(QWidget* pParent, QSettings *pSett)
 
 		if(m_pSettings->contains("tof_calc/geo"))
 			restoreGeometry(m_pSettings->value("tof_calc/geo").toByteArray());
+
+		ReadLastConfig();
 	}
 
 
@@ -196,10 +215,61 @@ void TOFDlg::CalcDiv()
 // -----------------------------------------------------------------------------
 
 
+void TOFDlg::ReadLastConfig()
+{
+	if(!m_pSettings)
+		return;
+
+	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
+	{
+		if(!m_pSettings->contains(m_vecEditNames[iEditBox].c_str()))
+			continue;
+		QString strEditVal = m_pSettings->value(m_vecEditNames[iEditBox].c_str()).value<QString>();
+		m_vecEditBoxes[iEditBox]->setText(strEditVal);
+	}
+
+	for(std::size_t iCheckBox=0; iCheckBox<m_vecCheckBoxes.size(); ++iCheckBox)
+	{
+		if(!m_pSettings->contains(m_vecCheckNames[iCheckBox].c_str()))
+			continue;
+		m_vecCheckBoxes[iCheckBox]->setChecked(m_pSettings->value(m_vecCheckNames[iCheckBox].c_str()).value<bool>());
+	}
+
+	for(std::size_t iRadio=0; iRadio<m_vecRadioBoxes.size(); ++iRadio)
+	{
+		if(!m_pSettings->contains(m_vecRadioNames[iRadio].c_str()))
+			continue;
+
+		bool bChecked = m_pSettings->value(m_vecRadioNames[iRadio].c_str()).value<bool>();
+		m_vecRadioBoxes[iRadio]->setChecked(bChecked);
+	}
+}
+
+
+void TOFDlg::WriteLastConfig()
+{
+	if(!m_pSettings)
+		return;
+
+	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
+		m_pSettings->setValue(m_vecEditNames[iEditBox].c_str(), m_vecEditBoxes[iEditBox]->text()/*.toDouble()*/);
+	for(std::size_t iRadio=0; iRadio<m_vecRadioBoxes.size(); ++iRadio)
+		m_pSettings->setValue(m_vecRadioNames[iRadio].c_str(), m_vecRadioBoxes[iRadio]->isChecked());
+	for(std::size_t iCheck=0; iCheck<m_vecCheckBoxes.size(); ++iCheck)
+		m_pSettings->setValue(m_vecCheckNames[iCheck].c_str(), m_vecCheckBoxes[iCheck]->isChecked());
+}
+
+
+// -----------------------------------------------------------------------------
+
+
 void TOFDlg::accept()
 {
 	if(m_pSettings)
+	{
+		WriteLastConfig();
 		m_pSettings->setValue("tof_calc/geo", saveGeometry());
+	}
 
 	QDialog::accept();
 }
