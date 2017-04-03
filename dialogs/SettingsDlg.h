@@ -1,6 +1,6 @@
 /**
  * Settings
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 5-dec-2014
  * @license GPLv2
  */

@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# MOC & UIC
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 
 if [[ $# -ge 3 ]]; then

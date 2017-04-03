@@ -1,6 +1,6 @@
 /**
  * cooper-nathans calculation
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013-2016
  * @license GPLv2
  *
@@ -17,6 +17,7 @@
 
 #include "defs.h"
 #include "tlibs/math/neutrons.h"
+#include "tlibs/math/linalg.h"
 #include <tuple>
 
 namespace units = boost::units;
@@ -78,5 +79,9 @@ extern std::tuple<t_real_reso, t_real_reso, t_real_reso>
 		const tl::t_wavenumber_si<t_real_reso>& ki,
 		const tl::t_angle_si<t_real_reso>& thetaa,
 		const tl::t_wavenumber_si<t_real_reso>& kf);
+
+extern ublas::matrix<t_real_reso> get_trafo_dkidkf_dQdE(
+	const tl::t_angle_si<t_real_reso>& ki_Q, const tl::t_angle_si<t_real_reso>& kf_Q,
+	const tl::t_wavenumber_si<t_real_reso>& ki, const tl::t_wavenumber_si<t_real_reso>& kf);
 
 #endif

@@ -1,4 +1,9 @@
 #!/bin/sh
+#
+# calling takin with local libs
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 TAKINDIR=$(dirname $0)
 echo -e "Takin directory: ${TAKINDIR}"

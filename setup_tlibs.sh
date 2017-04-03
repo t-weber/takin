@@ -1,5 +1,9 @@
 #!/bin/bash
+#
 # downloads tlibs and takin-data
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 
 if [ $# -ge 1  -a  "$1" == "latest" ]; then

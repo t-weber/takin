@@ -1,6 +1,6 @@
-/*
+/**
  * Server Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 27-aug-2014
  * @license GPLv2
  */

@@ -1,7 +1,7 @@
 // gcc -o sfact sfact.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../libs/spacegroups/spacegroup_clp.cpp ../../libs/spacegroups/crystalsys.cpp ../../libs/globals.cpp ../../libs/formfactors/formfact.cpp ../../tlibs/log/log.cpp -DNO_QT -lclipper-core -lboost_system -lboost_filesystem -lboost_iostreams
 /**
  * generates structure factors
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */

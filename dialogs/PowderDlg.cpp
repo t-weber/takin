@@ -1,6 +1,6 @@
 /**
  * Powder Line Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013, 2-dec-2014
  * @license GPLv2
  */
@@ -784,8 +784,8 @@ void PowderDlg::ShowAtomDlg()
 	}
 
 	m_pAtomsDlg->SetAtoms(m_vecAtoms);
-	m_pAtomsDlg->show();
-	m_pAtomsDlg->activateWindow();
+
+	focus_dlg(m_pAtomsDlg);
 }
 
 void PowderDlg::cursorMoved(const QPointF& pt)

@@ -1,6 +1,6 @@
 /**
  * Loads tabulated spacegroups
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2016
  * @license GPLv2
  */

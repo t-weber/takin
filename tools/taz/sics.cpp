@@ -1,6 +1,6 @@
 /**
  * Connection to Sics
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 26-aug-2015
  * @license GPLv2
  */

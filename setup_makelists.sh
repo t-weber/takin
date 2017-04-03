@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# chooses a makelist
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 DLG=$(which dialog 2>/dev/null)
 if [ "$DLG" == "" ]; then DLG="/usr/bin/dialog"; fi

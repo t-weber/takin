@@ -1,6 +1,6 @@
 /**
  * Form factor and scattering length tables
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
@@ -247,17 +247,70 @@ ScatlenList<T>::ScatlenList()
 		slen.xsec_incoh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_incoh").c_str(), 0.);
 		slen.xsec_scat = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_scat").c_str(), 0.);
 		slen.xsec_abs = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_abs").c_str(), 0.);
-
+		slen.abund = xml.QueryOpt<ScatlenList<T>::real_type>((strAtom + "/abund").c_str());
+		slen.hl = xml.QueryOpt<ScatlenList<T>::real_type>((strAtom + "/hl").c_str());
 
 		if(std::isdigit(slen.strAtom[0]))
-			s_vecIsotopes.push_back(std::move(slen));
+			s_vecIsotopes.push_back(std::move(slen));	// pure isotopes
 		else
-			s_vecElems.push_back(std::move(slen));
+			s_vecElems.push_back(std::move(slen));		// isotope mixtures
+	}
+
+	// link pure isotopes to isotope mixtures
+	for(const auto& isotope : s_vecIsotopes)
+	{
+		const std::string& strIso = isotope.GetAtomIdent();
+		std::string strElem = tl::remove_chars(strIso, std::string("0123456789"));
+		tl::trim(strElem);
+
+		auto iterElem = std::find_if(s_vecElems.begin(), s_vecElems.end(),
+			[&strElem](const elem_type& elem) { return (elem.GetAtomIdent() == strElem); });
+		if(iterElem == s_vecElems.end())
+		{
+			tl::log_err("Mixture for isotope \"", strElem, "\" was not found in scattering lengths list.");
+			continue;
+		}
+
+		iterElem->m_vecIsotopes.push_back(&isotope);
 	}
 
 	s_strSrc = xml.Query<std::string>("scatlens/source", "");
 	s_strSrcUrl = xml.Query<std::string>("scatlens/source_url", "");
+
+#ifndef NDEBUG
+	// testing scattering lengths
+	for(const auto& elem : s_vecElems)
+	{
+		const auto& vecIsotopes = elem.GetIsotopes();
+		if(!vecIsotopes.size()) continue;
+
+		std::vector<ScatlenList<T>::value_type> vecbcoh, vecbincoh;
+		std::vector<ScatlenList<T>::real_type> vecAbund;
+
+		for(const auto* isotope : vecIsotopes)
+		{
+			const auto& abund = isotope->GetAbundance();
+			if(abund)
+			{
+				vecAbund.push_back(*abund);
+				vecbcoh.push_back(isotope->GetCoherent());
+				vecbincoh.push_back(isotope->GetIncoherent());
+			}
+		}
+		
+		auto themean = tl::mean_value<decltype(vecAbund), decltype(vecbcoh)>
+			(vecAbund, vecbcoh);
+		auto thedev = tl::std_dev<decltype(vecAbund), decltype(vecbcoh)>
+			(vecAbund, vecbcoh);
+
+		tl::log_debug(elem.GetAtomIdent(), ": mean b: ", themean,
+			": stddev b: ", thedev,
+			", orig coh: ", elem.GetCoherent(),
+			", orig inc: ", elem.GetIncoherent());
+	}
+#endif
 }
+
 
 template<typename T>
 ScatlenList<T>::~ScatlenList()

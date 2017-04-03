@@ -1,6 +1,6 @@
 /**
  * Scan Monitor
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date jul-2016
  * @license GPLv2
  */

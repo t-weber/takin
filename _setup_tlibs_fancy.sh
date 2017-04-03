@@ -1,5 +1,9 @@
 #!/bin/bash
+#
 # internal dev script
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 TLIBS=tlibs-master.tar.bz2
 REPO=http://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tlibs.git/snapshot

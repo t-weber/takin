@@ -1,6 +1,6 @@
 /**
  * Form factor and scattering length tables
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
@@ -12,6 +12,7 @@
 #include <vector>
 #include <complex>
 #include <mutex>
+#include <boost/optional.hpp>
 
 #include "tlibs/helper/array.h"
 #include "tlibs/math/atoms.h"
@@ -153,13 +154,14 @@ class MagFormfactList
 // ----------------------------------------------------------------------------
 
 
-template<typename T=std::complex<double>>
+template<typename T = std::complex<double>>
 class Scatlen
 {
 	template<typename> friend class ScatlenList;
 
 	public:
-		typedef T value_type;
+		typedef T value_type;	// complex type
+		typedef typename value_type::value_type real_type;
 
 	protected:
 		std::string strAtom;
@@ -171,6 +173,10 @@ class Scatlen
 		value_type xsec_scat;
 		value_type xsec_abs;
 
+		std::vector<const Scatlen<value_type>*> m_vecIsotopes;	// for mixtures: vector of isotopes
+		boost::optional<real_type> abund;	// natural abundance of isotope
+		boost::optional<real_type> hl;		// in a
+
 	public:
 		const std::string& GetAtomIdent() const { return strAtom; }
 
@@ -181,6 +187,11 @@ class Scatlen
 		const value_type& GetXSecIncoherent() const { return xsec_incoh; }
 		const value_type& GetXSecScatter() const { return xsec_scat; }
 		const value_type& GetXSecAbsorption() const { return xsec_abs; }
+
+		const boost::optional<real_type>& GetAbundance() const { return abund; }
+		const boost::optional<real_type>& GetHalflife() const { return hl; }
+
+		const std::vector<const Scatlen<value_type>*> GetIsotopes() const { return m_vecIsotopes; }
 };
 
 
@@ -190,6 +201,7 @@ class ScatlenList
 	public:
 		typedef Scatlen<std::complex<T>> elem_type;
 		typedef typename elem_type::value_type value_type;
+		typedef typename elem_type::real_type real_type;
 
 	private:
 		static std::shared_ptr<ScatlenList> s_inst;

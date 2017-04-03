@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# gets external files
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 GTAR="$(which gtar)"
 if [ $? -ne 0 ]; then

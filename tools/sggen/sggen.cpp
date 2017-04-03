@@ -1,11 +1,11 @@
-// gcc -o sggen sggen.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../libs/spacegroups/spacegroup_clp.cpp ../../libs/spacegroups/crystalsys.cpp -DNO_QT -lclipper-core ../../tlibs/file/x3d.cpp ../../tlibs/log/log.cpp
-
 /**
  * generates atom positions based on space group
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
+
+// gcc -o sggen sggen.cpp -std=c++11 -lstdc++ -lm -I../.. -I/usr/include/QtGui/ ../../libs/spacegroups/spacegroup_clp.cpp ../../libs/spacegroups/crystalsys.cpp -DNO_QT -lclipper-core ../../tlibs/file/x3d.cpp ../../tlibs/log/log.cpp
 
 #include <clipper/clipper.h>
 #include <vector>

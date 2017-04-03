@@ -1,6 +1,6 @@
 /**
  * interface for S(q,w) models
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2015, 2016
  * @license GPLv2
  */
@@ -8,6 +8,9 @@
 #include "sqwbase.h"
 
 
+/**
+ * if the variable "strKey" is known, update it with the value "strNewVal"
+ */
 bool SqwBase::SetVarIfAvail(const std::string& strKey, const std::string& strNewVal)
 {
 	std::vector<t_var> vecVars = GetVars();
@@ -24,4 +27,13 @@ bool SqwBase::SetVarIfAvail(const std::string& strKey, const std::string& strNew
 	}
 
 	return false;
+}
+
+
+const SqwBase& SqwBase::operator=(const SqwBase& sqw)
+{
+	this->m_bOk = sqw.m_bOk;
+	this->m_vecFit = sqw.m_vecFit;
+
+	return *this;
 }

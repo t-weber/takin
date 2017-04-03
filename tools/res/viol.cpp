@@ -1,6 +1,6 @@
 /**
  * implementation of Violini's TOF reso algorithm
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date apr-2016
  * @license GPLv2
  *

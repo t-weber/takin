@@ -1,6 +1,6 @@
 /**
  * TAS tool (crystal stuff)
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2014 - 2016
  * @license GPLv2
  */
@@ -522,26 +522,69 @@ void TazDlg::RepopulateSpaceGroups()
 	for(int iCnt=comboSpaceGroups->count()-1; iCnt>0; --iCnt)
 		comboSpaceGroups->removeItem(iCnt);
 
+	// filter string
 	std::string strFilter = editSpaceGroupsFilter->text().toStdString();
+	// look for space group number instead of name?
+	bool bWantsNr = tl::str_is_digits<decltype(strFilter)>(strFilter);
 
+	// number, string containing number + name, pointer
+	using t_sgitem = std::tuple<unsigned int, std::string, void*>;
+	std::vector<t_sgitem> vecSGs;
+
+	// get all space groups and apply filter
 	for(const SpaceGroups<t_real>::t_mapSpaceGroups::value_type& pair : *pmapSpaceGroups)
 	{
+		// space group number and name
+		const std::string strSGNr = tl::var_to_str(pair.second.GetNr());
 		const std::string& strName = pair.second.GetName();
 
+		// apply user filter
 		typedef const boost::iterator_range<std::string::const_iterator> t_striterrange;
-		if(strFilter!="" &&
-			!boost::ifind_first(t_striterrange(strName.begin(), strName.end()),
-			t_striterrange(strFilter.begin(), strFilter.end())))
-			continue;
+		if(strFilter!="")
+		{
+			// sg number or name?
+			const std::string *pStrToFilter = bWantsNr ? &strSGNr : &strName;
 
+			if(!boost::ifind_first(t_striterrange(pStrToFilter->begin(), pStrToFilter->end()),
+				t_striterrange(strFilter.begin(), strFilter.end())))
+				continue;
+		}
+
+		vecSGs.push_back(std::make_tuple(pair.second.GetNr(),
+			"(" + strSGNr + ") " + strName, 
+			(void*)&pair.second));
+	}
+
+	// sort by space group number
+	std::sort(vecSGs.begin(), vecSGs.end(),
+		[](const t_sgitem& sg1, const t_sgitem& sg2)
+		{
+			return std::get<0>(sg1) < std::get<0>(sg2);
+		});
+
+	for(std::size_t iSG=0; iSG<vecSGs.size(); ++iSG)
+	{
+		// insert space groups
 		comboSpaceGroups->insertItem(comboSpaceGroups->count(),
-			strName.c_str(), QVariant::fromValue((void*)&pair.second));
+			std::get<1>(vecSGs[iSG]).c_str(), QVariant::fromValue(std::get<2>(vecSGs[iSG])));
 	}
 
 
 	int iSGIdx = comboSpaceGroups->findText(strCurSG);
-	if(iSGIdx >= 0)
+	if(iSGIdx > 0)
+	{	// select previously selected space group
 		comboSpaceGroups->setCurrentIndex(iSGIdx);
+	}
+	else if(vecSGs.size() == 1)
+	{	// if old sg is not compatible with filter -> select new sg, if unique
+		int iNewSGIdx = comboSpaceGroups->findText(std::get<1>(vecSGs[0]).c_str());
+		if(iNewSGIdx > 0)
+			comboSpaceGroups->setCurrentIndex(iNewSGIdx);
+	}
+	else
+	{	// not set
+		comboSpaceGroups->setCurrentIndex(0);
+	}
 }
 
 
@@ -560,8 +603,7 @@ void TazDlg::ShowSpurions()
 		m_sceneRecip.emitAllParams();
 	}
 
-	m_pSpuri->show();
-	m_pSpuri->activateWindow();
+	focus_dlg(m_pSpuri);
 }
 
 void TazDlg::spurionInfo(const tl::ElasticSpurion& spuri,
@@ -663,9 +705,7 @@ void TazDlg::InitReso()
 void TazDlg::ShowResoParams()
 {
 	InitReso();
-
-	m_pReso->show();
-	m_pReso->activateWindow();
+	focus_dlg(m_pReso);
 }
 
 void TazDlg::ShowResoEllipses()
@@ -681,8 +721,7 @@ void TazDlg::ShowResoEllipses()
 		m_pReso->EmitResults();
 	}
 
-	m_pEllipseDlg->show();
-	m_pEllipseDlg->activateWindow();
+	focus_dlg(m_pEllipseDlg);
 }
 
 void TazDlg::InitResoConv()
@@ -694,8 +733,7 @@ void TazDlg::InitResoConv()
 void TazDlg::ShowResoConv()
 {
 	InitResoConv();
-	m_pConvoDlg->show();
-	m_pConvoDlg->activateWindow();
+	focus_dlg(m_pConvoDlg);
 }
 
 #ifndef NO_3D
@@ -713,8 +751,7 @@ void TazDlg::ShowResoEllipses3D()
 		m_pReso->EmitResults();
 	}
 
-	m_pEllipseDlg3D->show();
-	m_pEllipseDlg3D->activateWindow();
+	focus_dlg(m_pEllipseDlg3D);
 }
 
 #else
@@ -730,8 +767,8 @@ void TazDlg::ShowFormfactorDlg()
 {
 	if(!m_pFormfactorDlg)
 		m_pFormfactorDlg = new FormfactorDlg(this, &m_settings);
-	m_pFormfactorDlg->show();
-	m_pFormfactorDlg->activateWindow();
+
+	focus_dlg(m_pFormfactorDlg);
 }
 
 void TazDlg::ShowAtomsDlg()
@@ -744,8 +781,7 @@ void TazDlg::ShowAtomsDlg()
 	}
 
 	m_pAtomsDlg->SetAtoms(m_vecAtoms);
-	m_pAtomsDlg->show();
-	m_pAtomsDlg->activateWindow();
+	focus_dlg(m_pAtomsDlg);
 }
 
 void TazDlg::ApplyAtoms(const std::vector<AtomPos<t_real>>& vecAtoms)
@@ -758,6 +794,6 @@ void TazDlg::ShowSgListDlg()
 {
 	if(!m_pSgListDlg)
 		m_pSgListDlg = new SgListDlg(this);
-	m_pSgListDlg->show();
-	m_pSgListDlg->activateWindow();
+
+	focus_dlg(m_pSgListDlg);
 }

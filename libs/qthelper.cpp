@@ -1,6 +1,6 @@
 /**
  * qt helpers
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2016
  * @license GPLv2
  */
@@ -119,3 +119,14 @@ std::vector<std::string> get_qt_std_path(QtStdPath path)
 }
 
 #endif
+
+
+// ----------------------------------------------------------------------------
+
+
+void focus_dlg(QDialog* pDlg)
+{
+	pDlg->show();
+	pDlg->raise();
+	pDlg->activateWindow();
+}

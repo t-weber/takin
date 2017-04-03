@@ -1,6 +1,6 @@
 /**
  * Scan Position Plotter Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date Feb-2017
  * @license GPLv2
  */

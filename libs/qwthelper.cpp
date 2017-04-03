@@ -1,6 +1,6 @@
 /**
  * qwt helpers
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2016
  * @license GPLv2
  */
@@ -143,10 +143,8 @@ QwtPlotWrapper::QwtPlotWrapper(QwtPlot *pPlot,
 		m_pSpec->setColorMap(create_colmap());
 		pRightAxis->setColorMap(QwtInterval(dCBMin, dCBMax), create_colmap());
 #else
-		QwtLinearColorMap *pColMap = create_colmap();
 		m_pSpec->setColorMap(*create_colmap());
 		pRightAxis->setColorMap(QwtInterval(dCBMin, dCBMax), *create_colmap());
-		//delete pColMap;
 #endif
 
 		m_pRaster = new MyQwtRasterData();

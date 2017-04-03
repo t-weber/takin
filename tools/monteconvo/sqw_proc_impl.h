@@ -1,6 +1,6 @@
 /**
  * S(Q,w) processes
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date sep-2016
  * @license GPLv2
  */

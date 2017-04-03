@@ -1,6 +1,6 @@
 /**
  * factory and plugin interface for S(q,w) models
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2016
  * @license GPLv2
  */

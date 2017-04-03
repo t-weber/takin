@@ -1,6 +1,6 @@
 /**
  * Reciprocal Lattice
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2014 - 2016
  * @license GPLv2
  */

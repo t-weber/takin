@@ -1,6 +1,6 @@
 /**
  * Spurion Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 26-may-2014
  * @license GPLv2
  */

@@ -1,6 +1,6 @@
 /**
  * Atom Positions Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
@@ -36,7 +36,8 @@ AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableJ)
 	if(m_bEnableJ)
 	{
 		tableAtoms->setColumnCount(5);
-		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::J), new QTableWidgetItem("J (meV/K)"));	}
+		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::J), new QTableWidgetItem("J (meV/K)"));
+	}
 
 	tableAtoms->setColumnWidth(0, 75);
 	btnAdd->setIcon(load_icon("res/icons/list-add.svg"));

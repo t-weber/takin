@@ -1,6 +1,6 @@
 /**
  * Plot scattering plane and positions from given scan files
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2016, 30-jan-2017
  * @license GPLv2
  *

@@ -1,3 +1,10 @@
+/**
+ * mini scan monitor
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @date 2015
+ * @license GPLv2
+ */
+
 #ifndef __DIALOG_H__
 #define __DIALOG_H__
 

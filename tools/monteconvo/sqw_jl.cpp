@@ -1,6 +1,6 @@
 /**
  * S(Q,w) julia interface
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date dec-2016
  * @license GPLv2
  */

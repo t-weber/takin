@@ -1,6 +1,6 @@
 /**
  * Creates needed tables
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
@@ -96,7 +96,9 @@ bool gen_formfacts()
 	return true;
 }
 
+
 // ============================================================================
+
 
 t_cplx get_number(std::string str)
 {
@@ -121,8 +123,20 @@ t_cplx get_number(std::string str)
 	t_real dR = c.real(), dI = c.imag();
 	tl::set_eps_0(dR); tl::set_eps_0(dI);
 	c.real(dR); c.imag(dI);
+
 	return c;
 }
+
+bool get_abundance_or_hl(const std::string& _str, t_real& dAbOrHL)
+{
+	bool bIsHL = (_str.find("a") != std::string::npos);
+	std::string str = tl::remove_chars(_str, std::string("()a"));
+
+	dAbOrHL = get_number(str).real();
+	if(!bIsHL) dAbOrHL /= t_real(100.);
+	return !bIsHL;
+}
+
 
 bool gen_scatlens()
 {
@@ -200,6 +214,9 @@ bool gen_scatlens()
 		t_real dXsecScat = get_number(vecCol[7]).real();
 		t_real dXsecAbsTherm = get_number(vecCol[8]).real();
 
+		t_real dAbOrHL = t_real(0);
+		bool bAb = get_abundance_or_hl(vecCol[2], dAbOrHL);
+
 		prop.Add(strAtom + ".name", strName);
 		prop.Add(strAtom + ".coh", tl::var_to_str(cCoh, g_iPrec));
 		prop.Add(strAtom + ".incoh", tl::var_to_str(cIncoh, g_iPrec));
@@ -208,6 +225,11 @@ bool gen_scatlens()
 		prop.Add(strAtom + ".xsec_incoh", tl::var_to_str(dXsecIncoh, g_iPrec));
 		prop.Add(strAtom + ".xsec_scat", tl::var_to_str(dXsecScat, g_iPrec));
 		prop.Add(strAtom + ".xsec_abs", tl::var_to_str(dXsecAbsTherm, g_iPrec));
+
+		if(bAb)
+			prop.Add(strAtom + ".abund", tl::var_to_str(dAbOrHL, g_iPrec));
+		else
+			prop.Add(strAtom + ".hl", tl::var_to_str(dAbOrHL, g_iPrec));
 
 		++iAtom;
 	}

@@ -1,3 +1,10 @@
+#
+# Takin dev makefile
+# @author Tobias Weber <tobias.weber@tum.de>
+# @date 2014-2017
+# @license GPLv2
+#
+
 #CC = gcc
 CC = clang
 
@@ -13,12 +20,12 @@ USE_IOSTR = 1
 USE_BOOST_REGEX = 0
 USE_GIL = 1
 USE_PY = 1
-USE_JL = 1
+USE_JL = 0
 USE_PLUGINS = 1
 USE_FADDEEVA = 1
 USE_CPP11_ABI = 1
 USE_FRAMEWORKS = 0
-NON_STANDALONE_MINUIT_HACK = 0
+NON_STANDALONE_MINUIT_HACK = 1
 
 
 STD_CPP = -std=c++11
@@ -111,12 +118,12 @@ DEFINES += -DQT_VER=$(QT_VER)
 # -----------------------------------------------------------------------------
 
 
-# TODO: find and add -I[gl dir]/Frameworks/OpenGL.framework/Headers
 ifeq ($(QT_VER), 5)	# qt 5
 	QT_INC = -I/usr/local/opt/qt5/Frameworks/QtOpenGL.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtWidgets.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtCore.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtGui.framework/Versions/5/Headers \
+			-I/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers \
 			-I/usr/local/opt/qt5/include \
 			-I/opt/local/libexec/qt5/include \
 			-I/opt/local/libexec/qt5/include/QtCore \
@@ -128,7 +135,6 @@ ifeq ($(QT_VER), 5)	# qt 5
 			-I/usr/include/qt5/QtGui \
 			-I/usr/include/qt5/QtOpenGL
 
-#TODO: find and add -F[gldir]/Frameworks/
 	QT_LIB = -L/opt/local/libexec/qt5/lib \
 			-L/usr/lib64/qt5 \
 			-L/usr/lib/qt5/lib
@@ -383,7 +389,8 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} \
 	obj/tasreso.o obj/ConvoDlg.o obj/ConvoDlg_file.o obj/SqwParamDlg.o \
 	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
-	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o
+	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o \
+	obj/convofit_import.o obj/ConvoDlg_fit.o obj/ConvoDlg_sim.o
 
 OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
 	obj/qthelper.o obj/qwthelper.o obj/globals.o obj/globals_qt.o
@@ -395,14 +402,16 @@ OBJ_MONTECONVO = obj/log.o obj/debug.o obj/sqw.o obj/sqwbase.o \
 
 OBJ_CONVOFIT = obj/convofit.o obj/convo_scan.o obj/convo_model.o \
 	obj/loadinstr.o obj/eval.o obj/gnuplot.o ${OBJ_MONTECONVO} \
-	obj/globals.o
+	obj/globals.o obj/tmp.o obj/convofit_import.o \
+	obj/convofit_main.o
 OBJ_CONVOSERIES = obj/scanseries.o obj/log.o obj/debug.o
 
 OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 	obj/spec_char.o obj/reso_res_main.o \
 	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
 	obj/ResoDlg.o obj/ResoDlg_file.o obj/TOFDlg.o \
-	obj/linalg2.o obj/globals.o obj/globals_qt.o obj/eval.o
+	obj/linalg2.o obj/globals.o obj/globals_qt.o obj/eval.o \
+	obj/qthelper.o
 
 OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 	obj/loadinstr.o obj/log.o obj/debug.o obj/qthelper.o \
@@ -458,9 +467,10 @@ monteconvo: ${OBJ_MONTECONVO} obj/globals.o obj/mconv_main.o
 	${STRIP} monteconvo
 
 xmonteconvo: ${OBJ_MONTECONVO} obj/xmconv_main.o obj/ConvoDlg.o obj/ConvoDlg_file.o\
+	obj/ConvoDlg_fit.o obj/ConvoDlg_sim.o \
 	obj/FavDlg.o obj/qthelper.o obj/qwthelper.o \
 	obj/globals.o obj/globals_qt.o obj/SqwParamDlg.o obj/convo_scan.o obj/loadinstr.o \
-	obj/spec_char.o
+	obj/spec_char.o obj/convofit_import.o
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/xmonteconvo $+ \
 		${BASIC_LIBS} ${QT_LIB} ${QWT_LIB} \
 		${PY_LIBS} ${JL_LIBS} ${LAPACK_LIBS} ${DL_LIBS} ${STD_LIBS}
@@ -621,6 +631,8 @@ obj/x3d.o: tlibs/file/x3d.cpp tlibs/file/x3d.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/recent.o: tlibs/file/recent.cpp tlibs/file/recent.h
 	${CC} ${FLAGS} -c -o $@ $<
+obj/tmp.o: tlibs/file/tmp.cpp tlibs/file/tmp.h
+	${CC} ${FLAGS} -c -o $@ $<
 obj/eval.o: tlibs/string/eval.cpp tlibs/string/eval.h tlibs/string/eval_impl.h
 	${CC} ${FLAGS} -c -o $@ $<
 
@@ -639,6 +651,10 @@ obj/ResoDlg.o: tools/res/ResoDlg.cpp tools/res/ResoDlg.h
 obj/ResoDlg_file.o: tools/res/ResoDlg_file.cpp tools/res/ResoDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/ConvoDlg.o: tools/monteconvo/ConvoDlg.cpp tools/monteconvo/ConvoDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/ConvoDlg_fit.o: tools/monteconvo/ConvoDlg_fit.cpp tools/monteconvo/ConvoDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/ConvoDlg_sim.o: tools/monteconvo/ConvoDlg_sim.cpp tools/monteconvo/ConvoDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/ConvoDlg_file.o: tools/monteconvo/ConvoDlg_file.cpp tools/monteconvo/ConvoDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
@@ -676,7 +692,11 @@ obj/tasreso.o: tools/monteconvo/TASReso.cpp tools/monteconvo/TASReso.h
 obj/posextract.o: tools/posextract/posextract.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 
-obj/convofit.o: tools/convofit/convofit.cpp
+obj/convofit.o: tools/convofit/convofit.cpp tools/convofit/convofit.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/convofit_main.o: tools/convofit/convofit_main.cpp tools/convofit/convofit.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+obj/convofit_import.o: tools/convofit/convofit_import.cpp tools/convofit/convofit_import.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/convo_scan.o: tools/convofit/scan.cpp tools/convofit/scan.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<

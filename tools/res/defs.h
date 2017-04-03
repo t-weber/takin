@@ -1,6 +1,6 @@
-/*
+/**
  * type definitions for reso
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date mar-2016
  * @license GPLv2
  */

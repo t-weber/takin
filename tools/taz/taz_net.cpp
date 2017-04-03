@@ -1,6 +1,6 @@
-/*
+/**
  * TAS tool (server stuff)
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2014
  * @license GPLv2
  */
@@ -21,8 +21,7 @@ void TazDlg::ShowConnectDlg()
 			this, SLOT(ConnectTo(int, const QString&, const QString&, const QString&, const QString&)));
 	}
 
-	m_pSrvDlg->show();
-	m_pSrvDlg->activateWindow();
+	focus_dlg(m_pSrvDlg);
 }
 
 void TazDlg::ConnectTo(int iSys, const QString& _strHost, const QString& _strPort,
@@ -108,8 +107,7 @@ void TazDlg::ShowNetCache()
 	if(!m_pNetCacheDlg)
 		m_pNetCacheDlg = new NetCacheDlg(this, &m_settings);
 
-	m_pNetCacheDlg->show();
-	m_pNetCacheDlg->activateWindow();
+	focus_dlg(m_pNetCacheDlg);
 }
 
 void TazDlg::ShowNetScanMonitor()
@@ -117,8 +115,7 @@ void TazDlg::ShowNetScanMonitor()
 	if(!m_pScanMonDlg)
 		m_pScanMonDlg = new ScanMonDlg(this, &m_settings);
 
-	m_pScanMonDlg->show();
-	m_pScanMonDlg->activateWindow();
+	focus_dlg(m_pScanMonDlg);
 }
 
 void TazDlg::NetRefresh()

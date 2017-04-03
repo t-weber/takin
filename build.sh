@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# invokes "themakefile" (alternate build path)
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 MAKE=make
 GCC=$(which gcc 2>/dev/null)

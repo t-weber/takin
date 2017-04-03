@@ -1,3 +1,9 @@
+/**
+ * mini scan monitor
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @date 2015
+ * @license GPLv2
+ */
 // gcc -o dialog dialog_indirect.cpp -std=c++11 -lstdc++ -lboost_iostreams
 
 #include "dialog.h"

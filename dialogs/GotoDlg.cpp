@@ -1,6 +1,6 @@
 /**
  * Goto Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 15-oct-2014
  * @license GPLv2
  */

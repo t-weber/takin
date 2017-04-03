@@ -1,6 +1,6 @@
 /**
  * monte carlo convolution tool
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2015, 2016
  * @license GPLv2
  */

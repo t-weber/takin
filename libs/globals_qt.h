@@ -1,6 +1,6 @@
-/*
+/**
  * globals
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 20-mar-2015
  * @license GPLv2
  */

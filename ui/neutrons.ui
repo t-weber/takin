@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>409</width>
-    <height>382</height>
+    <height>389</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -254,7 +254,7 @@
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>n λ = 2d sin θ,    G = 2k sin θ = 4π / λ sin θ = 2π / d</string>
+          <string>n λ = 2d sin θ,   n G = 2k sin θ = 4π / λ sin θ = 2π / d</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
           <property name="margin">

@@ -1,6 +1,6 @@
 /**
  * resolution calculation
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013 - 2016
  * @license GPLv2
  */
@@ -20,6 +20,7 @@
 #include "tlibs/math/rand.h"
 
 #include "libs/globals.h"
+#include "libs/qthelper.h"
 #include "helper.h"
 #include "mc.h"
 
@@ -1109,8 +1110,8 @@ void ResoDlg::ShowTOFCalcDlg()
 {
 	if(!m_pTOFDlg)
 		m_pTOFDlg.reset(new TOFDlg(this, m_pSettings));
-	m_pTOFDlg->show();
-	m_pTOFDlg->activateWindow();
+
+	focus_dlg(m_pTOFDlg.get());
 }
 
 // --------------------------------------------------------------------------------

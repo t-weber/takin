@@ -1,6 +1,6 @@
 /**
  * Connection to Nicos
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 27-aug-2014
  * @license GPLv2
  */

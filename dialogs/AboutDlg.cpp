@@ -1,6 +1,6 @@
 /**
  * About Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
@@ -36,21 +36,22 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 
 	labelVersion->setText("Version " TAKIN_VER);
 	labelWritten->setText("Written by Tobias Weber <tobias.weber@tum.de>");
-	labelYears->setText("2014 - 2016");
+	labelYears->setText("2014 - 2017");
 	labelDesc->setText("An overview of Takin can be found here: "
 		"<a href=http://dx.doi.org/10.1016/j.softx.2016.06.002>doi:10.1016/j.softx.2016.06.002</a>.");
 	labelDesc->setOpenExternalLinks(1);
 	labelLicense->setOpenExternalLinks(1);
 
-	std::string strCC = "Built using " + std::string(BOOST_COMPILER);
+	std::string strCC = "Built";
+#ifdef BOOST_PLATFORM
+		strCC += " for " + std::string(BOOST_PLATFORM);
+#endif
+	strCC += " using " + std::string(BOOST_COMPILER);
 #ifdef __cplusplus
 	strCC += " (standard: " + tl::var_to_str(__cplusplus) + ")";
 #endif
 #ifdef BOOST_STDLIB
 		strCC += " with " + std::string(BOOST_STDLIB);
-#endif
-#ifdef BOOST_PLATFORM
-		strCC += " for " + std::string(BOOST_PLATFORM);
 #endif
 	strCC += ".";
 	labelCC->setText(strCC.c_str());

@@ -1,6 +1,6 @@
 /**
  * simple resolution calculation including only ki and kf errors
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date jun-2016
  * @license GPLv2
  */

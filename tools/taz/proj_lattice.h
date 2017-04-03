@@ -1,6 +1,6 @@
 /**
  * Crystal lattice projections
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date may-2016
  * @license GPLv2
  */

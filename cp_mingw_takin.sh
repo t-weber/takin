@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# creates a distro for mingw
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 
 # installation directory
@@ -40,6 +45,7 @@ cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtCore4.dll		${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtGui4.dll			${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtOpenGL4.dll		${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtSvg4.dll			${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtXml4.dll			${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/qwt.dll			${INSTDIR}/
 
 

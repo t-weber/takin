@@ -1,6 +1,6 @@
 /**
  * Form Factor & Scattering Length Dialog
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */

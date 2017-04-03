@@ -1,6 +1,6 @@
 /**
  * gl plotter
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 19-may-2013
  * @license GPLv2
  */

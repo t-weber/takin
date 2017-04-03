@@ -1,6 +1,6 @@
-/*
+/**
  * Extracts (hkl), E positions from scan files for monteconvo
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 25-jul-2015
  * @license GPLv2
  */

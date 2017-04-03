@@ -1,7 +1,10 @@
 #!/bin/zsh
+#
 # quick backup of Takin source files
-# @author tweber
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
 # @date 18-jun-2016
+#
 
 thetime=${${${$(date --iso-8601='ns')//:/-}//,/_}//+/p}
 thefile="takin_src-${thetime}.txz"

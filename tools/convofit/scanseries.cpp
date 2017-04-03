@@ -1,10 +1,10 @@
-// gcc -I../../ -o scanseries scanseries.cpp ../../tlibs/log/log.cpp -std=c++11 -lboost_system -lboost_filesystem -lstdc++
 /**
  * processes multiple convo fit results
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date dec-2015
  * @license GPLv2
  */
+// gcc -I../../ -o scanseries scanseries.cpp ../../tlibs/log/log.cpp -std=c++11 -lboost_system -lboost_filesystem -lstdc++
 
 #include <fstream>
 #include <sstream>

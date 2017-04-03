@@ -1,6 +1,6 @@
-/*
+/**
  * Scattering factors dialog (e.g. Debye-Waller factor)
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013, jan-2015
  * @license GPLv2
  */
@@ -238,7 +238,7 @@ void DWDlg::CalcDW()
 
 		if(!bHasZetaSq)
 		{
-			std::string strZetaSq = tl::var_to_str(t_real(tl::my_units_sqrt<tl::t_length_si<t_real>>(zetasq) / angs));
+			std::string strZetaSq = tl::var_to_str(t_real(tl::my_units_sqrt<tl::t_length_si<t_real>>(zetasq) / angs), g_iPrec);
 			editZetaSq->setText(strZetaSq.c_str());
 
 			bHasZetaSq = 1;
@@ -262,8 +262,8 @@ void DWDlg::CalcAna()
 		t_real dAngMax = 0.5*tl::r2d(tl::get_mono_twotheta(dMinKf/angs, d, 1) / rads);
 		t_real dAngMin = 0.5*tl::r2d(tl::get_mono_twotheta(dMaxKf/angs, d, 1) / rads);
 
-		editAngMin->setText(tl::var_to_str(dAngMin).c_str());
-		editAngMax->setText(tl::var_to_str(dAngMax).c_str());
+		editAngMin->setText(tl::var_to_str(dAngMin, g_iPrec).c_str());
+		editAngMax->setText(tl::var_to_str(dAngMax, g_iPrec).c_str());
 
 		m_veckf.clear();
 		m_vecInt.clear();

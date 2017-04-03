@@ -1,6 +1,6 @@
 /**
  * TAS tool
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2015
  * @license GPLv2
  */
@@ -15,6 +15,27 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <boost/scope_exit.hpp>
+
+using t_real = t_real_glob;
+
+
+/**
+ * gets space group index from combo box
+ */
+static int find_sg_from_combo(QComboBox* pCombo, const std::string& str)
+{
+	//return pCombo->findText(str.c_str(), Qt::MatchContains /*Qt::MatchFixedString*/);
+
+	for(int iIdx=0; iIdx<pCombo->count(); ++iIdx)
+	{
+		SpaceGroup<t_real> *pSG = reinterpret_cast<SpaceGroup<t_real>*>
+			(pCombo->itemData(iIdx).value<void*>());
+		if(pSG && pSG->GetName() == str)
+			return iIdx;
+	}
+
+	return -1;
+}
 
 
 //--------------------------------------------------------------------------------
@@ -39,11 +60,11 @@ void TazDlg::New()
 
 	triag.dAnaD = triag.dMonoD = 3.355;
 	triag.bChangedAnaD = triag.bChangedMonoD = 1;
-	triag.dAnaTwoTheta = triag.dMonoTwoTheta = tl::get_pi<t_real_glob>()/2.;
+	triag.dAnaTwoTheta = triag.dMonoTwoTheta = tl::get_pi<t_real>()/2.;
 	triag.bChangedAnaTwoTheta = triag.bChangedMonoTwoTheta = 1;
 
-	triag.dTwoTheta = tl::get_pi<t_real_glob>()/2.;
-	triag.dAngleKiVec0 = tl::get_pi<t_real_glob>()/4.;
+	triag.dTwoTheta = tl::get_pi<t_real>()/2.;
+	triag.dAngleKiVec0 = tl::get_pi<t_real>()/4.;
 	triag.bChangedTwoTheta = triag.bChangedAngleKiVec0 = 1;
 
 	m_vecAtoms.clear();
@@ -235,7 +256,9 @@ bool TazDlg::Load(const char* pcFile)
 	if(bOk)
 	{
 		editSpaceGroupsFilter->clear();
-		int iSGIdx = comboSpaceGroups->findText(strSpaceGroup.c_str(), Qt::MatchFixedString);
+		RepopulateSpaceGroups();
+
+		int iSGIdx = find_sg_from_combo(comboSpaceGroups, strSpaceGroup);
 		if(iSGIdx >= 0)
 			comboSpaceGroups->setCurrentIndex(iSGIdx);
 		else
@@ -251,7 +274,7 @@ bool TazDlg::Load(const char* pcFile)
 
 		for(unsigned int iAtom=0; iAtom<iNumAtoms; ++iAtom)
 		{
-			AtomPos<t_real_glob> atom;
+			AtomPos<t_real> atom;
 			atom.vecPos.resize(3,0);
 
 			std::string strNr = tl::var_to_str(iAtom);
@@ -430,16 +453,21 @@ bool TazDlg::Save()
 	mapConf[strXmlRoot + "real/enable_realQDir"] = (bRealQDir ? "1" : "0");
 
 
-	std::string strSG = comboSpaceGroups->currentText().toStdString();
-	if(strSG == "<not set>")
-		strSG = "-1";
+	// space group
+	SpaceGroup<t_real> *pSpaceGroup = nullptr;
+	std::string strSG = "-1";
+	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
+	if(iSpaceGroupIdx != 0)
+		pSpaceGroup = (SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
+	if(pSpaceGroup)
+		strSG = pSpaceGroup->GetName();
 	mapConf[strXmlRoot + "sample/spacegroup"] = strSG;
 
 
 	mapConf[strXmlRoot + "sample/atoms/num"] = tl::var_to_str(m_vecAtoms.size());
 	for(unsigned int iAtom=0; iAtom<m_vecAtoms.size(); ++iAtom)
 	{
-		const AtomPos<t_real_glob>& atom = m_vecAtoms[iAtom];
+		const AtomPos<t_real>& atom = m_vecAtoms[iAtom];
 
 		std::string strAtomNr = tl::var_to_str(iAtom);
 		mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/name"] =
@@ -452,7 +480,7 @@ bool TazDlg::Save()
 			tl::var_to_str(atom.vecPos[2]);
 	}
 
-	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real_glob>(tl::epoch<t_real_glob>());
+	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
 	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
 	mapConf[strXmlRoot + "meta/info"] = "Created with Takin.";
 
@@ -573,18 +601,18 @@ bool TazDlg::Import(const char* pcFile)
 	std::size_t iScanNum = 0;
 	try
 	{
-		std::unique_ptr<tl::FileInstrBase<t_real_glob>> ptrDat(
-			tl::FileInstrBase<t_real_glob>::LoadInstr(pcFile));
-		tl::FileInstrBase<t_real_glob>* pdat = ptrDat.get();
+		std::unique_ptr<tl::FileInstrBase<t_real>> ptrDat(
+			tl::FileInstrBase<t_real>::LoadInstr(pcFile));
+		tl::FileInstrBase<t_real>* pdat = ptrDat.get();
 		if(!pdat)
 			return false;
 
-		std::array<t_real_glob,3> arrLatt = pdat->GetSampleLattice();
-		std::array<t_real_glob,3> arrAng = pdat->GetSampleAngles();
+		std::array<t_real, 3> arrLatt = pdat->GetSampleLattice();
+		std::array<t_real, 3> arrAng = pdat->GetSampleAngles();
 		std::array<bool, 3> arrSenses = pdat->GetScatterSenses();
-		std::array<t_real_glob, 2> arrD = pdat->GetMonoAnaD();
-		std::array<t_real_glob, 3> arrPeak0 = pdat->GetScatterPlane0();
-		std::array<t_real_glob, 3> arrPeak1 = pdat->GetScatterPlane1();
+		std::array<t_real, 2> arrD = pdat->GetMonoAnaD();
+		std::array<t_real, 3> arrPeak0 = pdat->GetScatterPlane0();
+		std::array<t_real, 3> arrPeak1 = pdat->GetScatterPlane1();
 
 		editA->setText(tl::var_to_str(arrLatt[0]).c_str());
 		editB->setText(tl::var_to_str(arrLatt[1]).c_str());
@@ -610,10 +638,13 @@ bool TazDlg::Import(const char* pcFile)
 		editScatY2->setText(tl::var_to_str(arrPeak1[2]).c_str());
 
 		// spacegroup
+		editSpaceGroupsFilter->clear();
+		RepopulateSpaceGroups();
+
 		std::string strSpaceGroup = pdat->GetSpacegroup();
 		tl::trim(strSpaceGroup);
-		editSpaceGroupsFilter->clear();
-		int iSGIdx = comboSpaceGroups->findText(strSpaceGroup.c_str(), Qt::MatchFixedString);
+
+		int iSGIdx = find_sg_from_combo(comboSpaceGroups, strSpaceGroup);
 		if(iSGIdx >= 0)
 			comboSpaceGroups->setCurrentIndex(iSGIdx);
 		else
@@ -634,7 +665,7 @@ bool TazDlg::Import(const char* pcFile)
 
 			for(std::size_t iScan=0; iScan<iScanNum; ++iScan)
 			{
-				std::array<t_real_glob,5> arrScan = pdat->GetScanHKLKiKf(iScan);
+				std::array<t_real, 5> arrScan = pdat->GetScanHKLKiKf(iScan);
 				m_pGotoDlg->AddPosToList(arrScan[0],arrScan[1],arrScan[2],arrScan[3],arrScan[4]);
 			}
 		}
@@ -660,10 +691,7 @@ bool TazDlg::Import(const char* pcFile)
 	if(iScanNum && m_pGotoDlg)
 	{
 		if(m_pGotoDlg->GotoPos(0))
-		{
-			m_pGotoDlg->show();
-			m_pGotoDlg->activateWindow();
-		}
+			focus_dlg(m_pGotoDlg);
 	}
 
 	return true;
@@ -674,8 +702,7 @@ void TazDlg::ShowScanViewer()
 	if(!m_pScanViewer)
 		m_pScanViewer = new ScanViewerDlg(this);
 
-	m_pScanViewer->show();
-	m_pScanViewer->activateWindow();
+	focus_dlg(m_pScanViewer);
 }
 
 void TazDlg::ShowScanPos()
@@ -683,6 +710,5 @@ void TazDlg::ShowScanPos()
 	if(!m_pScanPos)
 		m_pScanPos = new ScanPosDlg(this, &m_settings);
 
-	m_pScanPos->show();
-	m_pScanPos->activateWindow();
+	focus_dlg(m_pScanPos);
 }

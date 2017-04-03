@@ -1,6 +1,6 @@
 /**
  * resolution helper functions
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2016
  * @license GPLv2
  */

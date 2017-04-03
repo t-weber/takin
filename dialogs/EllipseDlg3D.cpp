@@ -1,6 +1,6 @@
 /**
  * 3D Ellipsoid Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date may-2013, 29-apr-2014
  * @license GPLv2
  */

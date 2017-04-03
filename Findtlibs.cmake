@@ -1,3 +1,10 @@
+#
+# tlibs
+# @author Tobias Weber <tobias.weber@tum.de>
+# @date 2012-2017
+# @license GPLv2 or GPLv3
+#
+
 find_path(tlibs_INCLUDE_DIRS
 	NAMES version.h
 	PATH_SUFFIXES tlibs

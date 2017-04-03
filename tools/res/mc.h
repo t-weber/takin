@@ -1,6 +1,6 @@
 /**
  * monte carlo neutrons
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2014
  * @license GPLv2
  */

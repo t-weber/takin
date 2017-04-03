@@ -1,6 +1,6 @@
 #
 # Sample Julia S(q,w) module for ferromagnetic dispersions
-# @author tw
+# @author Tobias Weber <tobias.weber@tum.de>
 # @license GPLv2
 # @date dec-2016
 #

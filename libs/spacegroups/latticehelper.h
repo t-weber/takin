@@ -1,6 +1,6 @@
 /**
  * Lattice Helpers
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2015-2016
  * @license GPLv2
  */

@@ -1,6 +1,6 @@
-/*
+/**
  * reso tool
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013, 2014
  * @copyright GPLv2
  */

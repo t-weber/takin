@@ -1,3 +1,9 @@
+/**
+ * mini scan monitor
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @date 2015
+ * @license GPLv2
+ */
 // gcc -o dialog dialog.cpp -std=c++11 -lstdc++ -ldialog
 
 #include "dialog.h"

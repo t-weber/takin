@@ -1,6 +1,6 @@
 /**
  * 3d unit cell drawing
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date oct-2016
  * @license GPLv2
  */

@@ -1,6 +1,6 @@
 /**
  * monte carlo convolution tool
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date aug-2015
  * @license GPLv2
  */
@@ -32,6 +32,9 @@
 #include "TASReso.h"
 
 
+#define CONVO_MAX_CURVES			16
+#define CONVO_DISP_CURVE_START 		3
+
 class ConvoDlg : public QDialog, Ui::ConvoDlg
 { Q_OBJECT
 protected:
@@ -56,10 +59,12 @@ protected:
 	std::vector<QDoubleSpinBox*> m_vecSpinBoxes;
 	std::vector<QSpinBox*> m_vecIntSpinBoxes;
 	std::vector<QLineEdit*> m_vecEditBoxes;
+	std::vector<QPlainTextEdit*> m_vecTextBoxes;
 	std::vector<QComboBox*> m_vecComboBoxes;
 	std::vector<QCheckBox*> m_vecCheckBoxes;
 
-	std::vector<std::string> m_vecSpinNames, m_vecIntSpinNames, m_vecEditNames,
+	std::vector<std::string> m_vecSpinNames, m_vecIntSpinNames,
+		m_vecEditNames, m_vecTextNames,
 		m_vecComboNames, m_vecCheckNames;
 
 	QAction *m_pLiveResults = nullptr, *m_pLivePlots = nullptr;
@@ -88,7 +93,8 @@ protected slots:
 
 	void SqwModelChanged(int);
 	void createSqwModel(const QString& qstrFile);
-	void SqwParamsChanged(const std::vector<SqwBase::t_var>&);
+	void SqwParamsChanged(const std::vector<SqwBase::t_var>&, 
+		const std::vector<SqwBase::t_var_fit>*);
 
 	void scanFileChanged(const QString& qstrFile);
 	void scanCheckToggled(bool);
@@ -97,6 +103,7 @@ protected slots:
 	void SaveResult();
 
 	void Start();		// convolution
+	void StartFit();	// convolution fit
 	void StartDisp();	// plot dispersion
 	void Stop();		// stop convo
 
@@ -112,6 +119,7 @@ protected slots:
 
 	void Load();
 	void Save();
+	void SaveConvofit();
 
 	void ShowAboutDlg();
 
@@ -120,7 +128,7 @@ public:
 	virtual ~ConvoDlg();
 
 signals:
-	void SqwLoaded(const std::vector<SqwBase::t_var>&);
+	void SqwLoaded(const std::vector<SqwBase::t_var>&, const std::vector<SqwBase::t_var_fit>*);
 };
 
 #endif

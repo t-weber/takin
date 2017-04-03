@@ -1,6 +1,6 @@
 /**
  * TAS tool
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2014
  * @license GPLv2
  */
@@ -77,6 +77,8 @@ TazDlg::TazDlg(QWidget* pParent)
 	m_pStatusMsg->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 	m_pCoordQStatusMsg->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 	m_pCoordCursorStatusMsg->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+
+	// prevents window resizing by message length
 	for(QLabel* pLabel : {m_pStatusMsg/*, m_pCoordQStatusMsg, m_pCoordCursorStatusMsg*/})
 		pLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
@@ -1003,8 +1005,7 @@ void TazDlg::ShowNeutronDlg()
 		m_sceneRecip.emitAllParams();
 	}
 
-	m_pNeutronDlg->show();
-	m_pNeutronDlg->activateWindow();
+	focus_dlg(m_pNeutronDlg);
 }
 
 void TazDlg::InitGoto()
@@ -1016,8 +1017,7 @@ void TazDlg::InitGoto()
 void TazDlg::ShowGotoDlg()
 {
 	InitGoto();
-	m_pGotoDlg->show();
-	m_pGotoDlg->activateWindow();
+	focus_dlg(m_pGotoDlg);
 }
 
 void TazDlg::ShowPowderDlg()
@@ -1030,8 +1030,7 @@ void TazDlg::ShowPowderDlg()
 		m_sceneRecip.emitAllParams();
 	}
 
-	m_pPowderDlg->show();
-	m_pPowderDlg->activateWindow();
+	focus_dlg(m_pPowderDlg);
 }
 
 void TazDlg::ShowDispDlg()
@@ -1039,8 +1038,7 @@ void TazDlg::ShowDispDlg()
 	if(!m_pDispDlg)
 		m_pDispDlg = new DispDlg(this, &m_settings);
 
-	m_pDispDlg->show();
-	m_pDispDlg->activateWindow();
+	focus_dlg(m_pDispDlg);
 }
 
 void TazDlg::ShowSettingsDlg()
@@ -1048,8 +1046,7 @@ void TazDlg::ShowSettingsDlg()
 	if(!m_pSettingsDlg)
 		m_pSettingsDlg = new SettingsDlg(this, &m_settings);
 
-	m_pSettingsDlg->show();
-	m_pSettingsDlg->activateWindow();
+	focus_dlg(m_pSettingsDlg);
 }
 
 void TazDlg::ShowDWDlg()
@@ -1057,8 +1054,7 @@ void TazDlg::ShowDWDlg()
 	if(!m_pDWDlg)
 		m_pDWDlg = new DWDlg(this, &m_settings);
 
-	m_pDWDlg->show();
-	m_pDWDlg->activateWindow();
+	focus_dlg(m_pDWDlg);
 }
 
 void TazDlg::ShowDynPlaneDlg()
@@ -1071,8 +1067,7 @@ void TazDlg::ShowDynPlaneDlg()
 		m_sceneRecip.emitAllParams();
 	}
 
-	m_pDynPlaneDlg->show();
-	m_pDynPlaneDlg->activateWindow();
+	focus_dlg(m_pDynPlaneDlg);
 }
 
 void TazDlg::UpdateDs()
@@ -1327,14 +1322,12 @@ void TazDlg::RealCoordsChanged(t_real dh, t_real dk, t_real dl,
 
 void TazDlg::ShowRecipParams()
 {
-	m_dlgRecipParam.show();
-	m_dlgRecipParam.activateWindow();
+	focus_dlg(&m_dlgRecipParam);
 }
 
 void TazDlg::ShowRealParams()
 {
-	m_dlgRealParam.show();
-	m_dlgRealParam.activateWindow();
+	focus_dlg(&m_dlgRealParam);
 }
 
 
@@ -1368,8 +1361,7 @@ void TazDlg::ShowAbout()
 	if(!m_pAboutDlg)
 		m_pAboutDlg = new AboutDlg(this, &m_settings);
 
-	m_pAboutDlg->show();
-	m_pAboutDlg->activateWindow();
+	focus_dlg(m_pAboutDlg);
 }
 
 void TazDlg::ShowHelp()

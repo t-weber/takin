@@ -1,6 +1,6 @@
 /**
  * loads reso settings
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date jul-2015
  * @license GPLv2
  */

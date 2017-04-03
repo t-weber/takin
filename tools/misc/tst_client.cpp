@@ -1,6 +1,12 @@
+/**
+ * test instrument client
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @date 2014
+ * clang -o tst_server -I. -I../.. ../../tools/misc/tst_server.cpp ../../tlibs/net/tcp.cpp ../../tlibs/log/log.cpp -lstdc++ -std=c++11 -lboost_system -lboost_iostreams -lpthread -lm
+ */
+
 /*
  * clang -o tst_client -I../.. tst_client.cpp ../../tlibs/net/tcp.cpp ../../tlibs/log/log.cpp -lstdc++ -std=c++11 -lboost_system -lpthread -lm
- * @author tw
  */
 
 #include <fstream>

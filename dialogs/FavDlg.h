@@ -1,6 +1,6 @@
 /**
  * Favourite Positions Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date aug-2016
  * @license GPLv2
  */

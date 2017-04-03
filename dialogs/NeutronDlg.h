@@ -1,6 +1,6 @@
-/*
- * Neutron Properties Dialog (was: old formula dialog)
- * @author Tobias Weber
+/**
+ * Neutron Properties Dialog
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date jul-2013, 28-may-2014
  * @license GPLv2
  */

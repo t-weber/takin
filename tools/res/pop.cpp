@@ -1,6 +1,6 @@
 /**
  * popovici calculation
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013-2016
  * @license GPLv2
  *
@@ -60,20 +60,9 @@ ResoResults calc_pop(const PopParams& pop)
 	ki_Q *= pop.dsample_sense;
 	kf_Q *= pop.dsample_sense;
 
-
-	t_mat Ti = tl::rotation_matrix_2d(ki_Q/rads);
-	t_mat Tf = -tl::rotation_matrix_2d(kf_Q/rads);
-
 	// B matrix, [pop75], Appendix 1 -> U matrix in CN
-	t_mat B = ublas::zero_matrix<t_real>(4,6);
-	tl::submatrix_copy(B, Ti, 0, 0);
-	tl::submatrix_copy(B, Tf, 0, 3);
-	B(2,2) = 1.; B(2,5) = -1.;
-	B(3,0) = t_real(2)*pop.ki*angs * tl::get_KSQ2E<t_real>();
-	B(3,3) = t_real(-2)*pop.kf*angs * tl::get_KSQ2E<t_real>();
-	//std::cout << "k^2 to E factor: " << tl::KSQ2E << std::endl;
-	//std::cout << "B = " << B << std::endl;
-
+	t_mat B = get_trafo_dkidkf_dQdE(ki_Q, kf_Q, pop.ki, pop.kf);
+	B.resize(4,6, true);
 
 	angle coll_h_pre_mono = pop.coll_h_pre_mono;
 	angle coll_v_pre_mono = pop.coll_v_pre_mono;
@@ -133,7 +122,7 @@ ResoResults calc_pop(const PopParams& pop)
 
 
 
-	// S matrix, [pop75], Appendix 2
+	// covariance matrix of component geometries, S, [pop75], Appendix 2
 	// source
 	t_real dMult = 1./12.;
 	if(!pop.bSrcRect) dMult = 1./16.;
@@ -232,7 +221,7 @@ ResoResults calc_pop(const PopParams& pop)
 
 
 
-	// T matrix, [pop75], Appendix 2
+	// T matrix to transform the mosaic cov. matrix, [pop75], Appendix 2
 	t_mat T = ublas::zero_matrix<t_real>(4,13);
 	T(0,0) = t_real(-0.5) / (pop.dist_src_mono / cm);
 	T(0,2) = t_real(0.5) * units::cos(thetam) *
@@ -265,7 +254,7 @@ ResoResults calc_pop(const PopParams& pop)
 	T(3,12) = t_real(-0.5)/(pop.dist_ana_det/cm*units::sin(thetaa));
 
 
-	// D matrix, [pop75], Appendix 2
+	// D matrix to transform the spatial and the mosaic cov. matrices, [pop75], Appendix 2
 	t_mat D = ublas::zero_matrix<t_real>(8,13);
 	D(0,0) = t_real(-1) / (pop.dist_src_mono/cm);
 	D(0,2) = -cos(thetam) / (pop.dist_src_mono/cm);

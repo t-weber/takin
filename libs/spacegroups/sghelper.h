@@ -1,6 +1,6 @@
 /**
  * spacegroup helpers
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date oct-2015
  * @license GPLv2
  */

@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# cleans temporary files
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 echo -e "Cleaning stuff made by themakefile..."
 make -f themakefile clean

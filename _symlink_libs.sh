@@ -1,5 +1,9 @@
 #!/bin/bash
+#
 # internal dev script: link to other project dirs
+# @author Tobias Weber <tobias.weber@tum.de>
+# @license GPLv2
+#
 
 function link_tlibs
 {

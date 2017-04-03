@@ -1,6 +1,6 @@
 /**
  * Cache dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 21-oct-2014
  * @license GPLv2
  */

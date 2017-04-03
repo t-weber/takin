@@ -1,6 +1,6 @@
-/*
+/**
  * Dynamic Plane Dialog
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013, jan-2015
  * @license GPLv2
  */

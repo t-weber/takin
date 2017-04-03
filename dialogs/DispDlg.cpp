@@ -1,6 +1,6 @@
 /**
  * Dispersion Dialog
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date may-2016
  * @license GPLv2
  */
@@ -584,8 +584,8 @@ void DispDlg::ShowAtomDlg()
 	}
 
 	m_pAtomsDlg->SetAtoms(m_vecAtoms);
-	m_pAtomsDlg->show();
-	m_pAtomsDlg->activateWindow();
+
+	focus_dlg(m_pAtomsDlg);
 }
 
 void DispDlg::cursorMoved(const QPointF& pt)

@@ -1,7 +1,7 @@
 /**
  * Monte-Carlo resolution calculation
  *
- * @author Tobias Weber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date July 2012, Sep. 2014
  * @license GPLv2
  *

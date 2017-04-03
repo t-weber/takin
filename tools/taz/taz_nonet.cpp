@@ -1,6 +1,6 @@
-/*
+/**
  * TAS tool (dummy server stuff)
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date mar-2015
  * @copyright GPLv2
  */

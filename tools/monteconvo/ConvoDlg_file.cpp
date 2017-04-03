@@ -1,6 +1,6 @@
 /**
  * monte carlo convolution tool
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2015, 2016
  * @license GPLv2
  */
@@ -11,6 +11,7 @@
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
+#include "tools/convofit/convofit_import.h"
 
 #include <iostream>
 #include <fstream>
@@ -121,6 +122,11 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 		boost::optional<std::string> odEditVal = xml.QueryOpt<std::string>(strXmlRoot+m_vecEditNames[iEditBox]);
 		if(odEditVal) m_vecEditBoxes[iEditBox]->setText((*odEditVal).c_str());
 	}
+	for(std::size_t iEditBox=0; iEditBox<m_vecTextBoxes.size(); ++iEditBox)
+	{
+		boost::optional<std::string> odEditVal = xml.QueryOpt<std::string>(strXmlRoot+m_vecTextNames[iEditBox]);
+		if(odEditVal) m_vecTextBoxes[iEditBox]->setPlainText((*odEditVal).c_str());
+	}
 	for(std::size_t iCheck=0; iCheck<m_vecCheckBoxes.size(); ++iCheck)
 	{
 		boost::optional<int> obChecked = xml.QueryOpt<int>(strXmlRoot+m_vecCheckNames[iCheck]);
@@ -143,7 +149,7 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 		if(m_pSqw)
 		{
 			load_sqw_params(m_pSqw.get(), xml, strXmlRoot + "monteconvo/");
-			emit SqwLoaded(m_pSqw->GetVars());
+			emit SqwLoaded(m_pSqw->GetVars(), &m_pSqw->GetFitVars());
 		}
 	}
 	m_bAllowSqwReinit = 1;
@@ -189,6 +195,47 @@ void ConvoDlg::Save(std::map<std::string, std::string>& mapConf, const std::stri
 	}
 
 	//mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
+}
+
+
+// -----------------------------------------------------------------------------
+// exporting
+
+void ConvoDlg::SaveConvofit()
+{
+	const std::string strXmlRoot("taz/");
+
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	QString strDirLast = "";
+	if(m_pSett)
+		strDirLast = m_pSett->value("monteconvo/last_dir_convofit", ".").toString();
+	QString _strFile = QFileDialog::getSaveFileName(this,
+		"Export to Convofit", strDirLast, "Convofit files (*.job *.JOB)",
+		nullptr, fileopt);
+
+	if(_strFile == "")
+		return;
+
+	std::string strFile = _strFile.toStdString();
+	std::string strDir = tl::get_dir(strFile);
+
+	std::map<std::string, std::string> mapConf;
+	Save(mapConf, strXmlRoot);
+
+	tl::Prop<std::string> xml;
+	xml.Add(mapConf);
+
+	if(convert_monteconvo(xml, strFile) != strFile)
+	{
+		QMessageBox::critical(this, "Error", "Could not export convofit job file.");
+		return;
+	}
+
+	if(m_pSett)
+		m_pSett->setValue("monteconvo/last_dir_convofit", QString(strDir.c_str()));
 }
 
 
@@ -300,6 +347,8 @@ void ConvoDlg::accept()
 		m_pSett->setValue(m_vecIntSpinNames[iSpinBox].c_str(), m_vecIntSpinBoxes[iSpinBox]->value());
 	for(std::size_t iEditBox=0; iEditBox<m_vecEditBoxes.size(); ++iEditBox)
 		m_pSett->setValue(m_vecEditNames[iEditBox].c_str(), m_vecEditBoxes[iEditBox]->text());
+	for(std::size_t iEditBox=0; iEditBox<m_vecTextBoxes.size(); ++iEditBox)
+		m_pSett->setValue(m_vecTextNames[iEditBox].c_str(), m_vecTextBoxes[iEditBox]->toPlainText());
 	for(std::size_t iCombo=0; iCombo<m_vecComboBoxes.size(); ++iCombo)
 		m_pSett->setValue(m_vecComboNames[iCombo].c_str(), m_vecComboBoxes[iCombo]->currentIndex());
 	for(std::size_t iCheck=0; iCheck<m_vecCheckBoxes.size(); ++iCheck)

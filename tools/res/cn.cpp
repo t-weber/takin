@@ -1,6 +1,6 @@
 /**
  * cooper-nathans calculation
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2013-2016
  * @license GPLv2
  *
@@ -16,7 +16,6 @@
 #include "ellipse.h"
 #include "helper.h"
 
-#include "tlibs/math/linalg.h"
 #include "tlibs/math/geo.h"
 #include "tlibs/math/math.h"
 #include "tlibs/log/log.h"
@@ -102,6 +101,38 @@ t_real chess_R0(wavenumber ki, wavenumber kf,
 // -----------------------------------------------------------------------------
 
 
+/**
+ * transformation matrix -> [mit84], equ. A.15
+ *
+ * (  Ti11   Ti12      0   Tf11   Tf12      0 )   ( dki_x )   ( dQ_x  )
+ * (  Ti12   Ti22      0   Tf12   Tf22      0 )   ( dki_y )   ( dQ_y  )
+ * (     0      0      1      0      0     -1 ) * ( dki_z ) = ( dQ_z  )
+ * ( 2ki*c      0      0 -2kf*c      0      0 )   ( dkf_x )   ( dE    )
+ * (     1      0      0      0      0      0 )   ( dkf_y )   ( dki_x )
+ * (     0      0      1      0      0      0 )   ( dkf_z )   ( dki_z )
+ *
+ * e.g. E ~ ki^2 - kf^2
+ * dE ~ 2ki*dki - 2kf*dkf
+ */
+t_mat get_trafo_dkidkf_dQdE(const angle& ki_Q, const angle& kf_Q,
+	const wavenumber& ki, const wavenumber& kf)
+{
+	t_mat Ti = tl::rotation_matrix_2d(ki_Q/rads);
+	t_mat Tf = -tl::rotation_matrix_2d(kf_Q/rads);
+
+	t_mat U = ublas::zero_matrix<t_real>(6,6);
+	tl::submatrix_copy(U, Ti, 0, 0);
+	tl::submatrix_copy(U, Tf, 0, 3);
+	U(2,2) = 1.; U(2,5) = -1.;
+	U(3,0) = +t_real(2)*ki * tl::get_KSQ2E<t_real>() * angs;
+	U(3,3) = -t_real(2)*kf * tl::get_KSQ2E<t_real>() * angs;
+	U(4,0) = 1.; U(5,2) = 1.;
+	//tl::log_info("Trafo matrix (CN) = ", U);
+
+	return U;
+}
+
+
 ResoResults calc_cn(const CNParams& cn)
 {
 	ResoResults res;
@@ -126,8 +157,6 @@ ResoResults calc_cn(const CNParams& cn)
 		coll_v_pre_mono = lam*(cn.guide_div_v/angs);
 	}*/
 
-	// -------------------------------------------------------------------------
-	// transformation matrix
 	angle thetaa = cn.thetaa * cn.dana_sense;
 	angle thetam = cn.thetam * cn.dmono_sense;
 	angle ki_Q = cn.angle_ki_Q;
@@ -136,18 +165,9 @@ ResoResults calc_cn(const CNParams& cn)
 	ki_Q *= cn.dsample_sense;
 	kf_Q *= cn.dsample_sense;
 
-	t_mat Ti = tl::rotation_matrix_2d(ki_Q/rads);
-	t_mat Tf = -tl::rotation_matrix_2d(kf_Q/rads);
+	t_mat U = get_trafo_dkidkf_dQdE(ki_Q, kf_Q, cn.ki, cn.kf);
 
-	t_mat U = ublas::zero_matrix<t_real>(6,6);
-	tl::submatrix_copy(U, Ti, 0, 0);
-	tl::submatrix_copy(U, Tf, 0, 3);
-	U(2,2) = 1.; U(2,5) = -1.;
-	U(3,0) = +t_real(2)*cn.ki * tl::get_KSQ2E<t_real>() * angs;
-	U(3,3) = -t_real(2)*cn.kf * tl::get_KSQ2E<t_real>() * angs;
-	U(4,0) = 1.; U(5,2) = 1.;
-	//tl::log_info("Trafo matrix (CN) = ", U);
-
+	// V matrix -> [mit84], equ. A.16
 	t_mat V(6,6);
 	if(!tl::inverse(U, V))
 	{

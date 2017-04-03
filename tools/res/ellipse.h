@@ -1,6 +1,6 @@
 /**
  * resolution ellipse calculation
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 14-may-2013
  * @license GPLv2
  *

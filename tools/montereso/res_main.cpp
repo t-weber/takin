@@ -1,6 +1,6 @@
 /**
  * Montereso
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date 2012, 22-sep-2014
  * @license GPLv2
  */

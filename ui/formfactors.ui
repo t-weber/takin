@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
-    <height>411</height>
+    <width>558</width>
+    <height>439</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,8 +43,14 @@
            <string>Table</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_10">
-           <item row="0" column="0">
+           <item row="3" column="0" colspan="2">
             <widget class="QFrame" name="frame_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="frameShape">
               <enum>QFrame::StyledPanel</enum>
              </property>
@@ -58,20 +64,20 @@
               <property name="spacing">
                <number>4</number>
               </property>
-              <item row="0" column="0">
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="editSLSearch"/>
+              </item>
+              <item row="1" column="0">
                <widget class="QLabel" name="label_2">
                 <property name="text">
                  <string>Search:</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLineEdit" name="editSLSearch"/>
-              </item>
              </layout>
             </widget>
            </item>
-           <item row="0" column="1" rowspan="2">
+           <item row="0" column="0" rowspan="2" colspan="2">
             <widget class="QTableWidget" name="tableSL">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -121,20 +127,12 @@
                <string>Im(Inc.)</string>
               </property>
              </column>
+             <column>
+              <property name="text">
+               <string>Abund.</string>
+              </property>
+             </column>
             </widget>
-           </item>
-           <item row="1" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>227</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </widget>
@@ -235,7 +233,7 @@
             <number>4</number>
            </property>
            <property name="spacing">
-            <number>4</number>
+            <number>2</number>
            </property>
            <item row="4" column="0">
             <widget class="QDoubleSpinBox" name="spinL">
@@ -267,6 +265,9 @@
              <property name="singleStep">
               <double>0.500000000000000</double>
              </property>
+             <property name="value">
+              <double>2.000000000000000</double>
+             </property>
             </widget>
            </item>
            <item row="4" column="1">
@@ -285,6 +286,9 @@
              </property>
              <property name="singleStep">
               <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>2.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -337,7 +341,7 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Orbitals</string>
+              <string>Orbitals, e.g. 4f5.</string>
              </property>
             </widget>
            </item>
@@ -440,7 +444,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="labelStatus">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -478,7 +482,6 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>tabSc2</tabstop>
-  <tabstop>editSLSearch</tabstop>
   <tabstop>tableSL</tabstop>
   <tabstop>listMAtoms</tabstop>
   <tabstop>editMFilter</tabstop>

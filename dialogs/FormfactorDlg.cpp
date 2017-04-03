@@ -1,6 +1,6 @@
 /**
  * Form Factor & Scattering Length Dialog
- * @author tweber
+ * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
  */
@@ -318,6 +318,17 @@ void FormfactorDlg::Calcg()
 
 	t_real dg = tl::eff_gJ(dS, dL, dJ);
 	sping->setValue(dg);
+
+
+	std::ostringstream ostrMu;
+	ostrMu.precision(g_iPrec);
+
+	t_real muJ = tl::eff_magnetons(dg, dJ);
+	t_real muS = tl::eff_magnetons(t_real(2), dS);	// spin only
+
+	ostrMu << "mu_eff (spin-only) = " << muS << " mu_B, ";
+	ostrMu << "mu_eff (total) = " << muJ << " mu_B.";
+	labelStatus->setText(ostrMu.str().c_str());
 }
 
 void FormfactorDlg::CalcTermSymbol(const QString& qstr)
@@ -391,6 +402,7 @@ enum
 	SL_ITEM_COH_I = 3,
 	SL_ITEM_INC_R = 4,
 	SL_ITEM_INC_I = 5,
+	SL_ITEM_ABUND = 6,
 };
 
 void FormfactorDlg::SetupScatteringLengths()
@@ -407,6 +419,7 @@ void FormfactorDlg::SetupScatteringLengths()
 	tableSL->setColumnWidth(SL_ITEM_COH_I, 75);
 	tableSL->setColumnWidth(SL_ITEM_INC_R, 75);
 	tableSL->setColumnWidth(SL_ITEM_INC_I, 75);
+	tableSL->setColumnWidth(SL_ITEM_ABUND, 75);
 
 	tableSL->verticalHeader()->setDefaultSectionSize(tableSL->verticalHeader()->minimumSectionSize()+2);
 
@@ -422,11 +435,32 @@ void FormfactorDlg::SetupScatteringLengths()
 		t_real dCohI = pelem->GetCoherent().imag();
 		t_real dIncR = pelem->GetIncoherent().real();
 		t_real dIncI = pelem->GetIncoherent().imag();
+		boost::optional<t_real> dAbund = pelem->GetAbundance();
+		boost::optional<t_real> dHL = pelem->GetHalflife();
+		const auto& vecIsotopes = pelem->GetIsotopes();
 
 		std::string strCohR = tl::var_to_str(dCohR, g_iPrec) + " fm";
 		std::string strCohI = tl::var_to_str(dCohI, g_iPrec) + " fm";
 		std::string strIncR = tl::var_to_str(dIncR, g_iPrec) + " fm";
 		std::string strIncI = tl::var_to_str(dIncI, g_iPrec) + " fm";
+
+		std::string strAbund;
+		if(vecIsotopes.size())	// if it is a mixture, list the isotopes
+		{
+			for(std::size_t iIsotope=0; iIsotope<vecIsotopes.size(); ++iIsotope)
+			{
+				strAbund += vecIsotopes[iIsotope]->GetAtomIdent();
+				if(iIsotope+1 < vecIsotopes.size())
+					strAbund += ", ";
+			}
+		}
+		else	// else list the abundance or halflife
+		{
+			if(dHL)
+				strAbund = std::string("HL = ") + tl::var_to_str(*dHL, g_iPrec) + " a";
+			else if(dAbund)
+				strAbund = tl::var_to_str(*dAbund, g_iPrec);
+		}
 
 		tableSL->setItem(iElem, SL_ITEM_NR, new QTableWidgetItemWrapper<std::size_t>(iElem+1));
 		tableSL->setItem(iElem, SL_ITEM_NAME, new QTableWidgetItem(pelem->GetAtomIdent().c_str()));
@@ -434,6 +468,7 @@ void FormfactorDlg::SetupScatteringLengths()
 		tableSL->setItem(iElem, SL_ITEM_COH_I, new QTableWidgetItemWrapper<t_real>(dCohI, strCohI));
 		tableSL->setItem(iElem, SL_ITEM_INC_R, new QTableWidgetItemWrapper<t_real>(dIncR, strIncR));
 		tableSL->setItem(iElem, SL_ITEM_INC_I, new QTableWidgetItemWrapper<t_real>(dIncI, strIncI));
+		tableSL->setItem(iElem, SL_ITEM_ABUND, new QTableWidgetItemWrapper<t_real>(dAbund?*dAbund:0, strAbund));
 	}
 
 	tableSL->setSortingEnabled(bSortTable);
