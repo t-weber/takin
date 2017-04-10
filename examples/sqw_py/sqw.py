@@ -1,5 +1,6 @@
 #
 # Sample Python S(q,w) module for (anti-)ferromagnetic dispersions
+#
 # @author Tobias Weber <tobias.weber@tum.de>
 # @license GPLv2
 # @date jun-2016

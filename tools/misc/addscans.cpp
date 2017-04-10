@@ -1,6 +1,7 @@
 /**
  * add scan files
  * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
  * @date 2014
  */
 // gcc -I../.. -I. -DNO_IOSTR -o addscans ../../tlibs/file/loadinstr.cpp ../../tlibs/log/log.cpp addscans.cpp -std=c++11 -lstdc++ -lm -lboost_system -lboost_filesystem

@@ -1,5 +1,9 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -o tst_proc tst_proc.cpp ../../tlibs/math/rand.cpp ../../tlibs/log/log.cpp -lpthread -lrt -lstdc++ -std=c++11
-// @author tw
 
 #include <iostream>
 #include <unistd.h>

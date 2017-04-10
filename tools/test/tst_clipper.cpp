@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -o tst_clipper tst_clipper.cpp -lstdc++ -lm -lclipper-core -std=c++11
 
 #include <clipper/clipper.h>

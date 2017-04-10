@@ -5,27 +5,66 @@
 # @license GPLv2
 #
 
-#CC = gcc
-CC = clang
+# -----------------------------------------------------------------------------
+# system-specific build flags
 
+# which compiler?
+CC = gcc
+#CC = clang
+
+# debug or unstable version?
 DO_DEBUG = 0
-NATIVE_OPTS = 1
 IS_UNSTABLE = 0
+
+# optimise specifically for THIS processor?
+NATIVE_OPTS = 1
+
+# which Qt and Qwt versions? Qt: 4 or 5, Qwt: 5 or 6
 QT_VER = 4
 QWT_VER = 6
+
+# use Lapack instead of internal linalg routines?
 USE_LAPACK = 0
+
+# compile the ogl code?
 USE_3D = 1
+
+# compile the network code?
 USE_NET = 1
+
+# use boost's iostreams/regex/image lib?
 USE_IOSTR = 1
-USE_BOOST_REGEX = 0
+USE_BOOST_REGEX = 1
 USE_GIL = 1
+
+# compile the python or julia interfaces?
 USE_PY = 1
 USE_JL = 0
+
+# enable the plugin interface?
 USE_PLUGINS = 1
+
+# compile the faddeeva functions?
 USE_FADDEEVA = 1
+
+# which ABI to use: C++98 or C++11?
 USE_CPP11_ABI = 1
+
+# enable Framework libs
 USE_FRAMEWORKS = 0
+
+# is Minuit a non-standalone installation?
 NON_STANDALONE_MINUIT_HACK = 1
+
+
+# set possible system-dependent library suffixes
+BOOST_SUFFIX = 
+#BOOST_SUFFIX = -mt
+#QWT5_SUFFIX = 
+QWT5_SUFFIX = -qt4
+#QWT5_SUFFIX = 5-qt4
+# -----------------------------------------------------------------------------
+
 
 
 STD_CPP = -std=c++11
@@ -38,13 +77,6 @@ ifeq ($(USE_FRAMEWORKS), 0)
 	STD_LIBS += -lpthread -lrt -lgomp
 endif
 
-
-
-BOOST_SUFFIX = 
-#BOOST_SUFFIX = -mt
-#QWT5_SUFFIX = 
-QWT5_SUFFIX = -qt4
-#QWT5_SUFFIX = 5-qt4
 
 
 # -----------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+!
+!@author Tobias Weber <tobias.weber@tum.de>
+!@license GPLv2
+!
 ! gfortran -c -ffree-form -o tst_for.o tst_for.for
 
 subroutine add(a,b, result)

@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 //gcc -std=c++11 -I /usr/include/python2.7 -o tst_py tst_py.cpp -lstdc++ -lboost_python -lpython2.7
 
 #include <iostream>

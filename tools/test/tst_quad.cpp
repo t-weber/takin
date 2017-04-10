@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -I../.. -I/usr/include/lapacke -o tst_quad tst_quad.cpp ../../tlibs/math/linalg2.cpp ../../tlibs/log/log.cpp -lstdc++ -lm -llapacke -llapack -std=c++11
 
 #include "tlibs/math/linalg.h"

@@ -91,7 +91,7 @@ enum class EllipseCoordSys : int
 // --------------------------------------------------------------------------------
 
 
-/*
+/**
  * Integration of the quadratic part of the quadric
  * this is a 1:1 C++ reimplementation of 'rc_int' from 'mcresplot' and 'rescal5'
  * (see also [eck14], equ. 57)
@@ -109,7 +109,7 @@ ublas::matrix<T> ellipsoid_gauss_int(const ublas::matrix<T>& mat, std::size_t iI
 	return m;
 }
 
-/*
+/**
  * Integration of the linear part of the quadric
  * (see [eck14], equ. 57)
  */

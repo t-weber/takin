@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -o tst_for tst_for.cpp tst_for.o -lstdc++ -lgfortran
 
 #include <iostream>

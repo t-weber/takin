@@ -2,6 +2,7 @@
  * gcc -o fcc_hk0 fcc_hk0.cpp -std=c++11 -lstdc++ -lm
  * draws 1st BZ of fcc in hk0 plane
  * @date 2015
+ * @license GPLv2
  * @author Tobias Weber <tobias.weber@tum.de>
  */
 

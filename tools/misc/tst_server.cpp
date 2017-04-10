@@ -2,6 +2,7 @@
  * test instrument server
  * @author Tobias Weber <tobias.weber@tum.de>
  * @date apr-2016
+ * @license GPLv2
  * clang -o tst_server -I. -I../.. ../../tools/misc/tst_server.cpp ../../tlibs/net/tcp.cpp ../../tlibs/log/log.cpp -lstdc++ -std=c++11 -lboost_system -lboost_iostreams -lpthread -lm
  */
 

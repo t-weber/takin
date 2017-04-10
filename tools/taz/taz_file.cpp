@@ -64,8 +64,10 @@ void TazDlg::New()
 	triag.bChangedAnaTwoTheta = triag.bChangedMonoTwoTheta = 1;
 
 	triag.dTwoTheta = tl::get_pi<t_real>()/2.;
+	triag.dMonoTwoTheta = triag.dAnaTwoTheta = tl::get_pi<t_real>()/2.;
 	triag.dAngleKiVec0 = tl::get_pi<t_real>()/4.;
 	triag.bChangedTwoTheta = triag.bChangedAngleKiVec0 = 1;
+	triag.bChangedMonoTwoTheta = triag.bChangedAnaTwoTheta = 1;
 
 	m_vecAtoms.clear();
 	m_strCurFile = "";
@@ -149,7 +151,7 @@ bool TazDlg::Load(const char* pcFile)
 	{
 		const std::vector<std::string>* pvecName = vecEditNames[iIdxEdit];
 
-		for(unsigned int iEditBox=0; iEditBox<pVec->size(); ++iEditBox)
+		for(std::size_t iEditBox=0; iEditBox<pVec->size(); ++iEditBox)
 		{
 			std::string str = xml.Query<std::string>((strXmlRoot+(*pvecName)[iEditBox]).c_str(), "0", &bOk);
 			tl::trim(str);
@@ -184,106 +186,116 @@ bool TazDlg::Load(const char* pcFile)
 
 
 	// TAS Layout
-	double dRealScale = xml.Query<double>((strXmlRoot + "real/pixels_per_cm").c_str(), 0., &bOk);
-	if(bOk)
-		m_sceneReal.GetTasLayout()->SetScaleFactor(dRealScale);
-
-	unsigned int iNodeReal = 0;
-	for(TasLayoutNode *pNode : m_sceneReal.GetTasLayout()->GetNodes())
+	if(xml.Exists((strXmlRoot + "real").c_str()))
 	{
-		std::string strNode = m_sceneReal.GetTasLayout()->GetNodeNames()[iNodeReal];
+		double dRealScale = xml.Query<double>((strXmlRoot + "real/pixels_per_cm").c_str(), 0., &bOk);
+		if(bOk)
+			m_sceneReal.GetTasLayout()->SetScaleFactor(dRealScale);
 
-		bool bOkX=0, bOkY=0;
-		double dValX = xml.Query<double>((strXmlRoot + "real/" + strNode + "_x").c_str(), 0., &bOkX);
-		double dValY = xml.Query<double>((strXmlRoot + "real/" + strNode + "_y").c_str(), 0., &bOkY);
+		unsigned int iNodeReal = 0;
+		for(TasLayoutNode *pNode : m_sceneReal.GetTasLayout()->GetNodes())
+		{
+			std::string strNode = m_sceneReal.GetTasLayout()->GetNodeNames()[iNodeReal];
 
-		pNode->setPos(dValX, dValY);
-		++iNodeReal;
+			bool bOkX=0, bOkY=0;
+			double dValX = xml.Query<double>((strXmlRoot + "real/" + strNode + "_x").c_str(), 0., &bOkX);
+			double dValY = xml.Query<double>((strXmlRoot + "real/" + strNode + "_y").c_str(), 0., &bOkY);
+
+			pNode->setPos(dValX, dValY);
+			++iNodeReal;
+		}
+
+		int bWSEnabled = xml.Query<int>((strXmlRoot + "real/enable_ws").c_str(), 0, &bOk);
+		if(bOk)
+			m_pWS->setChecked(bWSEnabled!=0);
+
+		int bRealQEnabled = xml.Query<int>((strXmlRoot + "real/enable_realQDir").c_str(), 0, &bOk);
+		if(bOk)
+			m_pShowRealQDir->setChecked(bRealQEnabled!=0);
 	}
-
 
 
 	// scattering triangle
-	double dRecipScale = xml.Query<double>((strXmlRoot + "recip/pixels_per_A-1").c_str(), 0., &bOk);
-	if(bOk)
-		m_sceneRecip.GetTriangle()->SetScaleFactor(dRecipScale);
-
-	unsigned int iNodeRecip = 0;
-	for(ScatteringTriangleNode *pNode : m_sceneRecip.GetTriangle()->GetNodes())
+	if(xml.Exists((strXmlRoot + "recip").c_str()))
 	{
-		std::string strNode = m_sceneRecip.GetTriangle()->GetNodeNames()[iNodeRecip];
+		double dRecipScale = xml.Query<double>((strXmlRoot + "recip/pixels_per_A-1").c_str(), 0., &bOk);
+		if(bOk)
+			m_sceneRecip.GetTriangle()->SetScaleFactor(dRecipScale);
 
-		bool bOkX=0, bOkY=0;
-		double dValX = xml.Query<double>((strXmlRoot + "recip/" + strNode + "_x").c_str(), 0., &bOkX);
-		double dValY = xml.Query<double>((strXmlRoot + "recip/" + strNode + "_y").c_str(), 0., &bOkY);
-
-		pNode->setPos(dValX, dValY);
-		++iNodeRecip;
-	}
-
-
-
-	int bSmallqEnabled = xml.Query<int>((strXmlRoot + "recip/enable_q").c_str(), 0, &bOk);
-	if(bOk)
-		m_pSmallq->setChecked(bSmallqEnabled!=0);
-
-	int bSmallqSnapped = xml.Query<int>((strXmlRoot + "recip/snap_q").c_str(), 1, &bOk);
-	if(bOk)
-		m_pSnapSmallq->setChecked(bSmallqSnapped!=0);
-
-	int bBZEnabled = xml.Query<int>((strXmlRoot + "recip/enable_bz").c_str(), 0, &bOk);
-	if(bOk)
-		m_pBZ->setChecked(bBZEnabled!=0);
-
-	int iEwald = xml.Query<int>((strXmlRoot + "recip/ewald_sphere").c_str(), 0, &bOk);
-	if(bOk)
-	{
-		if(iEwald == EWALD_NONE) m_pEwaldSphereNone->setChecked(1);
-		else if(iEwald == EWALD_KI) m_pEwaldSphereKi->setChecked(1);
-		else if(iEwald == EWALD_KF) m_pEwaldSphereKf->setChecked(1);
-	}
-
-	int bWSEnabled = xml.Query<int>((strXmlRoot + "real/enable_ws").c_str(), 0, &bOk);
-	if(bOk)
-		m_pWS->setChecked(bWSEnabled!=0);
-
-	int bRealQEnabled = xml.Query<int>((strXmlRoot + "real/enable_realQDir").c_str(), 0, &bOk);
-	if(bOk)
-		m_pShowRealQDir->setChecked(bRealQEnabled!=0);
-
-	std::string strSpaceGroup = xml.Query<std::string>((strXmlRoot + "sample/spacegroup").c_str(), "", &bOk);
-	tl::trim(strSpaceGroup);
-	if(bOk)
-	{
-		editSpaceGroupsFilter->clear();
-		RepopulateSpaceGroups();
-
-		int iSGIdx = find_sg_from_combo(comboSpaceGroups, strSpaceGroup);
-		if(iSGIdx >= 0)
-			comboSpaceGroups->setCurrentIndex(iSGIdx);
-		else
-			comboSpaceGroups->setCurrentIndex(0);
-	}
-
-
-	m_vecAtoms.clear();
-	unsigned int iNumAtoms = xml.Query<unsigned int>((strXmlRoot + "sample/atoms/num").c_str(), 0, &bOk);
-	if(bOk)
-	{
-		m_vecAtoms.reserve(iNumAtoms);
-
-		for(unsigned int iAtom=0; iAtom<iNumAtoms; ++iAtom)
+		unsigned int iNodeRecip = 0;
+		for(ScatteringTriangleNode *pNode : m_sceneRecip.GetTriangle()->GetNodes())
 		{
-			AtomPos<t_real> atom;
-			atom.vecPos.resize(3,0);
+			std::string strNode = m_sceneRecip.GetTriangle()->GetNodeNames()[iNodeRecip];
 
-			std::string strNr = tl::var_to_str(iAtom);
-			atom.strAtomName = xml.Query<std::string>((strXmlRoot + "sample/atoms/" + strNr + "/name").c_str(), "");
-			atom.vecPos[0] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/x").c_str(), 0.);
-			atom.vecPos[1] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/y").c_str(), 0.);
-			atom.vecPos[2] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/z").c_str(), 0.);
+			bool bOkX=0, bOkY=0;
+			double dValX = xml.Query<double>((strXmlRoot + "recip/" + strNode + "_x").c_str(), 0., &bOkX);
+			double dValY = xml.Query<double>((strXmlRoot + "recip/" + strNode + "_y").c_str(), 0., &bOkY);
 
-			m_vecAtoms.push_back(atom);
+			pNode->setPos(dValX, dValY);
+			++iNodeRecip;
+		}
+
+
+
+		int bSmallqEnabled = xml.Query<int>((strXmlRoot + "recip/enable_q").c_str(), 0, &bOk);
+		if(bOk)
+			m_pSmallq->setChecked(bSmallqEnabled!=0);
+
+		int bSmallqSnapped = xml.Query<int>((strXmlRoot + "recip/snap_q").c_str(), 1, &bOk);
+		if(bOk)
+			m_pSnapSmallq->setChecked(bSmallqSnapped!=0);
+
+		int bBZEnabled = xml.Query<int>((strXmlRoot + "recip/enable_bz").c_str(), 0, &bOk);
+		if(bOk)
+			m_pBZ->setChecked(bBZEnabled!=0);
+
+		int iEwald = xml.Query<int>((strXmlRoot + "recip/ewald_sphere").c_str(), 0, &bOk);
+		if(bOk)
+		{
+			if(iEwald == EWALD_NONE) m_pEwaldSphereNone->setChecked(1);
+			else if(iEwald == EWALD_KI) m_pEwaldSphereKi->setChecked(1);
+			else if(iEwald == EWALD_KF) m_pEwaldSphereKf->setChecked(1);
+		}
+	}
+
+
+	// sample definitions
+	if(xml.Exists((strXmlRoot + "sample").c_str()))
+	{
+		std::string strSpaceGroup = xml.Query<std::string>((strXmlRoot + "sample/spacegroup").c_str(), "", &bOk);
+		tl::trim(strSpaceGroup);
+		if(bOk)
+		{
+			editSpaceGroupsFilter->clear();
+			RepopulateSpaceGroups();
+
+			int iSGIdx = find_sg_from_combo(comboSpaceGroups, strSpaceGroup);
+			if(iSGIdx >= 0)
+				comboSpaceGroups->setCurrentIndex(iSGIdx);
+			else
+				comboSpaceGroups->setCurrentIndex(0);
+		}
+
+
+		m_vecAtoms.clear();
+		unsigned int iNumAtoms = xml.Query<unsigned int>((strXmlRoot + "sample/atoms/num").c_str(), 0, &bOk);
+		if(bOk)
+		{
+			m_vecAtoms.reserve(iNumAtoms);
+
+			for(unsigned int iAtom=0; iAtom<iNumAtoms; ++iAtom)
+			{
+				AtomPos<t_real> atom;
+				atom.vecPos.resize(3,0);
+
+				std::string strNr = tl::var_to_str(iAtom);
+				atom.strAtomName = xml.Query<std::string>((strXmlRoot + "sample/atoms/" + strNr + "/name").c_str(), "");
+				atom.vecPos[0] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/x").c_str(), 0.);
+				atom.vecPos[1] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/y").c_str(), 0.);
+				atom.vecPos[2] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/z").c_str(), 0.);
+
+				m_vecAtoms.push_back(atom);
+			}
 		}
 	}
 

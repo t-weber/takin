@@ -653,6 +653,10 @@ SqwPhononSingleBranch::SqwPhononSingleBranch(const char* pcFile)
 		}
 	}
 
+	// just use 100 if nothing else is defined
+	if(m_vecBragg.size() < 3)
+		m_vecBragg = tl::make_vec({1., 0., 0.});
+
 	m_bOk = 1;
 }
 
@@ -767,9 +771,6 @@ t_real SqwMagnon::antiferro_disp(t_real dq, t_real dD, t_real doffs)
 
 SqwMagnon::SqwMagnon(const char* pcFile)
 {
-	// example
-	m_vecBragg = tl::make_vec({1., 0., 0.});
-
 	std::ifstream ifstr(pcFile);
 	if(!ifstr)
 		tl::log_warn("Cannot open magnon config file \"", pcFile, "\".");
@@ -800,6 +801,10 @@ SqwMagnon::SqwMagnon(const char* pcFile)
 			else if(vecToks[0] == "T") m_dT = tl::str_to_var_parse<t_real>(vecToks[1]);
 		}
 	}
+
+	// just use 100 if nothing else is defined
+	if(m_vecBragg.size() < 3)
+		m_vecBragg = tl::make_vec({1., 0., 0.});
 
 	m_bOk = 1;
 }

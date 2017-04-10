@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -I../.. -o tst_hkl tst_hkl.cpp ../../tlibs/log/log.cpp -lstdc++ -std=c++11 -lm 
 
 #include <iostream>

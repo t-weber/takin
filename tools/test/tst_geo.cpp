@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -DUSE_LAPACK -o tst_geo tst_geo.cpp -std=c++11 -lstdc++ -lm -I../.. -I. -I/usr/include/lapacke ../../tlibs/log/log.cpp ../../tlibs/math/linalg2.cpp -llapacke -llapack
 
 #include "tlibs/math/geo.h"

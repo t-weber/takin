@@ -1,4 +1,11 @@
-// moc-qt5 tst_quat2.cpp > tst_quat2.moc && gcc -fPIC -I. -I../.. -I/usr/include/qt5 -I/usr/include/freetype2 -o tst_quat2 tst_quat2.cpp -lstdc++ -lm -lQt5Core -lQt5Gui -lQt5OpenGL -lQt5Widgets -lGL -std=c++14
+/**
+ * quaternion test
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @date jan-2015
+ * @license GPLv2
+ */
+
+// moc-qt5 tst_quat2.cpp > tst_quat2.moc && gcc -fPIC -I. -I../.. -I/usr/include/GL -I/usr/include/qt5 -I/usr/include/freetype2 -o tst_quat2 tst_quat2.cpp -lstdc++ -lm -lQt5Core -lQt5Gui -lQt5OpenGL -lQt5Widgets -lGL -std=c++14
 
 #include <iostream>
 
@@ -15,8 +22,6 @@
 
 using namespace tl;
 
-typedef ublas::matrix<double, ublas::row_major, ublas::bounded_array<double,4*4>> t_mat4;
-typedef ublas::matrix<double, ublas::row_major, ublas::bounded_array<double,3*3>> t_mat3;
 
 class GlWidget : public QGLWidget /*QOpenGLWidget*/
 { Q_OBJECT

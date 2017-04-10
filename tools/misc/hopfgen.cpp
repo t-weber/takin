@@ -1,5 +1,8 @@
-// gcc -o hopfgen hopfgen.cpp -std=c++11 -lstdc++ -lm
-// @author tw
+/**
+ * gcc -o hopfgen hopfgen.cpp -std=c++11 -lstdc++ -lm
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
 
 #include "../../tlibs/math/linalg.h"
 #include <iostream>

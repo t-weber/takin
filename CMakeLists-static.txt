@@ -262,7 +262,7 @@ add_executable(convofit
 
 	tools/convofit/convofit.cpp tools/convofit/convofit_import.cpp
 	tools/convofit/model.cpp tools/convofit/scan.cpp
-	tools/convofit_main.cpp
+	tools/convofit/convofit_main.cpp
 
 
 	# statically link tlibs externals
@@ -292,7 +292,7 @@ endif()
 
 add_executable(convoseries
 	tools/convofit/scanseries.cpp
-	
+
 	# statically link tlibs externals
 	tlibs/log/log.cpp
 )

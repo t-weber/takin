@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // clang -I../.. -I. -o tst_cov tst_cov.cpp -lstdc++ -lm -std=c++11
 
 #include <iostream>

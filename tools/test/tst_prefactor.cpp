@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // test prefactor of shirane formula A 4.65
 
 #include "../../tlibs/math/neutrons.h"

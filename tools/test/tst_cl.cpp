@@ -1,6 +1,10 @@
-// tests all available cl devices
+/**
+ * tests all available cl devices
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -o tst_cl tst_cl.cpp -lstdc++ -lOpenCL -std=c++11
-// @author tw
 
 #include <CL/cl.hpp>
 #include <iostream>

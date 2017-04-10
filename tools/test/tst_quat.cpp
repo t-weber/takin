@@ -1,3 +1,8 @@
+/**
+ * @author Tobias Weber <tobias.weber@tum.de>
+ * @license GPLv2
+ */
+
 // gcc -I../.. -o tst_quat tst_quat.cpp -lstdc++ -lm -std=c++11
 
 #include <iostream>
