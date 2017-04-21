@@ -7,7 +7,7 @@
 
 #include "DynPlaneDlg.h"
 #include "tlibs/string/string.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include <boost/units/io.hpp>
 
 using t_real = t_real_glob;

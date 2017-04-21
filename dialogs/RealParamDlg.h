@@ -15,7 +15,7 @@
 #include "ui/ui_real_params.h"
 #include "libs/globals.h"
 #include "libs/spacegroups/spacegroup.h"
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/lattice.h"
 #include "AtomsDlg.h"
 
 

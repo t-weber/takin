@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <iterator>
 #include "tlibs/math/linalg.h"
-#include "tlibs/math/atoms.h"
+#include "tlibs/phys/atoms.h"
 #include "tlibs/string/string.h"
 
 namespace ublas = tl::ublas;

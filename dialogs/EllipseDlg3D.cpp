@@ -25,16 +25,17 @@ EllipseDlg3D::EllipseDlg3D(QWidget* pParent, QSettings* pSett)
 	PlotGl* pPlotLeft = new PlotGl(this, m_pSettings, dScale);
 	pPlotLeft->SetEnabled(0);
 	pPlotLeft->SetPrec(g_iPrecGfx);
-	pPlotLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	pPlotLeft->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	m_pPlots.push_back(pPlotLeft);
 
 	PlotGl* pPlotRight = new PlotGl(this, m_pSettings, dScale);
 	pPlotRight->SetEnabled(0);
 	pPlotRight->SetPrec(g_iPrecGfx);
-	pPlotRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	pPlotRight->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	m_pPlots.push_back(pPlotRight);
 
 	m_pComboCoord = new QComboBox(this);
+	m_pComboCoord->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 	m_pComboCoord->insertItem(0, "(Q perpendicular, Q parallel, Q up) System (1/A)");
 	m_pComboCoord->insertItem(1, "Crystal (hkl) System (rlu)");
 	m_pComboCoord->insertItem(2, "Scattering Plane System (rlu)");
@@ -58,7 +59,7 @@ EllipseDlg3D::EllipseDlg3D(QWidget* pParent, QSettings* pSett)
 	if(m_pSettings && m_pSettings->contains("reso/ellipsoid3d_geo"))
 		restoreGeometry(m_pSettings->value("reso/ellipsoid3d_geo").toByteArray());
 	else
-		resize(640,480);
+		resize(800, 600);
 
 	for(PlotGl* pPlot : m_pPlots)
 		pPlot->SetEnabled(1);

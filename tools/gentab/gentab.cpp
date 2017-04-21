@@ -64,7 +64,7 @@ bool gen_formfacts()
 	tl::Prop<std::string> prop;
 	prop.SetSeparator('.');
 
-	prop.Add("ffacts.source", "Form factor coefficients extracted from Clipper");
+	prop.Add("ffacts.source", "Form factor coefficients extracted from Clipper.");
 	prop.Add("ffacts.source_url", "http://www.ysbl.york.ac.uk/~cowtan/clipper/");
 	prop.Add("ffacts.num_atoms", tl::var_to_str(dat::numsfdata));
 
@@ -181,7 +181,8 @@ bool gen_scatlens()
 
 	tl::Prop<std::string> prop;
 	prop.SetSeparator('.');
-	prop.Add("scatlens.source", "Scattering lengths and cross-sections extracted from NIST table");
+	prop.Add("scatlens.source", "Scattering lengths and cross-sections extracted from NIST table"
+		" (which itself is based on <a href=http://dx.doi.org/10.1080/10448639208218770>this paper</a>).");
 	prop.Add("scatlens.source_url", "https://www.ncnr.nist.gov/resources/n-lengths/list.html");
 
 	unsigned int iAtom = 0;
@@ -255,7 +256,7 @@ bool gen_spacegroups()
 	prop.SetSeparator('.');
 
 	const unsigned int iNumSGs = 230;
-	prop.Add("sgroups.source", "Space group data extracted from Clipper");
+	prop.Add("sgroups.source", "Space group data extracted from Clipper.");
 	prop.Add("sgroups.source_url", "http://www.ysbl.york.ac.uk/~cowtan/clipper/");
 	prop.Add("sgroups.num_groups", tl::var_to_str(iNumSGs));
 
@@ -323,7 +324,7 @@ bool gen_magformfacts()
 {
 	tl::Prop<std::string> propOut;
 	propOut.SetSeparator('.');
-	propOut.Add("magffacts.source", "Magnetic form factor coefficients extracted from ILL table");
+	propOut.Add("magffacts.source", "Magnetic form factor coefficients extracted from ILL table.");
 	propOut.Add("magffacts.source_url", "https://www.ill.eu/sites/ccsl/ffacts/");
 
 	std::size_t iAtom=0;

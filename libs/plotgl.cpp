@@ -341,15 +341,16 @@ void PlotGl::run()
 	tl::log_debug("GL thread ", iThisThread, " ended.");
 }
 
-void PlotGl::paintEvent(QPaintEvent *evt)
+void PlotGl::paintEvent(QPaintEvent *)
 {}
 
-void PlotGl::resizeEvent(QResizeEvent *evt)
+void PlotGl::resizeEvent(QResizeEvent *pEvt)
 {
+	if(!pEvt) return;
 	std::lock_guard<QMutex> _lck(m_mutex);
 
-	m_iW = size().width();
-	m_iH = size().height();
+	m_iW = pEvt->size().width();
+	m_iH = pEvt->size().height();
 
 	m_bDoResize = 1;
 }

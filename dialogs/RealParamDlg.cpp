@@ -8,9 +8,9 @@
 #include "RealParamDlg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
-#include "tlibs/math/neutrons.h"
-#include "tlibs/math/atoms.h"
-#include "tlibs/math/nn.h"
+#include "tlibs/phys/neutrons.h"
+#include "tlibs/phys/atoms.h"
+#include "tlibs/phys/nn.h"
 #include "tlibs/string/spec_char.h"
 
 using t_real = t_real_glob;

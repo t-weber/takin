@@ -6,7 +6,7 @@
  */
 
 #include "TASReso.h"
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/lattice.h"
 #include "tlibs/math/rand.h"
 #include "tlibs/file/prop.h"
 #include "tlibs/log/log.h"

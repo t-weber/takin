@@ -6,8 +6,8 @@
  */
 
 #include "tlibs/helper/flags.h"
-#include "tlibs/math/neutrons.h"
-#include "tlibs/math/atoms.h"
+#include "tlibs/phys/neutrons.h"
+#include "tlibs/phys/atoms.h"
 #include "tlibs/string/spec_char.h"
 #include "tlibs/log/log.h"
 #include "libs/globals.h"

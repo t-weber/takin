@@ -20,6 +20,7 @@
 #include <boost/filesystem.hpp>
 
 #include "tlibs/math/math.h"
+#include "tlibs/math/stat.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
 #include "tlibs/log/log.h"

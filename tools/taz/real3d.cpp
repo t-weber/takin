@@ -22,6 +22,7 @@ Real3DDlg::Real3DDlg(QWidget* pParent, QSettings *pSettings)
 
 	setWindowTitle("Real Space / Unit Cell");
 	m_pStatus->setSizeGripEnabled(1);
+	m_pStatus->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
 	if(m_pSettings)
 	{
@@ -32,11 +33,11 @@ Real3DDlg::Real3DDlg(QWidget* pParent, QSettings *pSettings)
 		if(m_pSettings->contains("real3d/geo"))
 			restoreGeometry(m_pSettings->value("real3d/geo").toByteArray());
 		else
-			resize(640, 480);
+			resize(800, 600);
 	}
 
 	m_pPlot->SetPrec(g_iPrecGfx);
-	m_pPlot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_pPlot->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	QGridLayout *gridLayout = new QGridLayout(this);
 	gridLayout->setContentsMargins(4, 4, 4, 4);

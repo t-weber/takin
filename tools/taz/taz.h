@@ -63,7 +63,7 @@
 #include "libs/spacegroups/latticehelper.h"
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/lattice.h"
 
 
 class TazDlg : public QMainWindow, Ui::TazDlg

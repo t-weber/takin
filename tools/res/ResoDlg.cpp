@@ -16,8 +16,8 @@
 #include "tlibs/string/spec_char.h"
 #include "tlibs/helper/misc.h"
 #include "tlibs/math/math.h"
-#include "tlibs/math/lattice.h"
 #include "tlibs/math/rand.h"
+#include "tlibs/phys/lattice.h"
 
 #include "libs/globals.h"
 #include "libs/qthelper.h"

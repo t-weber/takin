@@ -6,7 +6,7 @@
  */
 
 #include "tlibs/helper/flags.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/string/spec_char.h"
 #include "tlibs/log/log.h"
 #include "scattering_triangle.h"

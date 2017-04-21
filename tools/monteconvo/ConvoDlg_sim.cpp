@@ -291,18 +291,49 @@ void ConvoDlg::Start1D()
 
 			if(bLivePlots || bIsLastStep)
 			{
-				set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 0, false);
-				set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 1, false);
+				set_qwt_data<t_real>()(*m_plotwrap, m_vecQ, m_vecScaledS, 0, false);
+				set_qwt_data<t_real>()(*m_plotwrap, m_vecQ, m_vecScaledS, 1, false);
 				if(bUseScan)
-					set_qwt_data<t_real_reso>()(*m_plotwrap, m_scan.vecX, m_scan.vecCts, 2, false, &m_scan.vecCtsErr);
+					set_qwt_data<t_real>()(*m_plotwrap, m_scan.vecX, m_scan.vecCts, 2, false, &m_scan.vecCtsErr);
 				else
-					set_qwt_data<t_real_reso>()(*m_plotwrap, vecNull, vecNull, 2, false);
+					set_qwt_data<t_real>()(*m_plotwrap, vecNull, vecNull, 2, false);
 
 				if(bIsLastStep)
+				{
+					t_real_qwt dLeft = std::numeric_limits<t_real_qwt>::max();
+					t_real_qwt dRight = -dLeft;
+					t_real_qwt dTop = dRight;
+					t_real_qwt dBottom = dLeft;
+
+					auto minmaxQ = std::minmax_element(m_vecQ.begin(), m_vecQ.end());
+					auto minmaxS = std::minmax_element(m_vecScaledS.begin(), m_vecScaledS.end());
+
+					if(minmaxQ.first != m_vecQ.end())
+					{
+						dLeft = *minmaxQ.first;
+						dRight = *minmaxQ.second;
+					}
+					if(minmaxS.first != m_vecScaledS.end())
+					{
+						dBottom = *minmaxS.first;
+						dTop = *minmaxS.second;
+					}
+
+					if(bUseScan && m_scan.vecX.size() && m_scan.vecCts.size())
+					{
+						auto minmaxX = std::minmax_element(m_scan.vecX.begin(), m_scan.vecX.end());
+						auto minmaxY = std::minmax_element(m_scan.vecCts.begin(), m_scan.vecCts.end());
+
+						dLeft = std::min(dLeft, *minmaxX.first);
+						dRight = std::max(dRight, *minmaxX.second);
+						dBottom = std::min(dBottom, *minmaxY.first);
+						dTop = std::max(dTop, *minmaxY.second);
+					}
+
 					set_zoomer_base(m_plotwrap->GetZoomer(),
-					tl::container_cast<t_real_qwt, t_real, std::vector>()(m_vecQ),
-					tl::container_cast<t_real_qwt, t_real, std::vector>()(m_vecScaledS),
-					!bForceDeferred, m_plotwrap.get());
+						dLeft, dRight, dTop, dBottom,
+						!bForceDeferred, m_plotwrap.get());
+				}
 				QMetaObject::invokeMethod(m_plotwrap.get(), "doUpdate", connty);
 			}
 
@@ -871,7 +902,7 @@ void ConvoDlg::StartDisp()
 			{
 				for(std::size_t iBranch=0; iBranch<m_vecvecE.size() && iBranch+CONVO_DISP_CURVE_START<CONVO_MAX_CURVES; ++iBranch)
 				{
-					set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecvecQ[iBranch], m_vecvecE[iBranch], CONVO_DISP_CURVE_START+iBranch, false);
+					set_qwt_data<t_real>()(*m_plotwrap, m_vecvecQ[iBranch], m_vecvecE[iBranch], CONVO_DISP_CURVE_START+iBranch, false);
 				}
 
 				if(bIsLastStep)

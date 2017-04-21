@@ -9,9 +9,9 @@
 #define __TAZ_PROJ_LATTICE_H__
 
 #include "tlibs/math/linalg.h"
-#include "tlibs/math/lattice.h"
-#include "tlibs/math/neutrons.h"
 #include "tlibs/math/geo.h"
+#include "tlibs/phys/lattice.h"
+#include "tlibs/phys/neutrons.h"
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"

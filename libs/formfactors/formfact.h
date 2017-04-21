@@ -15,8 +15,8 @@
 #include <boost/optional.hpp>
 
 #include "tlibs/helper/array.h"
-#include "tlibs/math/atoms.h"
-#include "tlibs/math/mag.h"
+#include "tlibs/phys/atoms.h"
+#include "tlibs/phys/mag.h"
 #include "libs/globals.h"
 
 

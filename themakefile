@@ -570,11 +570,11 @@ obj/recip3d.o: tools/taz/recip3d.cpp tools/taz/recip3d.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/real3d.o: tools/taz/real3d.cpp tools/taz/real3d.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/scattering_triangle.o: tools/taz/scattering_triangle.cpp tools/taz/scattering_triangle.h tlibs/math/lattice.h
+obj/scattering_triangle.o: tools/taz/scattering_triangle.cpp tools/taz/scattering_triangle.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/real_lattice.o: tools/taz/real_lattice.cpp tools/taz/real_lattice.h tlibs/math/lattice.h
+obj/real_lattice.o: tools/taz/real_lattice.cpp tools/taz/real_lattice.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/proj_lattice.o: tools/taz/proj_lattice.cpp tools/taz/proj_lattice.h tlibs/math/lattice.h
+obj/proj_lattice.o: tools/taz/proj_lattice.cpp tools/taz/proj_lattice.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/tas_layout.o: tools/taz/tas_layout.cpp tools/taz/tas_layout.h
 	${CC} ${FLAGS} -c -o $@ $<
@@ -584,7 +584,7 @@ obj/RecipParamDlg.o: dialogs/RecipParamDlg.cpp dialogs/RecipParamDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/RealParamDlg.o: dialogs/RealParamDlg.cpp dialogs/RealParamDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/GotoDlg.o: dialogs/GotoDlg.cpp dialogs/GotoDlg.h tlibs/math/lattice.h
+obj/GotoDlg.o: dialogs/GotoDlg.cpp dialogs/GotoDlg.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/FavDlg.o: dialogs/FavDlg.cpp dialogs/FavDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
@@ -600,9 +600,9 @@ obj/qthelper.o: libs/qthelper.cpp libs/qthelper.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/qwthelper.o: libs/qwthelper.cpp libs/qwthelper.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/PowderDlg.o: dialogs/PowderDlg.cpp dialogs/PowderDlg.h tlibs/math/lattice.h
+obj/PowderDlg.o: dialogs/PowderDlg.cpp dialogs/PowderDlg.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/DispDlg.o: dialogs/DispDlg.cpp dialogs/DispDlg.h tlibs/math/nn.h
+obj/DispDlg.o: dialogs/DispDlg.cpp dialogs/DispDlg.h tlibs/phys/nn.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/SpurionDlg.o: dialogs/SpurionDlg.cpp dialogs/SpurionDlg.h
 	${CC} ${FLAGS} -c -o $@ $<

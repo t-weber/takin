@@ -9,7 +9,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
 #include "tlibs/math/linalg.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 
 namespace ublas = boost::numeric::ublas;
 using t_real = t_real_glob;

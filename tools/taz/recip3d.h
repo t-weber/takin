@@ -14,7 +14,7 @@
 #include "libs/plotgl.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/geo.h"
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/lattice.h"
 #include "libs/spacegroups/spacegroup.h"
 #include "libs/spacegroups/latticehelper.h"
 #include "libs/globals.h"

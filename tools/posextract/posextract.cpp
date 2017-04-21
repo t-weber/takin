@@ -7,7 +7,7 @@
 
 #include "tlibs/file/loadinstr.h"
 #include "tlibs/log/log.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "libs/globals.h"
 #include <memory>
 #include <fstream>

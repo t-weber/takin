@@ -10,7 +10,7 @@
 
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 
 #include <sstream>
 

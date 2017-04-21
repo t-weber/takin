@@ -11,7 +11,7 @@
 #define __TOFRESO_H__
 
 #include "defs.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 
 namespace units = boost::units;
 namespace codata = boost::units::si::constants::codata;

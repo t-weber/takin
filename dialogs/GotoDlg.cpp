@@ -6,7 +6,7 @@
  */
 
 #include "GotoDlg.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
 

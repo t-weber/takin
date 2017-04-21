@@ -10,8 +10,8 @@
 #include <clipper/clipper.h>
 #include <vector>
 #include <sstream>
-#include "tlibs/math/atoms.h"
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/atoms.h"
+#include "tlibs/phys/lattice.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/linalg_ops.h"
 #include "tlibs/file/x3d.h"

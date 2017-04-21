@@ -9,10 +9,10 @@
 #include <clipper/clipper.h>
 #include <vector>
 #include <sstream>
-#include "tlibs/math/atoms.h"
-#include "tlibs/math/lattice.h"
-#include "tlibs/math/neutrons.h"
 #include "tlibs/math/linalg_ops.h"
+#include "tlibs/phys/atoms.h"
+#include "tlibs/phys/lattice.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/string/string.h"
 #include "libs/spacegroups/spacegroup_clp.h"
 #include "libs/formfactors/formfact.h"

@@ -6,9 +6,9 @@
  */
 
 #include "PowderDlg.h"
-#include "tlibs/math/lattice.h"
-#include "tlibs/math/powder.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/lattice.h"
+#include "tlibs/phys/powder.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"

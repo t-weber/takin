@@ -551,12 +551,15 @@ void ConvoDlg::scanCheckToggled(bool bChecked)
 void ConvoDlg::scanFileChanged(const QString& qstrFile)
 {
 	m_bUseScan = 0;
-	std::string strFile  = qstrFile.toStdString();
-	tl::trim(strFile);
-	if(strFile == "") return;
-	if(!checkScan->isChecked()) return;
 
-	std::vector<std::string> vecFiles{strFile};
+	std::string strFile = qstrFile.toStdString();
+	tl::trim(strFile);
+	if(strFile == "" || !checkScan->isChecked())
+		return;
+
+	std::vector<std::string> vecFiles;
+	tl::get_tokens<std::string, std::string>(strFile, ";", vecFiles);
+	std::for_each(vecFiles.begin(), vecFiles.end(), [](std::string& str){ tl::trim(str); });
 
 	Filter filter;
 	m_scan = Scan();

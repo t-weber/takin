@@ -223,7 +223,7 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrConst << "<html><body>";
 	ostrConst << "<dl>";
 
-	ostrConst << "<dt>Physical constants from Boost Units</dt>";
+	ostrConst << "<dt>Physical constants from Boost Units.</dt>";
 	ostrConst << "<dd><a href=\"http://www.boost.org/doc/libs/release/libs/units/\">http://www.boost.org/doc/libs/release/libs/units/</a></dd>";
 
 	std::shared_ptr<const SpaceGroups<t_real_glob>> sgs = SpaceGroups<t_real_glob>::GetInstance();

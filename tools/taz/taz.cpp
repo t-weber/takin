@@ -23,7 +23,7 @@
 #include <QUrl>
 #include <QDesktopServices>
 
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/lattice.h"
 #include "tlibs/string/spec_char.h"
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"

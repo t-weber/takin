@@ -7,6 +7,7 @@
 
 #include "scan.h"
 #include "tlibs/log/log.h"
+#include "tlibs/math/stat.h"
 
 #include <fstream>
 

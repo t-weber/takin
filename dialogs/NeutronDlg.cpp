@@ -11,7 +11,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/string/eval.h"
 #include "tlibs/math/math.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/helper/misc.h"
 
 #include <sstream>

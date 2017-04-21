@@ -20,11 +20,11 @@
 #endif
 
 #include "tlibs/math/linalg.h"
-#include "tlibs/math/lattice.h"
-#include "tlibs/math/powder.h"
-#include "tlibs/math/bz.h"
-#include "tlibs/math/neutrons.h"
 #include "tlibs/math/kd.h"
+#include "tlibs/phys/lattice.h"
+#include "tlibs/phys/powder.h"
+#include "tlibs/phys/bz.h"
+#include "tlibs/phys/neutrons.h"
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"

@@ -8,7 +8,7 @@
 #include "FormfactorDlg.h"
 #include "libs/formfactors/formfact.h"
 #include "tlibs/string/spec_char.h"
-#include "tlibs/math/term.h"
+#include "tlibs/phys/term.h"
 #include "libs/qthelper.h"
 
 #include <qwt_picker_machine.h>

@@ -30,7 +30,7 @@ Recip3DDlg::Recip3DDlg(QWidget* pParent, QSettings *pSettings)
 		if(m_pSettings->contains("recip3d/geo"))
 			restoreGeometry(m_pSettings->value("recip3d/geo").toByteArray());
 		else
-			resize(640, 480);
+			resize(800, 600);
 	}
 
 	m_pPlot->SetPrec(g_iPrecGfx);

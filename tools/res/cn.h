@@ -16,7 +16,7 @@
 #define __TAKIN_CN_H__
 
 #include "defs.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/math/linalg.h"
 #include <tuple>
 

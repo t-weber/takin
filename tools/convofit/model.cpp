@@ -9,6 +9,7 @@
 
 #include "model.h"
 #include "tlibs/math/math.h"
+#include "tlibs/math/stat.h"
 #include "tlibs/log/log.h"
 #include "tlibs/string/string.h"
 #include "tlibs/helper/array.h"

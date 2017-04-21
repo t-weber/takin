@@ -12,7 +12,7 @@
 #include <QSettings>
 #include "ui/ui_goto.h"
 
-#include "tlibs/math/lattice.h"
+#include "tlibs/phys/lattice.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/file/prop.h"
 #include "libs/globals.h"

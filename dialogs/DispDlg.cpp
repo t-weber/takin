@@ -7,11 +7,11 @@
 
 #include "DispDlg.h"
 
-#include "tlibs/math/lattice.h"
-#include "tlibs/math/atoms.h"
-#include "tlibs/math/nn.h"
-#include "tlibs/math/mag.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/lattice.h"
+#include "tlibs/phys/atoms.h"
+#include "tlibs/phys/nn.h"
+#include "tlibs/phys/mag.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"

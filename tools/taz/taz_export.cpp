@@ -6,7 +6,7 @@
  */
 
 #include "taz.h"
-#include "tlibs/math/atoms.h"
+#include "tlibs/phys/atoms.h"
 #include "tlibs/file/x3d.h"
 #include "tlibs/log/log.h"
 

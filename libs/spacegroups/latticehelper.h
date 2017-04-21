@@ -9,8 +9,8 @@
 #define __LATTICE_HELPER_H__
 
 #include "tlibs/math/linalg.h"
-#include "tlibs/math/lattice.h"
 #include "tlibs/math/geo.h"
+#include "tlibs/phys/lattice.h"
 
 #include "spacegroup.h"
 #include "../formfactors/formfact.h"

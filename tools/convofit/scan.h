@@ -12,7 +12,7 @@
 #include <string>
 
 #include "tlibs/math/math.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/file/loadinstr.h"
 
 //#include "tlibs/fit/minuit.h"	// only to get intrinsic real type

@@ -6,7 +6,7 @@
  */
 
 #include "SpurionDlg.h"
-#include "tlibs/math/neutrons.h"
+#include "tlibs/phys/neutrons.h"
 #include "tlibs/string/string.h"
 #include "libs/qthelper.h"
 
