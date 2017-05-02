@@ -8,8 +8,26 @@
 project(takin)
 cmake_minimum_required(VERSION 3.0)
 
+# native or mingw build?
+set(BUILD_FOR_MINGW FALSE)
+#set(BUILD_FOR_MINGW TRUE)
+
+
 #set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_CXX_STANDARD 11)
+
+
+if(BUILD_FOR_MINGW)
+	# stuff needed by mingw
+	set(SOCK2 "ws2_32")
+	set(USE_GENTAB FALSE)
+	set(USE_RtMp FALSE)
+else()
+	set(SOCK2 "")
+	set(USE_GENTAB TRUE)
+	set(USE_RtMp TRUE)
+endif()
 
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}" "." "${PROJECT_SOURCE_DIR}/tlibs")
@@ -28,17 +46,23 @@ if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
 endif()
 
 
-
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPS} REQUIRED)
 find_package(Threads REQUIRED)
-find_package(Rt REQUIRED)
-find_package(Mp REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Qwt REQUIRED)
-find_package(Clipper REQUIRED)
-
 find_package(Minuit2)
+
+if(USE_RtMp)
+	find_package(Rt REQUIRED)
+	find_package(Mp REQUIRED)
+else()
+	set(Rt_LIBRARIES "")
+	set(Mp_LIBRARIES "")
+endif()
+if(USE_GENTAB)
+	find_package(Clipper REQUIRED)
+endif()
 
 find_package(OpenGL)
 find_package(Freetype)
@@ -51,6 +75,7 @@ find_package(X11)
 #message("Binary dir: ${CMAKE_BINARY_DIR}")
 message("Install path prefix: ${CMAKE_INSTALL_PREFIX}")
 message("Using qwt version ${QWT_MAJOR_VERSION}")
+message("Using Boost version ${Boost_VERSION}")
 message("Qt moc: ${QT_MOC_EXECUTABLE}\nQt uic: ${QT_UIC_EXECUTABLE}")
 
 add_definitions(-DNDEBUG)
@@ -61,6 +86,9 @@ add_definitions(-DNO_JPEG -DNO_TIFF)
 add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions(${Boost_CXX_FLAGS})
 add_definitions(-DTLIBS_INC_HDR_IMPLS)
+if(NOT BUILD_FOR_MINGW)
+	add_definitions(-DUSE_MULTI_TEXTURES)
+endif()
 
 
 include_directories("${PROJECT_SOURCE_DIR}" ".")
@@ -99,21 +127,31 @@ else()
 endif()
 
 
+if(X11_FOUND)
+	include_directories(${X11_X11_INCLUDE_PATH})
+else()
+	set(X11_X11_LIB "")
+endif()
+
+
 # 3d support
-if(OPENGL_FOUND AND X11_FOUND AND FREETYPE_FOUND)
-	message("Enabling 3D support.")
-	#message("GL include dir: ${OPENGL_INCLUDE_DIR}")
+if(OPENGL_FOUND AND FREETYPE_FOUND)
+	message("Enabling 3D support. Inc: \"${OPENGL_INCLUDE_DIR}\".")
 
 	include_directories("${FREETYPE_INCLUDE_DIRS}")
-	include_directories("${OPENGL_INCLUDE_DIR}" 
-		"${OPENGL_INCLUDE_DIR}/GL" "${OPENGL_INCLUDE_DIR}/OpenGL")
-	include_directories(${X11_X11_INCLUDE_PATH})
+	if(NOT "${OPENGL_INCLUDE_DIR}" STREQUAL "")
+		include_directories("${OPENGL_INCLUDE_DIR}")
+		include_directories("${OPENGL_INCLUDE_DIR}/GL" "${OPENGL_INCLUDE_DIR}/OpenGL")
+	else()
+		message("Empty OGL dirs, guessing some defaults.")
+		include_directories("/usr/include/GL" "/usr/include/OpenGL")	
+	endif()
 
 	add_definitions(-DUSE_3D)
 
 	set(SRCS_3D 
 		libs/plotgl.cpp tools/taz/recip3d.cpp 
-		tools/taz/real3d.cpp dialogs/EllipseDlg3D.cpp
+		tools/taz/real3d.cpp tools/taz/bz3d.cpp dialogs/EllipseDlg3D.cpp
 
 		tlibs/gfx/gl.cpp
 	)
@@ -123,10 +161,11 @@ if(OPENGL_FOUND AND X11_FOUND AND FREETYPE_FOUND)
 		${X11_X11_LIB}
 	)
 else()
-	message("Disabling 3D support.")
+	message("Disabling 3D support: OGL: ${OPENGL_FOUND}, FT: ${FREETYPE_FOUND}")
 
 	add_definitions(-DNO_3D)
 endif()
+
 
 
 set(CMAKE_AUTOMOC OFF)
@@ -140,20 +179,22 @@ add_definitions(-std=c++11)
 # -----------------------------------------------------------------------------
 # gentab
 # -----------------------------------------------------------------------------
-add_executable(gentab 
-	tools/gentab/gentab.cpp
-	libs/spacegroups/spacegroup_clp.cpp libs/spacegroups/crystalsys.cpp
-	tlibs/log/log.cpp
-)
+if(USE_GENTAB)
+	add_executable(gentab 
+		tools/gentab/gentab.cpp
+		libs/spacegroups/spacegroup_clp.cpp libs/spacegroups/crystalsys.cpp
+		tlibs/log/log.cpp
+	)
 
-target_link_libraries(gentab 
-	${Boost_LIBRARIES} ${LIBS_PY} ${Clipper_LIBRARIES}
-	Qt4::QtCore Qt4::QtGui
-)
+	target_link_libraries(gentab 
+		${Boost_LIBRARIES} ${LIBS_PY} ${Clipper_LIBRARIES}
+		Qt4::QtCore Qt4::QtGui
+	)
 
-add_custom_command(TARGET gentab POST_BUILD
-	COMMAND cd ${CMAKE_BINARY_DIR} && ./gentab
-	MAIN_DEPENDENCY gentab)
+	add_custom_command(TARGET gentab POST_BUILD
+		COMMAND cd ${CMAKE_BINARY_DIR} && ./gentab
+		MAIN_DEPENDENCY gentab)
+endif()
 # -----------------------------------------------------------------------------
 
 
@@ -211,7 +252,7 @@ add_executable(takin
 
 target_link_libraries(takin 
 	${LIBS_FIT}
-	${Boost_LIBRARIES}
+	${Boost_LIBRARIES} ${SOCK2}
 	${LIBS_3D}
 	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
 	${QWT_LIBRARIES}
@@ -243,7 +284,10 @@ endif()
 
 
 add_dependencies(takin prebuild-script)
-add_dependencies(takin gentab)
+
+if(USE_GENTAB)
+	add_dependencies(takin gentab)
+endif()
 # -----------------------------------------------------------------------------
 
 
@@ -276,7 +320,7 @@ add_executable(convofit
 set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convofit
-	${LIBS_FIT}
+	${LIBS_FIT} ${SOCK2}
 	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
 	${Boost_LIBRARIES} ${LIBS_PY}
 )

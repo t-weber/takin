@@ -63,8 +63,10 @@ struct LatticeCommon
 	{
 		lattice = lat;
 		recip = rec;
-		planeRLU = plRLU;
-		planeFrac = plFrac;
+
+		planeRLU = plRLU;	// for recip lattice
+		planeFrac = plFrac;	// for real lattice
+
 		pSpaceGroup = pSG;
 		pvecAtomPos = pvecAt;
 

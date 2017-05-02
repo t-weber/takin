@@ -9,7 +9,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/log/log.h"
 #include "tlibs/file/file.h"
-#include <julia.h>
+#include "tlibs/ext/jl.h"
 
 using t_real = t_real_reso;
 
@@ -128,7 +128,7 @@ std::tuple<std::vector<t_real>, std::vector<t_real>>
 
 	if(m_pDisp)
 	{
-		jl_value_t *phkl[3] = { jl_box_float64(dh), jl_box_float64(dk), jl_box_float64(dl) };
+		jl_value_t *phkl[3] = { tl::jl_traits<t_real>::box(dh), tl::jl_traits<t_real>::box(dk), tl::jl_traits<t_real>::box(dl) };
 		jl_array_t *pEW = reinterpret_cast<jl_array_t*>(jl_call((jl_function_t*)m_pDisp, phkl, 3));
 
 		if(jl_array_len(pEW) != 2)
@@ -148,8 +148,8 @@ std::tuple<std::vector<t_real>, std::vector<t_real>>
 
 		for(std::size_t iElem=0; iElem<std::min(iSizeE, iSizeW); ++iElem)
 		{
-			t_real dE = jl_unbox_float64(jl_arrayref(parrE, iElem));
-			t_real dW = jl_unbox_float64(jl_arrayref(parrE, iElem));
+			t_real dE = tl::jl_traits<t_real>::unbox(jl_arrayref(parrE, iElem));
+			t_real dW = tl::jl_traits<t_real>::unbox(jl_arrayref(parrE, iElem));
 
 			vecE.push_back(dE);
 			vecW.push_back(dW);
@@ -175,12 +175,12 @@ t_real SqwJl::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 	std::lock_guard<std::mutex> lock(*m_pmtx);
 
 	jl_value_t *phklE[4] =
-		{ jl_box_float64(dh), jl_box_float64(dk),
-		jl_box_float64(dl), jl_box_float64(dE) };
+		{ tl::jl_traits<t_real>::box(dh), tl::jl_traits<t_real>::box(dk),
+		tl::jl_traits<t_real>::box(dl), tl::jl_traits<t_real>::box(dE) };
 	jl_value_t *pSqw = jl_call((jl_function_t*)m_pSqw, phklE, 4);
 
 	PrintExceptions();
-	return t_real(jl_unbox_float64(pSqw));
+	return t_real(tl::jl_traits<t_real>::unbox(pSqw));
 }
 
 

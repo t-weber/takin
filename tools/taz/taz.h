@@ -55,6 +55,7 @@
 #if !defined NO_3D
 	#include "recip3d.h"
 	#include "real3d.h"
+	#include "bz3d.h"
 	#include "dialogs/EllipseDlg3D.h"
 #endif
 
@@ -170,6 +171,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 #if !defined NO_3D
 		Recip3DDlg *m_pRecip3d = nullptr;
 		Real3DDlg *m_pReal3d = nullptr;
+		BZ3DDlg *m_pBZ3d = nullptr;
 		EllipseDlg3D *m_pEllipseDlg3D = nullptr;
 #endif
 
@@ -246,6 +248,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void ExportRecip();
 		void ExportProj();
 		void ExportBZImage();
+		void ExportBZ3DModel();
 		void ExportWSImage();
 		void ExportUCModel();
 
@@ -267,6 +270,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void ShowDynPlaneDlg();
 
 		void Show3D();
+		void Show3DBZ();
 		void Show3DReal();
 		void ShowResoEllipses3D();
 

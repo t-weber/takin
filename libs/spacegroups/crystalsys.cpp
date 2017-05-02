@@ -104,9 +104,9 @@ void set_crystal_system_edits(CrystalSystem crystalsys,
 			if(editBetaRecip) editBetaRecip->setEnabled(1);
 			if(editGammaRecip) editGammaRecip->setEnabled(0);
 
-			if(editAlpha) editBeta->setText("90");
+			if(editAlpha) editAlpha->setText("90");
 			if(editGamma) editGamma->setText("90");
-			if(editAlphaRecip) editBetaRecip->setText("90");
+			if(editAlphaRecip) editAlphaRecip->setText("90");
 			if(editGammaRecip) editGammaRecip->setText("90");
 			break;
 

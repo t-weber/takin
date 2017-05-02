@@ -144,7 +144,6 @@ void RealLattice::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWid
 		painter->setPen(Qt::lightGray);
 
 		const t_vec& vecCentral = m_ws.GetCentralReflex() * m_dScaleFactor*m_dZoom;
-		//std::cout << vecCentral << std::endl;
 		for(const LatticePoint* pPeak : m_vecPeaks)
 		{
 			QPointF peakPos = pPeak->pos();
@@ -235,6 +234,7 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 			for(int il=-m_iMaxPeaks; il<=m_iMaxPeaks; ++il)
 			{
 				const t_real h = t_real(ih), k = t_real(ik), l = t_real(il);
+				const t_vec vecPeakHKL = tl::make_vec<t_vec>({h,k,l});
 				t_vec vecPeak = m_lattice.GetPos(h,k,l);
 
 				// add peak in A and in fractional units
@@ -278,16 +278,14 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 					{
 						t_vec vecCentral = tl::make_vec({dX, dY});
 						//log_debug("Central ", ih, ik, il, ": ", vecCentral);
-						m_ws.SetCentralReflex(vecCentral);
+						m_ws.SetCentralReflex(vecCentral, &vecPeakHKL);
 					}
 					// TODO: check if 2 next neighbours is sufficient for all space groups
-					else if(std::abs(ih-veciCent[0])<=2
-							&& std::abs(ik-veciCent[1])<=2
-							&& std::abs(il-veciCent[2])<=2)
+					else if(std::abs(ih-veciCent[0])<=2 && std::abs(ik-veciCent[1])<=2
+						&& std::abs(il-veciCent[2])<=2)
 					{
 						t_vec vecN = tl::make_vec({dX, dY});
-						//log_debug("Reflex: ", vecN);
-						m_ws.AddReflex(vecN);
+						m_ws.AddReflex(vecN, &vecPeakHKL);
 					}
 				}
 			}
@@ -550,6 +548,7 @@ LatticeView::LatticeView(QWidget* pParent)
 	setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing |
 		QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing);
 	setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+
 	setDragMode(QGraphicsView::ScrollHandDrag);
 	setMouseTracking(1);
 	setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
@@ -557,6 +556,32 @@ LatticeView::LatticeView(QWidget* pParent)
 
 LatticeView::~LatticeView()
 {}
+
+
+void LatticeView::DoZoom(t_real_glob dDelta)
+{
+	t_real dScale = std::pow(2., dDelta);
+	this->scale(dScale, dScale);
+
+	m_dTotalScale *= dScale;
+	emit scaleChanged(m_dTotalScale);
+}
+
+
+void LatticeView::keyPressEvent(QKeyEvent *pEvt)
+{
+	if(pEvt->key() == Qt::Key_Plus)
+		DoZoom(0.02);
+	else if(pEvt->key() == Qt::Key_Minus)
+		DoZoom(-0.02);
+
+	QGraphicsView::keyPressEvent(pEvt);
+}
+
+void LatticeView::keyReleaseEvent(QKeyEvent *pEvt)
+{
+	QGraphicsView::keyReleaseEvent(pEvt);
+}
 
 void LatticeView::wheelEvent(QWheelEvent *pEvt)
 {
@@ -566,10 +591,7 @@ void LatticeView::wheelEvent(QWheelEvent *pEvt)
 	const t_real dDelta = pEvt->delta()/8. / 150.;
 #endif
 
-	t_real dScale = std::pow(2., dDelta);
-	this->scale(dScale, dScale);
-	m_dTotalScale *= dScale;
-	emit scaleChanged(m_dTotalScale);
+	DoZoom(dDelta);
 }
 
 

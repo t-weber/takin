@@ -543,12 +543,39 @@ TofLayoutView::TofLayoutView(QWidget* pParent) : QGraphicsView(pParent)
 	setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing |
 		QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing);
 	setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+
 	setDragMode(QGraphicsView::ScrollHandDrag);
 	setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 }
 
 TofLayoutView::~TofLayoutView()
 {}
+
+
+void TofLayoutView::DoZoom(t_real_glob dDelta)
+{
+	const t_real dScale = std::pow(2., dDelta);
+	this->scale(dScale, dScale);
+
+	m_dTotalScale *= dScale;
+	emit scaleChanged(m_dTotalScale);
+}
+
+
+void TofLayoutView::keyPressEvent(QKeyEvent *pEvt)
+{
+	if(pEvt->key() == Qt::Key_Plus)
+		DoZoom(0.02);
+	else if(pEvt->key() == Qt::Key_Minus)
+		DoZoom(-0.02);
+
+	QGraphicsView::keyPressEvent(pEvt);
+}
+
+void TofLayoutView::keyReleaseEvent(QKeyEvent *pEvt)
+{
+	QGraphicsView::keyReleaseEvent(pEvt);
+}
 
 void TofLayoutView::wheelEvent(QWheelEvent *pEvt)
 {
@@ -558,10 +585,7 @@ void TofLayoutView::wheelEvent(QWheelEvent *pEvt)
 	const t_real dDelta = pEvt->delta()/8. / 150.;
 #endif
 
-	const t_real dScale = std::pow(2., dDelta);
-	this->scale(dScale, dScale);
-	m_dTotalScale *= dScale;
-	emit scaleChanged(m_dTotalScale);
+	DoZoom(dDelta);
 }
 
 

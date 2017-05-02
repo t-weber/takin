@@ -17,17 +17,21 @@
 #include <cmath>
 #include <tuple>
 
+
+// symbol drawing sizes
+#define DEF_PEAK_SIZE 3.
+#define MIN_PEAK_SIZE 0.2
+#define MAX_PEAK_SIZE 5.5
+
+#define CALC_BZ_AROUND_ZERO
+
+
 using t_real = t_real_glob;
 using t_vec = ublas::vector<t_real>;
 using t_mat = ublas::matrix<t_real>;
 static const tl::t_length_si<t_real> angs = tl::get_one_angstrom<t_real>();
 static const tl::t_energy_si<t_real> meV = tl::get_one_meV<t_real>();
 static const tl::t_angle_si<t_real> rads = tl::get_one_radian<t_real>();
-
-// symbol drawing sizes
-#define DEF_PEAK_SIZE 3.
-#define MIN_PEAK_SIZE 0.2
-#define MAX_PEAK_SIZE 5.5
 
 
 static inline bool flip_text(t_real _dAngle)
@@ -219,29 +223,56 @@ void ScatteringTriangle::paint(QPainter *painter, const QStyleOptionGraphicsItem
 	painter->setFont(g_fontGfx);
 
 	// Brillouin zone
-	if(m_bShowBZ && m_bz.IsValid())
+	if(m_bShowBZ && (m_bz.IsValid() || m_bz3.IsValid()))
 	{
 		QPen penOrg = painter->pen();
-		painter->setPen(Qt::lightGray);
+		painter->setPen(Qt::darkGray);
 
-		const t_vec& vecCentral = m_bz.GetCentralReflex() * m_dScaleFactor*m_dZoom;
-		//std::cout << vecCentral << std::endl;
+		t_vec vecCentral2d;
+		std::vector<QPointF> vecBZ3;
+
+		// use 3d BZ code
+		if(g_b3dBZ && m_bz3.IsValid())
+		{
+			// convert vertices to QPointFs
+			vecBZ3.reserve(m_vecBZ3Verts.size());
+			for(const auto& vecVert : m_vecBZ3Verts)
+				vecBZ3.push_back(vec_to_qpoint(vecVert * m_dScaleFactor * m_dZoom));
+		}
+		// use 2d BZ code
+		else if(m_bz.IsValid())
+		{
+			vecCentral2d = m_bz.GetCentralReflex() * m_dScaleFactor*m_dZoom;
+		}
+
 		for(const RecipPeak* pPeak : m_vecPeaks)
 		{
 			QPointF peakPos = pPeak->pos();
 			peakPos *= m_dZoom;
 
-			const tl::Brillouin2D<t_real>::t_vertices<t_real>& verts = m_bz.GetVertices();
-			for(const tl::Brillouin2D<t_real>::t_vecpair<t_real>& vertpair : verts)
+			// use 3d BZ code
+			if(g_b3dBZ && m_bz3.IsValid())
 			{
-				const t_vec& vec1 = vertpair.first * m_dScaleFactor * m_dZoom;
-				const t_vec& vec2 = vertpair.second * m_dScaleFactor * m_dZoom;
+				std::vector<QPointF> vecBZ3_peak = vecBZ3;
+				for(auto& vecVert : vecBZ3_peak)
+					vecVert += peakPos;
+				painter->drawPolygon(vecBZ3_peak.data(), vecBZ3_peak.size());
+			}
+			// use 2d BZ code
+			else if(m_bz.IsValid())
+			{
+				const tl::Brillouin2D<t_real>::t_vertices<t_real>& verts = m_bz.GetVertices();
+				for(const tl::Brillouin2D<t_real>::t_vecpair<t_real>& vertpair : verts)
+				{
+					const t_vec& vec1 = vertpair.first * m_dScaleFactor * m_dZoom;
+					const t_vec& vec2 = vertpair.second * m_dScaleFactor * m_dZoom;
 
-				QPointF pt1 = vec_to_qpoint(vec1 - vecCentral) + peakPos;
-				QPointF pt2 = vec_to_qpoint(vec2 - vecCentral) + peakPos;
+					QPointF pt1 = vec_to_qpoint(vec1 - vecCentral2d) + peakPos;
+					QPointF pt2 = vec_to_qpoint(vec2 - vecCentral2d) + peakPos;
 
-				QLineF lineBZ(pt1, pt2);
-				painter->drawLine(lineBZ);
+					QLineF lineBZ(pt1, pt2);
+					painter->drawLine(lineBZ);
+				}
 			}
 		}
 
@@ -809,10 +840,12 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	tl::Powder<int, t_real_glob> powder;
 	powder.SetRecipLattice(&m_recip);
 
+
 	// -------------------------------------------------------------------------
 	// central peak for BZ calculation
-	//const int iCent[] = {0,0,0};
-
+#ifdef CALC_BZ_AROUND_ZERO
+	ublas::vector<int> veciCent = tl::make_vec({0.,0.,0.});
+#else
 	std::vector<std::tuple<int, int>> vecPeaksToTry =
 	{
 		std::make_tuple(1, 2), std::make_tuple(1, 3), std::make_tuple(1, 4), std::make_tuple(1, 5), std::make_tuple(1, 6),
@@ -833,29 +866,11 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 			continue;
 		break;
 	}
-	//std::cout << veciCent << std::endl;
 
 	if(!veciCent.size())
 		veciCent = tl::make_vec({0.,0.,0.});
+#endif
 	// -------------------------------------------------------------------------
-
-
-	// crystal rotation angle
-	/*try
-	{
-		t_vec vecUnrotX = plane.GetDroppedPerp(m_recip_unrot.GetVec(0));
-		t_vec vecRotX = plane.GetDroppedPerp(m_recip.GetVec(0));
-
-		const t_vec &vecNorm = plane.GetNorm();
-		m_dAngleRot = -tl::vec_angle(vecRotX, vecUnrotX, &vecNorm);
-
-		//std::cout << "rotation angle: " << m_dAngleRot/M_PI*180. << std::endl;
-	}
-	catch(const std::exception& ex)
-	{
-		tl::log_err(ex.what());
-		return;
-	}*/
 
 
 	//const t_mat matB = recip.GetMetric();
@@ -866,14 +881,14 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	std::list<std::vector<t_real>> lstPeaksForKd;
 	t_real dMinF = std::numeric_limits<t_real>::max(), dMaxF = -1.;
 
+	// iterate over all bragg peaks
 	const int iMaxPeaks = bIsPowder ? m_iMaxPeaks/2 : m_iMaxPeaks;
 	for(int ih=-iMaxPeaks; ih<=iMaxPeaks; ++ih)
 		for(int ik=-iMaxPeaks; ik<=iMaxPeaks; ++ik)
 			for(int il=-iMaxPeaks; il<=iMaxPeaks; ++il)
 			{
-				const t_real h = t_real(ih);
-				const t_real k = t_real(ik);
-				const t_real l = t_real(il);
+				const t_real h=t_real(ih); const t_real k=t_real(ik); const t_real l=t_real(il);
+				const t_vec vecPeakHKL = tl::make_vec<t_vec>({h,k,l});
 
 				bool bHasRefl = 1;
 				bool bHasGenRefl = 1;
@@ -892,9 +907,18 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 				//const t_real dG = ublas::norm_2(vecPeak);
 
 
-				// add peak in 1/A and rlu units
+				// add peak in 1/A and rlu units (only 1/A vectors are used for kd calculation)
 				lstPeaksForKd.push_back(std::vector<t_real>
 					{ vecPeak[0],vecPeak[1],vecPeak[2], h,k,l/*, dF*/ });
+
+				// add peaks for 3d calculation of 1st BZ
+				if(g_b3dBZ)
+				{
+					if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
+						m_bz3.SetCentralReflex(vecPeak, &vecPeakHKL);
+					else if(std::abs(ih-veciCent[0]) <= 2 && std::abs(ik-veciCent[1]) <= 2 && std::abs(il-veciCent[2]) <= 2)
+						m_bz3.AddReflex(vecPeak, &vecPeakHKL);
+				}
 
 				t_real dDist = 0.;
 				t_vec vecDropped = recipcommon.plane.GetDroppedPerp(vecPeak, &dDist);
@@ -961,10 +985,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 							pPeak->SetLabel(ostrLabel.str().c_str());
 
 							tl::set_eps_0(vecPeak);
-							ostrTip << "\n("
-								<< vecPeak[0] << ", "
-								<< vecPeak[1] << ", "
-								<< vecPeak[2] << ") " << strAA;
+							ostrTip << "\n(" << vecPeak[0] << ", " << vecPeak[1] << ", " << vecPeak[2] << ") " << strAA;
 
 							//ostrTip << "\ndistance to plane: " << dDist << " " << strAA;
 							pPeak->setToolTip(QString::fromUtf8(ostrTip.str().c_str(), ostrTip.str().length()));
@@ -973,21 +994,20 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 							m_scene.addItem(pPeak);
 						}
 
-						// 1st BZ
-						if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
-						{
-							t_vec vecCentral = tl::make_vec({dX, dY});
-							//tl::log_debug("Central ", ih, ik, il, ": ", vecCentral);
-							m_bz.SetCentralReflex(vecCentral);
-						}
-						// TODO: check if 2 next neighbours is sufficient for all space groups
-						else if(std::abs(ih-veciCent[0]) <= 2
-							&& std::abs(ik-veciCent[1]) <= 2
-							&& std::abs(il-veciCent[2]) <= 2)
+
+						// add peaks for 2d approximation of 1st BZ
+						if(!g_b3dBZ)
 						{
 							t_vec vecN = tl::make_vec({dX, dY});
-							//tl::log_debug("Reflex: ", vecN);
-							m_bz.AddReflex(vecN);
+							if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
+							{
+								m_bz.SetCentralReflex(vecN, &vecPeakHKL);
+							}
+							else if(std::abs(ih-veciCent[0])<=2 && std::abs(ik-veciCent[1])<=2
+								&& std::abs(il-veciCent[2])<=2)
+							{
+								m_bz.AddReflex(vecN, &vecPeakHKL);
+							}
 						}
 					}
 				}
@@ -996,12 +1016,55 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 					powder.AddPeak(ih, ik, il, dF);
 			}
 
+	// single crystal
 	if(!bIsPowder)
 	{
-		//for(const auto& vec : m_bz.GetNeighbours()) std::cout << vec << std::endl;
-		m_bz.CalcBZ();
-		//for(RecipPeak* pPeak : m_vecPeaks)
-		//	pPeak->SetBZ(&m_bz);
+		if(g_b3dBZ)
+		{
+			m_bz3.CalcBZ();
+
+			// ----------------------------------------------------------------
+			// calculate points of high symmetry
+			std::vector<t_vec> vecSymmDirs = {
+				tl::make_vec<t_vec>({1,0,0}), tl::make_vec<t_vec>({0,1,0}), tl::make_vec<t_vec>({0,0,1}),
+
+				tl::make_vec<t_vec>({1,1,0}), tl::make_vec<t_vec>({0,1,1}), tl::make_vec<t_vec>({1,0,1}),
+				tl::make_vec<t_vec>({1,-1,0}), tl::make_vec<t_vec>({0,1,-1}), tl::make_vec<t_vec>({1,0,-1}),
+
+				tl::make_vec<t_vec>({1,1,1}), tl::make_vec<t_vec>({1,1,-1}), tl::make_vec<t_vec>({1,-1,-1}),
+				tl::make_vec<t_vec>({1,-1,1}),
+			};
+			for(const t_vec& vecSymmDir : vecSymmDirs)
+			{
+				const t_vec vecSymmDirInvA = m_recip.GetPos(vecSymmDir[0], vecSymmDir[1], vecSymmDir[2]);
+				tl::Line<t_real> lineSymmDir(m_bz3.GetCentralReflex(), vecSymmDirInvA);
+				std::vector<t_vec> vecSymmIntersects = m_bz3.GetIntersection(lineSymmDir);
+				for(t_vec& vecSymmIntersect : vecSymmIntersects)
+					m_vecBZ3SymmPts.emplace_back(std::move(vecSymmIntersect));
+			}
+			// ----------------------------------------------------------------
+
+			// ----------------------------------------------------------------
+			// calculate intersection with scattering plane
+			tl::Plane<t_real> planeBZ3 = tl::Plane<t_real>(m_bz3.GetCentralReflex(),
+				recipcommon.plane.GetNorm());
+
+			std::tie(std::ignore, m_vecBZ3VertsUnproj) = m_bz3.GetIntersection(planeBZ3);
+
+			for(const t_vec& _vecBZ3Vert : m_vecBZ3VertsUnproj)
+			{
+				t_vec vecBZ3Vert = ublas::prod(m_matPlane_inv, _vecBZ3Vert - m_bz3.GetCentralReflex());
+				vecBZ3Vert.resize(2, true);
+				vecBZ3Vert[1] = -vecBZ3Vert[1];
+
+				m_vecBZ3Verts.push_back(vecBZ3Vert);
+			}
+			// ----------------------------------------------------------------
+		}
+		else
+		{
+			m_bz.CalcBZ();
+		}
 
 		m_kdLattice.Load(lstPeaksForKd, 3);
 	}
@@ -1126,6 +1189,10 @@ t_vec ScatteringTriangle::GetKfVecPlane() const
 void ScatteringTriangle::ClearPeaks()
 {
 	m_bz.Clear();
+	m_bz3.Clear();
+	m_vecBZ3VertsUnproj.clear();
+	m_vecBZ3Verts.clear();
+	m_vecBZ3SymmPts.clear();
 
 	for(RecipPeak*& pPeak : m_vecPeaks)
 	{
@@ -1805,6 +1872,33 @@ ScatteringTriangleView::ScatteringTriangleView(QWidget* pParent)
 ScatteringTriangleView::~ScatteringTriangleView()
 {}
 
+
+void ScatteringTriangleView::DoZoom(t_real_glob dDelta)
+{
+	const t_real dScale = std::pow(2., dDelta);
+	this->scale(dScale, dScale);
+
+	m_dTotalScale *= dScale;
+	emit scaleChanged(m_dTotalScale);
+}
+
+
+void ScatteringTriangleView::keyPressEvent(QKeyEvent *pEvt)
+{
+	if(pEvt->key() == Qt::Key_Plus)
+		DoZoom(0.02);
+	else if(pEvt->key() == Qt::Key_Minus)
+		DoZoom(-0.02);
+
+	QGraphicsView::keyPressEvent(pEvt);
+}
+
+void ScatteringTriangleView::keyReleaseEvent(QKeyEvent *pEvt)
+{
+	QGraphicsView::keyReleaseEvent(pEvt);
+}
+
+
 void ScatteringTriangleView::wheelEvent(QWheelEvent *pEvt)
 {
 #if QT_VER>=5
@@ -1813,10 +1907,7 @@ void ScatteringTriangleView::wheelEvent(QWheelEvent *pEvt)
 	const t_real dDelta = pEvt->delta()/8. / 150.;
 #endif
 
-	const t_real dScale = std::pow(2., dDelta);
-	this->scale(dScale, dScale);
-	m_dTotalScale *= dScale;
-	emit scaleChanged(m_dTotalScale);
+	DoZoom(dDelta);
 }
 
 

@@ -5,8 +5,8 @@
  * @license GPLv2
  */
 
-#ifndef __MIEZE_PLOT_GL__
-#define __MIEZE_PLOT_GL__
+#ifndef __TAKIN_PLOT_GL__
+#define __TAKIN_PLOT_GL__
 
 #if QT_VER>=5
        	#include <QtWidgets>
@@ -33,7 +33,6 @@ namespace ublas = boost::numeric::ublas;
 namespace sig = boost::signals2;
 
 
-using tl::t_real_gl;
 using t_qglwidget = QGLWidget;
 //using t_qglwidget = QOpenGLWidget;
 
@@ -43,17 +42,34 @@ enum PlotTypeGl
 
 	PLOT_SPHERE,
 	PLOT_ELLIPSOID,
+
+	PLOT_POLY,
+	PLOT_LINES,
 };
 
 struct PlotObjGl
 {
 	PlotTypeGl plttype = PLOT_INVALID;
-	std::vector<t_real_gl> vecParams;
+
+	ublas::vector<t_real_glob> vecPos;
+	ublas::vector<t_real_glob> vecScale;
+	std::vector<t_real_glob> vecRotMat;
+
 	std::vector<t_real_glob> vecColor;
+	t_real_glob dLineWidth = 2.;
+
+	std::vector<ublas::vector<t_real_glob>> vecVertices;
+	ublas::vector<t_real_glob> vecNorm;
 
 	bool bSelected = 0;
 	bool bUseLOD = 1;
 	std::string strLabel;
+};
+
+struct PlotGlSize
+{
+	int iW = 800, iH = 600;
+	bool bDoResize = true;
 };
 
 class PlotGl : public t_qglwidget, QThread
@@ -61,26 +77,32 @@ class PlotGl : public t_qglwidget, QThread
 protected:
 	QSettings *m_pSettings = 0;
 	std::atomic<bool> m_bEnabled;
-	QMutex m_mutex;
+	mutable QMutex m_mutex, m_mutex_resize;
 
-	static constexpr t_real_gl m_dFOV = 45./180.*M_PI;
-	tl::t_mat4 m_matProj, m_matView;
+	static constexpr t_real_glob m_dFOV = 45./180.*M_PI;
+	tl::t_mat4_gen<t_real_glob> m_matProj, m_matView;
+	bool m_bPerspective = 1; // perspective or orthogonal projection?
+	ublas::vector<t_real_glob> m_vecCam;
+	bool m_bDoZTest = 0;
 
-	tl::GlFontMap *m_pFont = nullptr;
+	tl::GlFontMap<t_real_glob> *m_pFont = nullptr;
 
 	std::vector<PlotObjGl> m_vecObjs;
 	GLuint m_iLstSphere[8];
 	QString m_strLabels[3];
 
-	std::size_t m_iPrec = 6;
-	t_real_gl m_dXMin=-10., m_dXMax=10.;
-	t_real_gl m_dYMin=-10., m_dYMax=10.;
-	t_real_gl m_dZMin=-10., m_dZMax=10.;
-	t_real_gl m_dXMinMaxOffs, m_dYMinMaxOffs, m_dZMinMaxOffs;
 
-	//void initializeGL();
-	void resizeEvent(QResizeEvent*);
-	void paintEvent(QPaintEvent*);
+	std::size_t m_iPrec = 6;
+	t_real_glob m_dXMin=-10., m_dXMax=10.;
+	t_real_glob m_dYMin=-10., m_dYMax=10.;
+	t_real_glob m_dZMin=-10., m_dZMax=10.;
+	t_real_glob m_dXMinMaxOffs, m_dYMinMaxOffs, m_dZMinMaxOffs;
+	bool m_bDrawMinMax = 1;
+
+
+protected:
+	virtual void resizeEvent(QResizeEvent*) override;
+	virtual void paintEvent(QPaintEvent*) override;
 
 	void SetColor(t_real_glob r, t_real_glob g, t_real_glob b, t_real_glob a=1.);
 	void SetColor(std::size_t iIdx);
@@ -89,21 +111,19 @@ protected:
 	// ------------------------------------------------------------------------
 	// mouse stuff
 	bool m_bMouseRotateActive = 0;
-	t_real_gl m_dMouseRot[2];
-	t_real_gl m_dMouseBegin[2];
+	t_real_glob m_dMouseRot[2];
+	t_real_glob m_dMouseBegin[2];
 
 	bool m_bMouseScaleActive = 0;
-	t_real_gl m_dMouseScale;
-	t_real_gl m_dMouseScaleBegin;
+	t_real_glob m_dMouseScale;
+	t_real_glob m_dMouseScaleBegin;
 
-	t_real_gl m_dMouseX = 0., m_dMouseY = 0.;
-
-	void mousePressEvent(QMouseEvent*);
-	void mouseReleaseEvent(QMouseEvent*);
-	void mouseMoveEvent(QMouseEvent*);
+	virtual void mousePressEvent(QMouseEvent*) override;
+	virtual void mouseReleaseEvent(QMouseEvent*) override;
+	virtual void mouseMoveEvent(QMouseEvent*) override;
 
 	void updateViewMatrix();
-	void mouseSelectObj(t_real_gl dX, t_real_gl dY);
+	void mouseSelectObj(t_real_glob dX, t_real_glob dY);
 
 public:
 	using t_sigHover = sig::signal<void(const PlotObjGl*)>;
@@ -114,35 +134,45 @@ protected:
 
 	// ------------------------------------------------------------------------
 	// render thread
-	bool m_bDoResize = 1;
 	bool m_bRenderThreadActive = 1;
 
 	void initializeGLThread();
 	void freeGLThread();
 	void resizeGLThread(int w, int h);
 	void paintGLThread();
-	void tickThread(t_real_gl dTime);
-	void run();
+	void tickThread(t_real_glob dTime);
+	virtual void run() override;
 
-	int m_iW=640, m_iH=480;
+	t_real_glob GetCamObjDist(const PlotObjGl& obj) const;
+	std::vector<std::size_t> GetObjSortOrder() const;
+	PlotGlSize m_size;
 	// ------------------------------------------------------------------------
 
 public:
-	PlotGl(QWidget* pParent, QSettings *pSettings=nullptr, t_real_gl dMouseScale=25.);
+	PlotGl(QWidget* pParent, QSettings *pSettings=nullptr, t_real_glob dMouseScale=25.);
 	virtual ~PlotGl();
 
-	void PlotSphere(const ublas::vector<t_real_gl>& vecPos, t_real_gl dRadius, int iObjIdx=-1);
-	void PlotEllipsoid(const ublas::vector<t_real_gl>& widths,
-		const ublas::vector<t_real_gl>& offsets,
-		const ublas::matrix<t_real_gl>& rot,
+	void clear();
+	void TogglePerspective();
+	void ToggleZTest() { m_bDoZTest = !m_bDoZTest; }
+
+	void PlotSphere(const ublas::vector<t_real_glob>& vecPos, t_real_glob dRadius, int iObjIdx=-1);
+	void PlotEllipsoid(const ublas::vector<t_real_glob>& widths,
+		const ublas::vector<t_real_glob>& offsets,
+		const ublas::matrix<t_real_glob>& rot,
 		int iObjsIdx=-1);
+	void PlotPoly(const std::vector<ublas::vector<t_real_glob>>& vecVertices,
+		const ublas::vector<t_real_glob>& vecNorm, int iObjIdx=-1);
+	void PlotLines(const std::vector<ublas::vector<t_real_glob>>& vecVertices,
+		t_real_glob dLW=2., int iObjIdx=-1);
+
 	void SetObjectCount(std::size_t iSize) { m_vecObjs.resize(iSize); }
 	void SetObjectColor(std::size_t iObjIdx, const std::vector<t_real_glob>& vecCol);
 	void SetObjectLabel(std::size_t iObjIdx, const std::string& strLab);
 	void SetObjectUseLOD(std::size_t iObjIdx, bool bLOD);
-	void clear();
 
 	void SetLabels(const char* pcLabX, const char* pcLabY, const char* pcLabZ);
+	void SetDrawMinMax(bool b) { m_bDrawMinMax = b; }
 
 	template<class t_vec>
 	void SetMinMax(const t_vec& vecMin, const t_vec& vecMax, const t_vec* pOffs=0)
@@ -156,7 +186,7 @@ public:
 		m_dZMinMaxOffs =  pOffs ? (*pOffs)[2] : 0.;
 	}
 
-	template<class t_vec=ublas::vector<t_real_gl>>
+	template<class t_vec=ublas::vector<t_real_glob>>
 	void SetMinMax(const t_vec& vec, const t_vec* pOffs=0)
 	{
 		m_dXMin = -vec[0]; m_dXMax = vec[0];

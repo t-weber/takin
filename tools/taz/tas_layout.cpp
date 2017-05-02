@@ -690,6 +690,33 @@ TasLayoutView::TasLayoutView(QWidget* pParent) : QGraphicsView(pParent)
 TasLayoutView::~TasLayoutView()
 {}
 
+
+void TasLayoutView::DoZoom(t_real_glob dDelta)
+{
+	const t_real dScale = std::pow(2., dDelta);
+	this->scale(dScale, dScale);
+
+	m_dTotalScale *= dScale;
+	emit scaleChanged(m_dTotalScale);
+}
+
+
+void TasLayoutView::keyPressEvent(QKeyEvent *pEvt)
+{
+	if(pEvt->key() == Qt::Key_Plus)
+		DoZoom(0.02);
+	else if(pEvt->key() == Qt::Key_Minus)
+		DoZoom(-0.02);
+
+	QGraphicsView::keyPressEvent(pEvt);
+}
+
+void TasLayoutView::keyReleaseEvent(QKeyEvent *pEvt)
+{
+	QGraphicsView::keyReleaseEvent(pEvt);
+}
+
+
 void TasLayoutView::wheelEvent(QWheelEvent *pEvt)
 {
 #if QT_VER>=5
@@ -698,10 +725,7 @@ void TasLayoutView::wheelEvent(QWheelEvent *pEvt)
 	const t_real dDelta = pEvt->delta()/8. / 150.;
 #endif
 
-	const t_real dScale = std::pow(2., dDelta);
-	this->scale(dScale, dScale);
-	m_dTotalScale *= dScale;
-	emit scaleChanged(m_dTotalScale);
+	DoZoom(dDelta);
 }
 
 

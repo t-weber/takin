@@ -47,6 +47,7 @@ cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtOpenGL4.dll		${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtSvg4.dll			${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtXml4.dll			${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/qwt.dll			${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfreetype-6.dll	${INSTDIR}/
 
 
 

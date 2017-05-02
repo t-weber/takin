@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
-    <height>476</height>
+    <width>483</width>
+    <height>464</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -298,7 +298,27 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="5" column="0" colspan="2">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QLabel" name="label_42">
+         <property name="text">
+          <string>&lt;b&gt;Note&lt;/b&gt;: Some changes require restarting Takin.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
           <string>Reciprocal Space</string>
@@ -333,7 +353,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="2" column="0" colspan="2">
            <widget class="QComboBox" name="comboSFact">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -359,10 +379,24 @@
             </item>
            </widget>
           </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QComboBox" name="comboBZ">
+            <item>
+             <property name="text">
+              <string>Calc. 3D Brillouin Zones</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Approx. 2D Brillouin Zones</string>
+             </property>
+            </item>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
           <string>GUI</string>
@@ -394,20 +428,7 @@
          </layout>
         </widget>
        </item>
-       <item row="5" column="0" colspan="2">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QGroupBox" name="groupBox_7">
          <property name="title">
           <string>Network</string>
@@ -455,13 +476,6 @@
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item row="6" column="0" colspan="2">
-        <widget class="QLabel" name="label_42">
-         <property name="text">
-          <string>&lt;b&gt;Note&lt;/b&gt;: Some changes require restarting Takin.</string>
-         </property>
         </widget>
        </item>
       </layout>
@@ -1234,10 +1248,11 @@
   <tabstop>spinPrecGen</tabstop>
   <tabstop>spinPrecGfx</tabstop>
   <tabstop>spinPtsGfx</tabstop>
+  <tabstop>spinBragg</tabstop>
+  <tabstop>comboBZ</tabstop>
+  <tabstop>comboSFact</tabstop>
   <tabstop>checkNativeDlg</tabstop>
   <tabstop>checkPreview</tabstop>
-  <tabstop>spinBragg</tabstop>
-  <tabstop>comboSFact</tabstop>
   <tabstop>spinNetPoll</tabstop>
   <tabstop>editGenFont</tabstop>
   <tabstop>btnGenFont</tabstop>

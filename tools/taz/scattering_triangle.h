@@ -82,7 +82,6 @@ class RecipPeak : public QGraphicsItem
 	protected:
 		QColor m_color = Qt::red;
 		QString m_strLabel;
-		//const Brillouin2D<t_real_glob>* m_pBZ = 0;
 		t_real_glob m_dRadius = 3.;
 
 	protected:
@@ -97,7 +96,6 @@ class RecipPeak : public QGraphicsItem
 
 		void SetRadius(t_real_glob dRad) { m_dRadius = dRad; }
 		t_real_glob GetRadius() const { return m_dRadius; }
-		//void SetBZ(const Brillouin2D<t_real_glob>* pBZ) { this->m_pBZ = pBZ; }
 };
 
 class ScatteringTriangleScene;
@@ -129,9 +127,9 @@ class ScatteringTriangle : public QGraphicsItem
 
 		bool m_bShowBZ = 1;
 		tl::Brillouin2D<t_real_glob> m_bz;
-
-		//tl::Lattice<t_real_glob> m_recip_unrot;
-		//t_real_glob m_dAngleRot = 0.;
+		tl::Brillouin3D<t_real_glob> m_bz3;
+		std::vector<ublas::vector<t_real_glob>> m_vecBZ3VertsUnproj, m_vecBZ3Verts;
+		std::vector<ublas::vector<t_real_glob>> m_vecBZ3SymmPts;
 
 		bool m_bqVisible = 0;
 		bool m_bShowEwaldSphere = 1;
@@ -188,6 +186,10 @@ class ScatteringTriangle : public QGraphicsItem
 
 		const std::vector<t_powderline>& GetPowder() const { return m_vecPowderLines; }
 		const tl::Kd<t_real_glob>& GetKdLattice() const { return m_kdLattice; }
+
+		const tl::Brillouin3D<t_real_glob>& GetBZ3D() const { return m_bz3; }
+		const std::vector<ublas::vector<t_real_glob>>& GetBZ3DPlaneVerts() const { return m_vecBZ3VertsUnproj; }
+		const std::vector<ublas::vector<t_real_glob>>& GetBZ3DSymmVerts() const { return m_vecBZ3SymmPts; }
 
 	public:
 		std::vector<ScatteringTriangleNode*> GetNodes();
@@ -304,7 +306,11 @@ class ScatteringTriangleView : public QGraphicsView
 	Q_OBJECT
 	protected:
 		t_real_glob m_dTotalScale = 1.;
+
+		void DoZoom(t_real_glob delta);
 		virtual void wheelEvent(QWheelEvent* pEvt) override;
+		virtual void keyPressEvent(QKeyEvent *pEvt) override;
+		virtual void keyReleaseEvent(QKeyEvent *pEvt) override;
 
 	public:
 		ScatteringTriangleView(QWidget* pParent = 0);

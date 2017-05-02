@@ -420,14 +420,20 @@ TazDlg::TazDlg(QWidget* pParent)
 	pMenuProj->addActions(pGroupProj->actions());
 
 	m_pMenuViewRecip->addMenu(pMenuProj);
+	m_pMenuViewRecip->addSeparator();
 
 #if !defined NO_3D
-	QAction *pView3D = new QAction("3D View...", this);
+	QAction *pView3DBZ = new QAction("3D Brillouin Zone...", this);
+	//pView3DBZ->setIcon(QIcon::fromTheme("applications-graphics"));
+	m_pMenuViewRecip->addAction(pView3DBZ);
+
+	QAction *pView3D = new QAction("3D Bragg Peaks...", this);
 	//pView3D->setIcon(QIcon::fromTheme("applications-graphics"));
 	m_pMenuViewRecip->addAction(pView3D);
-#endif
 
 	m_pMenuViewRecip->addSeparator();
+#endif
+
 
 	QAction *pRecipExport = new QAction("Export Lattice Graphics...", this);
 	pRecipExport->setIcon(load_icon("res/icons/image-x-generic.svg"));
@@ -436,6 +442,10 @@ TazDlg::TazDlg(QWidget* pParent)
 	QAction *pProjExport = new QAction("Export Projection Graphics...", this);
 	pProjExport->setIcon(load_icon("res/icons/image-x-generic.svg"));
 	m_pMenuViewRecip->addAction(pProjExport);
+
+	QAction *pBZ3DExport = new QAction("Export 3D Brillouin Zone Model...", this);
+	pBZ3DExport->setIcon(load_icon("res/icons/image-x-generic.svg"));
+	m_pMenuViewRecip->addAction(pBZ3DExport);
 
 #ifdef USE_GIL
 	QAction *pBZExport = new QAction("Export Brillouin Zone Image...", this);
@@ -468,9 +478,10 @@ TazDlg::TazDlg(QWidget* pParent)
 	m_pMenuViewReal->addSeparator();
 
 #if !defined NO_3D
-	QAction *pView3DReal = new QAction("3D View...", this);
+	QAction *pView3DReal = new QAction("3D Unit Cell...", this);
 	//pView3DReal->setIcon(QIcon::fromTheme("applications-graphics"));
 	m_pMenuViewReal->addAction(pView3DReal);
+
 	m_pMenuViewReal->addSeparator();
 #endif
 
@@ -678,10 +689,12 @@ TazDlg::TazDlg(QWidget* pParent)
 #if !defined NO_3D
 	QObject::connect(pView3D, SIGNAL(triggered()), this, SLOT(Show3D()));
 	QObject::connect(pView3DReal, SIGNAL(triggered()), this, SLOT(Show3DReal()));
+	QObject::connect(pView3DBZ, SIGNAL(triggered()), this, SLOT(Show3DBZ()));
 	QObject::connect(pResoEllipses3D, SIGNAL(triggered()), this, SLOT(ShowResoEllipses3D()));
 #endif
 
 	QObject::connect(pRecipExport, SIGNAL(triggered()), this, SLOT(ExportRecip()));
+	QObject::connect(pBZ3DExport, SIGNAL(triggered()), this, SLOT(ExportBZ3DModel()));
 	QObject::connect(pProjExport, SIGNAL(triggered()), this, SLOT(ExportProj()));
 	QObject::connect(pRealExport, SIGNAL(triggered()), this, SLOT(ExportReal()));
 	QObject::connect(pTofExport, SIGNAL(triggered()), this, SLOT(ExportTof()));
@@ -870,6 +883,7 @@ void TazDlg::DeleteDialogs()
 #if !defined NO_3D
 	if(m_pRecip3d) { delete m_pRecip3d; m_pRecip3d = 0; }
 	if(m_pReal3d) { delete m_pReal3d; m_pReal3d = 0; }
+	if(m_pBZ3d) { delete m_pBZ3d; m_pBZ3d = 0; }
 	if(m_pEllipseDlg3D) { delete m_pEllipseDlg3D; m_pEllipseDlg3D = 0; }
 #endif
 
@@ -1221,9 +1235,22 @@ void TazDlg::Show3DReal()
 
 	CalcPeaks();
 }
+
+void TazDlg::Show3DBZ()
+{
+	if(!m_pBZ3d)
+		m_pBZ3d = new BZ3DDlg(this, &m_settings);
+
+	if(!m_pBZ3d->isVisible())
+		m_pBZ3d->show();
+	m_pBZ3d->activateWindow();
+
+	CalcPeaks();
+}
 #else
 void TazDlg::Show3D() {}
 void TazDlg::Show3DReal() {}
+void TazDlg::Show3DBZ() {}
 #endif
 
 void TazDlg::EnableSmallq(bool bEnable)

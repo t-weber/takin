@@ -24,6 +24,7 @@ bool g_bHasMagFormfacts = 0;
 bool g_bHasScatlens = 0;
 bool g_bHasSpaceGroups = 0;
 bool g_bShowFsq = 1;
+bool g_b3dBZ = 1;
 
 unsigned int GFX_NUM_POINTS = 512;
 

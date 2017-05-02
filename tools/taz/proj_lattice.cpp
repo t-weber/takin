@@ -380,6 +380,7 @@ ProjLatticeView::ProjLatticeView(QWidget* pParent)
 	setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing |
 		QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing);
 	setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+
 	setDragMode(QGraphicsView::ScrollHandDrag);
 	setMouseTracking(1);
 	setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
@@ -387,6 +388,32 @@ ProjLatticeView::ProjLatticeView(QWidget* pParent)
 
 ProjLatticeView::~ProjLatticeView()
 {}
+
+
+void ProjLatticeView::DoZoom(t_real_glob dDelta)
+{
+	t_real dScale = std::pow(2., dDelta);
+	this->scale(dScale, dScale);
+
+	m_dTotalScale *= dScale;
+	emit scaleChanged(m_dTotalScale);
+}
+
+
+void ProjLatticeView::keyPressEvent(QKeyEvent *pEvt)
+{
+	if(pEvt->key() == Qt::Key_Plus)
+		DoZoom(0.02);
+	else if(pEvt->key() == Qt::Key_Minus)
+		DoZoom(-0.02);
+
+	QGraphicsView::keyPressEvent(pEvt);
+}
+
+void ProjLatticeView::keyReleaseEvent(QKeyEvent *pEvt)
+{
+	QGraphicsView::keyReleaseEvent(pEvt);
+}
 
 void ProjLatticeView::wheelEvent(QWheelEvent *pEvt)
 {
@@ -396,10 +423,7 @@ void ProjLatticeView::wheelEvent(QWheelEvent *pEvt)
 	const t_real dDelta = pEvt->delta()/8. / 150.;
 #endif
 
-	t_real dScale = std::pow(2., dDelta);
-	this->scale(dScale, dScale);
-	m_dTotalScale *= dScale;
-	emit scaleChanged(m_dTotalScale);
+	DoZoom(dDelta);
 }
 
 

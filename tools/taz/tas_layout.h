@@ -165,7 +165,11 @@ class TasLayoutView : public QGraphicsView
 	Q_OBJECT
 	protected:
 		t_real_glob m_dTotalScale = 1.;
+
+		void DoZoom(t_real_glob delta);
 		virtual void wheelEvent(QWheelEvent* pEvt) override;
+		virtual void keyPressEvent(QKeyEvent *pEvt) override;
+		virtual void keyReleaseEvent(QKeyEvent *pEvt) override;
 
 	public:
 		TasLayoutView(QWidget* pParent = 0);

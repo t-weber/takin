@@ -18,8 +18,7 @@ else
 		--menu "Setup Makelists" 12 50 4 \
 			1 "Native, with dynamic tlibs" \
 			2 "Native, with static tlibs" \
-			3 "Mingw cross compile, with static tlibs" \
-			4 "Minimal cli client, with static tlibs" \
+			3 "Minimal cli client, with static tlibs" \
 		2>&1)
 	if [ ! $? -eq 0 ]
 	then
@@ -37,10 +36,6 @@ else
 			ln -sf CMakeLists-static.txt CMakeLists.txt
 			;;
 		3 )
-			rm -f CMakeLists.txt
-			ln -sf CMakeLists-static-mingw.txt CMakeLists.txt
-			;;
-		4 )
 			rm -f CMakeLists.txt
 			ln -sf CMakeLists-static-cli.txt CMakeLists.txt
 			;;

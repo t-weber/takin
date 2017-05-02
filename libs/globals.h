@@ -29,6 +29,7 @@ extern bool g_bHasMagFormfacts;
 extern bool g_bHasScatlens;
 extern bool g_bHasSpaceGroups;
 extern bool g_bShowFsq;
+extern bool g_b3dBZ;
 
 extern void add_resource_path(const std::string& strPath, bool bToBack=1);
 extern std::string find_resource(const std::string& strFile, bool bLogErr=1);

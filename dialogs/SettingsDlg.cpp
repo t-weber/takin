@@ -134,6 +134,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 	m_vecCombos =
 	{
 		t_tupCombo("main/sfact_sq", 0, comboSFact),
+		t_tupCombo("main/calc_3d_bz", 0, comboBZ),
 	};
 
 	spinPrecGen->setMaximum(std::numeric_limits<t_real>::max_digits10);
@@ -302,6 +303,8 @@ void SettingsDlg::SetGlobals() const
 
 
 	g_bShowFsq = (comboSFact->currentIndex() == 1);
+	g_b3dBZ = (comboBZ->currentIndex() == 0);
+
 
 	// fonts
 	QString strGfxFont = editGfxFont->text();

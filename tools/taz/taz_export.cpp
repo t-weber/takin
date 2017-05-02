@@ -9,6 +9,8 @@
 #include "tlibs/phys/atoms.h"
 #include "tlibs/file/x3d.h"
 #include "tlibs/log/log.h"
+#include "tlibs/time/chrono.h"
+#include "libs/version.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -104,6 +106,119 @@ void TazDlg::ExportSceneSVG(QGraphicsScene& scene)
 	std::string strDir = tl::get_dir(strFile.toStdString());
 	m_settings.setValue("main/last_dir_export", QString(strDir.c_str()));
 }
+
+
+/**
+ * export the 3d BZ as 3D model
+ */
+void TazDlg::ExportBZ3DModel()
+{
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(!m_settings.value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	QString strDirLast = m_settings.value("main/last_dir_export", ".").toString();
+	QString strFile = QFileDialog::getSaveFileName(this,
+		"Export X3D", strDirLast, "X3D files (*.x3d *.X3D)", nullptr, fileopt);
+	if(strFile == "")
+		return;
+
+
+	ScatteringTriangle *pTri = m_sceneRecip.GetTriangle();
+	if(!pTri) return;
+
+	const auto& bz = pTri->GetBZ3D();
+	if(!bz.IsValid())
+	{
+		QMessageBox::critical(this, "Error", "3D Brillouin zone calculation is disabled or results are invalid.");
+		return;
+	}
+
+
+	using t_vec = ublas::vector<t_real>;
+	tl::X3d x3d;
+
+	/*// vertices
+	for(const t_vec& vec : bz.GetVertices())
+	{
+		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		pTrafo->SetTrans(vec - bz.GetCentralReflex());
+
+		tl::X3dSphere *pSphere = new tl::X3dSphere(0.025);
+		pSphere->SetColor(tl::make_vec({1., 0., 0.}));
+		pTrafo->AddChild(pSphere);
+
+		x3d.GetScene().AddChild(pTrafo);
+	}*/
+
+	// symmetry points
+	for(const t_vec& vec : pTri->GetBZ3DSymmVerts())
+	{
+		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		pTrafo->SetTrans(vec - bz.GetCentralReflex());
+
+		tl::X3dSphere *pSphere = new tl::X3dSphere(0.025);
+		pSphere->SetColor(tl::make_vec({1., 0., 0.}));
+		pTrafo->AddChild(pSphere);
+
+		x3d.GetScene().AddChild(pTrafo);
+	}
+
+	// polygons
+	for(const std::vector<t_vec>& vecPoly : bz.GetPolys())
+	{
+		tl::X3dPolygon *pPoly = new tl::X3dPolygon();
+		pPoly->SetColor(tl::make_vec({0., 0., 1.}));
+
+		for(const t_vec& vec : vecPoly)
+			pPoly->AddVertex(vec - bz.GetCentralReflex());
+
+		x3d.GetScene().AddChild(pPoly);
+	}
+
+
+	/*// test plane cut
+	tl::Plane<t_real> plane(bz.GetCentralReflex(), tl::make_vec({1., -1., 0.}));
+	auto tupLinesandVerts = bz.GetIntersection(plane);
+
+	for(const t_vec& vec : std::get<1>(tupLinesandVerts))
+	{
+		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		pTrafo->SetTrans(vec);
+
+		tl::X3dSphere *pSphere = new tl::X3dSphere(0.05);
+		pSphere->SetColor(tl::make_vec({1., 1., 0.}));
+		pTrafo->AddChild(pSphere);
+
+		x3d.GetScene().AddChild(pTrafo);
+	}*/
+
+
+	// Comment
+	std::ostringstream ostrComment;
+	ostrComment << "Brillouin zone contains: ";
+	ostrComment << bz.GetPolys().size() << " faces, ";
+	ostrComment << bz.GetVertices().size() << " vertices, ";
+	ostrComment << pTri->GetBZ3DSymmVerts().size() << " symmetry points.\n";
+
+	std::string strTakin = "\nCreated with Takin " + std::string(TAKIN_VER) + ".\n";
+	strTakin += "Timestamp: " + tl::epoch_to_str<t_real>(tl::epoch<t_real>()) + "\n\n";
+	x3d.SetComment(strTakin + ostrComment.str());
+
+	bool bOk = x3d.Save(strFile.toStdString().c_str());
+
+
+	if(!bOk)
+		QMessageBox::critical(this, "Error", "Could not export 3D model.");
+
+	if(bOk)
+	{
+		std::string strDir = tl::get_dir(strFile.toStdString());
+		m_settings.setValue("main/last_dir_export", QString(strDir.c_str()));
+	}
+}
+
+
 
 #ifdef USE_GIL
 void TazDlg::ExportBZImage()
@@ -242,7 +357,6 @@ void TazDlg::ExportUCModel()
 
 
 	tl::X3d x3d;
-	std::ostringstream ostrComment;
 
 	std::vector<t_vec> vecAllAtoms, vecAllAtomsFrac;
 	std::vector<std::size_t> vecAllAtomTypes, vecIdxSC;
@@ -308,6 +422,9 @@ void TazDlg::ExportUCModel()
 	}
 
 	// comment
+	std::ostringstream ostrComment;
+	ostrComment << "Unit cell.\n";
+
 	for(std::size_t iAtom=0; iAtom<vecAtoms.size(); ++iAtom)
 	{
 		ostrComment << "Atom " << (iAtom+1) << ": " << vecAtomNames[iAtom]
@@ -327,7 +444,9 @@ void TazDlg::ExportUCModel()
 
 
 	tl::log_info(ostrComment.str());
-	x3d.SetComment(std::string("\nCreated with Takin.\n\n") + ostrComment.str());
+	std::string strTakin = "\nCreated with Takin " + std::string(TAKIN_VER) + ".\n";
+	strTakin += "Timestamp: " + tl::epoch_to_str<t_real>(tl::epoch<t_real>()) + "\n\n";
+	x3d.SetComment(strTakin + ostrComment.str());
 
 	bool bOk = x3d.Save(strFile.toStdString().c_str());
 

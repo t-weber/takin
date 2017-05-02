@@ -57,7 +57,7 @@ Real3DDlg::Real3DDlg(QWidget* pParent, QSettings *pSettings)
 			m_pStatus->clearMessage();
 	});
 
-	m_pPlot->SetLabels("a", "b", "c");
+	m_pPlot->SetLabels("a (A)", "b (A)", "c (A)");
 	m_pPlot->SetEnabled(1);
 }
 
@@ -110,12 +110,15 @@ void Real3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& latticecommon)
 		latticecommon.lattice.GetPos(0,0,-d), latticecommon.lattice.GetPos(0,0,d),
 	};
 
+	// minimum and maximum coordinates
 	for(const t_vec& vecPeak : vecPeaks)
+	{
 		for(unsigned int i=0; i<3; ++i)
 		{
 			vecMin[i] = std::min(vecPeak[i], vecMin[i]);
 			vecMax[i] = std::max(vecPeak[i], vecMax[i]);
 		}
+	}
 
 	for(std::size_t iAtom=0; iAtom<latticecommon.vecAllAtoms.size(); ++iAtom)
 	{
@@ -126,12 +129,6 @@ void Real3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& latticecommon)
 
 		m_pPlot->PlotSphere(vecThisAtom, 0.1, iPeakIdx);
 		m_pPlot->SetObjectColor(iPeakIdx, vecColor[iCurAtomType % vecColor.size()]);
-
-		/*for(unsigned int i=0; i<3; ++i)
-		{
-			vecMin[i] = std::min(vecThisAtom[i], vecMin[i]);
-			vecMax[i] = std::max(vecThisAtom[i], vecMax[i]);
-		}*/
 
 		std::ostringstream ostrTip;
 		ostrTip.precision(g_iPrecGfx);
@@ -153,6 +150,21 @@ void Real3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& latticecommon)
 	m_pPlot->SetMinMax(vecMin, vecMax);
 	m_pPlot->SetEnabled(1);
 }
+
+
+// ----------------------------------------------------------------------------
+
+
+void Real3DDlg::keyPressEvent(QKeyEvent* pEvt)
+{
+	if(!m_pPlot) return;
+
+	if(pEvt->key() == Qt::Key_Space)
+		m_pPlot->TogglePerspective();
+
+	QDialog::keyPressEvent(pEvt);
+}
+
 
 void Real3DDlg::closeEvent(QCloseEvent* pEvt)
 {

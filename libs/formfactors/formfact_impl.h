@@ -11,6 +11,7 @@
 #include "formfact.h"
 #include "libs/globals.h"
 #include "tlibs/math/math.h"
+#include "tlibs/math/stat.h"
 #include "tlibs/log/log.h"
 #include "tlibs/file/prop.h"
 #include "tlibs/string/string.h"

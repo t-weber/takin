@@ -215,33 +215,6 @@ void TazDlg::CalcPeaks()
 		//----------------------------------------------------------------------
 
 
-		/*
-		// rotated lattice
-		t_real dPhi = spinRotPhi->value() / 180. * M_PI;
-		t_real dTheta = spinRotTheta->value() / 180. * M_PI;
-		t_real dPsi = spinRotPsi->value() / 180. * M_PI;
-		//lattice.RotateEuler(dPhi, dTheta, dPsi);
-
-		ublas::vector<t_real> dir0 = plane.GetDir0();
-		ublas::vector<t_real> dirup = plane.GetNorm();
-		ublas::vector<t_real> dir1 = tl::cross_3(dirup, dir0);
-
-		t_real dDir0Len = ublas::norm_2(dir0);
-		t_real dDir1Len = ublas::norm_2(dir1);
-		t_real dDirUpLen = ublas::norm_2(dirup);
-
-		if(tl::float_equal(dDir0Len, 0.) || tl::float_equal(dDir1Len, 0.) || tl::float_equal(dDirUpLen, 0.)
-			|| tl::is_nan_or_inf<t_real>(dDir0Len) || tl::is_nan_or_inf<t_real>(dDir1Len) || tl::is_nan_or_inf<t_real>(dDirUpLen))
-		{
-			tl::log_err("Invalid scattering plane.");
-			return;
-		}
-
-		dir0 /= dDir0Len;
-		dir1 /= dDir1Len;
-		//dirup /= dDirUpLen;
-		*/
-
 		if(m_pGotoDlg)
 		{
 			m_pGotoDlg->SetLattice(lattice);
@@ -251,8 +224,6 @@ void TazDlg::CalcPeaks()
 
 		emitSampleParams();
 
-		//lattice.RotateEulerRecip(dir0, dir1, dirup, dPhi, dTheta, dPsi);
-		//tl::Lattice<t_real> recip = lattice.GetRecip();
 		const tl::Lattice<t_real>& recip = recip_unrot;		// anyway not rotated anymore
 
 
@@ -310,6 +281,11 @@ void TazDlg::CalcPeaks()
 				m_pRecip3d->CalcPeaks(m_latticecommon);
 			if(m_pReal3d)
 				m_pReal3d->CalcPeaks(m_latticecommon);
+			if(m_pBZ3d)
+				m_pBZ3d->RenderBZ(m_sceneRecip.GetTriangle()->GetBZ3D(),
+					m_latticecommon,
+					&m_sceneRecip.GetTriangle()->GetBZ3DPlaneVerts(),
+					&m_sceneRecip.GetTriangle()->GetBZ3DSymmVerts());
 #endif
 		}
 		else
@@ -551,7 +527,7 @@ void TazDlg::RepopulateSpaceGroups()
 		}
 
 		vecSGs.push_back(std::make_tuple(pair.second.GetNr(),
-			"(" + strSGNr + ") " + strName, 
+			"(" + strSGNr + ") " + strName,
 			(void*)&pair.second));
 	}
 

@@ -9,8 +9,8 @@
 # system-specific build flags
 
 # which compiler?
-CC = gcc
-#CC = clang
+#CC = gcc
+CC = clang
 
 # debug or unstable version?
 DO_DEBUG = 0
@@ -98,7 +98,7 @@ ifeq ($(IS_UNSTABLE), 1)
 endif
 
 ifeq ($(USE_3D), 1)
-	DEFINES += -DUSE_3D
+	DEFINES += -DUSE_3D -DUSE_MULTI_TEXTURES
 else
 	DEFINES += -DNO_3D
 endif
@@ -461,7 +461,7 @@ OBJ_SFACT = obj/sfact.o obj/spacegroup_clp.o obj/crystalsys_noqt.o obj/globals.o
 
 
 ifeq ($(USE_3D), 1)
-	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/real3d.o obj/EllipseDlg3D.o
+	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/real3d.o obj/bz3d.o obj/EllipseDlg3D.o
 endif
 
 ifeq ($(USE_NET), 1)
@@ -569,6 +569,8 @@ obj/taz_export.o: tools/taz/taz_export.cpp tools/taz/taz.h
 obj/recip3d.o: tools/taz/recip3d.cpp tools/taz/recip3d.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/real3d.o: tools/taz/real3d.cpp tools/taz/real3d.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/bz3d.o: tools/taz/bz3d.cpp tools/taz/bz3d.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/scattering_triangle.o: tools/taz/scattering_triangle.cpp tools/taz/scattering_triangle.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
@@ -772,9 +774,11 @@ clean:
 	rm -f obj/*.o
 	rm -f ui/*.h
 	rm -f *.moc
+	rm -f libs/*.moc
 	rm -f tools/taz/*.moc
 	rm -f tools/res/*.moc
 	rm -f tools/scanviewer/*.moc
+	rm -f tools/scanpos/*.moc
 	rm -f tools/monteconvo/*.moc
 	rm -f tools/sglist/*.moc
 	rm -f dialogs/*.moc
