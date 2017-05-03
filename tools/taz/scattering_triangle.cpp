@@ -840,6 +840,8 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	tl::Powder<int, t_real_glob> powder;
 	powder.SetRecipLattice(&m_recip);
 
+	m_bz.SetEpsilon(g_dEps);
+	m_bz3.SetEpsilon(g_dEps);
 
 	// -------------------------------------------------------------------------
 	// central peak for BZ calculation

@@ -95,13 +95,15 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 
 
 	const bool bShowVerts = 0;
+	const bool bShowSymmPts = 1;
+
 	// all objects: polys + edges
 	std::size_t iNumObjs =  2*bz.GetPolys().size();
 	if(bShowVerts)
 		iNumObjs += bz.GetVertices().size();
 	if(pScatPlaneVerts)
 		++iNumObjs;
-	if(pvecSymmPts)
+	if(bShowSymmPts && pvecSymmPts)
 		iNumObjs += pvecSymmPts->size();
 	m_pPlot->SetObjectCount(iNumObjs);
 
@@ -171,7 +173,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 	}
 
 	// render points of high symmetry if available
-	if(pvecSymmPts)
+	if(bShowSymmPts && pvecSymmPts)
 	{
 		for(const t_vec& vec : *pvecSymmPts)
 		{
