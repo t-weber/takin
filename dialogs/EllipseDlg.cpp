@@ -209,7 +209,7 @@ void EllipseDlg::Calc()
 						}
 						else
 						{
-							tl::log_err("Error in res.conf: Wrong size of parameters for ",
+							tl::log_err("Error in resolution config: Wrong size of parameters for ",
 								strProj,  ".");
 						}
 					}
@@ -304,8 +304,8 @@ void EllipseDlg::Calc()
 
 			//const std::string& strLabX = m_elliProj[iEll].x_lab;
 			//const std::string& strLabY = m_elliProj[iEll].y_lab;
-			const std::string& strLabX = ellipse_labels(iParams[0][iEll][0], coord);
-			const std::string& strLabY = ellipse_labels(iParams[0][iEll][1], coord);
+			const std::string& strLabX = ellipse_labels(iParams[0][iEll][0], coord, m_bCenterOn0);
+			const std::string& strLabY = ellipse_labels(iParams[0][iEll][1], coord, m_bCenterOn0);
 			m_vecplotwrap[iEll]->GetPlot()->setAxisTitle(QwtPlot::xBottom, strLabX.c_str());
 			m_vecplotwrap[iEll]->GetPlot()->setAxisTitle(QwtPlot::yLeft, strLabY.c_str());
 

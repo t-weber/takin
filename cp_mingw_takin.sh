@@ -36,10 +36,11 @@ cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgcc_s_seh-1.dll		${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libbz2-1.dll			${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/zlib1.dll				${INSTDIR}/
 
-cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_regex-mt.dll		${INSTDIR}/
-cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_system-mt.dll		${INSTDIR}/
-cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_iostreams-mt.dll	${INSTDIR}/
-cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_filesystem-mt.dll	${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_regex-mt.dll				${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_system-mt.dll				${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_iostreams-mt.dll			${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_filesystem-mt.dll			${INSTDIR}/
+cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libboost_program_options-mt.dll	${INSTDIR}/
 
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtCore4.dll		${INSTDIR}/
 cp -v /usr/x86_64-w64-mingw32/sys-root/mingw/bin/QtGui4.dll			${INSTDIR}/

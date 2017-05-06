@@ -232,21 +232,27 @@ static void elli_gauss_int(tl::QuadEllipsoid<T>& quad, std::size_t iIdx)
 }
 
 
+static const std::string g_strLabelsCentre[] = {"Q_{para}-<Q> (1/A)", "Q_{ortho}-<Q> (1/A)", "Q_z-<Q> (1/A)", "E (meV)"};
 static const std::string g_strLabels[] = {"Q_{para} (1/A)", "Q_{ortho} (1/A)", "Q_z (1/A)", "E (meV)"};
+static const std::string g_strLabelsHKLCentre[] = {"h-<h> (rlu)", "k-<k> (rlu)", "l-<l> (rlu)", "E (meV)"};
 static const std::string g_strLabelsHKL[] = {"h (rlu)", "k (rlu)", "l (rlu)", "E (meV)"};
 static const std::string g_strLabelsHKLOrient[] = {"Reflex 1 (rlu)", "Reflex 2 (rlu)", "Up (rlu)", "E (meV)"};
 
-static inline const std::string& ellipse_labels(int iCoord, EllipseCoordSys sys)
+static inline const std::string& ellipse_labels(int iCoord, EllipseCoordSys sys, bool bCentre=0)
 {
 	switch(sys)
 	{
 		case EllipseCoordSys::RLU:
+			if(bCentre)
+				return g_strLabelsHKLCentre[iCoord];
 			return g_strLabelsHKL[iCoord];
 		case EllipseCoordSys::RLU_ORIENT:
 			return g_strLabelsHKLOrient[iCoord];
 		case EllipseCoordSys::AUTO:
 		case EllipseCoordSys::Q_AVG:
 		default:
+			if(bCentre)
+				return g_strLabelsCentre[iCoord];
 			return g_strLabels[iCoord];
 	}
 }
@@ -511,7 +517,6 @@ Ellipsoid4d<t_real> calc_res_ellipsoid4d(
 
 	ell.vol = quad.GetVolume();
 
-	//std::cout << ell << std::endl;
 	return ell;
 }
 

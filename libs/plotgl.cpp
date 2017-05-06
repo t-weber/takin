@@ -680,14 +680,14 @@ void PlotGl::PlotLines(const std::vector<ublas::vector<t_real>>& vecVertices,
 
 void PlotGl::mousePressEvent(QMouseEvent *event)
 {
-	if(event->buttons() & Qt::RightButton)
+	if(event->buttons() & Qt::LeftButton)
 	{
 		m_bMouseRotateActive = 1;
 		m_dMouseBegin[0] = event->POS_F().x();
 		m_dMouseBegin[1] = event->POS_F().y();
 	}
 
-	if(event->buttons() & Qt::LeftButton)
+	if(event->buttons() & Qt::RightButton)
 	{
 		m_bMouseScaleActive = 1;
 		m_dMouseScaleBegin = event->POS_F().y();
@@ -696,10 +696,10 @@ void PlotGl::mousePressEvent(QMouseEvent *event)
 
 void PlotGl::mouseReleaseEvent(QMouseEvent *event)
 {
-	if((event->buttons() & Qt::RightButton) == 0)
+	if((event->buttons() & Qt::LeftButton) == 0)
 		m_bMouseRotateActive = 0;
 
-	if((event->buttons() & Qt::LeftButton) == 0)
+	if((event->buttons() & Qt::RightButton) == 0)
 		m_bMouseScaleActive = 0;
 }
 
@@ -754,6 +754,21 @@ void PlotGl::mouseMoveEvent(QMouseEvent *pEvt)
 	}
 	if(!bHasSelected)
 		m_sigHover(nullptr);
+}
+
+
+void PlotGl::wheelEvent(QWheelEvent* pEvt)
+{
+#if QT_VER>=5
+	const t_real dDelta = pEvt->angleDelta().y()/8. / 150.;
+#else
+	const t_real dDelta = pEvt->delta()/8. / 150.;
+#endif
+
+	m_dMouseScale *= std::pow(2., dDelta);;
+	updateViewMatrix();
+
+	QWidget::wheelEvent(pEvt);
 }
 
 

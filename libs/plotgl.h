@@ -121,6 +121,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent*) override;
 	virtual void mouseReleaseEvent(QMouseEvent*) override;
 	virtual void mouseMoveEvent(QMouseEvent*) override;
+	virtual void wheelEvent(QWheelEvent*) override;
 
 	void updateViewMatrix();
 	void mouseSelectObj(t_real_glob dX, t_real_glob dY);
