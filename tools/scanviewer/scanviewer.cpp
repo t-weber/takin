@@ -880,24 +880,16 @@ bool ScanViewerDlg::Fit(t_func&& func,
 	bool bOk = 0;
 	try
 	{
-		std::vector<t_real_min> _vecVals, _vecErrs;
+		std::vector<t_real_min>
+			_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals),
+			_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
 
 		if(checkSwarm->isChecked())
 		{
-			_vecVals = vecVals;
-			_vecErrs = vecErrs;
-
-			bool bSwarmOk = tl::swarmfit<t_real, iFuncArgs>
-				(func, m_vecX, m_vecY, m_vecYErr, vecParamNames, _vecVals, _vecErrs);
-			if(bSwarmOk)
-			{
-				vecVals = _vecVals;
-				vecErrs = _vecErrs;
-			}
+			bOk = tl::swarmfit<t_real, iFuncArgs>
+				(func, m_vecX, m_vecY, m_vecYErr, vecParamNames, vecVals, vecErrs);
 		}
 
-		_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals);
-		_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
 		bOk = tl::fit<iFuncArgs>(func,
 			tl::container_cast<t_real_min, t_real, std::vector>()(m_vecX),
 			tl::container_cast<t_real_min, t_real, std::vector>()(m_vecY),

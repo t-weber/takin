@@ -211,8 +211,8 @@ void PowderDlg::CalcPeaks()
 		tl::Lattice<t_real> lattice(dA, dB, dC, dAlpha, dBeta, dGamma);
 		tl::Lattice<t_real> recip = lattice.GetRecip();
 
-		const t_mat matA = lattice.GetMetric();
-		//const t_mat matB = recip.GetMetric();
+		const t_mat matA = lattice.GetBaseMatrixCov();
+		//const t_mat matB = recip.GetBaseMatrixCov();
 
 		const SpaceGroup<t_real>* pSpaceGroup = GetCurSpaceGroup();
 

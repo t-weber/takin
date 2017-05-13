@@ -8,9 +8,11 @@
 #include "ConvoDlg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
+#include "tlibs/file/file.h"
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
+#include "libs/recent.h"
 #include "tools/convofit/convofit_import.h"
 
 #include <iostream>
@@ -27,10 +29,14 @@ using t_real = t_real_reso;
 // -----------------------------------------------------------------------------
 // file operations
 
+void ConvoDlg::New()
+{
+	m_strLastFile = "";
+	setWindowTitle(s_strTitle.c_str());
+}
+
 void ConvoDlg::Load()
 {
-	const std::string strXmlRoot("taz/");
-
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
 	if(m_pSett && !m_pSett->value("main/native_dialogs", 1).toBool())
 		fileopt = QFileDialog::DontUseNativeDialog;
@@ -41,11 +47,20 @@ void ConvoDlg::Load()
 	QString _strFile = QFileDialog::getOpenFileName(this,
 		"Open Convolution Configuration...", strDirLast, "Takin files (*.taz *.TAZ)",
 		nullptr, fileopt);
+
+	Load(_strFile);
+}
+
+void ConvoDlg::Load(const QString& _strFile)
+{
+	const std::string strXmlRoot("taz/");
+
 	if(_strFile == "")
 		return;
 
 	std::string strFile = _strFile.toStdString();
-	std::string strDir = tl::get_dir(strFile);
+	if(!tl::file_exists(strFile.c_str()))
+		return;
 
 	tl::Prop<std::string> xml;
 	if(!xml.Load(strFile, tl::PropType::XML))
@@ -56,12 +71,23 @@ void ConvoDlg::Load()
 
 	Load(xml, strXmlRoot);
 
+	m_strLastFile = strFile;
+	std::string strDir = tl::get_dir(m_strLastFile);
+	setWindowTitle((s_strTitle + " - ").c_str() + _strFile);
+
 	if(m_pSett)
+	{
 		m_pSett->setValue("monteconvo/last_dir", QString(strDir.c_str()));
+
+		RecentFiles recent(m_pSett, "monteconvo/recent");
+		recent.AddFile(m_strLastFile.c_str());
+		recent.SaveList();
+		recent.FillMenu(m_pMenuRecent, m_pMapperRecent);
+	}
 }
 
 
-void ConvoDlg::Save()
+void ConvoDlg::SaveAs()
 {
 	const std::string strXmlRoot("taz/");
 
@@ -79,22 +105,45 @@ void ConvoDlg::Save()
 	if(_strFile == "")
 		return;
 
-	std::string strFile = _strFile.toStdString();
-	std::string strDir = tl::get_dir(strFile);
+	m_strLastFile = _strFile.toStdString();
+	std::string strDir = tl::get_dir(m_strLastFile);
+
+	Save();
+
+	if(m_pSett)
+	{
+		m_pSett->setValue("monteconvo/last_dir", QString(strDir.c_str()));
+
+		RecentFiles recent(m_pSett, "monteconvo/recent");
+		recent.AddFile(m_strLastFile.c_str());
+		recent.SaveList();
+		recent.FillMenu(m_pMenuRecent, m_pMapperRecent);
+	}
+}
+
+
+void ConvoDlg::Save()
+{
+	const std::string strXmlRoot("taz/");
+
+	if(m_strLastFile == "")
+	{
+		SaveAs();
+		return;
+	}
+
+	setWindowTitle((s_strTitle + " - " + m_strLastFile).c_str());
 
 	std::map<std::string, std::string> mapConf;
 	Save(mapConf, strXmlRoot);
 
 	tl::Prop<std::string> xml;
 	xml.Add(mapConf);
-	if(!xml.Save(strFile, tl::PropType::XML))
+	if(!xml.Save(m_strLastFile, tl::PropType::XML))
 	{
 		QMessageBox::critical(this, "Error", "Could not save convolution file.");
 		return;
 	}
-
-	if(m_pSett)
-		m_pSett->setValue("monteconvo/last_dir", QString(strDir.c_str()));
 }
 
 

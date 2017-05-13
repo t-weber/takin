@@ -16,14 +16,22 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}" ".")
 set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
+
+set(BOOST_COMPS
+	iostreams system filesystem regex program_options)
+
+find_package(PythonInterp 2.7)
+find_package(PythonLibs 2.7)
+if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
+	list(APPEND BOOST_COMPS python)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS iostreams system filesystem regex python program_options REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Rt REQUIRED)
 find_package(Mp REQUIRED)
 find_package(tlibs REQUIRED)
 find_package(Qt4 REQUIRED)
-find_package(PythonInterp 2.7 REQUIRED)
-find_package(PythonLibs 2.7 REQUIRED)
 find_package(PNG REQUIRED)
 #find_package(JPEG REQUIRED)
 #find_package(TIFF REQUIRED)
@@ -42,9 +50,9 @@ message("Using qwt version ${QWT_MAJOR_VERSION}")
 message("Qt moc: ${QT_MOC_EXECUTABLE}\nQt uic: ${QT_UIC_EXECUTABLE}")
 
 add_definitions(-DNDEBUG)
-add_definitions(-DUSE_NET -DUSE_IOSTR -DUSE_BOOST_REX -DUSE_PY -DUSE_GIL)
+add_definitions(-DUSE_NET -DUSE_IOSTR -DUSE_BOOST_REX -DUSE_GIL)
 add_definitions(-DQT_VER=4 -DQWT_VER=${QWT_MAJOR_VERSION})
-add_definitions(-DNO_LAPACK -DNO_3D -DNO_CLP)
+add_definitions(-DNO_LAPACK -DNO_CLP)
 add_definitions(-DNO_JPEG -DNO_TIFF)
 add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions(${Boost_CXX_FLAGS})
@@ -53,11 +61,74 @@ add_definitions(${Boost_CXX_FLAGS})
 include_directories("${PROJECT_SOURCE_DIR}" ".")
 include_directories("${Boost_INCLUDE_DIRS}/..")
 include_directories("${tlibs_INCLUDE_DIRS}/..")
-include_directories("${PYTHON_INCLUDE_DIRS}")
 include_directories("${PNG_INCLUDE_DIRS}")
 #include_directories("${JPEG_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS}")
 include_directories("${QWT_INCLUDE_DIRS}")
-include_directories("${Minuit2_INCLUDE_DIRS}")
+
+
+# py scripting support
+if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
+	message("Enabling py scripting support.")
+
+	add_definitions(-DUSE_PY)
+	include_directories("${PYTHON_INCLUDE_DIRS}")
+
+	set(SRCS_PY tools/monteconvo/sqw_py.cpp)
+	set(LIBS_PY ${PYTHON_LIBRARIES})
+else()
+	message("Disabling py scripting support.")
+
+	add_definitions(-DNO_PY)
+endif()
+
+
+# fitting support
+if(Minuit2_FOUND)
+	message("Enabling fitting support.")
+	include_directories("${Minuit2_INCLUDE_DIRS}")
+	set(LIBS_FIT ${Minuit2_LIBRARIES})
+else()
+	message("Disabling fitting support.")
+	add_definitions(-DNO_FIT)
+endif()
+
+
+if(X11_FOUND)
+	include_directories(${X11_X11_INCLUDE_PATH})
+else()
+	set(X11_X11_LIB "")
+endif()
+
+
+# 3d support
+if(OPENGL_FOUND AND FREETYPE_FOUND)
+	message("Enabling 3D support. Inc: \"${OPENGL_INCLUDE_DIR}\".")
+
+	include_directories("${FREETYPE_INCLUDE_DIRS}")
+	if(NOT "${OPENGL_INCLUDE_DIR}" STREQUAL "")
+		include_directories("${OPENGL_INCLUDE_DIR}")
+		include_directories("${OPENGL_INCLUDE_DIR}/GL" "${OPENGL_INCLUDE_DIR}/OpenGL")
+	else()
+		message("Empty OGL dirs, guessing some defaults.")
+		include_directories("/usr/include/GL" "/usr/include/OpenGL")
+	endif()
+
+	add_definitions(-DUSE_3D)
+
+	set(SRCS_3D
+		libs/plotgl.cpp tools/taz/recip3d.cpp
+		tools/taz/real3d.cpp tools/taz/bz3d.cpp dialogs/EllipseDlg3D.cpp
+	)
+	set(LIBS_3D
+		${FREETYPE_LIBRARY}
+		Qt4::QtOpenGL ${OPENGL_LIBRARIES}
+		${X11_X11_LIB}
+	)
+else()
+	message("Disabling 3D support: OGL: ${OPENGL_FOUND}, FT: ${FREETYPE_FOUND}")
+
+	add_definitions(-DNO_3D)
+endif()
 
 
 set(CMAKE_AUTOMOC OFF)
@@ -77,7 +148,8 @@ add_executable(gentab
 )
 
 target_link_libraries(gentab 
-	${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Clipper_LIBRARIES} ${tlibs_LIBRARIES}
+	${Boost_LIBRARIES} ${LIBS_PY} ${Clipper_LIBRARIES} 
+	${tlibs_LIBRARIES}
 	Qt4::QtCore Qt4::QtGui
 )
 
@@ -108,7 +180,7 @@ add_executable(takin
 	tools/convofit/convofit_import.cpp
 	tools/monteconvo/SqwParamDlg.cpp tools/monteconvo/TASReso.cpp
 	tools/monteconvo/sqw.cpp tools/monteconvo/sqwbase.cpp tools/monteconvo/sqwfactory.cpp
-	tools/monteconvo/sqw_py.cpp # tools/monteconvo/sqw_proc.cpp
+	${SRCS_PY}
 
 	tools/convofit/scan.cpp
 	tools/scanviewer/scanviewer.cpp tools/scanviewer/FitParamDlg.cpp
@@ -127,14 +199,16 @@ add_executable(takin
 	libs/spacegroups/spacegroup.cpp tools/sglist/SgListDlg.cpp
 	libs/globals.cpp libs/globals_qt.cpp libs/spacegroups/crystalsys.cpp
 	libs/formfactors/formfact.cpp libs/qthelper.cpp libs/qwthelper.cpp
-#	libs/plotgl.cpp tools/taz/recip3d.cpp dialogs/EllipseDlg3D.cpp
+	libs/recent.cpp
+
+	${SRCS_3D}
 )
 
 target_link_libraries(takin 
-	${Minuit2_LIBRARIES} ${Boost_LIBRARIES} ${tlibs_LIBRARIES}
-	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
+	${LIBS_FIT} ${Boost_LIBRARIES} ${tlibs_LIBRARIES}
+	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES} 
 	Qt4::QtCore Qt4::QtGui Qt4::QtSvg #Qt4::QtOpenGL
-	${PYTHON_LIBRARIES}
+	${LIBS_PY} ${LIBS_3D}
 	${PNG_LIBRARIES}
 #	${JPEG_LIBRARIES} ${TIFF_LIBRARIES}
 	${QWT_LIBRARIES}
@@ -187,9 +261,9 @@ add_executable(convofit
 set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convofit
-	${Minuit2_LIBRARIES}
+	${LIBS_FIT}
 	${tlibs_LIBRARIES} Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
-	${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
+	${Boost_LIBRARIES} ${LIBS_PY}
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -207,7 +281,7 @@ add_executable(convoseries
 set_target_properties(convoseries PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convoseries
-	${tlibs_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
+	${tlibs_LIBRARIES} ${Boost_LIBRARIES} ${LIBS_PY}
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

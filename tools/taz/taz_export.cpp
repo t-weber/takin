@@ -320,7 +320,7 @@ void TazDlg::ExportUCModel()
 	const t_real beta = tl::d2r(editBeta->text().toDouble());
 	const t_real gamma = tl::d2r(editGamma->text().toDouble());
 	const tl::Lattice<t_real> lattice(a,b,c, alpha,beta,gamma);
-	const t_mat matA = lattice.GetMetric();
+	const t_mat matA = lattice.GetBaseMatrixCov();
 
 
 	const std::vector<t_vec> vecColors =

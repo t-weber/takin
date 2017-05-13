@@ -8,6 +8,8 @@
 #include "ConvoDlg.h"
 #include "tlibs/time/stopwatch.h"
 #include "tlibs/helper/thread.h"
+#include "tlibs/math/stat.h"
+
 
 using t_real = t_real_reso;
 using t_stopwatch = tl::Stopwatch<t_real>;
@@ -324,10 +326,10 @@ void ConvoDlg::Start1D()
 						auto minmaxX = std::minmax_element(m_scan.vecX.begin(), m_scan.vecX.end());
 						auto minmaxY = std::minmax_element(m_scan.vecCts.begin(), m_scan.vecCts.end());
 
-						dLeft = std::min(dLeft, *minmaxX.first);
-						dRight = std::max(dRight, *minmaxX.second);
-						dBottom = std::min(dBottom, *minmaxY.first);
-						dTop = std::max(dTop, *minmaxY.second);
+						dLeft = std::min<t_real_qwt>(dLeft, *minmaxX.first);
+						dRight = std::max<t_real_qwt>(dRight, *minmaxX.second);
+						dBottom = std::min<t_real_qwt>(dBottom, *minmaxY.first);
+						dTop = std::max<t_real_qwt>(dTop, *minmaxY.second);
 					}
 
 					set_zoomer_base(m_plotwrap->GetZoomer(),
@@ -351,6 +353,47 @@ void ConvoDlg::Start1D()
 				Q_ARG(const QString&, QString(watch.GetEstStopTimeStr(t_real(iStep+1)/t_real(iNumSteps)).c_str())));
 			++iStep;
 		}
+
+
+		// approximate chi^2
+		if(bUseScan && m_pSqw)
+		{
+			const std::size_t iNumScanPts = m_scan.vecPoints.size();
+			std::vector<t_real> vecSFuncY;
+			vecSFuncY.reserve(iNumScanPts);
+
+			for(std::size_t iScanPt=0; iScanPt<iNumScanPts; ++iScanPt)
+			{
+				const ScanPoint& pt = m_scan.vecPoints[iScanPt];
+				t_real E = pt.E / tl::one_meV;
+				ublas::vector<t_real> vecScanHKLE = tl::make_vec({ pt.h, pt.k, pt.l, E });
+
+
+				// find point on S(q,w) curve closest to scan point
+				std::size_t iMinIdx = 0;
+				t_real dMinDist = std::numeric_limits<t_real>::max();
+				for(std::size_t iStep=0; iStep<iNumSteps; ++iStep)
+				{
+					ublas::vector<t_real> vecCurveHKLE =
+						tl::make_vec({ vecH[iStep], vecK[iStep], vecL[iStep], vecE[iStep] });
+
+					t_real dDist = ublas::norm_2(vecCurveHKLE - vecScanHKLE);
+					if(dDist < dMinDist)
+					{
+						dMinDist = dDist;
+						iMinIdx = iStep;
+					}
+				}
+
+				// add the scaled S value from the closest point
+				vecSFuncY.push_back(m_vecScaledS[iMinIdx]);
+			}
+
+			t_real tChi2 = tl::chi2_direct<t_real>(iNumScanPts,
+				vecSFuncY.data(), m_scan.vecCts.data(), m_scan.vecCtsErr.data());
+			tl::log_info("chi^2 = ", tChi2);
+		}
+
 
 		// output elapsed time
 		watch.stop();

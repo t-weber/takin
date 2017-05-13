@@ -144,13 +144,13 @@ if(OPENGL_FOUND AND FREETYPE_FOUND)
 		include_directories("${OPENGL_INCLUDE_DIR}/GL" "${OPENGL_INCLUDE_DIR}/OpenGL")
 	else()
 		message("Empty OGL dirs, guessing some defaults.")
-		include_directories("/usr/include/GL" "/usr/include/OpenGL")	
+		include_directories("/usr/include/GL" "/usr/include/OpenGL")
 	endif()
 
 	add_definitions(-DUSE_3D)
 
-	set(SRCS_3D 
-		libs/plotgl.cpp tools/taz/recip3d.cpp 
+	set(SRCS_3D
+		libs/plotgl.cpp tools/taz/recip3d.cpp
 		tools/taz/real3d.cpp tools/taz/bz3d.cpp dialogs/EllipseDlg3D.cpp
 
 		tlibs/gfx/gl.cpp
@@ -242,15 +242,15 @@ add_executable(takin
 	${SRCS_3D}
 
 	# statically link tlibs externals
-	#tlibs/file/loadinstr.cpp  
-	tlibs/file/recent.cpp  tlibs/file/x3d.cpp
+	#tlibs/file/loadinstr.cpp
+	libs/recent.cpp  tlibs/file/x3d.cpp
 	tlibs/log/log.cpp tlibs/log/debug.cpp
 	tlibs/math/rand.cpp
 	tlibs/string/spec_char.cpp
 	tlibs/helper/flags.cpp  tlibs/version.cpp
 )
 
-target_link_libraries(takin 
+target_link_libraries(takin
 	${LIBS_FIT}
 	${Boost_LIBRARIES} ${SOCK2}
 	${LIBS_3D}
@@ -296,7 +296,7 @@ if(Minuit2_FOUND)
 # -----------------------------------------------------------------------------
 # convofit, convoseries
 # -----------------------------------------------------------------------------
-add_executable(convofit 
+add_executable(convofit
 	tools/res/cn.cpp tools/res/pop.cpp tools/res/eck.cpp tools/res/viol.cpp
 	#tools/res/simple.cpp
 

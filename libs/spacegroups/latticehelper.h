@@ -133,8 +133,8 @@ struct LatticeCommon
 		}
 
 
-		matA = lattice.GetMetric();
-		matB = recip.GetMetric();
+		matA = lattice.GetBaseMatrixCov();
+		matB = recip.GetBaseMatrixCov();
 
 		dir0RLU = planeRLU.GetDir0();
 		dir1RLU = planeRLU.GetDir1();

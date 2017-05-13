@@ -202,11 +202,11 @@ void PlotGl::resizeGLThread(int w, int h)
 
 	glMatrixMode(GL_PROJECTION);
 	if(m_bPerspective)
-		m_matProj = tl::perspective_matrix(m_dFOV, t_real(w)/t_real(h), 0.1, 100.);
+		m_matProj = tl::perspective_matrix<t_mat4, t_real>(m_dFOV, t_real(w)/t_real(h), 0.1, 100.);
 	else
-		m_matProj = tl::ortho_matrix(-1.,1.,-1.,1.,0.1,100.);
+		m_matProj = tl::ortho_matrix<t_mat4, t_real>(-1.,1.,-1.,1.,0.1,100.);
 	t_real glmat[16]; tl::to_gl_array(m_matProj, glmat);
-	glLoadMatrixd(glmat);
+	tl::gl_traits<t_real>::LoadMatrix(glmat);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -306,7 +306,7 @@ void PlotGl::paintGLThread()
 		std::lock_guard<QMutex> _lck(m_mutex);
 		tl::to_gl_array(m_matView, glmat);
 	}
-	glLoadMatrixd(glmat);
+	tl::gl_traits<t_real>::LoadMatrix(glmat);
 
 
 	// camera position
@@ -394,7 +394,7 @@ void PlotGl::paintGLThread()
 				obj.vecRotMat[3], obj.vecRotMat[4], obj.vecRotMat[5], 0.,
 				obj.vecRotMat[6], obj.vecRotMat[7], obj.vecRotMat[8], 0.,
 				0., 0., 0., 1. };
-			glMultMatrixd(dMatRot);
+			tl::gl_traits<t_real>::MultMatrix(dMatRot);
 			tl::gl_traits<t_real>::SetScale(obj.vecScale[0], obj.vecScale[1], obj.vecScale[2]);
 
 			bIsSphereLikeObj = 1;

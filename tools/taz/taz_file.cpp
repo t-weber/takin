@@ -7,9 +7,9 @@
 
 #include "taz.h"
 #include "tlibs/string/string.h"
-#include "tlibs/file/recent.h"
 #include "tlibs/time/chrono.h"
 #include "libs/version.h"
+#include "libs/recent.h"
 #include "dialogs/FilePreviewDlg.h"
 
 #include <QMessageBox>
@@ -332,7 +332,7 @@ bool TazDlg::Load(const char* pcFile)
 	m_strCurFile = strFile1;
 	setWindowTitle((s_strTitle + " - " + m_strCurFile).c_str());
 
-	tl::RecentFiles recent(&m_settings, "main/recent");
+	RecentFiles recent(&m_settings, "main/recent");
 	recent.AddFile(strFile1.c_str());
 	recent.SaveList();
 	recent.FillMenu(m_pMenuRecent, m_pMapperRecent);
@@ -511,7 +511,7 @@ bool TazDlg::Save()
 		return false;
 	}
 
-	tl::RecentFiles recent(&m_settings, "main/recent");
+	RecentFiles recent(&m_settings, "main/recent");
 	recent.AddFile(m_strCurFile.c_str());
 	recent.SaveList();
 	recent.FillMenu(m_pMenuRecent, m_pMapperRecent);
@@ -693,7 +693,7 @@ bool TazDlg::Import(const char* pcFile)
 	m_strCurFile = /*strFile1*/ "";		// prevents overwriting imported file on saving
 	setWindowTitle((s_strTitle + " - " + strFile1).c_str());
 
-	tl::RecentFiles recent(&m_settings, "main/recent_import");
+	RecentFiles recent(&m_settings, "main/recent_import");
 	recent.AddFile(strFile1.c_str());
 	recent.SaveList();
 	recent.FillMenu(m_pMenuRecentImport, m_pMapperRecentImport);

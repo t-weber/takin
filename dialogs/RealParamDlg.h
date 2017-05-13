@@ -32,16 +32,22 @@ class RealParamDlg : public QDialog, Ui::RealParamDlg
 	protected:
 		QSettings *m_pSettings = 0;
 
+		// metric
+		ublas::matrix<t_real_glob> m_matGCov, m_matGCont;
+
 	public:
 		RealParamDlg(QWidget* pParent=0, QSettings* pSett=0);
 		virtual ~RealParamDlg();
 
 	public slots:
 		void paramsChanged(const RealParams& parms);
+
 		void CrystalChanged(const tl::Lattice<t_real_glob>& latt,
 			const tl::Lattice<t_real_glob>& recip,
 			const SpaceGroup<t_real_glob>* pSG,
 			const std::vector<AtomPos<t_real_glob>>* pAtoms);
+
+		void CalcVecs();
 
 	protected:
 		virtual void closeEvent(QCloseEvent *pEvt) override;

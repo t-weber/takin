@@ -27,8 +27,8 @@
 #include "tlibs/string/spec_char.h"
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"
-#include "tlibs/file/recent.h"
 #include "tlibs/log/log.h"
+#include "libs/recent.h"
 
 namespace algo = boost::algorithm;
 namespace fs = boost::filesystem;
@@ -304,7 +304,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	pMenuFile->addAction(pLoad);
 
 	m_pMenuRecent = new QMenu("Recently Loaded", this);
-	tl::RecentFiles recent(&m_settings, "main/recent");
+	RecentFiles recent(&m_settings, "main/recent");
 	m_pMapperRecent = new QSignalMapper(m_pMenuRecent);
 	QObject::connect(m_pMapperRecent, SIGNAL(mapped(const QString&)),
 		this, SLOT(LoadFile(const QString&)));
@@ -326,7 +326,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	pMenuFile->addAction(pImport);
 
 	m_pMenuRecentImport = new QMenu("Recently Imported", this);
-	tl::RecentFiles recentimport(&m_settings, "main/recent_import");
+	RecentFiles recentimport(&m_settings, "main/recent_import");
 	m_pMapperRecentImport = new QSignalMapper(m_pMenuRecentImport);
 	QObject::connect(m_pMapperRecentImport, SIGNAL(mapped(const QString&)),
 		this, SLOT(ImportFile(const QString&)));

@@ -41,8 +41,8 @@ void gen_atoms_sfact()
 
 	const tl::Lattice<t_real> lattice(a,b,c, alpha,beta,gamma);
 	const t_real dVol = lattice.GetVol();
-	const t_mat matA = lattice.GetMetric();
-	const t_mat matB = lattice.GetRecip().GetMetric();
+	const t_mat matA = lattice.GetBaseMatrixCov();
+	const t_mat matB = lattice.GetRecip().GetBaseMatrixCov();
 	std::cout << "A = " << matA << std::endl;
 	std::cout << "B = " << matB << std::endl;
 

@@ -11,6 +11,8 @@
 #include <QDialog>
 #include <QSettings>
 #include <QMenuBar>
+#include <QMenu>
+#include <QSignalMapper>
 
 #include <thread>
 #include <atomic>
@@ -55,6 +57,9 @@ protected:
 	bool m_bUseScan = 0;
 	Scan m_scan;
 
+	static const std::string s_strTitle;
+	std::string m_strLastFile;
+
 protected:
 	std::vector<QDoubleSpinBox*> m_vecSpinBoxes;
 	std::vector<QSpinBox*> m_vecIntSpinBoxes;
@@ -68,6 +73,10 @@ protected:
 		m_vecComboNames, m_vecCheckNames;
 
 	QAction *m_pLiveResults = nullptr, *m_pLivePlots = nullptr;
+
+	// recent files
+	QMenu *m_pMenuRecent = nullptr;
+	QSignalMapper *m_pMapperRecent = nullptr;
 
 protected:
 	void LoadSettings();
@@ -117,8 +126,11 @@ protected slots:
 
 	virtual void accept() override;
 
+	void New();
+	void Load(const QString&);
 	void Load();
 	void Save();
+	void SaveAs();
 	void SaveConvofit();
 
 	void ShowAboutDlg();

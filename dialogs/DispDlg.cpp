@@ -153,8 +153,8 @@ void DispDlg::Calc()
 		tl::Lattice<t_real> lattice(dA, dB, dC, dAlpha, dBeta, dGamma);
 		tl::Lattice<t_real> recip = lattice.GetRecip();
 
-		const t_mat matA = lattice.GetMetric();
-		const t_mat matB = recip.GetMetric();
+		const t_mat matA = lattice.GetBaseMatrixCov();
+		const t_mat matB = recip.GetBaseMatrixCov();
 
 		t_vec vecCentre = tl::mult<t_mat,t_vec>(matA, m_vecAtoms[iIdxCentre].vecPos);
 		if(tl::is_nan_or_inf(vecCentre))

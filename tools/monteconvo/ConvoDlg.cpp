@@ -16,6 +16,7 @@
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
+#include "libs/recent.h"
 
 #include <iostream>
 #include <fstream>
@@ -27,13 +28,14 @@
 
 
 using t_real = t_real_reso;
-
+const std::string ConvoDlg::s_strTitle = "Resolution Convolution";
 
 ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	: QDialog(pParent, Qt::WindowTitleHint|Qt::WindowCloseButtonHint|Qt::WindowMinMaxButtonsHint),
 		m_pSett(pSett)
 {
 	setupUi(this);
+	setWindowTitle(s_strTitle.c_str());
 
 	// -------------------------------------------------------------------------
 	// widgets
@@ -183,11 +185,29 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	// file menu
 	QMenu *pMenuFile = new QMenu("File", this);
 
-	QAction *pLoad = new QAction("Load Configuration...", this);
+    QAction *pNew = new QAction("New", this);
+    pNew->setIcon(load_icon("res/icons/document-new.svg"));
+    pMenuFile->addAction(pNew);
+
+	pMenuFile->addSeparator();
+
+	QAction *pLoad = new QAction("Load...", this);
 	pLoad->setIcon(load_icon("res/icons/document-open.svg"));
 	pMenuFile->addAction(pLoad);
 
-	QAction *pSaveAs = new QAction("Save Configuration...", this);
+	m_pMenuRecent = new QMenu("Recently Loaded", this);
+	RecentFiles recent(m_pSett, "monteconvo/recent");
+	m_pMapperRecent = new QSignalMapper(m_pMenuRecent);
+	QObject::connect(m_pMapperRecent, SIGNAL(mapped(const QString&)),
+		this, SLOT(Load(const QString&)));
+	recent.FillMenu(m_pMenuRecent, m_pMapperRecent);
+	pMenuFile->addMenu(m_pMenuRecent);
+
+	QAction *pSave = new QAction("Save", this);
+	pSave->setIcon(load_icon("res/icons/document-save.svg"));
+	pMenuFile->addAction(pSave);
+
+	QAction *pSaveAs = new QAction("Save As...", this);
 	pSaveAs->setIcon(load_icon("res/icons/document-save-as.svg"));
 	pMenuFile->addAction(pSaveAs);
 
@@ -265,8 +285,10 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 
 
 	QObject::connect(pExit, SIGNAL(triggered()), this, SLOT(accept()));
+	QObject::connect(pNew, SIGNAL(triggered()), this, SLOT(New()));
 	QObject::connect(pLoad, SIGNAL(triggered()), this, SLOT(Load()));
-	QObject::connect(pSaveAs, SIGNAL(triggered()), this, SLOT(Save()));
+	QObject::connect(pSave, SIGNAL(triggered()), this, SLOT(Save()));
+	QObject::connect(pSaveAs, SIGNAL(triggered()), this, SLOT(SaveAs()));
 	QObject::connect(pConvofit, SIGNAL(triggered()), this, SLOT(SaveConvofit()));
 	QObject::connect(pActionStart, SIGNAL(triggered()), this, SLOT(Start()));
 	QObject::connect(pActionDisp, SIGNAL(triggered()), this, SLOT(StartDisp()));
