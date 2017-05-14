@@ -61,6 +61,7 @@ BZ3DDlg::BZ3DDlg(QWidget* pParent, QSettings *pSettings)
 			m_pStatus->clearMessage();
 	});
 
+	m_vecq_rlu = m_vecq = tl::ublas::zero_vector<t_real>(3);
 	m_pPlot->SetLabels("x (1/A)", "y (1/A)", "z (1/A)");
 	m_pPlot->SetDrawMinMax(0);
 	m_pPlot->SetEnabled(1);
@@ -87,6 +88,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 	static const std::vector<t_real> vecColPolys = { 0., 0., 1., 0.85 };
 	static const std::vector<t_real> vecColEdges = { 0., 0., 0., 1. };
 	static const std::vector<t_real> vecColScatPlane = { 1., 1., 0., 1. };
+	static const std::vector<t_real> vecColCurq = { 0., 0., 0., 1. };
 
 	m_pPlot->SetEnabled(0);
 	m_pPlot->clear();
@@ -96,6 +98,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 
 	const bool bShowVerts = 0;
 	const bool bShowSymmPts = 1;
+	const bool bShowCurq = 1;
 
 	// all objects: polys + edges
 	std::size_t iNumObjs =  2*bz.GetPolys().size();
@@ -105,6 +108,8 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 		++iNumObjs;
 	if(bShowSymmPts && pvecSymmPts)
 		iNumObjs += pvecSymmPts->size();
+	if(bShowCurq)
+		++iNumObjs;
 	m_pPlot->SetObjectCount(iNumObjs);
 
 
@@ -194,8 +199,56 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 		}
 	}
 
+	// current q position
+	if(bShowCurq)
+	{
+		m_pPlot->PlotSphere(m_vecq, 0.02, iCurObjIdx);
+		m_pPlot->SetObjectColor(iCurObjIdx, vecColCurq);
+		m_pPlot->SetObjectAnimation(iCurObjIdx, 1);
+
+		// current q label
+		std::ostringstream ostrTip;
+		ostrTip.precision(g_iPrecGfx);
+		ostrTip << "q = (" << m_vecq_rlu[0] << ", " << m_vecq_rlu[1] << ", " << m_vecq_rlu[2] << ") rlu";
+		ostrTip << "\nq = (" << m_vecq[0] << ", " << m_vecq[1] << ", " << m_vecq[2] << ") 1/A";
+		m_pPlot->SetObjectLabel(iCurObjIdx, ostrTip.str());
+
+		m_iqIdx = iCurObjIdx;
+		++iCurObjIdx;
+	}
+
 	m_pPlot->SetMinMax(vecMin, vecMax);
 	m_pPlot->SetEnabled(1);
+}
+
+
+// ----------------------------------------------------------------------------
+
+
+/**
+ * scattering triangle changed
+ */
+void BZ3DDlg::RecipParamsChanged(const RecipParams& recip)
+{
+	m_vecq = tl::make_vec({ -recip.q[0], -recip.q[1], -recip.q[2] });
+	m_vecq_rlu = tl::make_vec({ -recip.q_rlu[0], -recip.q_rlu[1], -recip.q_rlu[2] });
+
+	// if a 3d object is already assigned, update it
+	if(m_pPlot && m_iqIdx)
+	{
+		m_pPlot->SetEnabled(0);
+
+		m_pPlot->PlotSphere(m_vecq, 0.02, *m_iqIdx);
+
+		// current q label
+		std::ostringstream ostrTip;
+		ostrTip.precision(g_iPrecGfx);
+		ostrTip << "q = (" << m_vecq_rlu[0] << ", " << m_vecq_rlu[1] << ", " << m_vecq_rlu[2] << ") rlu";
+		ostrTip << "\nq = (" << m_vecq[0] << ", " << m_vecq[1] << ", " << m_vecq[2] << ") 1/A";
+		m_pPlot->SetObjectLabel(*m_iqIdx, ostrTip.str());
+
+		m_pPlot->SetEnabled(1);
+	}
 }
 
 

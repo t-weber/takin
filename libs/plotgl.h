@@ -36,6 +36,10 @@ namespace sig = boost::signals2;
 using t_qglwidget = QGLWidget;
 //using t_qglwidget = QOpenGLWidget;
 
+
+/**
+ * types of plottable objects
+ */
 enum PlotTypeGl
 {
 	PLOT_INVALID,
@@ -47,6 +51,10 @@ enum PlotTypeGl
 	PLOT_LINES,
 };
 
+
+/**
+ * plottable object
+ */
 struct PlotObjGl
 {
 	PlotTypeGl plttype = PLOT_INVALID;
@@ -63,8 +71,14 @@ struct PlotObjGl
 
 	bool bSelected = 0;
 	bool bUseLOD = 1;
+	bool bCull = 1;
+
+	bool bAnimated = 0;
+	t_real_glob dScaleMult = 1.;
+
 	std::string strLabel;
 };
+
 
 struct PlotGlSize
 {
@@ -171,6 +185,8 @@ public:
 	void SetObjectColor(std::size_t iObjIdx, const std::vector<t_real_glob>& vecCol);
 	void SetObjectLabel(std::size_t iObjIdx, const std::string& strLab);
 	void SetObjectUseLOD(std::size_t iObjIdx, bool bLOD);
+	void SetObjectCull(std::size_t iObjIdx, bool bCull);
+	void SetObjectAnimation(std::size_t iObjIdx, bool bAnimate);
 
 	void SetLabels(const char* pcLabX, const char* pcLabY, const char* pcLabZ);
 	void SetDrawMinMax(bool b) { m_bDrawMinMax = b; }

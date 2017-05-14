@@ -77,7 +77,7 @@ void RecentFiles::FillMenu(QMenu* pMenu, QSignalMapper* pMapper)
 {
 	// clear old actions
 	QList<QAction*> lstActions = pMenu->actions();
-	for(std::size_t iAction=0; iAction<lstActions.size(); ++iAction)
+	for(int iAction=0; iAction<lstActions.size(); ++iAction)
 	{
 		pMapper->removeMappings(lstActions[iAction]);
 		delete lstActions[iAction];

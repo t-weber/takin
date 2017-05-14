@@ -283,10 +283,28 @@ std::vector<std::size_t> PlotGl::GetObjSortOrder() const
 
 
 /**
- * advance time
+ * advance time by "dTime" seconds
  */
 void PlotGl::tickThread(t_real dTime)
-{}
+{
+	// cycle between dNum1 and dNum2
+	auto fktCycle = [](t_real dTime, t_real dNum1, t_real dNum2) -> t_real
+	{
+		dNum2 -= dNum1;
+		return (dNum1 + std::abs(std::fmod(dTime,dNum2*2.)-dNum2));
+	};
+
+
+	{	// look for objects with animation
+		std::lock_guard<QMutex> _lck(m_mutex);
+		for(PlotObjGl& obj : m_vecObjs)
+		{
+			if(!obj.bAnimated) continue;
+
+			obj.dScaleMult = fktCycle(2.*dTime, 0.5, 2.);
+		}
+	}
+}
 
 
 /**
@@ -363,6 +381,11 @@ void PlotGl::paintGLThread()
 		int iLOD = 0;
 		bool bIsSphereLikeObj = 0;
 
+		if(obj.bCull)
+			glEnable(GL_CULL_FACE);
+		else
+			glDisable(GL_CULL_FACE);
+
 		bool bColorSet = 0;
 		if(obj.bSelected)
 		{
@@ -382,7 +405,10 @@ void PlotGl::paintGLThread()
 		if(obj.plttype == PLOT_SPHERE)
 		{
 			tl::gl_traits<t_real>::SetTranslate(obj.vecPos[0], obj.vecPos[1], obj.vecPos[2]);
-			tl::gl_traits<t_real>::SetScale(obj.vecScale[0], obj.vecScale[0], obj.vecScale[0]);
+			tl::gl_traits<t_real>::SetScale(
+				obj.vecScale[0] * obj.dScaleMult,
+				obj.vecScale[0] * obj.dScaleMult,
+				obj.vecScale[0] * obj.dScaleMult);
 
 			bIsSphereLikeObj = 1;
 		}
@@ -395,7 +421,10 @@ void PlotGl::paintGLThread()
 				obj.vecRotMat[6], obj.vecRotMat[7], obj.vecRotMat[8], 0.,
 				0., 0., 0., 1. };
 			tl::gl_traits<t_real>::MultMatrix(dMatRot);
-			tl::gl_traits<t_real>::SetScale(obj.vecScale[0], obj.vecScale[1], obj.vecScale[2]);
+			tl::gl_traits<t_real>::SetScale(
+				obj.vecScale[0] * obj.dScaleMult,
+				obj.vecScale[1] * obj.dScaleMult,
+				obj.vecScale[2] * obj.dScaleMult);
 
 			bIsSphereLikeObj = 1;
 		}
@@ -576,6 +605,24 @@ void PlotGl::SetObjectUseLOD(std::size_t iObjIdx, bool bLOD)
 	if(m_vecObjs.size() <= iObjIdx)
 		return;
 	m_vecObjs[iObjIdx].bUseLOD = bLOD;
+}
+
+void PlotGl::SetObjectCull(std::size_t iObjIdx, bool bCull)
+{
+	std::lock_guard<QMutex> _lck(m_mutex);
+
+	if(m_vecObjs.size() <= iObjIdx)
+		return;
+	m_vecObjs[iObjIdx].bCull = bCull;
+}
+
+void PlotGl::SetObjectAnimation(std::size_t iObjIdx, bool bAnim)
+{
+	std::lock_guard<QMutex> _lck(m_mutex);
+
+	if(m_vecObjs.size() <= iObjIdx)
+		return;
+	m_vecObjs[iObjIdx].bAnimated = bAnim;
 }
 
 
@@ -834,12 +881,16 @@ void PlotGl::mouseSelectObj(t_real dX, t_real dY)
 
 		if(obj.plttype == PLOT_SPHERE)
 		{
-			pQuad.reset(new tl::QuadSphere<t_real>(obj.vecScale[0]));
+			pQuad.reset(new tl::QuadSphere<t_real>(
+				obj.vecScale[0] * obj.dScaleMult));
 			vecOffs = obj.vecPos;
 		}
 		else if(obj.plttype == PLOT_ELLIPSOID)
 		{
-			pQuad.reset(new tl::QuadEllipsoid<t_real>(obj.vecScale[0], obj.vecScale[1], obj.vecScale[2]));
+			pQuad.reset(new tl::QuadEllipsoid<t_real>(
+				obj.vecScale[0] * obj.dScaleMult,
+				obj.vecScale[1] * obj.dScaleMult,
+				obj.vecScale[2] * obj.dScaleMult));
 
 			vecOffs = obj.vecPos;
 			t_mat3 matRot = tl::make_mat<t_mat3>(

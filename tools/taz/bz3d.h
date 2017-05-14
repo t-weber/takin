@@ -12,11 +12,14 @@
 #include <QStatusBar>
 
 #include <memory>
+#include <boost/optional.hpp>
 
 #include "libs/globals.h"
 #include "libs/plotgl.h"
 #include "libs/spacegroups/latticehelper.h"
 #include "tlibs/phys/bz.h"
+
+#include "dialogs/RecipParamDlg.h"
 
 
 class BZ3DDlg : public QDialog
@@ -25,6 +28,9 @@ protected:
 	QSettings *m_pSettings = nullptr;
 	QStatusBar *m_pStatus = nullptr;
 	std::unique_ptr<PlotGl> m_pPlot;
+
+	boost::optional<std::size_t> m_iqIdx;
+	ublas::vector<t_real_glob> m_vecq, m_vecq_rlu;
 
 public:
 	BZ3DDlg(QWidget* pParent, QSettings* = 0);
@@ -41,6 +47,9 @@ protected:
 	virtual void closeEvent(QCloseEvent*) override;
 
 	virtual void keyPressEvent(QKeyEvent*) override;
+
+public slots:
+	void RecipParamsChanged(const RecipParams&);
 };
 
 #endif
