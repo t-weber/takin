@@ -214,7 +214,7 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	{
 		if(!tl::float_equal<t_real_sc>(scan.vecScanDir[i], 0., dEps))
 		{
-			scan.vecScanDir[i] /= scan.vecScanDir[i];
+			scan.vecScanDir[i] = 1.;
 			scan.vecScanOrigin[i] = 0.;
 		}
 		else

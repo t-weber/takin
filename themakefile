@@ -334,7 +334,7 @@ endif
 
 ifeq ($(USE_3D), 1)
 	ifeq ($(USE_FRAMEWORKS), 0)
-		GL_LIBS = ${X11_LIBS} -lGL -lGLU -lfreetype
+		GL_LIBS = ${X11_LIBS} -lGL -lfreetype
 	else
 		GL_LIBS = ${X11_LIBS} -lfreetype
 	endif

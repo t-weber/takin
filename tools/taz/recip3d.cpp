@@ -231,6 +231,13 @@ void Recip3DDlg::RecipParamsChanged(const RecipParams& recip)
 	}
 }
 
+void Recip3DDlg::keyPressEvent(QKeyEvent* pEvt)
+{
+	if(m_pPlot)
+		m_pPlot->keyPressEvent(pEvt);
+
+	QDialog::keyPressEvent(pEvt);
+}
 
 void Recip3DDlg::closeEvent(QCloseEvent *pEvt)
 {

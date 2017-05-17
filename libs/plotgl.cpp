@@ -8,10 +8,10 @@
 #include "plotgl.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/math.h"
+#include "tlibs/math/geo_prim.h"
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"
 
-#include <glu.h>
 #include <time.h>
 #include <iostream>
 #include <sstream>
@@ -113,6 +113,7 @@ void PlotGl::initializeGLThread()
 	glClearColor(1.,1.,1.,0.);
 	glShadeModel(GL_SMOOTH);
 	//glShadeModel(GL_FLAT);
+	glDisable(GL_NORMALIZE);
 
 	glClearDepth(1.);
 	glDepthMask(GL_TRUE);
@@ -124,7 +125,7 @@ void PlotGl::initializeGLThread()
 
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POINT_SMOOTH);
-	//glEnable(GL_POLYGON_SMOOTH);
+	glEnable(GL_POLYGON_SMOOTH);
 #ifdef USE_MULTI_TEXTURES
 	glEnable(GL_MULTISAMPLE);
 	glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
@@ -146,20 +147,27 @@ void PlotGl::initializeGLThread()
 	tl::gl_traits<t_real>::SetLight(GL_LIGHT0, GL_POSITION, vecLight0);
 
 
-	unsigned int iLOD = 32;
+	// generate spheres in several detail levels
 	for(std::size_t iSphere=0; iSphere<sizeof(m_iLstSphere)/sizeof(*m_iLstSphere); ++iSphere)
 	{
 		m_iLstSphere[iSphere] = glGenLists(1);
+		tl::TesselSphere<t_vec3> prim(t_real(1), iSphere);
 
-		GLUquadricObj *pQuadSphere = gluNewQuadric();
-		gluQuadricDrawStyle(pQuadSphere, GLU_FILL /*GLU_LINE*/);
-		gluQuadricNormals(pQuadSphere, GLU_SMOOTH);
 		glNewList(m_iLstSphere[iSphere], GL_COMPILE);
-			gluSphere(pQuadSphere, 1., iLOD, iLOD);
+			for(std::size_t iPoly=0; iPoly<prim.GetPolyCount(); ++iPoly)
+			{
+				glBegin(GL_POLYGON);
+					//t_vec3 vecFaceNorm = prim.GetPolyNormal(iPoly);
+					//tl::gl_traits<t_real>::SetNorm(vecFaceNorm[0], vecFaceNorm[1], vecFaceNorm[2]);
+					for(const t_vec3& vec : prim.GetPoly(iPoly))
+					{
+						t_vec3 vecNorm = vec / ublas::norm_2(vec);
+						tl::gl_traits<t_real>::SetNorm(vecNorm[0], vecNorm[1], vecNorm[2]);
+						tl::gl_traits<t_real>::SetVertex(vec[0], vec[1], vec[2]);
+					}
+				glEnd();
+			}
 		glEndList();
-		gluDeleteQuadric(pQuadSphere);
-
-		iLOD *= 0.8;
 	}
 
 #ifdef USE_MULTI_TEXTURES
@@ -377,8 +385,6 @@ void PlotGl::paintGLThread()
 		if(iObjIdx >= m_vecObjs.size())
 			continue;
 		const PlotObjGl& obj = m_vecObjs[iObjIdx];
-
-		int iLOD = 0;
 		bool bIsSphereLikeObj = 0;
 
 		if(obj.bCull)
@@ -386,11 +392,9 @@ void PlotGl::paintGLThread()
 		else
 			glDisable(GL_CULL_FACE);
 
-		bool bColorSet = 0;
 		if(obj.bSelected)
 		{
 			SetColor(0.25, 0.25, 0.25, 0.9);
-			bColorSet = 1;
 		}
 		else
 		{
@@ -452,17 +456,14 @@ void PlotGl::paintGLThread()
 
 		if(bIsSphereLikeObj)
 		{
+			int iLODMax = sizeof(m_iLstSphere)/sizeof(*m_iLstSphere)-1;
+			int iLOD = iLODMax;
+
 			if(obj.bUseLOD)
 			{
 				t_real dLenDist = tl::gl_proj_sphere_size(/*dRadius*/1.);
 				iLOD = dLenDist * 50.;
-
-				if(iLOD >= int(sizeof(m_iLstSphere)/sizeof(*m_iLstSphere)))
-					iLOD = sizeof(m_iLstSphere)/sizeof(*m_iLstSphere)-1;
-				if(iLOD < 0)
-					iLOD = 0;
-
-				iLOD = sizeof(m_iLstSphere)/sizeof(*m_iLstSphere) - iLOD - 1;
+				iLOD = tl::clamp<int>(iLOD, 0, iLODMax);
 			}
 
 			glCallList(m_iLstSphere[iLOD]);
@@ -927,4 +928,15 @@ void PlotGl::SetLabels(const char* pcLabX, const char* pcLabY, const char* pcLab
 	m_strLabels[0] = pcLabX;
 	m_strLabels[1] = pcLabY;
 	m_strLabels[2] = pcLabZ;
+}
+
+
+void PlotGl::keyPressEvent(QKeyEvent* pEvt)
+{
+	if(pEvt->key() == Qt::Key_Space)
+		TogglePerspective();
+	else if(pEvt->key() == Qt::Key_Z)
+		ToggleZTest();
+
+	t_qglwidget::keyPressEvent(pEvt);
 }

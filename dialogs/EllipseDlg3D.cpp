@@ -239,4 +239,14 @@ void EllipseDlg3D::SetParams(const EllipseDlgParams& params)
 	Calc();
 }
 
+
+void EllipseDlg3D::keyPressEvent(QKeyEvent* pEvt)
+{
+	for(PlotGl* pPlot : m_pPlots)
+		pPlot->keyPressEvent(pEvt);
+
+	QDialog::keyPressEvent(pEvt);
+}
+
+
 #include "EllipseDlg3D.moc"

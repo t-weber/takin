@@ -86,8 +86,13 @@ std::vector<std::string> get_qt_std_path(QtStdPath path)
 	QStandardPaths::StandardLocation iLoc;
 	switch(path)
 	{
-		case QtStdPath::HOME: iLoc = QStandardPaths::HomeLocation;
-		case QtStdPath::FONTS: iLoc = QStandardPaths::FontsLocation;
+		case QtStdPath::FONTS:
+			iLoc = QStandardPaths::FontsLocation;
+			break;
+		case QtStdPath::HOME:
+		default:
+			iLoc = QStandardPaths::HomeLocation;
+			break;
 	}
 
 	QStringList lst = QStandardPaths::standardLocations(iLoc);
@@ -109,8 +114,13 @@ std::vector<std::string> get_qt_std_path(QtStdPath path)
 	QDesktopServices::StandardLocation iLoc;
 	switch(path)
 	{
-		case QtStdPath::HOME: iLoc = QDesktopServices::HomeLocation;
-		case QtStdPath::FONTS: iLoc = QDesktopServices::FontsLocation;
+		case QtStdPath::FONTS:
+			iLoc = QDesktopServices::FontsLocation;
+			break;
+		case QtStdPath::HOME:
+		default:
+			iLoc = QDesktopServices::HomeLocation;
+			break;
 	}
 
 	std::vector<std::string> vecPaths;

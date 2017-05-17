@@ -29,7 +29,7 @@ protected:
 
 	std::shared_ptr<boost::interprocess::managed_shared_memory> m_pMem;
 	std::shared_ptr<boost::interprocess::message_queue> m_pmsgIn, m_pmsgOut;
-	void *m_pSharedPars;
+	void *m_pSharedPars = nullptr;
 
 public:
 	SqwProc();

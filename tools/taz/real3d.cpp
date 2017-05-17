@@ -157,10 +157,8 @@ void Real3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& latticecommon)
 
 void Real3DDlg::keyPressEvent(QKeyEvent* pEvt)
 {
-	if(!m_pPlot) return;
-
-	if(pEvt->key() == Qt::Key_Space)
-		m_pPlot->TogglePerspective();
+	if(m_pPlot)
+		m_pPlot->keyPressEvent(pEvt);
 
 	QDialog::keyPressEvent(pEvt);
 }
