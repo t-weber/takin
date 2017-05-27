@@ -48,9 +48,13 @@ FilePreviewDlg::FilePreviewDlg(QWidget* pParent, const char* pcTitle, QSettings*
 	m_pPlot->setSizePolicy(spol);
 
 	// depends on qt/src/gui/dialogs/qfiledialog.ui using QGridLayout
-	QGridLayout *pLayout((QGridLayout*)layout());
-	pLayout->addWidget(m_pPlot.get(), pLayout->rowCount(), 0, 1, pLayout->columnCount());
-	resize(size().width(), size().height()*1.25);
+	setOptions(QFileDialog::DontUseNativeDialog);
+	QGridLayout *pLayout = (QGridLayout*)layout();
+	if(pLayout)
+	{
+		pLayout->addWidget(m_pPlot.get(), pLayout->rowCount(), 0, 1, pLayout->columnCount());
+		resize(size().width(), size().height()*1.25);
+	}
 
 #if QT_VER >= 5
 	QObject::connect(this, &FilePreviewDlg::currentChanged,

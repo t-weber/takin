@@ -567,16 +567,11 @@ bool TazDlg::Import()
 
 	std::unique_ptr<QFileDialog> pdlg;
 	if(bShowPreview)
-	{
 		pdlg.reset(new FilePreviewDlg(this, "Import Data File...", &m_settings));
-		pdlg->setOptions(QFileDialog::DontUseNativeDialog);
-	}
 	else
-	{
 		pdlg.reset(new QFileDialog(this, "Import Data File..."));
-		pdlg->setOptions(fileopt);
-	}
 
+	pdlg->setOptions(fileopt);
 	pdlg->setDirectory(strDirLast);
 	pdlg->setFileMode(QFileDialog::ExistingFile);
 	pdlg->setViewMode(QFileDialog::Detail);
