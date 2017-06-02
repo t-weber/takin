@@ -22,12 +22,35 @@ template<class t_real = double>
 struct AtomPos
 {
 	std::string strAtomName;
+
+	// position in fractional units
 	ublas::vector<t_real> vecPos;
 
-	t_real J;		// optional: coupling
+	// optional: coupling
+	t_real J;
 };
 
 
+/**
+ * additional infos for the atom
+ */
+template<class t_real = double>
+struct AtomPosAux
+{
+	// position in angstrom units
+	ublas::vector<t_real> vecPosAA;
+
+	// (supercell) indices of neighbour atoms
+	std::vector<std::vector<std::size_t>> vecIdxNN;
+
+	// coordination polyhedron
+	std::vector<std::vector<ublas::vector<t_real>>> vecPolys;
+};
+
+
+/**
+ * common lattice calculations needed for several program modules
+ */
 template<class t_real = double>
 struct LatticeCommon
 {
@@ -39,6 +62,7 @@ struct LatticeCommon
 
 	const SpaceGroup<t_real>* pSpaceGroup = nullptr;
 	const std::vector<AtomPos<t_real>>* pvecAtomPos = nullptr;
+	std::vector<AtomPosAux<t_real>> vecAtomPosAux;
 
 	t_mat matPlane, matPlane_inv;
 	t_mat matPlaneReal, matPlaneReal_inv;
@@ -47,6 +71,11 @@ struct LatticeCommon
 	std::vector<t_vec> vecAllAtoms, vecAllAtomsFrac;
 	std::vector<std::size_t> vecAllAtomTypes;
 	std::vector<std::complex<t_real>> vecScatlens;
+	std::vector<AtomPosAux<t_real>> vecAllAtomPosAux;
+
+	std::vector<t_vec> vecAtomsSC;
+	std::vector<std::size_t> vecIdxSC;
+	std::vector<std::string> vecNamesSC;
 
 	t_vec dir0RLU, dir1RLU;
 	t_mat matA, matB;
@@ -56,6 +85,132 @@ struct LatticeCommon
 
 	LatticeCommon() = default;
 	~LatticeCommon() = default;
+
+
+	/**
+	 * structure factors
+	 */
+	void CalcStructFacts()
+	{
+		if(!pSpaceGroup || !pvecAtomPos)
+			return;
+
+		std::shared_ptr<const ScatlenList<t_real>> lstsl
+			= ScatlenList<t_real>::GetInstance();
+
+		const std::vector<t_mat>* pvecSymTrafos = nullptr;
+		if(pSpaceGroup)
+			pvecSymTrafos = &pSpaceGroup->GetTrafos();
+
+		if(pvecSymTrafos && pvecSymTrafos->size() && /*g_bHasFormfacts &&*/
+			g_bHasScatlens && pvecAtomPos && pvecAtomPos->size())
+		{
+			std::vector<t_vec> vecAtoms;
+			std::vector<std::string> vecNames;
+			for(std::size_t iAtom=0; iAtom<pvecAtomPos->size(); ++iAtom)
+			{
+				vecAtoms.push_back((*pvecAtomPos)[iAtom].vecPos);
+				vecNames.push_back((*pvecAtomPos)[iAtom].strAtomName);
+			}
+
+			const t_real dUCSize = 1.;
+			std::tie(vecAllNames, vecAllAtoms, vecAllAtomsFrac, vecAllAtomTypes) =
+			tl::generate_all_atoms<t_mat, t_vec, std::vector>
+				(*pvecSymTrafos, vecAtoms, &vecNames, matA,
+				/*t_real(0), t_real(1)*/ -dUCSize/t_real(2), dUCSize/t_real(2),
+				 g_dEps);
+
+			for(std::size_t iAtom=0; iAtom<vecAllAtoms.size(); ++iAtom)
+			{
+				tl::set_eps_0(vecAllAtoms[iAtom]);
+				tl::set_eps_0(vecAllAtomsFrac[iAtom]);
+			}
+
+			for(const std::string& strElem : vecAllNames)
+			{
+				const typename ScatlenList<t_real>::elem_type* pElem = lstsl->Find(strElem);
+				vecScatlens.push_back(pElem ? pElem->GetCoherent() : std::complex<t_real>(0.,0.));
+				if(!pElem)
+					tl::log_err("Element \"", strElem, "\" not found in scattering length table.",
+						" Using b=0.");
+			}
+		}
+	}
+
+	/**
+	 * super cell & environments
+	 */
+	void CalcSC()
+	{
+		const unsigned iSC = 3;
+		std::vector<std::complex<t_real>> vecDummy;
+		std::tie(vecAtomsSC, std::ignore, vecIdxSC) =
+			tl::generate_supercell<t_vec, std::vector, t_real>
+				(lattice, vecAllAtoms, vecDummy, iSC);
+		for(std::size_t iIdxSC : vecIdxSC)
+			vecNamesSC.push_back((*pvecAtomPos)[vecAllAtomTypes[iIdxSC]].strAtomName);
+
+
+		auto fktgetNN = [this](const t_vec& vecCentre) -> AtomPosAux<t_real>
+		{
+			AtomPosAux<t_real> atomaux;
+
+			atomaux.vecPosAA = vecCentre;
+			if(tl::is_nan_or_inf(vecCentre))
+				tl::log_err("Invalid atomic position: ", vecCentre, ".");
+			tl::set_eps_0(atomaux.vecPosAA, g_dEps);
+
+
+			// neighbours
+			const t_real dEpsShell = 0.01;
+			atomaux.vecIdxNN =
+				tl::get_neighbours<t_vec, std::vector, t_real>
+					(vecAtomsSC, atomaux.vecPosAA, dEpsShell);
+
+
+			// nearest neighbours
+			if(atomaux.vecIdxNN.size() > 1)
+			{
+				std::vector<t_vec> vecNN;
+				for(std::size_t iIdxNN : atomaux.vecIdxNN[1])
+				{
+					t_vec vecThisAA = vecAtomsSC[iIdxNN] - atomaux.vecPosAA;
+					tl::set_eps_0(vecThisAA, g_dEps);
+					//const std::string& strThisAtom = vecNamesSC[iIdxNN];
+
+					vecNN.emplace_back(std::move(vecThisAA));
+				}
+
+
+				// calculate coordination polyhedron if enough next neighbours are in list
+				if(vecNN.size() >= 4)
+				{
+					atomaux.vecPolys = 
+						tl::verts_to_polyhedron<t_vec, std::vector, t_real>(vecNN, g_dEps);
+
+					/*static int iNum = 0;
+					std::ofstream ofstr("/home/tw/tmp/verts_" + tl::var_to_str<int>(iNum++) + ".dat");
+					for(const auto& vert : vecNN)
+						ofstr << vert << "\n";
+					ofstr << "# " << atomaux.vecPolys.size() << " polys\n";*/
+				}
+			}
+
+			return atomaux;
+		};
+
+		// neighbours of all atoms in primitive UC
+		for(const AtomPos<t_real>& atomPos : *pvecAtomPos)
+		{
+			t_vec vecPosAA = tl::mult<t_mat, t_vec>(matA, atomPos.vecPos);
+			vecAtomPosAux.emplace_back(std::move(fktgetNN(vecPosAA)));
+		}
+
+		// neighbours of all atoms in conventional UC
+		for(const t_vec& vecCentre : vecAllAtoms)
+			vecAllAtomPosAux.emplace_back(std::move(fktgetNN(vecCentre)));
+	}
+
 
 	bool Calc(const tl::Lattice<t_real>& lat, const tl::Lattice<t_real>& rec,
 		const tl::Plane<t_real>& plRLU, const tl::Plane<t_real>& plFrac,
@@ -140,49 +295,8 @@ struct LatticeCommon
 		dir1RLU = planeRLU.GetDir1();
 
 
-		// --------------------------------------------------------------------
-		// structure factors
-		std::shared_ptr<const ScatlenList<t_real>> lstsl
-			= ScatlenList<t_real>::GetInstance();
-
-		const std::vector<t_mat>* pvecSymTrafos = nullptr;
-		if(pSpaceGroup)
-			pvecSymTrafos = &pSpaceGroup->GetTrafos();
-
-		if(pvecSymTrafos && pvecSymTrafos->size() && /*g_bHasFormfacts &&*/
-			g_bHasScatlens && pvecAtomPos && pvecAtomPos->size())
-		{
-			std::vector<t_vec> vecAtoms;
-			std::vector<std::string> vecNames;
-			for(std::size_t iAtom=0; iAtom<pvecAtomPos->size(); ++iAtom)
-			{
-				vecAtoms.push_back((*pvecAtomPos)[iAtom].vecPos);
-				vecNames.push_back((*pvecAtomPos)[iAtom].strAtomName);
-			}
-
-			const t_real dUCSize = 1.;
-			std::tie(vecAllNames, vecAllAtoms, vecAllAtomsFrac, vecAllAtomTypes) =
-			tl::generate_all_atoms<t_mat, t_vec, std::vector>
-				(*pvecSymTrafos, vecAtoms, &vecNames, matA,
-				/*t_real(0), t_real(1)*/ -dUCSize/t_real(2), dUCSize/t_real(2),
-				 g_dEps);
-
-			for(std::size_t iAtom=0; iAtom<vecAllAtoms.size(); ++iAtom)
-			{
-				tl::set_eps_0(vecAllAtoms[iAtom]);
-				tl::set_eps_0(vecAllAtomsFrac[iAtom]);
-			}
-
-			for(const std::string& strElem : vecAllNames)
-			{
-				const typename ScatlenList<t_real>::elem_type* pElem = lstsl->Find(strElem);
-				vecScatlens.push_back(pElem ? pElem->GetCoherent() : std::complex<t_real>(0.,0.));
-				if(!pElem)
-					tl::log_err("Element \"", strElem, "\" not found in scattering length table.",
-						" Using b=0.");
-			}
-		}
-		// --------------------------------------------------------------------
+		CalcStructFacts();
+		CalcSC();
 
 		return true;
 	}

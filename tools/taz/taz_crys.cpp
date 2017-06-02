@@ -293,7 +293,7 @@ void TazDlg::CalcPeaks()
 			tl::log_err("Lattice calculations failed.");
 		}
 
-		m_dlgRealParam.CrystalChanged(lattice, recip, pSpaceGroup, &m_vecAtoms);
+		m_dlgRealParam.CrystalChanged(m_latticecommon);
 	}
 	catch(const std::exception& ex)
 	{

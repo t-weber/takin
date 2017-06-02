@@ -15,6 +15,7 @@
 #include "ui/ui_real_params.h"
 #include "libs/globals.h"
 #include "libs/spacegroups/spacegroup.h"
+#include "libs/spacegroups/latticehelper.h"
 #include "tlibs/phys/lattice.h"
 #include "AtomsDlg.h"
 
@@ -42,11 +43,7 @@ class RealParamDlg : public QDialog, Ui::RealParamDlg
 	public slots:
 		void paramsChanged(const RealParams& parms);
 
-		void CrystalChanged(const tl::Lattice<t_real_glob>& latt,
-			const tl::Lattice<t_real_glob>& recip,
-			const SpaceGroup<t_real_glob>* pSG,
-			const std::vector<AtomPos<t_real_glob>>* pAtoms);
-
+		void CrystalChanged(const LatticeCommon<t_real_glob>&);
 		void CalcVecs();
 
 	protected:
