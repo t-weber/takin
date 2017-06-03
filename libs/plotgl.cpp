@@ -141,9 +141,13 @@ void PlotGl::initializeGLThread()
 
 	const t_real vecLightColDiff[] = { 1., 1., 1., 1. };
 	const t_real vecLightColAmb[] = { 0.25, 0.25, 0.25, 1. };
-	const t_real vecLight0[] = { 1., 1., 1., 0. };
+	const t_real vecLightColSpec[] = { 0., 0., 0., 1. };
+
+	t_real dLightDir = 1./std::sqrt(t_real(3));
+	const t_real vecLight0[] = { dLightDir, dLightDir, dLightDir, t_real(0) };
 	tl::gl_traits<t_real>::SetLight(GL_LIGHT0, GL_AMBIENT, vecLightColAmb);
 	tl::gl_traits<t_real>::SetLight(GL_LIGHT0, GL_DIFFUSE, vecLightColDiff);
+	tl::gl_traits<t_real>::SetLight(GL_LIGHT0, GL_SPECULAR, vecLightColSpec);
 	tl::gl_traits<t_real>::SetLight(GL_LIGHT0, GL_POSITION, vecLight0);
 
 
@@ -450,7 +454,7 @@ void PlotGl::paintGLThread()
 		}
 		else
 		{
-			tl::log_warn("Unknown plot object.");
+			tl::log_warn("Unknown plot object at index ", iObjIdx, ".");
 		}
 
 

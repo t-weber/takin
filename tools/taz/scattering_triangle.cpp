@@ -875,9 +875,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	// -------------------------------------------------------------------------
 
 
-	//const t_mat matB = recip.GetMetric();
-
-	const std::string strAA = tl::get_spec_char_utf8("AA") +
+	static const std::string strAA = tl::get_spec_char_utf8("AA") +
 		tl::get_spec_char_utf8("sup-") +
 		tl::get_spec_char_utf8("sup1");
 	std::list<std::vector<t_real>> lstPeaksForKd;

@@ -280,7 +280,8 @@ void TazDlg::CalcPeaks()
 			if(m_pRecip3d)
 				m_pRecip3d->CalcPeaks(m_latticecommon);
 			if(m_pReal3d)
-				m_pReal3d->CalcPeaks(m_latticecommon);
+				m_pReal3d->CalcPeaks(m_sceneRealLattice.GetLattice()->GetWS3D(),
+					m_latticecommon);
 			if(m_pBZ3d)
 				m_pBZ3d->RenderBZ(m_sceneRecip.GetTriangle()->GetBZ3D(),
 					m_latticecommon,

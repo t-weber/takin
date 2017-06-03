@@ -289,6 +289,15 @@ void TazDlg::ExportUCModel()
 		return;
 	}
 
+	RealLattice *pReal = m_sceneRealLattice.GetLattice();
+	if(!pReal) return;
+
+	const auto& ws = pReal->GetWS3D();
+	if(!ws.IsValid())
+	{
+		QMessageBox::critical(this, "Error", "3D unit cell calculation is disabled or results are invalid.");
+		return;
+	}
 
 	SpaceGroup<t_real>* pSpaceGroup = nullptr;
 	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
@@ -392,6 +401,20 @@ void TazDlg::ExportUCModel()
 		x3d.GetScene().AddChild(pTrafo);
 	}
 
+
+	// unit cell
+	for(const std::vector<t_vec>& vecPoly : ws.GetPolys())
+	{
+		tl::X3dLines *pPoly = new tl::X3dLines();
+		pPoly->SetColor(tl::make_vec({0., 0., 0., 1.}));
+
+		for(const t_vec& vec : vecPoly)
+			pPoly->AddVertex(vec - ws.GetCentralReflex());
+
+		x3d.GetScene().AddChild(pPoly);
+	}
+
+
 	// comment
 	std::ostringstream ostrComment;
 	ostrComment << "Unit cell.\n";
@@ -404,39 +427,11 @@ void TazDlg::ExportUCModel()
 	ostrComment << "Unit cell contains " << m_latticecommon.vecAllAtoms.size() << " atoms.\n";
 	ostrComment << "Super cell contains " << m_latticecommon.vecIdxSC.size() << " atoms.\n";
 
-
-	if(lattice.IsCubic())
-	{
-		const t_real a = editA->text().toDouble();
-		const t_real b = editB->text().toDouble();
-		const t_real c = editC->text().toDouble();
-		//const t_real alpha = tl::d2r(editAlpha->text().toDouble());
-		//const t_real beta = tl::d2r(editBeta->text().toDouble());
-		//const t_real gamma = tl::d2r(editGamma->text().toDouble());
-
-		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
-		pTrafo->SetScale(tl::make_vec<t_vec>({a,b,c}));
-
-		tl::Cube<t_vec> cube;
-		for(std::size_t iPoly=0; iPoly<cube.GetPolyCount(); ++iPoly)
-		{
-			auto *pPoly = new tl::X3dLines() /*tl::X3dPolygon()*/;
-			pPoly->SetColor(tl::make_vec({0., 0., 0., 1.}));
-
-			for(const t_vec& vecVert : cube.GetPoly(iPoly))
-				pPoly->AddVertex(t_real(0.5)*vecVert);
-
-			pTrafo->AddChild(pPoly);
-		}
-
-		x3d.GetScene().AddChild(pTrafo);
-	}
-
-
 	tl::log_info(ostrComment.str());
 	std::string strTakin = "\nCreated with Takin " + std::string(TAKIN_VER) + ".\n";
 	strTakin += "Timestamp: " + tl::epoch_to_str<t_real>(tl::epoch<t_real>()) + "\n\n";
 	x3d.SetComment(strTakin + ostrComment.str());
+
 
 	bool bOk = x3d.Save(strFile.toStdString().c_str());
 

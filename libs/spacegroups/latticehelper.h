@@ -185,7 +185,7 @@ struct LatticeCommon
 				// calculate coordination polyhedron if enough next neighbours are in list
 				if(vecNN.size() >= 4)
 				{
-					atomaux.vecPolys = 
+					atomaux.vecPolys =
 						tl::verts_to_polyhedron<t_vec, std::vector, t_real>(vecNN, g_dEps);
 
 					/*static int iNum = 0;

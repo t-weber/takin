@@ -96,7 +96,9 @@ class RealLattice : public QGraphicsItem
 		tl::Kd<t_real_glob> m_kdLattice;
 
 		bool m_bShowWS = 1;
-		tl::Brillouin2D<t_real_glob> m_ws;	// Wigner-Seitz cell
+		tl::Brillouin2D<t_real_glob> m_ws;	// "Wigner-Seitz cell"
+		tl::Brillouin3D<t_real_glob> m_ws3;	// "Wigner-Seitz cell"
+		std::vector<ublas::vector<t_real_glob>> m_vecWS3VertsUnproj, m_vecWS3Verts;
 
 	protected:
 		virtual QRectF boundingRect() const override;
@@ -124,6 +126,8 @@ class RealLattice : public QGraphicsItem
 		t_real_glob GetZoom() const { return m_dZoom; }
 
 		void SetWSVisible(bool bVisible);
+		const tl::Brillouin3D<t_real_glob>& GetWS3D() const { return m_ws3; }
+		const std::vector<ublas::vector<t_real_glob>>& GetWS3DPlaneVerts() const { return m_vecWS3VertsUnproj; }
 
 		const tl::Kd<t_real_glob>& GetKdLattice() const { return m_kdLattice; }
 

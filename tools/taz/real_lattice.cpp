@@ -133,33 +133,65 @@ void RealLattice::SetWSVisible(bool bVisible)
 	this->update();
 }
 
+
+/**
+ * paint real lattice & unit cell
+ */
 void RealLattice::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
 	painter->setFont(g_fontGfx);
 
-	// Wigner-Seitz cell
-	if(m_bShowWS && m_ws.IsValid())
+	// Brillouin zone
+	if(m_bShowWS && (m_ws.IsValid() || m_ws3.IsValid()))
 	{
 		QPen penOrg = painter->pen();
-		painter->setPen(Qt::lightGray);
+		painter->setPen(Qt::darkGray);
 
-		const t_vec& vecCentral = m_ws.GetCentralReflex() * m_dScaleFactor*m_dZoom;
+		t_vec vecCentral2d;
+		std::vector<QPointF> vecWS3;
+
+		// use 3d BZ code
+		if(g_b3dBZ && m_ws3.IsValid())
+		{
+			// convert vertices to QPointFs
+			vecWS3.reserve(m_vecWS3Verts.size());
+			for(const auto& vecVert : m_vecWS3Verts)
+				vecWS3.push_back(vec_to_qpoint(vecVert * m_dScaleFactor * m_dZoom));
+		}
+		// use 2d BZ code
+		else if(m_ws.IsValid())
+		{
+			vecCentral2d = m_ws.GetCentralReflex() * m_dScaleFactor*m_dZoom;
+		}
+
 		for(const LatticePoint* pPeak : m_vecPeaks)
 		{
 			QPointF peakPos = pPeak->pos();
 			peakPos *= m_dZoom;
 
-			const tl::Brillouin2D<t_real>::t_vertices<t_real>& verts = m_ws.GetVertices();
-			for(const tl::Brillouin2D<t_real>::t_vecpair<t_real>& vertpair : verts)
+			// use 3d BZ code
+			if(g_b3dBZ && m_ws3.IsValid())
 			{
-				const t_vec& vec1 = vertpair.first * m_dScaleFactor * m_dZoom;
-				const t_vec& vec2 = vertpair.second * m_dScaleFactor * m_dZoom;
+				std::vector<QPointF> vecWS3_peak = vecWS3;
+				for(auto& vecVert : vecWS3_peak)
+					vecVert += peakPos;
+				painter->drawPolygon(vecWS3_peak.data(), vecWS3_peak.size());
+			}
+			// use 2d BZ code
+			else if(m_ws.IsValid())
+			{
+				const tl::Brillouin2D<t_real>::t_vertices<t_real>& verts = m_ws.GetVertices();
+				for(const tl::Brillouin2D<t_real>::t_vecpair<t_real>& vertpair : verts)
+				{
+					const t_vec& vec1 = vertpair.first * m_dScaleFactor * m_dZoom;
+					const t_vec& vec2 = vertpair.second * m_dScaleFactor * m_dZoom;
 
-				QPointF pt1 = vec_to_qpoint(vec1 - vecCentral) + peakPos;
-				QPointF pt2 = vec_to_qpoint(vec2 - vecCentral) + peakPos;
+					QPointF pt1 = vec_to_qpoint(vec1 - vecCentral2d) + peakPos;
+					QPointF pt2 = vec_to_qpoint(vec2 - vecCentral2d) + peakPos;
 
-				QLineF lineBZ(pt1, pt2);
-				painter->drawLine(lineBZ);
+					QLineF lineWS(pt1, pt2);
+					painter->drawLine(lineWS);
+				}
 			}
 		}
 
@@ -167,6 +199,10 @@ void RealLattice::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWid
 	}
 }
 
+
+/**
+ * calculate real space representation
+ */
 void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 {
 	ClearPeaks();
@@ -175,10 +211,13 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 	m_matPlane = latticecommon.matPlaneReal;
 	m_matPlane_inv = latticecommon.matPlaneReal_inv;
 
+	m_ws.SetEpsilon(g_dEps);
+	m_ws3.SetEpsilon(g_dEps);
+
 	// central peak for WS cell calculation
 	ublas::vector<int> veciCent = tl::make_vec({0.,0.,0.});
 
-	const std::string strAA = tl::get_spec_char_utf8("AA");
+	static const std::string strAA = tl::get_spec_char_utf8("AA");
 
 	// --------------------------------------------------------------------
 	// atom positions in unit cell
@@ -237,6 +276,15 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 				const t_vec vecPeakHKL = tl::make_vec<t_vec>({h,k,l});
 				t_vec vecPeak = m_lattice.GetPos(h,k,l);
 
+				// 3d unit cell
+				if(g_b3dBZ)
+				{
+					if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
+						m_ws3.SetCentralReflex(vecPeak, &vecPeakHKL);
+					else if(std::abs(ih-veciCent[0]) <= 2 && std::abs(ik-veciCent[1]) <= 2 && std::abs(il-veciCent[2]) <= 2)
+						m_ws3.AddReflex(vecPeak, &vecPeakHKL);
+				}
+
 				// add peak in A and in fractional units
 				lstPeaksForKd.push_back(std::vector<t_real>{vecPeak[0],vecPeak[1],vecPeak[2], h,k,l});
 
@@ -273,24 +321,53 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 					m_scene.addItem(pPeak);
 
 
-					// Wigner-Seitz cell
-					if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
+					// 2d unit cell
+					if(!g_b3dBZ)
 					{
-						t_vec vecCentral = tl::make_vec({dX, dY});
-						//log_debug("Central ", ih, ik, il, ": ", vecCentral);
-						m_ws.SetCentralReflex(vecCentral, &vecPeakHKL);
-					}
-					// TODO: check if 2 next neighbours is sufficient for all space groups
-					else if(std::abs(ih-veciCent[0])<=2 && std::abs(ik-veciCent[1])<=2
-						&& std::abs(il-veciCent[2])<=2)
-					{
-						t_vec vecN = tl::make_vec({dX, dY});
-						m_ws.AddReflex(vecN, &vecPeakHKL);
+						if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
+						{
+							t_vec vecCentral = tl::make_vec({dX, dY});
+							//log_debug("Central ", ih, ik, il, ": ", vecCentral);
+							m_ws.SetCentralReflex(vecCentral, &vecPeakHKL);
+						}
+						// TODO: check if 2 next neighbours is sufficient for all space groups
+						else if(std::abs(ih-veciCent[0])<=2 && std::abs(ik-veciCent[1])<=2
+							&& std::abs(il-veciCent[2])<=2)
+						{
+							t_vec vecN = tl::make_vec({dX, dY});
+							m_ws.AddReflex(vecN, &vecPeakHKL);
+						}
 					}
 				}
 			}
 
-	m_ws.CalcBZ();
+	if(g_b3dBZ)
+	{
+		m_ws3.CalcBZ();
+
+		// ----------------------------------------------------------------
+		// calculate intersection with real plane
+		tl::Plane<t_real> planeBZ3 = tl::Plane<t_real>(m_ws3.GetCentralReflex(),
+			latticecommon.planeReal.GetNorm());
+
+		std::tie(std::ignore, m_vecWS3VertsUnproj) = m_ws3.GetIntersection(planeBZ3);
+
+		for(const t_vec& _vecWS3Vert : m_vecWS3VertsUnproj)
+		{
+			t_vec vecWS3Vert = ublas::prod(latticecommon.matPlaneReal_inv, _vecWS3Vert - m_ws3.GetCentralReflex());
+			vecWS3Vert.resize(2, true);
+			vecWS3Vert[1] = -vecWS3Vert[1];
+
+			m_vecWS3Verts.push_back(vecWS3Vert);
+		}
+		// ----------------------------------------------------------------
+
+	}
+	else
+	{
+		m_ws.CalcBZ();
+	}
+
 	//for(LatticePoint* pPeak : m_vecPeaks)
 	//	pPeak->SetBZ(&m_ws);
 
@@ -312,6 +389,10 @@ t_vec RealLattice::GetHKLFromPlanePos(t_real x, t_real y) const
 void RealLattice::ClearPeaks()
 {
 	m_ws.Clear();
+	m_ws3.Clear();
+	
+	m_vecWS3VertsUnproj.clear();
+	m_vecWS3Verts.clear();
 
 	for(LatticePoint*& pPeak : m_vecPeaks)
 	{
