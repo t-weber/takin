@@ -10,6 +10,7 @@
 
 #include <QDialog>
 #include <QSettings>
+#include "tlibs/helper/boost_hacks.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <vector>
 #include <string>

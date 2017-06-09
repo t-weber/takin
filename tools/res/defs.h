@@ -9,7 +9,7 @@
 #define __RESO_DEFS_H__
 
 #include "libs/globals.h"
-
+#include "tlibs/helper/boost_hacks.h"
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>

@@ -12,6 +12,8 @@
 
 #include <list>
 #include <unordered_map>
+
+#include "tlibs/helper/boost_hacks.h"
 #include <boost/numeric/ublas/vector.hpp>
 
 #include "tlibs/math/math.h"

@@ -346,7 +346,7 @@ void TazDlg::VarsChanged(const CrystalOptions& crys, const TriangleOptions& tria
 	if(crys.bChangedSpacegroup)
 	{
 		editSpaceGroupsFilter->clear();
-		int iSGIdx = comboSpaceGroups->findText(crys.strSpacegroup.c_str());
+		int iSGIdx = comboSpaceGroups->findText(crys.strSpacegroup.c_str(), Qt::MatchContains /*| Qt::MatchCaseSensitive*/);
 		if(iSGIdx >= 0)
 			comboSpaceGroups->setCurrentIndex(iSGIdx);
 		else

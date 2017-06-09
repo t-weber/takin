@@ -39,7 +39,7 @@ USE_GIL = 1
 
 # compile the python or julia interfaces?
 USE_PY = 1
-USE_JL = 0
+USE_JL = 1
 
 # enable the plugin interface?
 USE_PLUGINS = 1
@@ -57,12 +57,15 @@ USE_FRAMEWORKS = 0
 NON_STANDALONE_MINUIT_HACK = 1
 
 
-# set possible system-dependent library suffixes
+# set possible system-dependent library suffixes...
 BOOST_SUFFIX = 
 #BOOST_SUFFIX = -mt
 #QWT5_SUFFIX = 
 QWT5_SUFFIX = -qt4
 #QWT5_SUFFIX = 5-qt4
+
+# ... and prefixes
+JL_APP = /Applications/Julia-0.5.app/Contents/Resources/julia
 # -----------------------------------------------------------------------------
 
 
@@ -264,7 +267,7 @@ endif
 
 
 
-INC = ${QT_INC} ${QWT_INC} -I . \
+INC = ${QT_INC} ${QWT_INC} -I . -I ./3rdparty/ \
 	-I/usr/local/opt/minuit2/include/Minuit2 \
 	-I/opt/local/include -I/opt/local/include/GL \
 	-I/usr/local/include -I/usr/local/include/GL \
@@ -353,7 +356,7 @@ endif
 
 ifeq (${USE_FADDEEVA}, 1)
 	FAD_DEFS += -DHAS_COMPLEX_ERF
-	FAD_LIBS += /usr/local/include/Faddeeva.cc
+	FAD_LIBS += ./3rdparty/Faddeeva.cc
 else
 	FAD_DEFS =
 	FAD_LIBS =
@@ -372,9 +375,9 @@ else
 endif
 
 ifeq ($(USE_JL), 1)
-	JL_LIBS = -ljulia
+	JL_LIBS = -L${JL_APP}/lib -ljulia
 	JL_OBJS = obj/sqw_jl.o 
-	JL_INC = /usr/include/julia
+	JL_INC = -I/usr/include/julia -I${JL_APP}/include/julia
 else
 	JL_LIBS =
 	JL_OBJS =
@@ -720,7 +723,7 @@ obj/sqwfact.o: tools/monteconvo/sqwfactory.cpp tools/monteconvo/sqwfactory.h \
 obj/sqw_py.o: tools/monteconvo/sqw_py.cpp tools/monteconvo/sqw_py.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/sqw_jl.o: tools/monteconvo/sqw_jl.cpp tools/monteconvo/sqw_jl.h
-	${CC} ${FLAGS} -I${JL_INC} -DNO_QT -c -o $@ $<
+	${CC} ${FLAGS} ${JL_INC} -DNO_QT -c -o $@ $<
 obj/tasreso.o: tools/monteconvo/TASReso.cpp tools/monteconvo/TASReso.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/posextract.o: tools/posextract/posextract.cpp

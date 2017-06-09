@@ -5,6 +5,7 @@
 # @license GPLv2
 #
 
+
 GTAR="$(which gtar)"
 if [ $? -ne 0 ]; then
 	GTAR="$(which gnutar)"
@@ -14,7 +15,9 @@ if [ $? -ne 0 ]; then
 	fi
 fi
 
+
 FINDQWT=http://cmake.org/Wiki/images/2/27/FindQwt.cmake
+FADD=http://ab-initio.mit.edu/Faddeeva
 TANGOICONS=http://tango.freedesktop.org/releases/tango-icon-theme-0.8.90.tar.gz
 SCATLENS=https://www.ncnr.nist.gov/resources/n-lengths/list.html
 MAGFFACT_J0_1=https://www.ill.eu/sites/ccsl/ffacts/ffactnode5.html
@@ -27,6 +30,9 @@ MAGFFACT_J2_3=https://www.ill.eu/sites/ccsl/ffacts/ffactnode11.html
 MAGFFACT_J2_4=https://www.ill.eu/sites/ccsl/ffacts/ffactnode12.html
 
 
+#
+# qwt finder for cmake
+#
 function dl_findqwt
 {
 #	rm -f FindQwt.cmake
@@ -36,12 +42,32 @@ function dl_findqwt
 
 		if ! wget ${FINDQWT}; then
 			echo -e "Error: Cannot download FindQwt.";
-			exit -1;
+			return -1;
 		fi
 	fi
 }
 
 
+#
+# faddeeva module
+#
+function dl_fadd
+{
+	if [ ! -f 3rdparty/Faddeeva.hh  ]; then
+		echo -e "Downloading Faddeeva library...\n"
+
+		if ! (wget ${FADD}.hh -O 3rdparty/Faddeeva.hh &&
+			wget ${FADD}.cc -O 3rdparty/Faddeeva.cc); then
+			echo -e "Error: Cannot download Faddeeva library.";
+			return -1;
+		fi
+	fi
+}
+
+
+#
+# tango icons
+#
 function dl_tangoicons
 {
 #	rm -f tmp/tango-icon-theme.tar.gz
@@ -51,7 +77,7 @@ function dl_tangoicons
 
 		if ! wget ${TANGOICONS} -O tmp/tango-icon-theme.tar.gz; then
 			echo -e "Error: Cannot download Tango icons.";
-			exit -1;
+			return -1;
 		fi
 	fi
 
@@ -86,6 +112,10 @@ function dl_tangoicons
 	mv -v tmp/*.svg res/icons/
 }
 
+
+#
+# scattering lengths
+#
 function dl_scatlens
 {
 	if [ ! -f tmp/scatlens.html ]; then
@@ -93,7 +123,7 @@ function dl_scatlens
 
 #		if ! wget ${SCATLENS} -O tmp/${SCATLENS##*/}; then
 #			echo -e "Error: Cannot download scattering length list.";
-#			exit -1;
+#			return -1;
 #		fi
 
 		if [ ! -f tmp/${SCATLENS##*/} ]; then
@@ -107,6 +137,10 @@ function dl_scatlens
 	fi
 }
 
+
+#
+# magnetic form factors
+#
 function dl_magffacts
 {
 	if [ ! -f tmp/j2_4.html ]; then
@@ -122,7 +156,7 @@ function dl_magffacts
 #			wget ${MAGFFACT_J2_3} -O tmp/${MAGFFACT_J2_3##*/} &&
 #			wget ${MAGFFACT_J2_4} -O tmp/${MAGFFACT_J2_4##*/}); then
 #			echo -e "Error: Cannot download magnetic form factor lists.";
-#			exit -1;
+#			return -1;
 #		fi
 
 		if [ ! -f tmp/${MAGFFACT_J2_4##*/} ]; then
@@ -151,11 +185,14 @@ function dl_magffacts
 }
 
 
+
 mkdir tmp
 echo -e "--------------------------------------------------------------------------------"
 dl_scatlens
 echo -e "--------------------------------------------------------------------------------"
 dl_magffacts
+echo -e "--------------------------------------------------------------------------------"
+dl_fadd
 echo -e "--------------------------------------------------------------------------------"
 dl_tangoicons
 echo -e "--------------------------------------------------------------------------------"
