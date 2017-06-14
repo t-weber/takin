@@ -135,7 +135,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 		const t_vec& vecThisAtomFrac = lattice.vecAllAtomsFrac[iAtom];
 		std::size_t iCurAtomType = lattice.vecAllAtomTypes[iAtom];
 
-		m_pPlot->PlotSphere(vecThisAtom, 0.1, iCurObjIdx);
+		m_pPlot->PlotSphere(vecThisAtom, 0.1/**0.1*g_dFontSize*/, iCurObjIdx);
 		m_pPlot->SetObjectColor(iCurObjIdx, vecColor[iCurAtomType % vecColor.size()]);
 
 		std::ostringstream ostrTip;
@@ -168,7 +168,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 				//m_pPlot->SetObjectCull(iCurObjIdx, 1);
 				++iCurObjIdx;
 
-				m_pPlot->PlotLines(vecPoly, 2., iCurObjIdx);
+				m_pPlot->PlotLines(vecPoly, 2.*0.1*g_dFontSize, iCurObjIdx);
 				m_pPlot->SetObjectColor(iCurObjIdx, {0., 0., 0., 1.});
 				++iCurObjIdx;
 			}
@@ -184,7 +184,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 
 		if(bShowUCVerts)
 		{
-			m_pPlot->PlotSphere(vec, 0.025, iCurObjIdx);
+			m_pPlot->PlotSphere(vec, 0.025/**0.1*g_dFontSize*/, iCurObjIdx);
 			m_pPlot->SetObjectColor(iCurObjIdx, vecColVertices);
 
 			// label
@@ -220,7 +220,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 	// render edges
 	for(const std::vector<t_vec>& vecPoly : ws.GetPolys())
 	{
-		m_pPlot->PlotLines(vecPoly, 2., iCurObjIdx);
+		m_pPlot->PlotLines(vecPoly, 2.*0.1*g_dFontSize, iCurObjIdx);
 		m_pPlot->SetObjectColor(iCurObjIdx, vecColEdges);
 
 		++iCurObjIdx;

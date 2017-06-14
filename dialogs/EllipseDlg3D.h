@@ -53,6 +53,7 @@ class EllipseDlg3D : public QDialog
 		virtual void showEvent(QShowEvent*) override;
 		virtual void closeEvent(QCloseEvent*) override;
 		virtual void keyPressEvent(QKeyEvent*) override;
+		virtual void accept() override;
 
 	public slots:
 		void SetParams(const EllipseDlgParams& params);

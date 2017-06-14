@@ -71,7 +71,7 @@ protected slots:
 	void GenerateExternal(int iLang=0);
 
 	void UpdateFileList();
-	void FileSelected(QListWidgetItem *pItem, QListWidgetItem *pItemPrev);
+	void FileSelected();
 	void PropSelected(QTableWidgetItem *pItem, QTableWidgetItem *pItemPrev);
 	void SelectDir();
 	void ChangedPath();

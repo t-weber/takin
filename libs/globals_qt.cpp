@@ -17,6 +17,7 @@ QFont g_fontGfx("DejaVu Sans",10);
 std::string g_strFontGL("");
 int g_iFontGLSize = 24;
 
+
 QIcon load_icon(const std::string& strIcon)
 {
 	std::string strFile = find_resource(strIcon);

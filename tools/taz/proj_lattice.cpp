@@ -54,19 +54,19 @@ QRectF ProjLatticePoint::boundingRect() const
 	return QRectF(-5., -5., 10., 10.);
 }
 
-void ProjLatticePoint::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidget*)
+void ProjLatticePoint::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	painter->setFont(g_fontGfx);
-	painter->setBrush(m_color);
-	painter->drawEllipse(QRectF(-m_dRadius, -m_dRadius, m_dRadius*2., m_dRadius*2.));
+	pPainter->setFont(g_fontGfx);
+	pPainter->setBrush(m_color);
+	pPainter->drawEllipse(QRectF(-m_dRadius, -m_dRadius, m_dRadius*2., m_dRadius*2.));
 
 	if(m_strLabel != "")
 	{
-		painter->setPen(m_color);
+		pPainter->setPen(m_color);
 		QRectF rect = boundingRect();
 		rect.setTop(rect.top()+16.5);
-		//painter->drawRect(rect);
-		painter->drawText(rect, Qt::AlignHCenter|Qt::AlignTop, m_strLabel);
+		//pPainter->drawRect(rect);
+		pPainter->drawText(rect, Qt::AlignHCenter|Qt::AlignTop, m_strLabel);
 	}
 }
 
@@ -98,9 +98,9 @@ void ProjLattice::SetZoom(t_real dZoom)
 	m_scene.update();
 }
 
-void ProjLattice::paint(QPainter *painter, const QStyleOptionGraphicsItem*, QWidget*)
+void ProjLattice::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	painter->setFont(g_fontGfx);
+	pPainter->setFont(g_fontGfx);
 }
 
 template<class T = double>

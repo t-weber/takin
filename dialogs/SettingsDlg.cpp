@@ -312,7 +312,12 @@ void SettingsDlg::SetGlobals() const
 	{
 		QFont font;
 		if(font.fromString(strGfxFont))
+		{
 			g_fontGfx = font;
+
+			g_dFontSize = g_fontGfx.pointSizeF();
+			if(g_dFontSize <= 0.) g_dFontSize = 10.;
+		}
 	}
 
 	if(editGLFont->text().length() != 0)
@@ -372,6 +377,9 @@ void SettingsDlg::SelectGfxFont()
 	if(bOk)
 	{
 		g_fontGfx = fontNew;
+		g_dFontSize = g_fontGfx.pointSizeF();
+		if(g_dFontSize <= 0.) g_dFontSize = 10.;
+
 		editGfxFont->setText(fontNew.toString());
 	}
 }

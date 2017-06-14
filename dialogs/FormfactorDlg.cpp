@@ -11,8 +11,6 @@
 #include "tlibs/phys/term.h"
 #include "libs/qthelper.h"
 
-#include <qwt_picker_machine.h>
-
 using t_real = t_real_glob;
 
 
@@ -23,7 +21,8 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 	if(m_pSettings)
 	{
 		QFont font;
-		if(m_pSettings->contains("main/font_gen") && font.fromString(m_pSettings->value("main/font_gen", "").toString()))
+		if(m_pSettings->contains("main/font_gen") &&
+			font.fromString(m_pSettings->value("main/font_gen", "").toString()))
 			setFont(font);
 	}
 
@@ -227,13 +226,33 @@ void FormfactorDlg::SetupMagAtoms()
 	}
 }
 
+// ----------------------------------------------------------------------------
+
+
+t_real FormfactorDlg::GetFormFact(t_real dQ) const
+{
+	if(!m_pCurAtom) return t_real(-1);
+	const unsigned int iAtomOrIon = m_pCurAtom->data(Qt::UserRole).toUInt();
+	if(iAtomOrIon == 0) return t_real(-1);
+	const unsigned int iAtom = m_pCurAtom->data(Qt::UserRole+1).toUInt();
+
+	std::shared_ptr<const FormfactList<t_real>> lstff = FormfactList<t_real>::GetInstance();
+	if((iAtomOrIon==1 && iAtom < lstff->GetNumAtoms()) ||
+		(iAtomOrIon==2 && iAtom < lstff->GetNumIons()))
+	{
+		const Formfact<t_real>& ff = (iAtomOrIon==1 ? lstff->GetAtom(iAtom) : lstff->GetIon(iAtom));
+		const t_real dFF = ff.GetFormfact(dQ);
+		return dFF;
+	}
+
+	return t_real(-1);
+}
+
 
 void FormfactorDlg::AtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 {
-	if(!pItem) return;
-	const unsigned int iAtomOrIon = pItem->data(Qt::UserRole).toUInt();
-	if(iAtomOrIon == 0) return;
-	const unsigned int iAtom = pItem->data(Qt::UserRole+1).toUInt();
+	m_pCurAtom = pItem;
+	if(!m_pCurAtom || !m_pCurAtom->data(Qt::UserRole).toUInt()) return;
 
 	t_real dMinQ = 0.;
 	t_real dMaxQ = 25.;
@@ -244,30 +263,54 @@ void FormfactorDlg::AtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	m_vecQ.reserve(GFX_NUM_POINTS);
 	m_vecFF.reserve(GFX_NUM_POINTS);
 
-	std::shared_ptr<const FormfactList<t_real>> lstff = FormfactList<t_real>::GetInstance();
-	if((iAtomOrIon==1 && iAtom < lstff->GetNumAtoms()) ||
-		(iAtomOrIon==2 && iAtom < lstff->GetNumIons()))
+	for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		const Formfact<t_real>& ff = (iAtomOrIon==1 ? lstff->GetAtom(iAtom) : lstff->GetIon(iAtom));
+		const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(GFX_NUM_POINTS)*t_real(iPt));
+		const t_real dFF = GetFormFact(dQ);
 
-		for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
-		{
-			const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(GFX_NUM_POINTS)*t_real(iPt));
-			const t_real dFF = ff.GetFormfact(dQ);
-
-			m_vecQ.push_back(dQ);
-			m_vecFF.push_back(dFF);
-		}
+		m_vecQ.push_back(dQ);
+		m_vecFF.push_back(dFF);
 	}
 
 	set_qwt_data<t_real>()(*m_plotwrap, m_vecQ, m_vecFF);
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+t_real FormfactorDlg::GetMagFormFact(t_real dQ) const
+{
+	if(!m_pCurMagAtom || !m_pCurMagAtom->data(Qt::UserRole).toUInt())
+		return t_real(-1);
+
+	t_real dL = spinL->value();
+	t_real dS = spinS->value();
+	t_real dJ = spinJ->value();
+	t_real dG = sping->value();
+
+	const unsigned int iAtom = m_pCurMagAtom->data(Qt::UserRole+1).toUInt();
+	const bool b_d_Orbital = m_pCurMagAtom->data(Qt::UserRole+2).toBool();
+
+	std::shared_ptr<const MagFormfactList<t_real>> lstff = MagFormfactList<t_real>::GetInstance();
+	if(iAtom >= lstff->GetNumAtoms())
+		return t_real(-1);
+
+	const MagFormfact<t_real>& ff = lstff->GetAtom(iAtom);
+
+	t_real dFF;
+	if(b_d_Orbital)
+		dFF = ff.GetFormfact(dQ, dG);
+	else
+		dFF = ff.GetFormfact(dQ, dL, dS, dJ);
+	return dFF;
+}
+
+
 void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 {
-	if(!pItem || !pItem->data(Qt::UserRole).toUInt()) return;
-	const unsigned int iAtom = pItem->data(Qt::UserRole+1).toUInt();
-	const bool b_d_Orbital = pItem->data(Qt::UserRole+2).toBool();
+	m_pCurMagAtom = pItem;
+	if(!m_pCurMagAtom || !m_pCurMagAtom->data(Qt::UserRole).toUInt()) return;
 
 	t_real dMinQ = 0.;
 	t_real dMaxQ = 15.;
@@ -278,24 +321,11 @@ void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	m_vecQ_m.reserve(GFX_NUM_POINTS);
 	m_vecFF_m.reserve(GFX_NUM_POINTS);
 
-	t_real dL = spinL->value();
-	t_real dS = spinS->value();
-	t_real dJ = spinJ->value();
-	t_real dG = sping->value();
-
-	std::shared_ptr<const MagFormfactList<t_real>> lstff = MagFormfactList<t_real>::GetInstance();
-	if(iAtom >= lstff->GetNumAtoms()) return;
-
-	const MagFormfact<t_real>& ff = lstff->GetAtom(iAtom);
 
 	for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
 		const t_real dQ = (dMinQ + (dMaxQ - dMinQ)/t_real(GFX_NUM_POINTS)*t_real(iPt));
-		t_real dFF;
-		if(b_d_Orbital)
-			dFF = ff.GetFormfact(dQ, dG);
-		else
-			dFF = ff.GetFormfact(dQ, dL, dS, dJ);
+		const t_real dFF = GetMagFormFact(dQ);
 
 		m_vecQ_m.push_back(dQ);
 		m_vecFF_m.push_back(dFF);
@@ -304,11 +334,13 @@ void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	set_qwt_data<t_real>()(*m_plotwrap_m, m_vecQ_m, m_vecFF_m);
 }
 
+
 void FormfactorDlg::RefreshMagAtom()
 {
 	MagAtomSelected(listMAtoms->currentItem(), nullptr);
 }
 
+// ----------------------------------------------------------------------------
 
 void FormfactorDlg::Calcg()
 {
@@ -350,6 +382,7 @@ void FormfactorDlg::CalcTermSymbol(const QString& qstr)
 	}
 }
 
+// ----------------------------------------------------------------------------
 
 void FormfactorDlg::SearchAtom(const QString& qstr)
 {
@@ -478,10 +511,18 @@ void FormfactorDlg::SetupScatteringLengths()
 
 void FormfactorDlg::cursorMoved(const QPointF& pt)
 {
-	if(tabWidget->currentIndex() == 1)
+	const int iCurTabIdx = tabWidget->currentIndex();
+
+	if(iCurTabIdx == 1 || iCurTabIdx == 2)		// magnetic & atomic form factors
 	{
-		std::wstring strX = std::to_wstring(pt.x());
-		std::wstring strY = std::to_wstring(pt.y());
+		t_real dX = pt.x();
+		std::wstring strX = std::to_wstring(dX);
+		std::wstring strY;
+		
+		if(iCurTabIdx == 1)		// magnetic
+			strY = std::to_wstring(GetMagFormFact(dX));
+		if(iCurTabIdx == 2)		// atomic
+			strY = std::to_wstring(GetFormFact(dX));
 
 		const std::wstring strAA = tl::get_spec_char_utf16("AA") +
 			tl::get_spec_char_utf16("sup-") +
@@ -493,7 +534,7 @@ void FormfactorDlg::cursorMoved(const QPointF& pt)
 
 		labelStatus->setText(QString::fromWCharArray(ostr.str().c_str()));
 	}
-	else if(tabWidget->currentIndex() == 0)
+	else if(iCurTabIdx == 0)		// scattering lengths
 	{
 		std::shared_ptr<const ScatlenList<t_real>> lst = ScatlenList<t_real>::GetInstance();
 
@@ -518,9 +559,18 @@ void FormfactorDlg::cursorMoved(const QPointF& pt)
 
 void FormfactorDlg::closeEvent(QCloseEvent* pEvt)
 {
+	QDialog::closeEvent(pEvt);
+}
+
+
+void FormfactorDlg::accept()
+{
 	if(m_pSettings)
 		m_pSettings->setValue("formfactors/geo", saveGeometry());
+
+	QDialog::accept();
 }
+
 
 
 #include "FormfactorDlg.moc"

@@ -96,7 +96,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 #if QT_VER>=5
 	ScanViewerDlg *pThis = this;
 	QObject::connect(editPath, &QLineEdit::textEdited, pThis, &ScanViewerDlg::ChangedPath);
-	QObject::connect(listFiles, &QListWidget::currentItemChanged, pThis, &ScanViewerDlg::FileSelected);
+	QObject::connect(listFiles, &QListWidget::itemSelectionChanged, pThis, &ScanViewerDlg::FileSelected);
 	QObject::connect(editSearch, &QLineEdit::textEdited, pThis, &ScanViewerDlg::SearchProps);
 	QObject::connect(btnBrowse, &QToolButton::clicked, pThis, &ScanViewerDlg::SelectDir);
 #ifndef NO_FIT
@@ -114,10 +114,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 #else
 	QObject::connect(editPath, SIGNAL(textEdited(const QString&)),
 		this, SLOT(ChangedPath()));
-	//QObject::connect(listFiles, SIGNAL(itemSelectionChanged()),
-	//	this, SLOT(FileSelected()));
-	QObject::connect(listFiles, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-		this, SLOT(FileSelected(QListWidgetItem*, QListWidgetItem*)));
+	QObject::connect(listFiles, SIGNAL(itemSelectionChanged()), this, SLOT(FileSelected()));
 	QObject::connect(editSearch, SIGNAL(textEdited(const QString&)),
 		this, SLOT(SearchProps(const QString&)));
 	QObject::connect(btnBrowse, SIGNAL(clicked(bool)), this, SLOT(SelectDir()));
@@ -242,18 +239,39 @@ void ScanViewerDlg::YAxisSelected(const QString& strLab) { PlotScan(); }
 /**
  * new file selected
  */
-void ScanViewerDlg::FileSelected(QListWidgetItem *pItem, QListWidgetItem *pItemPrev)
+void ScanViewerDlg::FileSelected()
 {
-	//QListWidgetItem *pItem = listFiles->currentItem();
-	if(!pItem) return;
-
-	m_strCurFile = pItem->text().toStdString();
-
+	// all selected items
+	QList<QListWidgetItem*> lstSelected = listFiles->selectedItems();
+	if(lstSelected.size() == 0)
+		return;
 
 	ClearPlot();
+	m_strCurFile = lstSelected.first()->text().toStdString();
+
+	std::vector<std::string> vecStrSelected;
+	for(const QListWidgetItem *pLstItem : lstSelected)
+	{
+		if(!pLstItem) continue;
+		if(pLstItem == lstSelected.first()) continue;
+
+		vecStrSelected.push_back(m_strCurDir + pLstItem->text().toStdString());
+	}
+
+	// first file
 	std::string strFile = m_strCurDir + m_strCurFile;
 	m_pInstr = tl::FileInstrBase<t_real>::LoadInstr(strFile.c_str());
 	if(!m_pInstr) return;
+
+	// merge with other selected files
+	for(const std::string& strOtherFile : vecStrSelected)
+	{
+		std::unique_ptr<tl::FileInstrBase<t_real>> pToMerge(
+			tl::FileInstrBase<t_real>::LoadInstr(strOtherFile.c_str()));
+		if(!pToMerge) continue;
+
+		m_pInstr->MergeWith(pToMerge.get());
+	}
 
 	std::vector<std::string> vecScanVars = m_pInstr->GetScannedVars();
 	std::string strCntVar = m_pInstr->GetCountVar();

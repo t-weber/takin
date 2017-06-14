@@ -128,7 +128,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 
 		if(bShowVerts)
 		{
-			m_pPlot->PlotSphere(vec, 0.025, iCurObjIdx);
+			m_pPlot->PlotSphere(vec, 0.025/**0.1*g_dFontSize*/, iCurObjIdx);
 			m_pPlot->SetObjectColor(iCurObjIdx, vecColVertices);
 
 			// label
@@ -161,7 +161,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 	// render edges
 	for(const std::vector<t_vec>& vecPoly : bz.GetPolys())
 	{
-		m_pPlot->PlotLines(vecPoly, 2., iCurObjIdx);
+		m_pPlot->PlotLines(vecPoly, 2.*0.1*g_dFontSize, iCurObjIdx);
 		m_pPlot->SetObjectColor(iCurObjIdx, vecColEdges);
 
 		++iCurObjIdx;
@@ -170,7 +170,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 	// render scattering plane if available
 	if(pScatPlaneVerts)
 	{
-		m_pPlot->PlotLines(*pScatPlaneVerts, 4., iCurObjIdx);
+		m_pPlot->PlotLines(*pScatPlaneVerts, 4.*0.1*g_dFontSize, iCurObjIdx);
 		//m_pPlot->PlotPoly(*pScatPlaneVerts, tl::make_vec({0.,0.,1.}), iCurObjIdx);
 		m_pPlot->SetObjectColor(iCurObjIdx, vecColScatPlane);
 
@@ -185,7 +185,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 			t_vec vecRLU = ublas::prod(matBinv, vec);
 			tl::set_eps_0(vecRLU);
 
-			m_pPlot->PlotSphere(vec, 0.025, iCurObjIdx);
+			m_pPlot->PlotSphere(vec, 0.025/**0.1*g_dFontSize*/, iCurObjIdx);
 			m_pPlot->SetObjectColor(iCurObjIdx, vecColSymmVerts);
 
 			// label
@@ -202,7 +202,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 	// current q position
 	if(bShowCurq)
 	{
-		m_pPlot->PlotSphere(m_vecq, 0.02, iCurObjIdx);
+		m_pPlot->PlotSphere(m_vecq, 0.02/**0.1*g_dFontSize*/, iCurObjIdx);
 		m_pPlot->SetObjectColor(iCurObjIdx, vecColCurq);
 		m_pPlot->SetObjectAnimation(iCurObjIdx, 1);
 
@@ -238,7 +238,7 @@ void BZ3DDlg::RecipParamsChanged(const RecipParams& recip)
 	{
 		m_pPlot->SetEnabled(0);
 
-		m_pPlot->PlotSphere(m_vecq, 0.02, *m_iqIdx);
+		m_pPlot->PlotSphere(m_vecq, 0.02/**0.1*g_dFontSize*/, *m_iqIdx);
 
 		// current q label
 		std::ostringstream ostrTip;

@@ -28,6 +28,9 @@ bool g_b3dBZ = 1;
 
 unsigned int GFX_NUM_POINTS = 512;
 
+t_real_glob g_dFontSize = 10.;
+
+
 // -----------------------------------------------------------------------------
 
 

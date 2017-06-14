@@ -74,9 +74,14 @@ EllipseDlg3D::~EllipseDlg3D()
 
 void EllipseDlg3D::closeEvent(QCloseEvent* pEvt)
 {
+	QDialog::closeEvent(pEvt);
+}
+
+void EllipseDlg3D::accept()
+{
 	if(m_pSettings)
 		m_pSettings->setValue("reso/ellipsoid3d_geo", saveGeometry());
-	QDialog::closeEvent(pEvt);
+	QDialog::accept();
 }
 
 void EllipseDlg3D::hideEvent(QHideEvent *pEvt)

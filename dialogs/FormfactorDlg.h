@@ -10,9 +10,12 @@
 
 #include <QDialog>
 #include <QSettings>
+
 #include <vector>
 #include <memory>
+
 #include "ui/ui_formfactors.h"
+
 #include "libs/qthelper.h"
 #include "libs/qwthelper.h"
 #include "libs/globals.h"
@@ -20,6 +23,11 @@
 
 class FormfactorDlg : public QDialog, Ui::FormFactorDlg
 { Q_OBJECT
+private:
+	QListWidgetItem *m_pCurAtom = nullptr;
+	QListWidgetItem *m_pCurMagAtom = nullptr;
+
+
 protected:
 	QSettings *m_pSettings = nullptr;
 
@@ -38,9 +46,13 @@ protected:
 
 protected:
 	virtual void closeEvent(QCloseEvent* pEvt) override;
+	virtual void accept() override;
 
 	void SetupAtoms();
 	void SetupMagAtoms();
+
+	t_real_glob GetFormFact(t_real_glob dQ) const;
+	t_real_glob GetMagFormFact(t_real_glob dQ) const;
 
 protected slots:
 	void SearchAtom(const QString& qstr);
