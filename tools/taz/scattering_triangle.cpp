@@ -868,7 +868,9 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	powder.SetRecipLattice(&m_recip);
 
 	m_bz.SetEpsilon(g_dEps);
+	m_bz.SetMaxNN(g_iMaxNN);
 	m_bz3.SetEpsilon(g_dEps);
+	m_bz3.SetMaxNN(g_iMaxNN);
 
 	// -------------------------------------------------------------------------
 	// central peak for BZ calculation

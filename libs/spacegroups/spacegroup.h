@@ -152,6 +152,9 @@ class SpaceGroups
 		std::string s_strSrc, s_strUrl;
 		bool m_bOk = 0;
 
+	protected:
+		bool LoadSpaceGroups(const char* pcFile, bool bMandatory=1);
+
 	public:
 		virtual ~SpaceGroups();
 		static std::shared_ptr<const SpaceGroups<t_real>> GetInstance();

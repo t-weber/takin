@@ -26,7 +26,8 @@ bool g_bHasSpaceGroups = 0;
 bool g_bShowFsq = 1;
 bool g_b3dBZ = 1;
 
-unsigned int GFX_NUM_POINTS = 512;
+std::size_t GFX_NUM_POINTS = 512;
+std::size_t g_iMaxNN = 4;
 
 t_real_glob g_dFontSize = 10.;
 
@@ -51,6 +52,7 @@ void add_resource_path(const std::string& strPath, bool bToBack)
 		s_vecInstallPaths.insert(s_vecInstallPaths.begin()+1, strPath);
 }
 
+
 std::string find_resource(const std::string& strFile, bool bLogErr)
 {
 	for(const std::string& strPrefix : s_vecInstallPaths)
@@ -69,6 +71,7 @@ std::string find_resource(const std::string& strFile, bool bLogErr)
 		tl::log_err("Could not find resource file \"", strFile, "\".");
 	return "";
 }
+
 
 std::vector<std::string> find_resource_dirs(const std::string& strDir, bool bLogErr)
 {

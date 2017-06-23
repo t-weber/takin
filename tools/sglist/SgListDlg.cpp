@@ -48,6 +48,7 @@ SgListDlg::SgListDlg(QWidget *pParent)
 SgListDlg::~SgListDlg()
 {}
 
+
 void SgListDlg::closeEvent(QCloseEvent* pEvt)
 {
 	m_settings.setValue("sglist/geo", saveGeometry());
@@ -80,21 +81,28 @@ void SgListDlg::SetupSpacegroups()
 	std::shared_ptr<const SpaceGroups<t_real>> sgs = SpaceGroups<t_real>::GetInstance();
 	const SpaceGroups<t_real>::t_vecSpaceGroups* pvecSG = sgs->get_space_groups_vec();
 
+	// prevents double insertion of headers if two space groups have the same number
+	bool bAlreadySeen[7] = { 0, 0, 0, 0, 0, 0, 0 };
+	const char* pcHeader[7] = { "Triclinic", "Monoclinic", "Orthorhombic", "Tetragonal",
+		"Trigonal", "Hexagonal", "Cubic" };
+	const unsigned int iStartNr[7] = { 1, 3, 16, 75, 143, 168, 195 };
+
 	// actually: space group TYPE, not space group...
 	for(unsigned int iSG=0; iSG<pvecSG->size(); ++iSG)
 	{
 		const SpaceGroup<t_real>* psg = pvecSG->at(iSG);
 		unsigned int iSgNr = psg->GetNr();
 
-		// list headers
-		if(iSgNr==1) listSGs->addItem(create_header_item("Triclinic"));
-		else if(iSgNr==3) listSGs->addItem(create_header_item("Monoclinic"));
-		else if(iSgNr==16) listSGs->addItem(create_header_item("Orthorhombic"));
-		else if(iSgNr==75) listSGs->addItem(create_header_item("Tetragonal"));
-		else if(iSgNr==143) listSGs->addItem(create_header_item("Trigonal"));
-		else if(iSgNr==168) listSGs->addItem(create_header_item("Hexagonal"));
-		else if(iSgNr==195) listSGs->addItem(create_header_item("Cubic"));
-
+		// crystal system headers
+		for(unsigned int iCrystSys=0; iCrystSys<7; ++iCrystSys)
+		{
+			if(iSgNr==iStartNr[iCrystSys] && !bAlreadySeen[iCrystSys])
+			{
+				listSGs->addItem(create_header_item(pcHeader[iCrystSys]));
+				bAlreadySeen[iCrystSys] = 1;
+				break;
+			}
+		}
 
 		std::ostringstream ostrSg;
 		ostrSg << "No. " << iSgNr << ": " << psg->GetName();

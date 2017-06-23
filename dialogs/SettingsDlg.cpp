@@ -126,6 +126,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupSpin("main/prec", g_iPrec, spinPrecGen),
 		t_tupSpin("main/prec_gfx", g_iPrecGfx, spinPrecGfx),
 		t_tupSpin("main/points_gfx", GFX_NUM_POINTS, spinPtsGfx),
+		t_tupSpin("main/max_neighbours", g_iMaxNN, spinMaxNN),
 		t_tupSpin("main/max_peaks", 10, spinBragg),
 		t_tupSpin("gl/font_size", 24, spinGLFont),
 		t_tupSpin("net/poll", 750, spinNetPoll),
@@ -300,6 +301,7 @@ void SettingsDlg::SetGlobals() const
 	g_dEpsGfx = std::pow(10., -t_real(g_iPrecGfx));
 
 	GFX_NUM_POINTS = spinPtsGfx->value();
+	g_iMaxNN = spinMaxNN->value();
 
 
 	g_bShowFsq = (comboSFact->currentIndex() == 1);

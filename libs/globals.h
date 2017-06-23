@@ -22,7 +22,8 @@ extern unsigned int g_iPrecGfx;
 extern t_real_glob g_dEps;
 extern t_real_glob g_dEpsGfx;
 
-extern unsigned int GFX_NUM_POINTS;
+extern std::size_t GFX_NUM_POINTS;
+extern std::size_t g_iMaxNN;
 
 extern bool g_bHasFormfacts;
 extern bool g_bHasMagFormfacts;

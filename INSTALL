@@ -26,16 +26,9 @@ For example, on *buntu systems, use the following commands:
 
 
 
-Getting Takin and dependencies
-------------------------------
-
-
-Set up takin (if not already downloaded):
-	* wget http://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tastools.git/snapshot/tastools-master.tar.bz2
-	* tar -xjvf tastools-master.tar.bz2
-	* cd tastools-master
-
 Set up other external dependencies:
+------------------------------
+	* cd to Takin dir
 	* ./setup_externals.sh
 
 
@@ -52,17 +45,12 @@ Takin has to be compiled with a fully C++11 compliant compiler, e.g.:
 	* GCC version 4.8 or above
 	* Clang
 
-Optional: Select appropriate Make lists (standard: (2) native, with static tlibs):
-	* ./setup_makelists.sh
-	* If the non-static tlibs is selected, tlibs has to be installed separately.
-
 Make using CMake:
 	* mkdir build
 	* cd build
 	* cmake ..
 	* make
 	* optional: make install (as root)
-
 
 Run program with
 	* takin

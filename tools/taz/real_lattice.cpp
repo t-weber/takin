@@ -219,7 +219,9 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 	m_matPlane_inv = latticecommon.matPlaneReal_inv;
 
 	m_ws.SetEpsilon(g_dEps);
+	m_ws.SetMaxNN(g_iMaxNN);
 	m_ws3.SetEpsilon(g_dEps);
+	m_ws3.SetMaxNN(g_iMaxNN);
 
 	// central peak for WS cell calculation
 	ublas::vector<int> veciCent = tl::make_vec({0.,0.,0.});
