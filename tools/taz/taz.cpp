@@ -478,6 +478,11 @@ TazDlg::TazDlg(QWidget* pParent)
 
 	m_pMenuViewReal->addSeparator();
 
+	QAction *pDeadAngles = new QAction("Dead Angles...", this);
+	m_pMenuViewReal->addAction(pDeadAngles);
+
+	m_pMenuViewReal->addSeparator();
+
 #if !defined NO_3D
 	QAction *pView3DReal = new QAction("3D Unit Cell...", this);
 	pView3DReal->setIcon(load_icon("res/icons/unitcell3d.svg"));
@@ -719,6 +724,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	QObject::connect(pSpuri, SIGNAL(triggered()), this, SLOT(ShowSpurions()));
 	QObject::connect(pDW, SIGNAL(triggered()), this, SLOT(ShowDWDlg()));
 	QObject::connect(pDynPlane, SIGNAL(triggered()), this, SLOT(ShowDynPlaneDlg()));
+	QObject::connect(pDeadAngles, SIGNAL(triggered()), this, SLOT(ShowDeadAnglesDlg()));
 
 #if !defined NO_NET
 	QObject::connect(pConn, SIGNAL(triggered()), this, SLOT(ShowConnectDlg()));
@@ -894,6 +900,7 @@ void TazDlg::DeleteDialogs()
 	if(m_pScanViewer) { delete m_pScanViewer; m_pScanViewer = nullptr; }
 	if(m_pScanPos) { delete m_pScanPos; m_pScanPos = nullptr; }
 	if(m_pAtomsDlg) { delete m_pAtomsDlg; m_pAtomsDlg = nullptr; }
+	if(m_pDeadAnglesDlg) { delete m_pDeadAnglesDlg; m_pDeadAnglesDlg = nullptr; }
 
 #if !defined NO_3D
 	if(m_pRecip3d) { delete m_pRecip3d; m_pRecip3d = 0; }
@@ -1411,6 +1418,32 @@ void TazDlg::RealContextMenu(const QPoint& _pt)
 	QPoint pt = this->m_pviewReal->mapToGlobal(_pt);
 	m_pMenuViewReal->exec(pt);
 }
+
+
+
+//--------------------------------------------------------------------------------
+// obstacles
+
+void TazDlg::ShowDeadAnglesDlg()
+{
+	if(!m_pDeadAnglesDlg)
+	{
+		m_pDeadAnglesDlg = new DeadAnglesDlg(this, &m_settings);
+		QObject::connect(m_pDeadAnglesDlg, SIGNAL(ApplyDeadAngles(const std::vector<DeadAngle<t_real_glob>>&)),
+			this, SLOT(ApplyDeadAngles(const std::vector<DeadAngle<t_real_glob>>&)));
+	}
+
+	m_pDeadAnglesDlg->SetDeadAngles(m_vecDeadAngles);
+	focus_dlg(m_pDeadAnglesDlg);
+}
+
+void TazDlg::ApplyDeadAngles(const std::vector<DeadAngle<t_real>>& vecAngles)
+{
+	m_vecDeadAngles = vecAngles;
+	if(m_sceneReal.GetTasLayout())
+		m_sceneReal.GetTasLayout()->SetDeadAngles(&m_vecDeadAngles);
+}
+
 
 
 //--------------------------------------------------------------------------------

@@ -27,6 +27,7 @@
 #include "tasoptions.h"
 #include "dialogs/RealParamDlg.h"	// for RealParams struct
 #include "dialogs/RecipParamDlg.h"	// for RecipParams struct
+#include "dialogs/DeadAnglesDlg.h"	// for DeadAngle struct
 
 
 class TasLayout;
@@ -73,6 +74,9 @@ class TasLayout : public QGraphicsItem
 		bool m_bRealQVisible = 1;
 		bool m_bAllowChanges = 1;
 
+		const std::vector<DeadAngle<t_real_glob>> *m_pvecDeadAngles = nullptr;
+
+
 	public:
 		t_real_glob GetMonoTwoTheta() const { return m_dMonoTwoTheta; }
 		t_real_glob GetMonoTheta() const { return m_dMonoTwoTheta/2.; }
@@ -86,6 +90,7 @@ class TasLayout : public QGraphicsItem
 
 	protected:
 		virtual QRectF boundingRect() const override;
+
 
 	public:
 		TasLayout(TasLayoutScene& scene);
@@ -110,7 +115,6 @@ class TasLayout : public QGraphicsItem
 		void SetZoom(t_real_glob dZoom);
 		t_real_glob GetZoom() const { return m_dZoom; }
 
-	public:
 		std::vector<TasLayoutNode*> GetNodes();
 		std::vector<std::string> GetNodeNames() const;
 
@@ -119,6 +123,8 @@ class TasLayout : public QGraphicsItem
 
 		void SetRealQVisible(bool bVisible);
 		bool GetRealQVisible() const { return m_bRealQVisible; }
+
+		void SetDeadAngles(const std::vector<DeadAngle<t_real_glob>> *pvecDeadAngles);
 };
 
 

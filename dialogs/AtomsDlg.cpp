@@ -39,7 +39,7 @@ AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableJ)
 		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::J), new QTableWidgetItem("J (meV/K)"));
 	}
 
-	tableAtoms->setColumnWidth(0, 75);
+	tableAtoms->setColumnWidth(int(AtInfo::NAME), 75);
 	btnAdd->setIcon(load_icon("res/icons/list-add.svg"));
 	btnDel->setIcon(load_icon("res/icons/list-remove.svg"));
 
@@ -148,7 +148,7 @@ void AtomsDlg::SendApplyAtoms()
 		if(m_bEnableJ)
 			atom.J = tl::str_to_var<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::J))->text().toStdString());
 
-		vecAtoms.push_back(std::move(atom));
+		vecAtoms.emplace_back(std::move(atom));
 	}
 
 	emit ApplyAtoms(vecAtoms);

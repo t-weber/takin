@@ -70,6 +70,10 @@ void TazDlg::New()
 	triag.bChangedMonoTwoTheta = triag.bChangedAnaTwoTheta = 1;
 
 	m_vecAtoms.clear();
+	m_vecDeadAngles.clear();
+	if(m_sceneReal.GetTasLayout())
+		m_sceneReal.GetTasLayout()->SetDeadAngles(&m_vecDeadAngles);
+
 	m_strCurFile = "";
 	setWindowTitle(s_strTitle.c_str());
 
@@ -166,11 +170,9 @@ bool TazDlg::Load(const char* pcFile)
 	if(bOk)
 		editDescr->setText(strDescr.c_str());
 
-
 	/*// spin boxes
 	for(unsigned int iSpinBox=0; iSpinBox<m_vecSpinBoxesSample.size(); ++iSpinBox)
-	{
-		double dVal = xml.Query<double>((strXmlRoot+m_vecSpinBoxNamesSample[iSpinBox]).c_str(), 0., &bOk);
+		t_real dVal = xml.Query<t_real>((strXmlRoot+m_vecSpinBoxNamesSample[iSpinBox]).c_str(), 0., &bOk);
 		if(bOk)
 			m_vecSpinBoxesSample[iSpinBox]->setValue(dVal);
 	}*/
@@ -188,7 +190,7 @@ bool TazDlg::Load(const char* pcFile)
 	// TAS Layout
 	if(xml.Exists((strXmlRoot + "real").c_str()))
 	{
-		double dRealScale = xml.Query<double>((strXmlRoot + "real/pixels_per_cm").c_str(), 0., &bOk);
+		t_real dRealScale = xml.Query<t_real>((strXmlRoot + "real/pixels_per_cm").c_str(), 0., &bOk);
 		if(bOk)
 			m_sceneReal.GetTasLayout()->SetScaleFactor(dRealScale);
 
@@ -198,8 +200,8 @@ bool TazDlg::Load(const char* pcFile)
 			std::string strNode = m_sceneReal.GetTasLayout()->GetNodeNames()[iNodeReal];
 
 			bool bOkX=0, bOkY=0;
-			double dValX = xml.Query<double>((strXmlRoot + "real/" + strNode + "_x").c_str(), 0., &bOkX);
-			double dValY = xml.Query<double>((strXmlRoot + "real/" + strNode + "_y").c_str(), 0., &bOkY);
+			t_real dValX = xml.Query<t_real>((strXmlRoot + "real/" + strNode + "_x").c_str(), 0., &bOkX);
+			t_real dValY = xml.Query<t_real>((strXmlRoot + "real/" + strNode + "_y").c_str(), 0., &bOkY);
 
 			pNode->setPos(dValX, dValY);
 			++iNodeReal;
@@ -218,7 +220,7 @@ bool TazDlg::Load(const char* pcFile)
 	// scattering triangle
 	if(xml.Exists((strXmlRoot + "recip").c_str()))
 	{
-		double dRecipScale = xml.Query<double>((strXmlRoot + "recip/pixels_per_A-1").c_str(), 0., &bOk);
+		t_real dRecipScale = xml.Query<t_real>((strXmlRoot + "recip/pixels_per_A-1").c_str(), 0., &bOk);
 		if(bOk)
 			m_sceneRecip.GetTriangle()->SetScaleFactor(dRecipScale);
 
@@ -228,8 +230,8 @@ bool TazDlg::Load(const char* pcFile)
 			std::string strNode = m_sceneRecip.GetTriangle()->GetNodeNames()[iNodeRecip];
 
 			bool bOkX=0, bOkY=0;
-			double dValX = xml.Query<double>((strXmlRoot + "recip/" + strNode + "_x").c_str(), 0., &bOkX);
-			double dValY = xml.Query<double>((strXmlRoot + "recip/" + strNode + "_y").c_str(), 0., &bOkY);
+			t_real dValX = xml.Query<t_real>((strXmlRoot + "recip/" + strNode + "_x").c_str(), 0., &bOkX);
+			t_real dValY = xml.Query<t_real>((strXmlRoot + "recip/" + strNode + "_y").c_str(), 0., &bOkY);
 
 			pNode->setPos(dValX, dValY);
 			++iNodeRecip;
@@ -290,13 +292,43 @@ bool TazDlg::Load(const char* pcFile)
 
 				std::string strNr = tl::var_to_str(iAtom);
 				atom.strAtomName = xml.Query<std::string>((strXmlRoot + "sample/atoms/" + strNr + "/name").c_str(), "");
-				atom.vecPos[0] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/x").c_str(), 0.);
-				atom.vecPos[1] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/y").c_str(), 0.);
-				atom.vecPos[2] = xml.Query<double>((strXmlRoot + "sample/atoms/" + strNr + "/z").c_str(), 0.);
+				atom.vecPos[0] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/x").c_str(), 0.);
+				atom.vecPos[1] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/y").c_str(), 0.);
+				atom.vecPos[2] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/z").c_str(), 0.);
 
 				m_vecAtoms.push_back(atom);
 			}
+
+			if(m_pAtomsDlg) m_pAtomsDlg->SetAtoms(m_vecAtoms);
 		}
+	}
+
+
+	// dead angles
+	m_vecDeadAngles.clear();
+	unsigned int iNumAngles = xml.Query<unsigned int>((strXmlRoot + "deadangles/num").c_str(), 0, &bOk);
+	if(bOk)
+	{
+		m_vecDeadAngles.reserve(iNumAngles);
+
+		for(unsigned int iAngle=0; iAngle<iNumAngles; ++iAngle)
+		{
+			DeadAngle<t_real> angle;
+
+			std::string strNr = tl::var_to_str(iAngle);
+			angle.dAngleStart = xml.Query<t_real>((strXmlRoot + "deadangles/" + strNr + "/start").c_str(), 0.);
+			angle.dAngleEnd = xml.Query<t_real>((strXmlRoot + "deadangles/" + strNr + "/end").c_str(), 0.);
+			angle.dAngleOffs = xml.Query<t_real>((strXmlRoot + "deadangles/" + strNr + "/offs").c_str(), 0.);
+			angle.iCentreOn = xml.Query<int>((strXmlRoot + "deadangles/" + strNr + "/centreon").c_str(), 1);
+			angle.iRelativeTo = xml.Query<int>((strXmlRoot + "deadangles/" + strNr + "/relativeto").c_str(), 0);
+
+			m_vecDeadAngles.push_back(angle);
+		}
+
+		if(m_pDeadAnglesDlg)
+			m_pDeadAnglesDlg->SetDeadAngles(m_vecDeadAngles);
+		if(m_sceneReal.GetTasLayout())
+			m_sceneReal.GetTasLayout()->SetDeadAngles(&m_vecDeadAngles);
 	}
 
 
@@ -362,6 +394,7 @@ bool TazDlg::Load(const char* pcFile)
 	return true;
 }
 
+
 bool TazDlg::Save()
 {
 	if(m_strCurFile == "")
@@ -423,7 +456,7 @@ bool TazDlg::Save()
 
 		++iNodeReal;
 	}
-	double dRealScale = m_sceneReal.GetTasLayout()->GetScaleFactor();
+	t_real dRealScale = m_sceneReal.GetTasLayout()->GetScaleFactor();
 	mapConf[strXmlRoot + "real/pixels_per_cm"] = tl::var_to_str(dRealScale);
 
 
@@ -440,7 +473,7 @@ bool TazDlg::Save()
 
 		++iNodeRecip;
 	}
-	double dRecipScale = m_sceneRecip.GetTriangle()->GetScaleFactor();
+	t_real dRecipScale = m_sceneRecip.GetTriangle()->GetScaleFactor();
 	mapConf[strXmlRoot + "recip/pixels_per_A-1"] = tl::var_to_str(dRecipScale);
 
 
@@ -476,6 +509,7 @@ bool TazDlg::Save()
 	mapConf[strXmlRoot + "sample/spacegroup"] = strSG;
 
 
+	// atom positions
 	mapConf[strXmlRoot + "sample/atoms/num"] = tl::var_to_str(m_vecAtoms.size());
 	for(unsigned int iAtom=0; iAtom<m_vecAtoms.size(); ++iAtom)
 	{
@@ -492,6 +526,28 @@ bool TazDlg::Save()
 			tl::var_to_str(atom.vecPos[2]);
 	}
 
+
+	// dead angles
+	mapConf[strXmlRoot + "deadangles/num"] = tl::var_to_str(m_vecDeadAngles.size());
+	for(unsigned int iAngle=0; iAngle<m_vecDeadAngles.size(); ++iAngle)
+	{
+		const DeadAngle<t_real>& angle = m_vecDeadAngles[iAngle];
+
+		std::string strAtomNr = tl::var_to_str(iAngle);
+		mapConf[strXmlRoot + "deadangles/" + strAtomNr + "/start"] =
+			tl::var_to_str(angle.dAngleStart);
+		mapConf[strXmlRoot + "deadangles/" + strAtomNr + "/end"] =
+			tl::var_to_str(angle.dAngleEnd);
+		mapConf[strXmlRoot + "deadangles/" + strAtomNr + "/offs"] =
+			tl::var_to_str(angle.dAngleOffs);
+		mapConf[strXmlRoot + "deadangles/" + strAtomNr + "/centreon"] =
+			tl::var_to_str(angle.iCentreOn);
+		mapConf[strXmlRoot + "deadangles/" + strAtomNr + "/relativeto"] =
+			tl::var_to_str(angle.iRelativeTo);
+	}
+
+
+	// meta data
 	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
 	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
 	mapConf[strXmlRoot + "meta/info"] = "Created with Takin.";

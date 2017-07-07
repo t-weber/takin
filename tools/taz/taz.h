@@ -50,6 +50,7 @@
 #include "dialogs/DynPlaneDlg.h"
 #include "dialogs/FormfactorDlg.h"
 #include "dialogs/AtomsDlg.h"
+#include "dialogs/DeadAnglesDlg.h"
 #include "dialogs/AboutDlg.h"
 
 #if !defined NO_3D
@@ -140,6 +141,9 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		std::vector<AtomPos<t_real_glob>> m_vecAtoms;
 		CrystalSystem m_crystalsys = CRYS_NOT_SET;
 
+		std::vector<DeadAngle<t_real_glob>> m_vecDeadAngles;
+
+		// dialogs
 		RecipParamDlg m_dlgRecipParam;
 		RealParamDlg m_dlgRealParam;
 
@@ -156,6 +160,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		DynPlaneDlg* m_pDynPlaneDlg = nullptr;
 		FormfactorDlg* m_pFormfactorDlg = nullptr;
 		AtomsDlg *m_pAtomsDlg = nullptr;
+		DeadAnglesDlg *m_pDeadAnglesDlg = nullptr;
 		AboutDlg *m_pAboutDlg = nullptr;
 
 		ScanViewerDlg *m_pScanViewer = nullptr;
@@ -280,6 +285,8 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void ShowAtomsDlg();
 		void ApplyAtoms(const std::vector<AtomPos<t_real_glob>>& vecAtoms);
 
+		void ShowDeadAnglesDlg();
+		void ApplyDeadAngles(const std::vector<DeadAngle<t_real_glob>>& vecAngles);
 
 		void ShowSpurions();
 		void spurionInfo(const tl::ElasticSpurion& spuris,
