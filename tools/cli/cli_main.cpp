@@ -263,6 +263,7 @@ int main()
 	tl::log_info("This is Takin-CLI, version " TAKIN_VER
 		" (built on " __DATE__ ").");
 	tl::log_info("Please report bugs to tobias.weber@tum.de.");
+	tl::log_info(TAKIN_LICENSE("Takin-CLI"));
 
 	std::string strLine;
 	while(std::getline(istr, strLine))

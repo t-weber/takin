@@ -57,7 +57,7 @@ USE_FRAMEWORKS = 0
 NON_STANDALONE_MINUIT_HACK = 0
 
 # build tools needed for setup?
-BUILD_SETUP_PROGS = 0
+BUILD_SETUP_PROGS = 1
 # build auxiliary tas tools?
 BUILD_AUX_PROGS = 0
 
