@@ -55,6 +55,7 @@ struct TriangleOptions
 
 	t_real_glob dAngleKiVec0;
 
+
 	bool operator==(const TriangleOptions& op) const
 	{
 		if(!tl::float_equal(dTheta, op.dTheta, g_dEps)) return false;
@@ -72,6 +73,16 @@ struct TriangleOptions
 		return bChangedTheta || bChangedTwoTheta || bChangedAnaTwoTheta ||
 			bChangedMonoTwoTheta || bChangedMonoD || bChangedAnaD ||
 			bChangedAngleKiVec0;
+	}
+
+	void clear()
+	{
+		bChangedTheta = bChangedTwoTheta = bChangedAnaTwoTheta =
+			bChangedMonoTwoTheta = bChangedMonoD = bChangedAnaD =
+			bChangedAngleKiVec0 = 0;
+
+		dTheta = dTwoTheta = dAnaTwoTheta = dMonoTwoTheta =
+			dMonoD = dAnaD = dAngleKiVec0 = t_real_glob(0);
 	}
 };
 
@@ -92,6 +103,7 @@ struct CrystalOptions
 
 	std::string strSampleName;
 
+
 	bool IsAnythingChanged() const
 	{
 		return bChangedLattice || bChangedLatticeAngles ||
@@ -99,6 +111,19 @@ struct CrystalOptions
 			bChangedSampleName;
 	}
 
+	void clear()	// struct is no POD, cannot use memset
+	{
+		bChangedLattice = bChangedLatticeAngles =
+			bChangedSpacegroup = bChangedPlane1 =
+			bChangedPlane2 = bChangedSampleName = 0;
+
+		strSpacegroup = strSampleName = "";
+
+		for(char i=0; i<3; ++i)
+		{
+			dLattice[i] = dLatticeAngles[i] = dPlane1[i] = dPlane2[i] = t_real_glob(0);
+		}
+	}
 };
 
 

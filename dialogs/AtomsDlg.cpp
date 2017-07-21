@@ -140,13 +140,13 @@ void AtomsDlg::SendApplyAtoms()
 		AtomPos<t_real> atom;
 		atom.strAtomName = tableAtoms->item(iRow, static_cast<int>(AtInfo::NAME))->text().toStdString();
 		tl::trim(atom.strAtomName);
-		t_real dX = tl::str_to_var<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_X))->text().toStdString());
-		t_real dY = tl::str_to_var<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_Y))->text().toStdString());
-		t_real dZ = tl::str_to_var<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_Z))->text().toStdString());
+		t_real dX = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_X))->text().toStdString());
+		t_real dY = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_Y))->text().toStdString());
+		t_real dZ = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_Z))->text().toStdString());
 		atom.vecPos = tl::make_vec({dX, dY, dZ});
 
 		if(m_bEnableJ)
-			atom.J = tl::str_to_var<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::J))->text().toStdString());
+			atom.J = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::J))->text().toStdString());
 
 		vecAtoms.emplace_back(std::move(atom));
 	}

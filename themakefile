@@ -9,8 +9,8 @@
 # system-specific build flags
 
 # which compiler?
-#CC = gcc
-CC = clang
+CC = gcc
+#CC = clang
 
 # debug or unstable version?
 DO_DEBUG = 0
@@ -54,12 +54,17 @@ USE_CPP11_ABI = 1
 USE_FRAMEWORKS = 0
 
 # is Minuit a non-standalone installation?
-NON_STANDALONE_MINUIT_HACK = 1
+NON_STANDALONE_MINUIT_HACK = 0
 
 # build tools needed for setup?
-BUILD_SETUP_PROGS = 1
+BUILD_SETUP_PROGS = 0
 # build auxiliary tas tools?
-BUILD_AUX_PROGS = 1
+BUILD_AUX_PROGS = 0
+
+
+# local lib/inc overrides
+MYLIB=~/lib
+MYINC=~/include
 
 
 
@@ -164,7 +169,12 @@ DEFINES += -DQT_VER=$(QT_VER)
 
 
 ifeq ($(QT_VER), 5)	# qt 5
-	QT_INC = -I/usr/local/opt/qt5/Frameworks/QtOpenGL.framework/Versions/5/Headers \
+	QT_INC =	-I${MYINC}/qt5 \
+                        -I${MYINC}/qt5/QtCore \
+                        -I${MYINC}/qt5/QtWidgets \
+                        -I${MYINC}/qt5/QtGui \
+                        -I${MYINC}/qt5/QtOpenGL \
+			-I/usr/local/opt/qt5/Frameworks/QtOpenGL.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtWidgets.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtCore.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtGui.framework/Versions/5/Headers \
@@ -180,7 +190,9 @@ ifeq ($(QT_VER), 5)	# qt 5
 			-I/usr/include/qt5/QtGui \
 			-I/usr/include/qt5/QtOpenGL
 
-	QT_LIB = -L/opt/local/libexec/qt5/lib \
+	QT_LIB =	-L${MYLIB}/qt5 \
+			-L${MYLIB}/qt5/lib \
+			-L/opt/local/libexec/qt5/lib \
 			-L/usr/lib64/qt5 \
 			-L/usr/lib/qt5/lib
 	ifeq ($(USE_FRAMEWORKS), 0)
@@ -202,7 +214,14 @@ ifeq ($(QT_VER), 5)	# qt 5
 
 else	# qt4
 
-	QT_INC = -I/usr/local/opt/qt4/Frameworks/QtOpenGL.framework/Versions/4/Headers \
+	QT_INC =	-I${MYINC}/qt4 \
+			-I${MYINC}/qt4/QtCore \
+			-I${MYINC}/qt4/QtGui \
+			-I${MYINC}/qt4/QtOpenGL \
+			-I${MYINC}/QtCore \
+			-I${MYINC}/QtGui \
+			-I${MYINC}/QtOpenGL \
+			-I/usr/local/opt/qt4/Frameworks/QtOpenGL.framework/Versions/4/Headers \
 			-I/usr/local/opt/qt4/Frameworks/QtWidgets.framework/Versions/4/Headers \
 			-I/usr/local/opt/qt4/Frameworks/QtCore.framework/Versions/4/Headers \
 			-I/usr/local/opt/qt4/Frameworks/QtGui.framework/Versions/4/Headers \
@@ -219,7 +238,8 @@ else	# qt4
 			-I/usr/include/QtGui \
 			-I/usr/include/QtOpenGL
 
-	QT_LIB = -L/opt/local/libexec/qt4/lib -L/usr/lib64/qt4 -L/usr/lib/qt4/lib
+	QT_LIB = -L${MYLIB}/qt4 -L${MYLIB}/qt4/lib \
+		-L/opt/local/libexec/qt4/lib -L/usr/lib64/qt4 -L/usr/lib/qt4/lib
 
 	ifeq ($(USE_FRAMEWORKS), 0)
 			QT_LIB += -lQtCore -lQtGui -lQtSvg
@@ -240,22 +260,26 @@ endif
 
 ifeq ($(QWT_VER), 6)
 	ifeq ($(QT_VER), 5)
-		QWT_INC = -I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
-			-I/opt/local/libexec/qt5/include/qwt \
-			-I/usr/include/qt5/qwt \
-			-I/usr/include/qwt-qt5
+		QWT_INC =	-I${MYINC}/qwt \
+				-I${MYINC}/qwt-qt5 \
+				-I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
+				-I/opt/local/libexec/qt5/include/qwt \
+				-I/usr/include/qt5/qwt \
+				-I/usr/include/qwt-qt5
 		ifeq ($(USE_FRAMEWORKS), 0)
 			QWT_LIB = -lqwt-qt5
 		else
 			QWT_LIB = -F/usr/local/opt/qwt/lib -framework qwt
 		endif
 	else
-		QWT_INC = -I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
-			-I/opt/local/libexec/qt4/include/qwt \
-			-I/usr/include/qwt6 \
-			-I/usr/include/qwt \
-			-I/usr/include/qwt-qt4 \
-			-I/usr/local/qwt/include
+		QWT_INC =	-I${MYINC}/qwt \
+				-I${MYINC}/qwt-qt4 \
+				-I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
+				-I/opt/local/libexec/qt4/include/qwt \
+				-I/usr/include/qwt6 \
+				-I/usr/include/qwt \
+				-I/usr/include/qwt-qt4 \
+				-I/usr/local/qwt/include
 		ifeq ($(USE_FRAMEWORKS), 0)
 			QWT_LIB = -L/usr/local/qwt/lib -lqwt
 		else
@@ -263,11 +287,14 @@ ifeq ($(QWT_VER), 6)
 		endif
 	endif
 else
-	QWT_INC = -I/usr/local/opt/qwt/lib/qwt.framework/Versions/5/Headers \
-		-I/usr/include/qwt5 \
-		-I/usr/include/qwt-qt4 \
-		-I/usr/include/qwt5-qt4 \
-		-I/usr/local/qwt/include
+	QWT_INC =	-I${MYINC}/qwt5 \
+			-I${MYINC}/qwt-qt4 \
+			-I${MYINC}/qwt5-qt4 \
+			-I/usr/local/opt/qwt/lib/qwt.framework/Versions/5/Headers \
+			-I/usr/include/qwt5 \
+			-I/usr/include/qwt-qt4 \
+			-I/usr/include/qwt5-qt4 \
+			-I/usr/local/qwt/include
 	ifeq ($(USE_FRAMEWORKS), 0)
 		QWT_LIB = -L/usr/local/qwt/lib -lqwt${QWT5_SUFFIX}
 	else
@@ -277,7 +304,8 @@ endif
 
 
 
-INC = ${QT_INC} ${QWT_INC} -I . -I ./3rdparty/ \
+INC =	-I${MYINC} \
+	${QT_INC} ${QWT_INC} -I . -I ./3rdparty/ \
 	-I/usr/local/opt/minuit2/include/Minuit2 \
 	-I/opt/local/include -I/opt/local/include/GL \
 	-I/usr/local/include -I/usr/local/include/GL \
@@ -289,12 +317,13 @@ INC = ${QT_INC} ${QWT_INC} -I . -I ./3rdparty/ \
 	-I/usr/include/python2.7 -idirafter /usr/include/root \
 	-I/usr/include -I/usr/include/GL
 
-LIB_DIRS = -L/usr/local/opt/minuit2/lib/ \
-	-L/usr/local/opt/freetype/lib \
-	-L/opt/local/lib -L/opt/lib \
-	-L/usr/local/lib -L/usr/local/lib64 \
-	-L/usr/lib64 -L/usr/lib64/root \
-	-L/usr/lib/x86_64-linux-gnu
+LIB_DIRS =	-L${MYLIB} \
+		-L/usr/local/opt/minuit2/lib/ \
+		-L/usr/local/opt/freetype/lib \
+		-L/opt/local/lib -L/opt/lib \
+		-L/usr/local/lib -L/usr/local/lib64 \
+		-L/usr/lib64 -L/usr/lib64/root \
+		-L/usr/lib/x86_64-linux-gnu
 
 
 
@@ -411,7 +440,9 @@ LIBS_TAZ = ${BASIC_LIBS} ${FAD_LIBS} ${QT_LIB} ${QWT_LIB} ${GL_LIBS} \
 	${PY_LIBS} ${JL_LIBS} ${GIL_LIBS} ${DL_LIBS} ${LAPACK_LIBS} ${STD_LIBS}
 
 
+
 # -----------------------------------------------------------------------------
+
 
 
 OBJ_COMMON = obj/log.o obj/debug.o obj/rand.o obj/linalg2.o \

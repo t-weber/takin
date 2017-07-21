@@ -139,9 +139,8 @@ void SicsCache::disconnect()
 void SicsCache::refresh()
 {
 	m_mapCache.clear();
-
-	memset(&m_triagCache, 0, sizeof(m_triagCache));
-	memset(&m_crysCache, 0, sizeof(m_crysCache));
+	m_triagCache.clear();
+	m_crysCache.clear();
 }
 
 void SicsCache::start_poller()
