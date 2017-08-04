@@ -88,6 +88,8 @@ add_definitions(${Boost_CXX_FLAGS})
 add_definitions(-DTLIBS_INC_HDR_IMPLS)
 if(NOT BUILD_FOR_MINGW)
 	add_definitions(-DUSE_MULTI_TEXTURES)
+else()
+	add_definitions(-DNO_HELP_ASSISTANT)
 endif()
 
 

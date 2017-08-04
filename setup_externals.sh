@@ -19,6 +19,7 @@ fi
 FINDQWT=http://cmake.org/Wiki/images/2/27/FindQwt.cmake
 FADD=http://ab-initio.mit.edu/Faddeeva
 TANGOICONS=http://tango.freedesktop.org/releases/tango-icon-theme-0.8.90.tar.gz
+
 SCATLENS=https://www.ncnr.nist.gov/resources/n-lengths/list.html
 MAGFFACT_J0_1=https://www.ill.eu/sites/ccsl/ffacts/ffactnode5.html
 MAGFFACT_J0_2=https://www.ill.eu/sites/ccsl/ffacts/ffactnode6.html
@@ -28,6 +29,12 @@ MAGFFACT_J2_1=https://www.ill.eu/sites/ccsl/ffacts/ffactnode9.html
 MAGFFACT_J2_2=https://www.ill.eu/sites/ccsl/ffacts/ffactnode10.html
 MAGFFACT_J2_3=https://www.ill.eu/sites/ccsl/ffacts/ffactnode11.html
 MAGFFACT_J2_4=https://www.ill.eu/sites/ccsl/ffacts/ffactnode12.html
+
+SCATLENS2=https://raw.githubusercontent.com/neutronpy/neutronpy/master/neutronpy/database/scattering_lengths.json
+MAGFFACT2=https://raw.githubusercontent.com/neutronpy/neutronpy/master/neutronpy/database/magnetic_form_factors.json
+
+ELEMENTS=https://raw.githubusercontent.com/egonw/bodr/master/bodr/elements/elements.xml
+
 
 
 #
@@ -48,6 +55,7 @@ function dl_findqwt
 }
 
 
+
 #
 # faddeeva module
 #
@@ -63,6 +71,7 @@ function dl_fadd
 		fi
 	fi
 }
+
 
 
 #
@@ -113,6 +122,31 @@ function dl_tangoicons
 }
 
 
+
+#
+# periodic table of elements
+#
+function dl_elements
+{
+	if [ ! -f tmp/${ELEMENTS##*/} ]; then
+		echo -e "Obtaining periodic table of elements...\n"
+
+		if ! wget ${ELEMENTS} -O tmp/${ELEMENTS##*/}; then
+			echo -e "Error: Cannot download periodic table.";
+			return -1;
+		fi
+
+		if [ ! -f tmp/${ELEMENTS##*/} ]; then
+			echo -e "Files cannot be automatically downloaded. "
+			echo -e "Please download the following file manually and place them in the ./tmp subfolder:\n"
+			echo -e "\t${ELEMENTS}\n"
+			echo -e "Afterwards, please run this script again.\n"
+		fi
+	fi
+}
+
+
+
 #
 # scattering lengths
 #
@@ -136,6 +170,31 @@ function dl_scatlens
 		fi
 	fi
 }
+
+
+
+#
+# scattering lengths (alternative table)
+#
+function dl_scatlens2
+{
+	if [ ! -f tmp/${SCATLENS2##*/} ]; then
+		echo -e "Obtaining scattering length table...\n"
+
+		if ! wget ${SCATLENS2} -O tmp/${SCATLENS2##*/}; then
+			echo -e "Error: Cannot download scattering length table.";
+			return -1;
+		fi
+
+		if [ ! -f tmp/${SCATLENS2##*/} ]; then
+			echo -e "Files cannot be automatically downloaded. "
+			echo -e "Please download the following file manually and place them in the ./tmp subfolder:\n"
+			echo -e "\t${SCATLENS2}\n"
+			echo -e "Afterwards, please run this script again.\n"
+		fi
+	fi
+}
+
 
 
 #
@@ -186,11 +245,39 @@ function dl_magffacts
 
 
 
+#
+# magnetic form factors (alternative table)
+#
+function dl_magffacts2
+{
+	if [ ! -f tmp/${MAGFFACT2##*/} ]; then
+		echo -e "Obtaining magnetic form factors table...\n"
+
+		if ! wget ${MAGFFACT2} -O tmp/${MAGFFACT2##*/}; then
+			echo -e "Error: Cannot download magnetic form factors table.";
+			return -1;
+		fi
+
+		if [ ! -f tmp/${MAGFFACT2##*/} ]; then
+			echo -e "Files cannot be automatically downloaded. "
+			echo -e "Please download the following file manually and place them in the ./tmp subfolder:\n"
+			echo -e "\t${MAGFFACT2}\n"
+			echo -e "Afterwards, please run this script again.\n"
+		fi
+	fi
+}
+
+
+
 mkdir tmp
 echo -e "--------------------------------------------------------------------------------"
-dl_scatlens
+dl_elements
 echo -e "--------------------------------------------------------------------------------"
-dl_magffacts
+#dl_scatlens
+dl_scatlens2
+echo -e "--------------------------------------------------------------------------------"
+#dl_magffacts
+dl_magffacts2
 echo -e "--------------------------------------------------------------------------------"
 dl_fadd
 echo -e "--------------------------------------------------------------------------------"

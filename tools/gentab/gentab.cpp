@@ -9,6 +9,7 @@
 #include <sstream>
 #include <set>
 #include <limits>
+#include <unordered_map>
 
 #include "tlibs/string/string.h"
 #include "tlibs/file/prop.h"
@@ -40,409 +41,409 @@ unsigned g_iPrec = std::numeric_limits<t_real>::max_digits10-1;
 
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// ugly, but can't be helped for the moment:
-// directly link to the internal clipper coefficients table
-// that lives in clipper/clipper/core/atomsf.cpp
-namespace clipper { namespace data
+#include "gentab_clp.cpp"
+#include "gentab_web.cpp"
+
+// ============================================================================
+
+
+static std::unordered_map<std::string, int> g_mapElems;
+
+/**
+ * periodic table of elements
+ */
+bool gen_elements()
 {
-	extern const struct SFData
+	g_mapElems.clear();
+
+	using t_propval = tl::Prop<std::string>::t_propval;
+
+	tl::Prop<std::string> propIn, propOut;
+	propIn.SetSeparator('/');
+	propOut.SetSeparator('.');
+
+	if(!propIn.Load("tmp/elements.xml", tl::PropType::XML))
 	{
-		const char atomname[8];
-		const t_real a[5], c, b[5], d;  // d is always 0
-	} sfdata[];
-
-	const unsigned int numsfdata = 212;
-}}
-// ----------------------------------------------------------------------------
-
-namespace dat = clipper::data;
-
-
-bool gen_formfacts()
-{
-	tl::Prop<std::string> prop;
-	prop.SetSeparator('.');
-
-	prop.Add("ffacts.source", "Form factor coefficients extracted from Clipper.");
-	prop.Add("ffacts.source_url", "http://www.ysbl.york.ac.uk/~cowtan/clipper/");
-	prop.Add("ffacts.num_atoms", tl::var_to_str(dat::numsfdata));
-
-	for(unsigned int iFF=0; iFF<dat::numsfdata; ++iFF)
-	{
-		std::ostringstream ostr;
-		ostr << "ffacts.atom_" << iFF;
-		std::string strAtom = ostr.str();
-
-		std::string strA, strB;
-		for(int i=0; i<5; ++i)
-		{
-			strA += tl::var_to_str(dat::sfdata[iFF].a[i], g_iPrec) + " ";
-			strB += tl::var_to_str(dat::sfdata[iFF].b[i], g_iPrec) + " ";
-		}
-
-		prop.Add(strAtom + ".name", std::string(dat::sfdata[iFF].atomname));
-		prop.Add(strAtom + ".a", strA);
-		prop.Add(strAtom + ".b", strB);
-		prop.Add(strAtom + ".c", tl::var_to_str(dat::sfdata[iFF].c, g_iPrec));
-	}
-
-
-	if(!prop.Save("res/data/ffacts.xml.gz"))
-	{
-		tl::log_err("Cannot write \"res/data/ffacts.xml.gz\".");
+		tl::log_err("Cannot load periodic table of elements \"tmp/elements.xml\".");
 		return false;
 	}
+
+
+	// iterate over all elements
+	std::vector<t_propval> vecElems = propIn.GetFullChildNodes("/list");
+	std::size_t iElem = 0;
+	for(const t_propval& elem : vecElems)
+	{
+		if(elem.first != "atom") continue;
+
+		try
+		{
+			tl::Prop<std::string> propelem(elem.second, '/');
+
+			std::string strName = propelem.Query<std::string>("<xmlattr>/id", "");
+			if(strName == "" || strName == "Xx") continue;
+
+			t_real dMass = t_real(-1);
+			t_real dRadCov=t_real(-1), dRadVdW=t_real(-1);
+			t_real dEIon=t_real(-1), dEAffin(-1);
+			t_real dTMelt=t_real(-1), dTBoil=t_real(-1);
+			int iNr=-1, iPeriod=-1, iGroup=-1;
+			std::string strConfig, strBlock;
+
+			// iterate over all properties
+			for(auto iterVal=propelem.GetProp().begin(); iterVal!=propelem.GetProp().end(); ++iterVal)
+			{
+				tl::Prop<std::string> propVal(iterVal->second, '/');
+				std::string strKey = propVal.Query<std::string>("<xmlattr>/dictRef", "");
+				std::string strVal = propVal.Query<std::string>("/", "");
+				//std::cout << strKey << " = " << strVal << std::endl;
+
+				if(strKey.find("atomicNumber") != std::string::npos)
+					iNr = tl::str_to_var<int>(strVal);
+				else if(strKey.find("electronicConfiguration") != std::string::npos)
+					strConfig = strVal;
+				else if(strKey.find("periodTableBlock") != std::string::npos)
+					strBlock = strVal;
+				else if(strKey.find("period") != std::string::npos)
+					iPeriod = tl::str_to_var<int>(strVal);
+				else if(strKey.find("group") != std::string::npos)
+					iGroup = tl::str_to_var<int>(strVal);
+				else if(strKey.find("exactMass") != std::string::npos)
+					dMass = tl::str_to_var<t_real>(strVal);
+				else if(strKey.find("radiusCovalent") != std::string::npos)
+					dRadCov = tl::str_to_var<t_real>(strVal);
+				else if(strKey.find("radiusVDW") != std::string::npos)
+					dRadVdW = tl::str_to_var<t_real>(strVal);
+				else if(strKey.find("ionization") != std::string::npos)
+					dEIon = tl::str_to_var<t_real>(strVal);
+				else if(strKey.find("electronAffinity") != std::string::npos)
+					dEAffin = tl::str_to_var<t_real>(strVal);
+				else if(strKey.find("melting") != std::string::npos)
+					dTMelt = tl::str_to_var<t_real>(strVal);
+				else if(strKey.find("boiling") != std::string::npos)
+					dTBoil = tl::str_to_var<t_real>(strVal);
+			}
+
+			std::ostringstream ostr;
+			ostr << "pte.elem_" << iElem;
+			std::string strElem = ostr.str();
+
+			propOut.Add(strElem + ".name", strName);
+			propOut.Add(strElem + ".num", tl::var_to_str(iNr, g_iPrec));
+			propOut.Add(strElem + ".period", tl::var_to_str(iPeriod, g_iPrec));
+			propOut.Add(strElem + ".group", tl::var_to_str(iGroup, g_iPrec));
+			propOut.Add(strElem + ".orbitals", strConfig);
+			propOut.Add(strElem + ".block", strBlock);
+			propOut.Add(strElem + ".m", tl::var_to_str(dMass, g_iPrec));
+			propOut.Add(strElem + ".r_cov", tl::var_to_str(dRadCov, g_iPrec));
+			propOut.Add(strElem + ".r_vdW", tl::var_to_str(dRadVdW, g_iPrec));
+			propOut.Add(strElem + ".E_ion", tl::var_to_str(dEIon, g_iPrec));
+			propOut.Add(strElem + ".E_affin", tl::var_to_str(dEAffin, g_iPrec));
+			propOut.Add(strElem + ".T_melt", tl::var_to_str(dTMelt, g_iPrec));
+			propOut.Add(strElem + ".T_boil", tl::var_to_str(dTBoil, g_iPrec));
+
+			g_mapElems[strName] = iNr;
+		}
+		catch(const std::exception& ex)
+		{
+			tl::log_err("Element ", iElem, ": ", ex.what());
+		}
+
+		++iElem;
+	}
+
+
+	propOut.Add("pte.num_elems", iElem);
+
+	propOut.Add("pte.source", "Periodic table of the elements obtained from the "
+		"<a href=\"http://dx.doi.org/10.1021/ci050400b\">Blue Obelisk Data Repository</a>.");
+	propOut.Add("pte.source_url", "https://github.com/egonw/bodr/blob/master/bodr/elements/elements.xml");
+
+	if(!propOut.Save("res/data/elements.xml.gz"))
+	{
+		tl::log_err("Cannot write \"res/data/elements.xml.gz\".");
+		return false;
+	}
+
 	return true;
 }
+
 
 
 // ============================================================================
 
 
-t_cplx get_number(std::string str)
+struct ffact
 {
-	tl::string_rm<std::string>(str, "(", ")");
+	std::string strName;
 
-	if(tl::string_rm<std::string>(str, "<i>", "</i>"))
-	{	// complex number
-		std::size_t iSign = str.find_last_of("+-");
-		str.insert(iSign, ", ");
-		str.insert(0, "(");
-		str.push_back(')');
-	}
+	t_cplx cCohb, cIncb;
+	t_real dAbsXs, dCohXs;
+	t_real dIncXs, dScatXs;
 
-	tl::trim(str);
-	if(str == "---") str = "";
+	std::string strAbund;
+	t_real dAbOrHL;
+	bool bAb;
+};
 
-
-	t_cplx c;
-	std::istringstream istr(str);
-	istr >> c;
-
-	t_real dR = c.real(), dI = c.imag();
-	tl::set_eps_0(dR); tl::set_eps_0(dI);
-	c.real(dR); c.imag(dI);
-
-	return c;
-}
-
-bool get_abundance_or_hl(const std::string& _str, t_real& dAbOrHL)
+bool gen_scatlens_npy()
 {
-	bool bIsHL = (_str.find("a") != std::string::npos);
-	std::string str = tl::remove_chars(_str, std::string("()a"));
+	tl::Prop<std::string> propIn, propOut;
+	propIn.SetSeparator('/');
+	propOut.SetSeparator('.');
 
-	dAbOrHL = get_number(str).real();
-	if(!bIsHL) dAbOrHL /= t_real(100.);
-	return !bIsHL;
-}
-
-
-bool gen_scatlens()
-{
-	std::ifstream ifstr("tmp/scatlens.html");
-	if(!ifstr)
+	if(!propIn.Load("tmp/scattering_lengths.json", tl::PropType::JSON))
 	{
-		tl::log_err("Cannot open \"tmp/scatlens.html\".");
+		tl::log_err("Cannot load scattering length table \"tmp/scattering_lengths.json\".");
 		return false;
 	}
 
-	bool bTableStarted = 0;
-	std::string strTable;
-	while(!ifstr.eof())
+	std::vector<std::string> vecNuclei = propIn.GetChildNodes("/");
+	std::vector<ffact> vecFfacts;
+
+	for(const std::string& strNucl : vecNuclei)
 	{
-		std::string strLine;
-		std::getline(ifstr, strLine);
+		ffact ff;
 
-		if(!bTableStarted)
-		{
-			std::vector<std::string> vecHdr;
-			tl::get_tokens_seq<std::string, std::string>(strLine, "<th>", vecHdr, 0);
-			if(vecHdr.size() < 9)
-				continue;
-			bTableStarted = 1;
-		}
-		else
-		{
-			// at end of table?
-			if(tl::str_to_lower(strLine).find("/table") != std::string::npos)
-				break;
+		ff.strName = strNucl;
+		ff.cCohb = propIn.Query<t_real>("/" + strNucl + "/Coh b");
+		ff.cIncb = propIn.Query<t_real>("/" + strNucl + "/Inc b");
+		ff.dAbsXs = propIn.Query<t_real>("/" + strNucl + "/Abs xs");
+		ff.dCohXs = propIn.Query<t_real>("/" + strNucl + "/Coh xs");
+		ff.dIncXs = propIn.Query<t_real>("/" + strNucl + "/Inc xs");
+		ff.dScatXs = propIn.Query<t_real>("/" + strNucl + "/Scatt xs");
+		ff.strAbund = propIn.Query<std::string>("/" + strNucl + "/conc");
 
-			strTable += strLine;
+		// complex?
+		auto vecValsCohb = propIn.GetChildValues<t_real>("/" + strNucl + "/Coh b");
+		auto vecValsIncb = propIn.GetChildValues<t_real>("/" + strNucl + "/Inc b");
+
+		if(vecValsCohb.size() >= 2)
+		{
+			ff.cCohb.real(vecValsCohb[0]);
+			ff.cCohb.imag(vecValsCohb[1]);
 		}
+		if(vecValsIncb.size() >= 2)
+		{
+			ff.cIncb.real(vecValsIncb[0]);
+			ff.cIncb.imag(vecValsIncb[1]);
+		}
+
+		ff.dAbOrHL = t_real(0);
+		ff.bAb = get_abundance_or_hl(ff.strAbund, ff.dAbOrHL);
+
+		vecFfacts.emplace_back(std::move(ff));
 	}
-	ifstr.close();
 
 
-
-	std::vector<std::string> vecRows;
-	tl::get_tokens_seq<std::string, std::string>(strTable, "<tr>", vecRows, 0);
-
-
-	tl::Prop<std::string> prop;
-	prop.SetSeparator('.');
-	prop.Add("scatlens.source", "Scattering lengths and cross-sections extracted from NIST table"
-		" (which itself is based on <a href=http://dx.doi.org/10.1080/10448639208218770>this paper</a>).");
-	prop.Add("scatlens.source_url", "https://www.ncnr.nist.gov/resources/n-lengths/list.html");
-
-	unsigned int iAtom = 0;
-	for(const std::string& strRow : vecRows)
+	// sort elements if elements map is not empty
+	if(g_mapElems.size())
 	{
-		if(strRow.length() == 0)
-			continue;
+		std::stable_sort(vecFfacts.begin(), vecFfacts.end(),
+			[](const ffact& ff1, const ffact& ff2) -> bool
+			{
+				std::string strName1 = tl::remove_chars(ff1.strName, std::string("+-0123456789"));
+				std::string strName2 = tl::remove_chars(ff2.strName, std::string("+-0123456789"));
 
+				auto iter1 = g_mapElems.find(strName1);
+				auto iter2 = g_mapElems.find(strName2);
+
+				if(iter1 == g_mapElems.end())
+				{
+					tl::log_err("Element ", strName1, " not in table!");
+					return 0;
+				}
+				if(iter2 == g_mapElems.end())
+				{
+					tl::log_err("Element ", strName2, " not in table!");
+					return 0;
+				}
+
+				return iter1->second < iter2->second;
+			});
+	}
+
+
+	// write database
+	std::size_t iNucl = 0;
+	for(const ffact& ff : vecFfacts)
+	{
 		std::ostringstream ostr;
-		ostr << "scatlens.atom_" << iAtom;
+		ostr << "scatlens.atom_" << iNucl;
 		std::string strAtom = ostr.str();
 
+		propOut.Add(strAtom + ".name", ff.strName);
+		propOut.Add(strAtom + ".coh", tl::var_to_str(ff.cCohb, g_iPrec));
+		propOut.Add(strAtom + ".incoh", tl::var_to_str(ff.cIncb, g_iPrec));
 
-		std::vector<std::string> vecCol;
-		tl::get_tokens_seq<std::string, std::string>(strRow, "<td>", vecCol, 0);
-		if(vecCol.size() < 9)
-		{
-			tl::log_warn("Invalid number of table entries in row \"", strRow, "\".");
-			continue;
-		}
+		propOut.Add(strAtom + ".xsec_coh", tl::var_to_str(ff.dCohXs, g_iPrec));
+		propOut.Add(strAtom + ".xsec_incoh", tl::var_to_str(ff.dIncXs, g_iPrec));
+		propOut.Add(strAtom + ".xsec_scat", tl::var_to_str(ff.dScatXs, g_iPrec));
+		propOut.Add(strAtom + ".xsec_abs", tl::var_to_str(ff.dAbsXs, g_iPrec));
 
-		std::string strName = vecCol[1];
-		tl::trim(strName);
-		if(strName == "") continue;
-
-		t_cplx cCoh = get_number(vecCol[3]);
-		t_cplx cIncoh = get_number(vecCol[4]);
-		t_real dXsecCoh = get_number(vecCol[5]).real();
-		t_real dXsecIncoh = get_number(vecCol[6]).real();
-		t_real dXsecScat = get_number(vecCol[7]).real();
-		t_real dXsecAbsTherm = get_number(vecCol[8]).real();
-
-		t_real dAbOrHL = t_real(0);
-		bool bAb = get_abundance_or_hl(vecCol[2], dAbOrHL);
-
-		prop.Add(strAtom + ".name", strName);
-		prop.Add(strAtom + ".coh", tl::var_to_str(cCoh, g_iPrec));
-		prop.Add(strAtom + ".incoh", tl::var_to_str(cIncoh, g_iPrec));
-
-		prop.Add(strAtom + ".xsec_coh", tl::var_to_str(dXsecCoh, g_iPrec));
-		prop.Add(strAtom + ".xsec_incoh", tl::var_to_str(dXsecIncoh, g_iPrec));
-		prop.Add(strAtom + ".xsec_scat", tl::var_to_str(dXsecScat, g_iPrec));
-		prop.Add(strAtom + ".xsec_abs", tl::var_to_str(dXsecAbsTherm, g_iPrec));
-
-		if(bAb)
-			prop.Add(strAtom + ".abund", tl::var_to_str(dAbOrHL, g_iPrec));
+		if(ff.bAb)
+			propOut.Add(strAtom + ".abund", tl::var_to_str(ff.dAbOrHL, g_iPrec));
 		else
-			prop.Add(strAtom + ".hl", tl::var_to_str(dAbOrHL, g_iPrec));
+			propOut.Add(strAtom + ".hl", tl::var_to_str(ff.dAbOrHL, g_iPrec));
 
-		++iAtom;
+		++iNucl;
 	}
 
-	prop.Add("scatlens.num_atoms", tl::var_to_str(iAtom));
+	propOut.Add("scatlens.num_atoms", tl::var_to_str(vecNuclei.size()));
 
+	propOut.Add("scatlens.source", "Scattering lengths and cross-sections extracted from NeutronPy (by D. Fobes)"
+		" (which itself is based on <a href=\"http://dx.doi.org/10.1080/10448639208218770\">this paper</a>).");
+	propOut.Add("scatlens.source_url", "https://github.com/neutronpy/neutronpy/blob/master/neutronpy/database/scattering_lengths.json");
 
-	if(!prop.Save("res/data/scatlens.xml.gz"))
+	if(!propOut.Save("res/data/scatlens.xml.gz"))
 	{
 		tl::log_err("Cannot write \"res/data/scatlens.xml.gz\".");
 		return false;
 	}
+
 	return true;
 }
+
 
 
 // ============================================================================
 
 
-bool gen_spacegroups()
+struct mag_ffact
 {
-	tl::Prop<std::string> prop;
-	prop.SetSeparator('.');
+	std::string strName;
+	std::string strJ0_A, strJ0_a;
+	std::string strJ2_A, strJ2_a;
+	std::string strJ4_A, strJ4_a;
+};
 
-	const unsigned int iNumSGs = 230;
-	prop.Add("sgroups.source", "Space group data extracted from Clipper.");
-	prop.Add("sgroups.source_url", "http://www.ysbl.york.ac.uk/~cowtan/clipper/");
-	prop.Add("sgroups.num_groups", tl::var_to_str(iNumSGs));
+bool gen_magformfacts_npy()
+{
+	tl::Prop<std::string> propIn, propOut;
+	propIn.SetSeparator('/');
+	propOut.SetSeparator('.');
 
-	for(unsigned int iSG=1; iSG<=iNumSGs; ++iSG)
+	if(!propIn.Load("tmp/magnetic_form_factors.json", tl::PropType::JSON))
 	{
-		SpaceGroupClp sg(iSG);
-
-		std::ostringstream ostr;
-		ostr << "sgroups.group_" << (iSG-1);
-		std::string strGroup = ostr.str();
-
-		prop.Add(strGroup + ".number", tl::var_to_str(iSG));
-		prop.Add(strGroup + ".name", sg.GetName());
-		//prop.Add(strGroup + ".pointgroup", get_pointgroup(sg.GetName()));
-		prop.Add(strGroup + ".lauegroup", sg.GetLaueGroup());
-		//prop.Add(strGroup + ".crystalsys", sg.GetCrystalSystem());
-		//prop.Add(strGroup + ".crystalsysname", sg.GetCrystalSystemName());
-
-
-		std::vector<t_mat> vecTrafos, vecInv, vecPrim, vecCenter;
-		sg.GetSymTrafos(vecTrafos);
-		sg.GetInvertingSymTrafos(vecInv);
-		sg.GetPrimitiveSymTrafos(vecPrim);
-		sg.GetCenteringSymTrafos(vecCenter);
-
-
-		prop.Add(strGroup + ".num_trafos", tl::var_to_str(vecTrafos.size()));
-		unsigned int iTrafo = 0;
-		for(const t_mat& matTrafo : vecTrafos)
-		{
-			bool bIsInv = is_mat_in_container(vecInv, matTrafo);
-			bool bIsPrim = is_mat_in_container(vecPrim, matTrafo);
-			bool bIsCenter = is_mat_in_container(vecCenter, matTrafo);
-
-			std::string strOpts = "; ";
-			if(bIsPrim) strOpts += "p";
-			if(bIsInv) strOpts += "i";
-			if(bIsCenter) strOpts += "c";
-
-			std::ostringstream ostrTrafo;
-			ostrTrafo << strGroup << ".trafo_" << iTrafo;
-			std::string strTrafo = ostrTrafo.str();
-
-			prop.Add(strTrafo, tl::var_to_str(matTrafo, g_iPrec) + strOpts);
-
-			++iTrafo;
-		}
-	}
-
-
-	if(!prop.Save("res/data/sgroups.xml.gz"))
-	{
-		tl::log_err("Cannot write \"res/data/sgroups.xml.gz\".");
+		tl::log_err("Cannot load scattering length table \"tmp/magnetic_form_factors.json\".");
 		return false;
 	}
 
-	return true;
-}
+	std::vector<std::string> vecNuclei = propIn.GetChildNodes("/");
+	std::vector<mag_ffact> vecFfacts;
 
-
-// ============================================================================
-
-
-bool gen_magformfacts()
-{
-	tl::Prop<std::string> propOut;
-	propOut.SetSeparator('.');
-	propOut.Add("magffacts.source", "Magnetic form factor coefficients extracted from ILL table.");
-	propOut.Add("magffacts.source_url", "https://www.ill.eu/sites/ccsl/ffacts/");
-
-	std::size_t iAtom=0;
-	std::set<std::string> setAtoms;
-
-	std::vector<std::string> vecFiles =
-		{"tmp/j0_1.html", "tmp/j0_2.html",
-		"tmp/j0_3.html" , "tmp/j0_4.html",
-
-		"tmp/j2_1.html", "tmp/j2_2.html",
-		"tmp/j2_3.html", "tmp/j2_4.html",};
-
-	for(std::size_t iFile=0; iFile<vecFiles.size(); ++iFile)
+	for(const std::string& strNucl : vecNuclei)
 	{
-		const std::string& strFile = vecFiles[iFile];
-		std::string strJ = iFile < 4 ? "j0" : "j2";
+		auto vecJ0 = propIn.GetChildValues<t_real>("/" + strNucl + "/j0");
+		auto vecJ2 = propIn.GetChildValues<t_real>("/" + strNucl + "/j2");
+		auto vecJ4 = propIn.GetChildValues<t_real>("/" + strNucl + "/j4");
 
-		// switching to j2 files
-		if(iFile==4)
+		mag_ffact ffact;
+		ffact.strName = strNucl;
+		std::string& strJ0A = ffact.strJ0_A;
+		std::string& strJ2A = ffact.strJ2_A;
+		std::string& strJ4A = ffact.strJ4_A;
+		std::string& strJ0a = ffact.strJ0_a;
+		std::string& strJ2a = ffact.strJ2_a;
+		std::string& strJ4a = ffact.strJ4_a;
+
+		for(std::size_t iJ=0; iJ<vecJ0.size(); ++iJ)
 		{
-			iAtom = 0;
-			setAtoms.clear();
-		}
-
-		std::ifstream ifstr(strFile);
-		if(!ifstr)
-		{
-			tl::log_err("Cannot open \"", strFile, "\".");
-			return false;
-		}
-
-		std::string strTable;
-		bool bTableStarted=0;
-		while(!ifstr.eof())
-		{
-			std::string strLine;
-			std::getline(ifstr, strLine);
-			std::string strLineLower = tl::str_to_lower(strLine);
-
-			if(bTableStarted)
+			t_real dVal = vecJ0[iJ];
+			bool bEven = tl::is_even(iJ);
+			if(bEven)
 			{
-				strTable += strLine + "\n";
-				if(strLineLower.find("</table") != std::string::npos)
-				break;
+				if(strJ0A != "") strJ0A += "; ";
+				strJ0A += tl::var_to_str(dVal, g_iPrec);
 			}
 			else
 			{
-				std::size_t iPos = strLineLower.find("<table");
-				if(iPos != std::string::npos)
-				{
-					std::string strSub = strLine.substr(iPos);
-					strTable += strSub + "\n";
-
-					bTableStarted = 1;
-				}
+				if(strJ0a != "") strJ0a += "; ";
+				strJ0a += tl::var_to_str(dVal, g_iPrec);
 			}
 		}
-		if(strTable.length() == 0)
+		for(std::size_t iJ=0; iJ<vecJ2.size(); ++iJ)
 		{
-			tl::log_err("Invalid table: \"", strFile, "\".");
-			return 0;
-		}
-
-		// removing attributes
-		rex::basic_regex<char> rex("<([A-Za-z]*)[A-Za-z0-9\\=\\\"\\ ]*>", rex::regex::ECMAScript);
-		strTable = rex::regex_replace(strTable, rex, "<$1>");
-
-		tl::find_all_and_replace<std::string>(strTable, "<P>", "");
-		tl::find_all_and_replace<std::string>(strTable, "<p>", "");
-		//std::cout << strTable << std::endl;
-
-
-		std::istringstream istrTab(strTable);
-		tl::Prop<std::string> prop;
-		prop.Load(istrTab, tl::PropType::XML);
-		const auto& tab = prop.GetProp().begin()->second;
-
-		auto iter = tab.begin(); ++iter;
-		for(; iter!=tab.end(); ++iter)
-		{
-			auto iterElem = iter->second.begin();
-			std::string strElem = iterElem++->second.data();
-			tl::trim(strElem);
-			if(*strElem.rbegin() == '0')
-				strElem.resize(strElem.length()-1);
-			else
-				strElem += "+";
-
-			if(setAtoms.find(strElem) != setAtoms.end())
+			t_real dVal = vecJ2[iJ];
+			bool bEven = tl::is_even(iJ);
+			if(bEven)
 			{
-				tl::log_warn("Atom ", strElem, " already in set. Ignoring.");
-				continue;
+				if(strJ2A != "") strJ2A += "; ";
+				strJ2A += tl::var_to_str(dVal, g_iPrec);
 			}
-			setAtoms.insert(strElem);
-
-			t_real dA = tl::str_to_var<t_real>(iterElem++->second.data());
-			t_real da = tl::str_to_var<t_real>(iterElem++->second.data());
-			t_real dB = tl::str_to_var<t_real>(iterElem++->second.data());
-			t_real db = tl::str_to_var<t_real>(iterElem++->second.data());
-			t_real dC = tl::str_to_var<t_real>(iterElem++->second.data());
-			t_real dc = tl::str_to_var<t_real>(iterElem++->second.data());
-			t_real dD = tl::str_to_var<t_real>(iterElem->second.data());
-
-			std::ostringstream ostrAtom;
-			ostrAtom << "magffacts." + strJ + ".atom_" << iAtom;
-			propOut.Add(ostrAtom.str() + ".name", strElem);
-			propOut.Add(ostrAtom.str() + ".A", tl::var_to_str(dA, g_iPrec));
-			propOut.Add(ostrAtom.str() + ".a", tl::var_to_str(da, g_iPrec));
-			propOut.Add(ostrAtom.str() + ".B", tl::var_to_str(dB, g_iPrec));
-			propOut.Add(ostrAtom.str() + ".b", tl::var_to_str(db, g_iPrec));
-			propOut.Add(ostrAtom.str() + ".C", tl::var_to_str(dC, g_iPrec));
-			propOut.Add(ostrAtom.str() + ".c", tl::var_to_str(dc, g_iPrec));
-			propOut.Add(ostrAtom.str() + ".D", tl::var_to_str(dD, g_iPrec));
-			++iAtom;
+			else
+			{
+				if(strJ2a != "") strJ2a += "; ";
+				strJ2a += tl::var_to_str(dVal, g_iPrec);
+			}
 		}
+		for(std::size_t iJ=0; iJ<vecJ4.size(); ++iJ)
+		{
+			t_real dVal = vecJ4[iJ];
+			bool bEven = tl::is_even(iJ);
+			if(bEven)
+			{
+				if(strJ4A != "") strJ4A += "; ";
+				strJ4A += tl::var_to_str(dVal, g_iPrec);
+			}
+			else
+			{
+				if(strJ4a != "") strJ4a += "; ";
+				strJ4a += tl::var_to_str(dVal, g_iPrec);
+			}
+		}
+
+		vecFfacts.emplace_back(std::move(ffact));
 	}
 
-	propOut.Add("magffacts.num_atoms", tl::var_to_str(iAtom));
+
+	// sort elements
+	std::stable_sort(vecFfacts.begin(), vecFfacts.end(),
+		[](const mag_ffact& ff1, const mag_ffact& ff2) -> bool
+		{
+			std::string strName1 = tl::remove_chars(ff1.strName, std::string("+-0123456789"));
+			std::string strName2 = tl::remove_chars(ff2.strName, std::string("+-0123456789"));
+
+			auto iter1 = g_mapElems.find(strName1);
+			auto iter2 = g_mapElems.find(strName2);
+
+			if(iter1 == g_mapElems.end())
+				tl::log_err("Element ", strName1, " not in table!");
+			if(iter2 == g_mapElems.end())
+				tl::log_err("Element ", strName2, " not in table!");
+
+			return iter1->second < iter2->second;
+		});
+
+
+	// write database
+	std::size_t iNucl = 0;
+	for(const mag_ffact& ffact : vecFfacts)
+	{
+		std::ostringstream ostr;
+		ostr << "atom_" << iNucl;
+		std::string strAtom = ostr.str();
+
+		propOut.Add("magffacts.j0." + strAtom + ".name", ffact.strName);
+		propOut.Add("magffacts.j2." + strAtom + ".name", ffact.strName);
+		propOut.Add("magffacts.j4." + strAtom + ".name", ffact.strName);
+
+		propOut.Add("magffacts.j0." + strAtom + ".A", ffact.strJ0_A);
+		propOut.Add("magffacts.j0." + strAtom + ".a", ffact.strJ0_a);
+
+		propOut.Add("magffacts.j2." + strAtom + ".A", ffact.strJ2_A);
+		propOut.Add("magffacts.j2." + strAtom + ".a", ffact.strJ2_a);
+
+		propOut.Add("magffacts.j4." + strAtom + ".A", ffact.strJ4_A);
+		propOut.Add("magffacts.j4." + strAtom + ".a", ffact.strJ4_a);
+
+		++iNucl;
+	}
+
+	propOut.Add("magffacts.num_atoms", tl::var_to_str(vecNuclei.size()));
+
+	propOut.Add("magffacts.source", "Magnetic form factor coefficients extracted from NeutronPy (by D. Fobes).");
+	propOut.Add("magffacts.source_url", "https://github.com/neutronpy/neutronpy/blob/master/neutronpy/database/magnetic_form_factors.json");
 
 	if(!propOut.Save("res/data/magffacts.xml.gz"))
 	{
@@ -463,21 +464,45 @@ int main()
 	tl::Log::SetUseTermCmds(0);
 #endif
 
+	std::cout << "Generating periodic table of elements ... ";
+	bool bHasElems = gen_elements();
+	if(bHasElems)
+		std::cout << "OK" << std::endl;
+
 	std::cout << "Generating atomic form factor coefficient table ... ";
 	if(gen_formfacts())
 		std::cout << "OK" << std::endl;
 
 	std::cout << "Generating scattering length table ... ";
-	if(gen_scatlens())
+	if(gen_scatlens_npy())
+	{
 		std::cout << "OK" << std::endl;
+	}
+	else
+	{
+		std::cout << "Generating scattering length table (alternative) ... ";
+		if(gen_scatlens())
+			std::cout << "OK" << std::endl;
+	}
 
 	std::cout << "Generating space group table ... ";
 	if(gen_spacegroups())
 		std::cout << "OK" << std::endl;
 
-	std::cout << "Generating magnetic form factor coefficient table ... ";
-	if(gen_magformfacts())
-		std::cout << "OK" << std::endl;
+	//std::cout << "Generating magnetic form factor coefficient table ... ";
+	//if(gen_magformfacts())
+	//	std::cout << "OK" << std::endl;
+
+	if(bHasElems)
+	{
+		std::cout << "Generating magnetic form factor coefficient table ... ";
+		if(gen_magformfacts_npy())
+			std::cout << "OK" << std::endl;
+	}
+	else
+	{
+		tl::log_err("Cannot create magnetic form factor coefficient table, because required periodic table is invalid.");
+	}
 
 	return 0;
 }

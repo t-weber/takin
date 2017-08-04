@@ -10,6 +10,7 @@
 #include "libs/globals.h"
 
 
+template class PeriodicSystem<t_real_glob>;
 template class FormfactList<t_real_glob>;
 template class MagFormfactList<t_real_glob>;
 template class ScatlenList<t_real_glob>;

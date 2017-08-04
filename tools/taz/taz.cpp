@@ -37,6 +37,8 @@ using t_real = t_real_glob;
 const std::string TazDlg::s_strTitle = "Takin";
 const t_real_glob TazDlg::s_dPlaneDistTolerance = std::cbrt(tl::get_epsilon<t_real_glob>());
 
+//#define NO_HELP_ASSISTANT
+
 
 TazDlg::TazDlg(QWidget* pParent)
 	: QMainWindow(pParent), m_settings("tobis_stuff", "takin"),
@@ -559,7 +561,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	QAction *pFormfactor = nullptr;
 	if(g_bHasFormfacts && g_bHasScatlens)
 	{
-		pFormfactor = new QAction("Form Factors...", this);
+		pFormfactor = new QAction("Elements && Form Factors...", this);
 		pMenuCalc->addAction(pFormfactor);
 	}
 

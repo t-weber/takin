@@ -345,6 +345,22 @@ void NeutronDlg::setupConstants()
 		vecConsts.push_back(std::move(constant));
 	}
 
+
+
+	{
+		std::ostringstream ostrVal;
+		ostrVal << std::scientific;
+		ostrVal << tl::get_amu<t_real>();
+
+		Constant constant;
+		constant.strSymbol = "m_u";
+		constant.strName = "Atomic mass unit";
+		constant.strVal = tl::insert_before<std::string>(ostrVal.str(), "(", "\n");
+
+		vecConsts.push_back(std::move(constant));
+	}
+
+
 	// neutron
 	{
 		std::ostringstream ostrVal;

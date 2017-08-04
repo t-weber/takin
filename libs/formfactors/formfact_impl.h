@@ -17,6 +17,100 @@
 #include "tlibs/string/string.h"
 
 
+
+
+template<typename T> std::shared_ptr<PeriodicSystem<T>> PeriodicSystem<T>::s_inst = nullptr;
+template<typename T> std::mutex PeriodicSystem<T>::s_mutex;
+
+template<typename T>
+PeriodicSystem<T>::PeriodicSystem()
+{
+	std::string strTabFile = find_resource("res/data/elements.xml");
+	tl::log_debug("Loading periodic table from file \"", strTabFile, "\".");
+
+	tl::Prop<std::string> xml;
+	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
+		return;
+
+	const std::size_t iNumDat = xml.Query<std::size_t>("pte/num_elems", 0);
+	if(!iNumDat)
+	{
+		tl::log_err("No data in periodic table of elements.");
+		return;
+	}
+
+	bool bIonStart = 0;
+	for(std::size_t iElem=0; iElem<iNumDat; ++iElem)
+	{
+		elem_type elem;
+		std::string strAtom = "pte/elem_" + tl::var_to_str(iElem);
+
+		elem.strAtom = xml.Query<std::string>((strAtom + "/name").c_str(), "");
+		if(elem.strAtom == "")
+			continue;
+
+		elem.iNr = xml.Query<int>((strAtom + "/num").c_str(), -1.);
+		elem.iPeriod = xml.Query<int>((strAtom + "/period").c_str(), -1.);
+		elem.iGroup = xml.Query<int>((strAtom + "/group").c_str(), -1.);
+
+		elem.strOrbitals = xml.Query<std::string>((strAtom + "/orbitals").c_str(), "");
+		elem.strBlock = xml.Query<std::string>((strAtom + "/block").c_str(), "");
+
+		elem.dMass = xml.Query<value_type>((strAtom + "/m").c_str(), -1.);
+
+		elem.dRadCov = xml.Query<value_type>((strAtom + "/r_cov").c_str(), -1.);
+		elem.dRadVdW = xml.Query<value_type>((strAtom + "/r_vdW").c_str(), -1.);
+
+		elem.dEIon = xml.Query<value_type>((strAtom + "/E_ion").c_str(), -1.);
+		elem.dEAffin = xml.Query<value_type>((strAtom + "/E_affin").c_str(), -1.);
+
+		elem.dTMelt = xml.Query<value_type>((strAtom + "/T_melt").c_str(), -1.);
+		elem.dTBoil = xml.Query<value_type>((strAtom + "/T_boil").c_str(), -1.);
+
+		s_vecAtoms.push_back(std::move(elem));
+	}
+
+	s_strSrc = xml.Query<std::string>("pte/source", "");
+	s_strSrcUrl = xml.Query<std::string>("pte/source_url", "");
+}
+
+template<typename T> PeriodicSystem<T>::~PeriodicSystem() {}
+
+template<typename T>
+std::shared_ptr<const PeriodicSystem<T>> PeriodicSystem<T>::GetInstance()
+{
+	std::lock_guard<std::mutex> _guard(s_mutex);
+
+	if(!s_inst)
+		s_inst = std::shared_ptr<PeriodicSystem<T>>(new PeriodicSystem<T>());
+
+	return s_inst;
+}
+
+template<typename T>
+const typename PeriodicSystem<T>::elem_type* PeriodicSystem<T>::Find(const std::string& strElem) const
+{
+	typedef typename decltype(s_vecAtoms)::const_iterator t_iter;
+
+	// elements
+	t_iter iter = std::find_if(s_vecAtoms.begin(), s_vecAtoms.end(),
+		[&strElem](const elem_type& elem)->bool
+		{
+			//std::cout << elem.GetAtomIdent() << std::endl;
+			return elem.GetAtomIdent() == strElem;
+		});
+	if(iter != s_vecAtoms.end())
+		return &*iter;
+
+	return nullptr;
+}
+
+
+
+// =============================================================================
+
+
+
 template<typename T>
 std::shared_ptr<FormfactList<T>> FormfactList<T>::s_inst = nullptr;
 
@@ -34,7 +128,7 @@ FormfactList<T>::FormfactList()
 	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
-	unsigned int iNumDat = xml.Query<unsigned int>("ffacts/num_atoms", 0);
+	const std::size_t iNumDat = xml.Query<std::size_t>("ffacts/num_atoms", 0);
 	if(!iNumDat)
 	{
 		tl::log_err("No data in atomic form factor list.");
@@ -42,7 +136,7 @@ FormfactList<T>::FormfactList()
 	}
 
 	bool bIonStart = 0;
-	for(unsigned int iSf=0; iSf<iNumDat; ++iSf)
+	for(std::size_t iSf=0; iSf<iNumDat; ++iSf)
 	{
 		elem_type ffact;
 		std::string strAtom = "ffacts/atom_" + tl::var_to_str(iSf);
@@ -112,8 +206,9 @@ const typename FormfactList<T>::elem_type* FormfactList<T>::Find(const std::stri
 
 
 
-
 // =============================================================================
+
+
 
 template<typename T>
 std::shared_ptr<MagFormfactList<T>> MagFormfactList<T>::s_inst = nullptr;
@@ -132,27 +227,30 @@ MagFormfactList<T>::MagFormfactList()
 	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
-	unsigned int iNumDat = xml.Query<unsigned int>("magffacts/num_atoms", 0);
+	const std::size_t iNumDat = xml.Query<std::size_t>("magffacts/num_atoms", 0);
 	if(!iNumDat)
 	{
 		tl::log_err("No data in magnetic form factor list.");
 		return;
 	}
-	for(unsigned int iSf=0; iSf<iNumDat; ++iSf)
+
+	for(std::size_t iSf=0; iSf<iNumDat; ++iSf)
 	{
 		elem_type ffact;
 		std::string strAtom = "magffacts/j0/atom_" + tl::var_to_str(iSf);
 
+		std::string strvecA = xml.Query<std::string>(strAtom + "/A");
+		std::string strveca = xml.Query<std::string>(strAtom + "/a");
+
+		tl::get_tokens<value_type>(strvecA, std::string(";"), ffact.A0);
+		tl::get_tokens<value_type>(strveca, std::string(";"), ffact.a0);
+
 		ffact.strAtom = xml.Query<std::string>((strAtom + "/name").c_str(), "");
-		for(const std::string& strA : {"/A", "/B", "/C", "/D"})
-			ffact.A0.push_back(xml.Query<value_type>((strAtom + strA).c_str(), 0.));
-		for(const std::string& stra : {"/a", "/b", "/c"})
-			ffact.a0.push_back(xml.Query<value_type>((strAtom + stra).c_str(), 0.));
 
 		s_vecAtoms.push_back(std::move(ffact));
 	}
 
-	for(unsigned int iSf=0; iSf<iNumDat; ++iSf)
+	for(std::size_t iSf=0; iSf<iNumDat; ++iSf)
 	{
 		std::string strAtom = "magffacts/j2/atom_" + tl::var_to_str(iSf);
 		std::string strAtomName = xml.Query<std::string>((strAtom + "/name").c_str(), "");
@@ -165,10 +263,11 @@ MagFormfactList<T>::MagFormfactList()
 			continue;
 		}
 
-		for(const std::string& strA : {"/A", "/B", "/C", "/D"})
-			pElem->A2.push_back(xml.Query<value_type>((strAtom + strA).c_str(), 0.));
-		for(const std::string& stra : {"/a", "/b", "/c"})
-			pElem->a2.push_back(xml.Query<value_type>((strAtom + stra).c_str(), 0.));
+		std::string strvecA = xml.Query<std::string>(strAtom + "/A");
+		std::string strveca = xml.Query<std::string>(strAtom + "/a");
+
+		tl::get_tokens<value_type>(strvecA, std::string(";"), pElem->A2);
+		tl::get_tokens<value_type>(strveca, std::string(";"), pElem->a2);
 	}
 
 	s_strSrc = xml.Query<std::string>("magffacts/source", "");
@@ -228,14 +327,14 @@ ScatlenList<T>::ScatlenList()
 	if(!xml.Load(strTabFile.c_str(), tl::PropType::XML))
 		return;
 
-	const unsigned int iNumDat = xml.Query<unsigned int>("scatlens/num_atoms", 0);
+	const std::size_t iNumDat = xml.Query<std::size_t>("scatlens/num_atoms", 0);
 	if(!iNumDat)
 	{
 		tl::log_err("No data in scattering length list.");
 		return;
 	}
 
-	for(unsigned int iSl=0; iSl<iNumDat; ++iSl)
+	for(std::size_t iSl=0; iSl<iNumDat; ++iSl)
 	{
 		ScatlenList<T>::elem_type slen;
 		std::string strAtom = "scatlens/atom_" + tl::var_to_str(iSl);

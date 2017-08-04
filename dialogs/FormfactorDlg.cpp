@@ -1,5 +1,5 @@
 /**
- * Form Factor & Scattering Length Dialog
+ * Form Factors, Scattering Lengths, Elements Dialog
  * @author Tobias Weber <tobias.weber@tum.de>
  * @date nov-2015
  * @license GPLv2
@@ -44,6 +44,8 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 			this, SLOT(AtomSelected(QListWidgetItem*, QListWidgetItem*)));
 		QObject::connect(editFilter, SIGNAL(textEdited(const QString&)),
 			this, SLOT(SearchAtom(const QString&)));
+		for(QDoubleSpinBox* pSpin : {spinXQMin, spinXQMax})
+			QObject::connect(pSpin, SIGNAL(valueChanged(double)), this, SLOT(RefreshAtom()));
 
 		SearchAtom("H");
 	}
@@ -72,7 +74,7 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 
 		for(QDoubleSpinBox* pSpin : {spinL, spinS, spinJ})
 			QObject::connect(pSpin, SIGNAL(valueChanged(double)), this, SLOT(Calcg()));
-		for(QDoubleSpinBox* pSpin : {sping, spinL, spinS, spinJ})
+		for(QDoubleSpinBox* pSpin : {sping, spinL, spinS, spinJ, spinMagQMin, spinMagQMax})
 			QObject::connect(pSpin, SIGNAL(valueChanged(double)), this, SLOT(RefreshMagAtom()));
 
 		QObject::connect(editOrbital, SIGNAL(textEdited(const QString&)),
@@ -107,6 +109,34 @@ FormfactorDlg::FormfactorDlg(QWidget* pParent, QSettings *pSettings)
 	else
 	{
 		tabSc->setEnabled(0);
+	}
+
+
+	// elements
+	if(g_bHasElements)
+	{
+		SetupElements();
+
+		m_plotwrapElem.reset(new QwtPlotWrapper(plotElems));
+		m_plotwrapElem->GetCurve(0)->setTitle("Elements");
+		m_plotwrapElem->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Element");
+		m_plotwrapElem->GetPlot()->setAxisTitle(QwtPlot::yLeft, "");
+		if(m_plotwrapElem->HasTrackerSignal())
+			connect(m_plotwrapElem->GetPicker(), SIGNAL(moved(const QPointF&)), this, SLOT(cursorMoved(const QPointF&)));
+
+		// connections
+		for(QRadioButton *pRadio : {radioElemMass, radioElemRadCov, radioElemRadVdW, 
+			radioElemIon, radioElemAffin, radioElemMelt, radioElemBoil})
+			QObject::connect(pRadio, SIGNAL(toggled(bool)), this, SLOT(PlotElements()));
+
+		QObject::connect(editElemSearch, SIGNAL(textEdited(const QString&)),
+			this, SLOT(SearchElement(const QString&)));
+
+		PlotElements();
+	}
+	else
+	{
+		tableElems->setEnabled(0);
 	}
 
 
@@ -254,8 +284,8 @@ void FormfactorDlg::AtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	m_pCurAtom = pItem;
 	if(!m_pCurAtom || !m_pCurAtom->data(Qt::UserRole).toUInt()) return;
 
-	t_real dMinQ = 0.;
-	t_real dMaxQ = 25.;
+	t_real dMinQ = spinXQMin->value();
+	t_real dMaxQ = spinXQMax->value();
 
 	m_vecQ.clear();
 	m_vecFF.clear();
@@ -274,6 +304,12 @@ void FormfactorDlg::AtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 
 	set_qwt_data<t_real>()(*m_plotwrap, m_vecQ, m_vecFF);
 }
+
+void FormfactorDlg::RefreshAtom()
+{
+	AtomSelected(listAtoms->currentItem(), nullptr);
+}
+
 
 
 // ----------------------------------------------------------------------------
@@ -312,8 +348,8 @@ void FormfactorDlg::MagAtomSelected(QListWidgetItem *pItem, QListWidgetItem*)
 	m_pCurMagAtom = pItem;
 	if(!m_pCurMagAtom || !m_pCurMagAtom->data(Qt::UserRole).toUInt()) return;
 
-	t_real dMinQ = 0.;
-	t_real dMaxQ = 15.;
+	t_real dMinQ = spinMagQMin->value();
+	t_real dMaxQ = spinMagQMax->value();
 
 	m_vecQ_m.clear();
 	m_vecFF_m.clear();
@@ -340,7 +376,9 @@ void FormfactorDlg::RefreshMagAtom()
 	MagAtomSelected(listMAtoms->currentItem(), nullptr);
 }
 
+
 // ----------------------------------------------------------------------------
+
 
 void FormfactorDlg::Calcg()
 {
@@ -365,20 +403,39 @@ void FormfactorDlg::Calcg()
 
 void FormfactorDlg::CalcTermSymbol(const QString& qstr)
 {
-	try
+	bool bReset = 0;
+
+	if(qstr != "")
 	{
-		std::string strOrbitals = qstr.toStdString();
+		try
+		{
+			std::string strOrbitals = qstr.toStdString();
 
-		t_real dS, dL, dJ;
-		std::tie(dS, dL, dJ) = tl::hund(strOrbitals);
+			t_real dS, dL, dJ;
+			std::tie(dS, dL, dJ) = tl::hund(strOrbitals);
 
-		spinS->setValue(dS);
-		spinL->setValue(dL);
-		spinJ->setValue(dJ);
+			spinS->setValue(dS);
+			spinL->setValue(dL);
+			spinJ->setValue(dJ);
+		}
+		catch(const std::exception& ex)
+		{
+			bReset = 1;
+			tl::log_err(ex.what());
+		}
 	}
-	catch(const std::exception& ex)
+	else
 	{
-		tl::log_err(ex.what());
+		bReset = 1;
+	}
+
+	if(bReset)
+	{
+		// reset defaults
+		sping->setValue(2.);
+		spinS->setValue(2.);
+		spinJ->setValue(2.);
+		spinL->setValue(0.);
 	}
 }
 
@@ -405,6 +462,16 @@ void FormfactorDlg::SearchSLAtom(const QString& qstr)
 		tableSL->setCurrentItem(lstItems[0]);
 }
 
+void FormfactorDlg::SearchElement(const QString& qstr)
+{
+	QList<QTableWidgetItem*> lstItems = tableElems->findItems(qstr, Qt::MatchContains);
+	if(lstItems.size())
+		tableElems->setCurrentItem(lstItems[0]);
+}
+
+// ----------------------------------------------------------------------------
+
+
 
 void FormfactorDlg::PlotScatteringLengths()
 {
@@ -426,7 +493,56 @@ void FormfactorDlg::PlotScatteringLengths()
 	set_qwt_data<t_real>()(*m_plotwrapSc, m_vecElem, m_vecSc);
 }
 
+void FormfactorDlg::PlotElements()
+{
+	m_vecElemX.clear();
+	m_vecElemY.clear();
 
+	std::shared_ptr<const PeriodicSystem<t_real>> lstel = PeriodicSystem<t_real>::GetInstance();
+	for(std::size_t iAtom=0; iAtom<lstel->GetNumAtoms(); ++iAtom)
+	{
+		const PeriodicSystem<t_real>::elem_type& sc = lstel->GetAtom(iAtom);
+
+		t_real dVal = t_real(-1);
+
+		if(radioElemMass->isChecked())
+			dVal = sc.GetMass();
+		else if(radioElemRadCov->isChecked())
+			dVal = sc.GetRadiusCov();
+		else if(radioElemRadVdW->isChecked())
+			dVal = sc.GetRadiusVdW();
+		else if(radioElemIon->isChecked())
+			dVal = sc.GetEIon();
+		else if(radioElemAffin->isChecked())
+			dVal = sc.GetEAffin();
+		else if(radioElemMelt->isChecked())
+			dVal = sc.GetTMelt();
+		else if(radioElemBoil->isChecked())
+			dVal = sc.GetTBoil();
+
+		if(dVal >= t_real(0))
+		{
+			m_vecElemX.push_back(t_real(sc.GetNr()));
+			m_vecElemY.push_back(dVal);
+		}
+	}
+
+	if(radioElemMass->isChecked())
+		m_plotwrapElem->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Mass (u)");
+	else if(radioElemRadCov->isChecked() || radioElemRadVdW->isChecked())
+		m_plotwrapElem->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Length (A)");
+	else if(radioElemIon->isChecked() || radioElemAffin->isChecked())
+		m_plotwrapElem->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Energy (eV)");
+	else if(radioElemMelt->isChecked() || radioElemBoil->isChecked())
+		m_plotwrapElem->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Temperature (K)");
+
+	set_qwt_data<t_real>()(*m_plotwrapElem, m_vecElemX, m_vecElemY);
+}
+
+
+
+// ----------------------------------------------------------------------------
+// scattering lengths table
 enum
 {
 	SL_ITEM_NR = 0,
@@ -507,6 +623,94 @@ void FormfactorDlg::SetupScatteringLengths()
 	tableSL->setSortingEnabled(bSortTable);
 	tableSL->sortByColumn(SL_ITEM_NR, Qt::AscendingOrder);
 }
+// ----------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------------
+// periodic table
+enum
+{
+	ELEM_ITEM_NR = 0,
+	ELEM_ITEM_NAME = 1,
+	ELEM_ITEM_GROUP = 2,
+	ELEM_ITEM_PERIOD = 3,
+	ELEM_ITEM_BLOCK = 4,
+	ELEM_ITEM_ORBITALS = 5,
+	ELEM_ITEM_MASS = 6,
+	ELEM_ITEM_RAD_COV = 7,
+	ELEM_ITEM_RAD_VDW = 8,
+	ELEM_ITEM_ION = 9,
+	ELEM_ITEM_AFFIN = 10,
+	ELEM_ITEM_MELT = 11,
+	ELEM_ITEM_BOIL = 12,
+};
+
+void FormfactorDlg::SetupElements()
+{
+	std::shared_ptr<const PeriodicSystem<t_real>> lstel = PeriodicSystem<t_real>::GetInstance();
+
+	const bool bSortTable = tableElems->isSortingEnabled();
+	tableElems->setSortingEnabled(0);
+
+	tableElems->setRowCount(lstel->GetNumAtoms());
+	tableElems->setColumnWidth(ELEM_ITEM_NR, 50);
+	tableElems->setColumnWidth(ELEM_ITEM_NAME, 70);
+	tableElems->setColumnWidth(ELEM_ITEM_GROUP, 50);
+	tableElems->setColumnWidth(ELEM_ITEM_PERIOD, 50);
+	tableElems->setColumnWidth(ELEM_ITEM_BLOCK, 50);
+	tableElems->setColumnWidth(ELEM_ITEM_ORBITALS, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_MASS, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_RAD_COV, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_RAD_VDW, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_ION, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_AFFIN, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_MELT, 100);
+	tableElems->setColumnWidth(ELEM_ITEM_BOIL, 100);
+
+	tableElems->verticalHeader()->setDefaultSectionSize(tableElems->verticalHeader()->minimumSectionSize()+2);
+
+	for(std::size_t iElem=0; iElem<lstel->GetNumAtoms(); ++iElem)
+	{
+		const typename PeriodicSystem<t_real>::elem_type* pelem = &lstel->GetAtom(iElem);
+
+		t_real dMass = pelem->GetMass();
+		t_real dRadCov = pelem->GetRadiusCov();
+		t_real dRadVdW = pelem->GetRadiusVdW();
+		t_real dEIon = pelem->GetEIon();
+		t_real dEAffin = pelem->GetEAffin();
+		t_real dTMelt = pelem->GetTMelt();
+		t_real dTBoil = pelem->GetTBoil();
+
+		std::string strMass = dMass>=0. ? tl::var_to_str(dMass, g_iPrec) + " u" : "";
+		std::string strRadCov = dRadCov>=0. ? tl::var_to_str(dRadCov, g_iPrec) + " A" : "";
+		std::string strRadVdW = dRadVdW>=0. ? tl::var_to_str(dRadVdW, g_iPrec) + " A" : "";
+		std::string strEIon = dEIon>=0. ? tl::var_to_str(dEIon, g_iPrec) + " eV" : "";
+		std::string strEAffin = dEAffin>=0. ? tl::var_to_str(dEAffin, g_iPrec) + " eV" : "";
+		std::string strTMelt = dTMelt>=0. ? tl::var_to_str(dTMelt, g_iPrec) + " K" : "";
+		std::string strTBoil = dTBoil>=0. ? tl::var_to_str(dTBoil, g_iPrec) + " K" : "";
+
+		tableElems->setItem(iElem, ELEM_ITEM_NR, new QTableWidgetItemWrapper<int>(pelem->GetNr()));
+		tableElems->setItem(iElem, ELEM_ITEM_GROUP, new QTableWidgetItemWrapper<int>(pelem->GetGroup()));
+		tableElems->setItem(iElem, ELEM_ITEM_PERIOD, new QTableWidgetItemWrapper<int>(pelem->GetPeriod()));
+
+		tableElems->setItem(iElem, ELEM_ITEM_NAME, new QTableWidgetItem(pelem->GetAtomIdent().c_str()));
+		tableElems->setItem(iElem, ELEM_ITEM_BLOCK, new QTableWidgetItem(pelem->GetBlock().c_str()));
+		tableElems->setItem(iElem, ELEM_ITEM_ORBITALS, new QTableWidgetItem(pelem->GetOrbitals().c_str()));
+
+		tableElems->setItem(iElem, ELEM_ITEM_MASS, new QTableWidgetItemWrapper<t_real>(dMass, strMass));
+		tableElems->setItem(iElem, ELEM_ITEM_RAD_COV, new QTableWidgetItemWrapper<t_real>(dRadCov, strRadCov));
+		tableElems->setItem(iElem, ELEM_ITEM_RAD_VDW, new QTableWidgetItemWrapper<t_real>(dRadVdW, strRadVdW));
+		tableElems->setItem(iElem, ELEM_ITEM_ION, new QTableWidgetItemWrapper<t_real>(dEIon, strEIon));
+		tableElems->setItem(iElem, ELEM_ITEM_AFFIN, new QTableWidgetItemWrapper<t_real>(dEAffin, strEAffin));
+		tableElems->setItem(iElem, ELEM_ITEM_MELT, new QTableWidgetItemWrapper<t_real>(dTMelt, strTMelt));
+		tableElems->setItem(iElem, ELEM_ITEM_BOIL, new QTableWidgetItemWrapper<t_real>(dTBoil, strTBoil));
+	}
+
+	tableElems->setSortingEnabled(bSortTable);
+	tableElems->sortByColumn(SL_ITEM_NR, Qt::AscendingOrder);
+}
+// ----------------------------------------------------------------------------
+
 
 
 void FormfactorDlg::cursorMoved(const QPointF& pt)
@@ -518,7 +722,7 @@ void FormfactorDlg::cursorMoved(const QPointF& pt)
 		t_real dX = pt.x();
 		std::wstring strX = std::to_wstring(dX);
 		std::wstring strY;
-		
+
 		if(iCurTabIdx == 1)		// magnetic
 			strY = std::to_wstring(GetMagFormFact(dX));
 		if(iCurTabIdx == 2)		// atomic
@@ -552,6 +756,23 @@ void FormfactorDlg::cursorMoved(const QPointF& pt)
 		std::ostringstream ostr;
 		ostr << iElem << ", " << strName
 			<< ": b_coh = " << b_coh << ", b_inc = " << b_inc;
+		labelStatus->setText(ostr.str().c_str());
+	}
+	else if(iCurTabIdx == 3)	// elements
+	{
+		std::shared_ptr<const PeriodicSystem<t_real>> lst = PeriodicSystem<t_real>::GetInstance();
+
+		int iElem = std::round(pt.x());
+		if(iElem<=0 || iElem>=int(lst->GetNumAtoms()))
+		{
+			labelStatus->setText("");
+			return;
+		}
+
+		const std::string& strName = lst->GetAtom(unsigned(iElem-1)).GetAtomIdent();
+
+		std::ostringstream ostr;
+		ostr << iElem << ", " << strName;
 		labelStatus->setText(ostr.str().c_str());
 	}
 }

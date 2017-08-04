@@ -9,8 +9,8 @@
 # system-specific build flags
 
 # which compiler?
-CC = gcc
-#CC = clang
+#CC = gcc
+CC = clang
 
 # debug or unstable version?
 DO_DEBUG = 0
@@ -34,7 +34,7 @@ USE_NET = 1
 
 # use boost's iostreams/regex/image lib?
 USE_IOSTR = 1
-USE_BOOST_REGEX = 1
+USE_BOOST_REGEX = 0
 USE_GIL = 1
 
 # compile the python or julia interfaces?
@@ -54,12 +54,12 @@ USE_CPP11_ABI = 1
 USE_FRAMEWORKS = 0
 
 # is Minuit a non-standalone installation?
-NON_STANDALONE_MINUIT_HACK = 0
+NON_STANDALONE_MINUIT_HACK = 1
 
 # build tools needed for setup?
 BUILD_SETUP_PROGS = 1
 # build auxiliary tas tools?
-BUILD_AUX_PROGS = 0
+BUILD_AUX_PROGS = 1
 
 
 # local lib/inc overrides
@@ -169,11 +169,11 @@ DEFINES += -DQT_VER=$(QT_VER)
 
 
 ifeq ($(QT_VER), 5)	# qt 5
-	QT_INC =	-I${MYINC}/qt5 \
-                        -I${MYINC}/qt5/QtCore \
-                        -I${MYINC}/qt5/QtWidgets \
-                        -I${MYINC}/qt5/QtGui \
-                        -I${MYINC}/qt5/QtOpenGL \
+	QT_INC =-I${MYINC}/qt5 \
+			-I${MYINC}/qt5/QtCore \
+			-I${MYINC}/qt5/QtWidgets \
+			-I${MYINC}/qt5/QtGui \
+			-I${MYINC}/qt5/QtOpenGL \
 			-I/usr/local/opt/qt5/Frameworks/QtOpenGL.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtWidgets.framework/Versions/5/Headers \
 			-I/usr/local/opt/qt5/Frameworks/QtCore.framework/Versions/5/Headers \
@@ -190,7 +190,7 @@ ifeq ($(QT_VER), 5)	# qt 5
 			-I/usr/include/qt5/QtGui \
 			-I/usr/include/qt5/QtOpenGL
 
-	QT_LIB =	-L${MYLIB}/qt5 \
+	QT_LIB =-L${MYLIB}/qt5 \
 			-L${MYLIB}/qt5/lib \
 			-L/opt/local/libexec/qt5/lib \
 			-L/usr/lib64/qt5 \
@@ -538,7 +538,7 @@ ifeq ($(BUILD_AUX_PROGS), 1)
 	ALL_PROGS += ${AUX_PROGS}
 endif
 
-all: ${ALL_PROGS}$
+all: ${ALL_PROGS}
 
 
 takin: ${OBJ_COMMON} ${OBJ_TAZ}

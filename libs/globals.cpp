@@ -19,6 +19,7 @@ unsigned int g_iPrecGfx = 4;
 t_real_glob g_dEps = 1e-6;
 t_real_glob g_dEpsGfx = 1e-4;
 
+bool g_bHasElements = 0;
 bool g_bHasFormfacts = 0;
 bool g_bHasMagFormfacts = 0;
 bool g_bHasScatlens = 0;

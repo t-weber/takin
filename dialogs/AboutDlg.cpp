@@ -19,6 +19,8 @@
 #include "libs/version.h"
 #include <sstream>
 
+//#define PRIVATE_SRC_VERSION
+
 
 AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	: QDialog(pParent), m_pSettings(pSett)
@@ -34,13 +36,20 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 			restoreGeometry(m_pSettings->value("about/geo").toByteArray());
 	}
 
-	labelVersion->setText("Version " TAKIN_VER);
-	labelWritten->setText("Written by Tobias Weber <tobias.weber@tum.de>");
-	labelYears->setText("2014 - 2017");
+	labelVersion->setText("Version " TAKIN_VER ".");
+	labelWritten->setText("Written by Tobias Weber <tobias.weber@tum.de>.");
+	labelYears->setText("Years: 2014 - 2017.");
+
+#ifdef PRIVATE_SRC_VERSION
+	labelRepo->setText("Source repo: <a href=\"https://github.com/t-weber/takin\">https://github.com/t-weber/takin</a>.");
+#else
+	labelRepo->setText("Source repo: <br><a href=\"https://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tastools.git\">https://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tastools.git</a>.");
+#endif
+
 	labelDesc->setText("Overviews of Takin can be found here:"
 		"<ul>"
-		"<li><a href=http://dx.doi.org/10.1016/j.softx.2017.06.002>doi:10.1016/j.softx.2017.06.002</a>,</li>"
-		"<li><a href=http://dx.doi.org/10.1016/j.softx.2016.06.002>doi:10.1016/j.softx.2016.06.002</a>.</li>"
+		"<li><a href=\"http://dx.doi.org/10.1016/j.softx.2017.06.002\">doi:10.1016/j.softx.2017.06.002</a>,</li>"
+		"<li><a href=\"http://dx.doi.org/10.1016/j.softx.2016.06.002\">doi:10.1016/j.softx.2016.06.002</a>.</li>"
 		"</ul>");
 	labelDesc->setOpenExternalLinks(1);
 	labelLicense->setOpenExternalLinks(1);
@@ -69,49 +78,53 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrLibs << "<html><body>";
 	ostrLibs << "<dl>";
 
-	ostrLibs << "<dt>Uses Qt version " << QT_VERSION_STR << "</dt>";
-	ostrLibs << "<dd><a href=\"http://qt-project.org\">http://qt-project.org</a></dd>";
+	ostrLibs << "<dt>Uses Qt version " << QT_VERSION_STR << ".</dt>";
+	ostrLibs << "<dd><a href=\"http://qt-project.org\">http://qt-project.org</a><br></dd>";
 
-	ostrLibs << "<dt>Uses Qwt version " << QWT_VERSION_STR << "</dt>";
-	ostrLibs << "<dd><a href=\"http://qwt.sourceforge.net\">http://qwt.sourceforge.net</a></dd>";
+	ostrLibs << "<dt>Uses Qwt version " << QWT_VERSION_STR << ".</dt>";
+	ostrLibs << "<dd><a href=\"http://qwt.sourceforge.net\">http://qwt.sourceforge.net</a><br></dd>";
 
 	std::string strBoost = BOOST_LIB_VERSION;
 	tl::find_all_and_replace<std::string>(strBoost, "_", ".");
-	ostrLibs << "<dt>Uses Boost version " << strBoost << "</dt>";
-	ostrLibs << "<dd><a href=\"http://www.boost.org\">http://www.boost.org</a></dd>";
+	ostrLibs << "<dt>Uses Boost version " << strBoost << ".</dt>";
+	ostrLibs << "<dd><a href=\"http://www.boost.org\">http://www.boost.org</a><br></dd>";
+
+	ostrLibs << "<dt>Uses TLibs version " << TLIBS_VERSION << ".</dt>";
+#ifdef PRIVATE_SRC_VERSION
+	ostrLibs << "<dd><a href=\"https://github.com/t-weber/tlibs\">https://github.com/t-weber/tlibs</a><br></dd>";
+#else
+	ostrLibs << "<dd><a href=\"https://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tlibs.git\">https://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tlibs.git</a><br></dd>";
+#endif
 
 #ifndef NO_LAPACK
-	ostrLibs << "<dt>Uses Lapack/e version 3</dt>";
-	ostrLibs << "<dd><a href=\"http://www.netlib.org/lapack\">http://www.netlib.org/lapack</a></dd>";
+	ostrLibs << "<dt>Uses Lapack/e version 3.</dt>";
+	ostrLibs << "<dd><a href=\"http://www.netlib.org/lapack\">http://www.netlib.org/lapack</a><br></dd>";
 #endif
 
 #ifndef DNO_FIT
-	ostrLibs << "<dt>Uses Minuit version 2</dt>";
-	ostrLibs << "<dd><a href=\"https://root.cern.ch\">https://root.cern.ch</a></dd>";
+	ostrLibs << "<dt>Uses Minuit version 2.</dt>";
+	ostrLibs << "<dd><a href=\"https://root.cern.ch\">https://root.cern.ch</a><br></dd>";
 #endif
 
-	ostrLibs << "<dt>Uses tLibs version " << TLIBS_VERSION << "</dt>";
-
-	ostrLibs << "<dt>Uses Clipper crystallography library</dt>";
-	ostrLibs << "<dd><a href=\"http://www.ysbl.york.ac.uk/~cowtan/clipper\">http://www.ysbl.york.ac.uk/~cowtan/clipper</a></dd>";
+	ostrLibs << "<dt>Uses Clipper crystallography library.</dt>";
+	ostrLibs << "<dd><a href=\"http://www.ysbl.york.ac.uk/~cowtan/clipper\">http://www.ysbl.york.ac.uk/~cowtan/clipper</a><br></dd>";
 
 #ifdef HAS_COMPLEX_ERF
-	ostrLibs << "<dt>Uses Faddeeva library</dt>";
-	ostrLibs << "<dd><a href=\"http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package\">http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package</a></dd>";
+	ostrLibs << "<dt>Uses Faddeeva library.</dt>";
+	ostrLibs << "<dd><a href=\"http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package\">http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package</a><br></dd>";
 #endif
 
-	ostrLibs << "<dt>Uses resolution algorithms ported from Rescal version 5</dt>";
-	ostrLibs << "<dd><a href=\"http://www.ill.eu/en/html/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab\">http://www.ill.eu/en/html/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab</a></dd>";
+	ostrLibs << "<dt>Uses resolution algorithms ported from Rescal version 5.</dt>";
+	ostrLibs << "<dd><a href=\"http://www.ill.eu/en/html/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab\">http://www.ill.eu/en/html/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab</a><br></dd>";
 
-	ostrLibs << "<dt>Uses Tango icons</dt>";
-	ostrLibs << "<dd><a href=\"http://tango.freedesktop.org\">http://tango.freedesktop.org</a></dd>";
+	ostrLibs << "<dt>Uses Tango icons.</dt>";
+	ostrLibs << "<dd><a href=\"http://tango.freedesktop.org\">http://tango.freedesktop.org</a><br></dd>";
 
 	ostrLibs << "</dl>";
 	//ostrLibs << "<p>See the LICENSES file in the Takin root directory.</p>";
 	ostrLibs << "</body></html>";
 
-	labelLibraries->setText(ostrLibs.str().c_str());
-	labelLibraries->setOpenExternalLinks(1);
+	editLibs->setText(ostrLibs.str().c_str());
 
 
 
@@ -227,36 +240,41 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrConst << "<dl>";
 
 	ostrConst << "<dt>Physical constants from Boost Units.</dt>";
-	ostrConst << "<dd><a href=\"http://www.boost.org/doc/libs/release/libs/units/\">http://www.boost.org/doc/libs/release/libs/units/</a></dd>";
+	ostrConst << "<dd><a href=\"http://www.boost.org/doc/libs/release/libs/units/\">http://www.boost.org/doc/libs/release/libs/units/</a><br></dd>";
 
 	std::shared_ptr<const SpaceGroups<t_real_glob>> sgs = SpaceGroups<t_real_glob>::GetInstance();
 	ostrConst << "<dt>" << sgs->get_sgsource(0) <<"</dt>";
-	ostrConst << "<dd><a href=\"" << sgs->get_sgsource(1) << "\">" << sgs->get_sgsource(1) << "</a></dd>";
+	ostrConst << "<dd><a href=\"" << sgs->get_sgsource(1) << "\">" << sgs->get_sgsource(1) << "</a><br></dd>";
 
 	std::shared_ptr<const FormfactList<t_real_glob>> ff = FormfactList<t_real_glob>::GetInstance();
 	std::shared_ptr<const MagFormfactList<t_real_glob>> mff = MagFormfactList<t_real_glob>::GetInstance();
 	std::shared_ptr<const ScatlenList<t_real_glob>> sl = ScatlenList<t_real_glob>::GetInstance();
+	std::shared_ptr<const PeriodicSystem<t_real_glob>> pt = PeriodicSystem<t_real_glob>::GetInstance();
 
 	if(g_bHasFormfacts)
 	{
 		ostrConst << "<dt>" << ff->GetSource() << "</dt>";
-		ostrConst << "<dd><a href=\"" << ff->GetSourceUrl() << "\">" << ff->GetSourceUrl() << "</a></dd>";
+		ostrConst << "<dd><a href=\"" << ff->GetSourceUrl() << "\">" << ff->GetSourceUrl() << "</a><br></dd>";
 	}
 	if(g_bHasMagFormfacts)
 	{
 		ostrConst << "<dt>" << mff->GetSource() << "</dt>";
-		ostrConst << "<dd><a href=\"" << mff->GetSourceUrl() << "\">" << mff->GetSourceUrl() << "</a></dd>";
+		ostrConst << "<dd><a href=\"" << mff->GetSourceUrl() << "\">" << mff->GetSourceUrl() << "</a><br></dd>";
 	}
 	if(g_bHasScatlens)
 	{
 		ostrConst << "<dt>" << sl->GetSource() << "</dt>";
-		ostrConst << "<dd><a href=\"" << sl->GetSourceUrl() << "\">" << sl->GetSourceUrl() << "</a></dd>";
+		ostrConst << "<dd><a href=\"" << sl->GetSourceUrl() << "\">" << sl->GetSourceUrl() << "</a><br></dd>";
+	}
+	if(g_bHasElements)
+	{
+		ostrConst << "<dt>" << pt->GetSource() << "</dt>";
+		ostrConst << "<dd><a href=\"" << pt->GetSourceUrl() << "\">" << pt->GetSourceUrl() << "</a><br></dd>";
 	}
 
 	ostrConst << "</dl>";
 	ostrConst << "</body></html>";
-	labelConst->setText(ostrConst.str().c_str());
-	labelConst->setOpenExternalLinks(1);
+	editTables->setText(ostrConst.str().c_str());
 
 
 

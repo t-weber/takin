@@ -192,7 +192,7 @@ int main(int argc, char** argv)
 
 		// ------------------------------------------------------------
 		// tlibs version check
-		tl::log_info("Using tLibs version ", tl::get_tlibs_version(), ".");
+		tl::log_info("Using tlibs version ", tl::get_tlibs_version(), ".");
 		if(!tl::check_tlibs_version(TLIBS_VERSION))
 		{
 			tl::log_crit("Version mismatch in tLibs. Please recompile.");
@@ -204,6 +204,7 @@ int main(int argc, char** argv)
 		}
 
 		// check tables
+		g_bHasElements = (find_resource("res/data/elements.xml") != "");
 		g_bHasScatlens = (find_resource("res/data/scatlens.xml") != "");
 		g_bHasFormfacts = (find_resource("res/data/ffacts.xml") != "");
 		g_bHasMagFormfacts = (find_resource("res/data/magffacts.xml") != "");

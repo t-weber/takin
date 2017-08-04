@@ -25,6 +25,7 @@ extern t_real_glob g_dEpsGfx;
 extern std::size_t GFX_NUM_POINTS;
 extern std::size_t g_iMaxNN;
 
+extern bool g_bHasElements;
 extern bool g_bHasFormfacts;
 extern bool g_bHasMagFormfacts;
 extern bool g_bHasScatlens;

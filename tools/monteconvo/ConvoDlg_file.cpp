@@ -151,6 +151,11 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 {
 	m_bAllowSqwReinit = 0;
 
+	for(std::size_t iCheck=0; iCheck<m_vecCheckBoxes.size(); ++iCheck)
+	{
+		boost::optional<int> obChecked = xml.QueryOpt<int>(strXmlRoot+m_vecCheckNames[iCheck]);
+		if(obChecked) m_vecCheckBoxes[iCheck]->setChecked(*obChecked);
+	}
 	for(std::size_t iSpinBox=0; iSpinBox<m_vecSpinBoxes.size(); ++iSpinBox)
 	{
 		boost::optional<t_real> odSpinVal = xml.QueryOpt<t_real>(strXmlRoot+m_vecSpinNames[iSpinBox]);
@@ -175,11 +180,6 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 	{
 		boost::optional<std::string> odEditVal = xml.QueryOpt<std::string>(strXmlRoot+m_vecTextNames[iEditBox]);
 		if(odEditVal) m_vecTextBoxes[iEditBox]->setPlainText((*odEditVal).c_str());
-	}
-	for(std::size_t iCheck=0; iCheck<m_vecCheckBoxes.size(); ++iCheck)
-	{
-		boost::optional<int> obChecked = xml.QueryOpt<int>(strXmlRoot+m_vecCheckNames[iCheck]);
-		if(obChecked) m_vecCheckBoxes[iCheck]->setChecked(*obChecked);
 	}
 
 	if(m_pFavDlg)
