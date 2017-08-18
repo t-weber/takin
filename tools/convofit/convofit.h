@@ -44,6 +44,9 @@ extern bool g_bUseValuesFromModel;
 extern unsigned int g_iNumNeutrons;
 extern std::string g_strSetParams;
 extern std::string g_strOutFileSuffix;
+extern unsigned int g_iPlotPoints;
+extern unsigned int g_iPlotSkipBegin;
+extern unsigned int g_iPlotSkipEnd;
 // --------------------------------------------------------------------
 
 

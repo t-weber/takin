@@ -89,6 +89,8 @@ void TazDlg::ExportSceneSVG(QGraphicsScene& scene)
 		"Export SVG", strDirLast, "SVG files (*.svg *.SVG)", nullptr, fileopt);
 	if(strFile == "")
 		return;
+	if(!strFile.endsWith(".svg", Qt::CaseInsensitive))
+		strFile += ".svg";
 
 	QRectF rect = scene.sceneRect();
 
@@ -123,6 +125,8 @@ void TazDlg::ExportBZ3DModel()
 		"Export X3D", strDirLast, "X3D files (*.x3d *.X3D)", nullptr, fileopt);
 	if(strFile == "")
 		return;
+	if(!strFile.endsWith(".x3d", Qt::CaseInsensitive))
+		strFile += ".x3d";
 
 
 	ScatteringTriangle *pTri = m_sceneRecip.GetTriangle();
@@ -233,6 +237,9 @@ void TazDlg::ExportBZImage()
 		"Export PNG", strDirLast, "PNG files (*.png *.PNG)", nullptr, fileopt);
 	if(strFile == "")
 		return;
+	if(!strFile.endsWith(".png", Qt::CaseInsensitive))
+		strFile += ".png";
+
 
 	bool bOk = m_sceneRecip.ExportBZAccurate(strFile.toStdString().c_str());
 	if(!bOk)
@@ -256,6 +263,8 @@ void TazDlg::ExportWSImage()
 		"Export PNG", strDirLast, "PNG files (*.png *.PNG)", nullptr, fileopt);
 	if(strFile == "")
 		return;
+	if(!strFile.endsWith(".png", Qt::CaseInsensitive))
+		strFile += ".png";
 
 	bool bOk = m_sceneRealLattice.ExportWSAccurate(strFile.toStdString().c_str());
 	if(!bOk)
@@ -355,7 +364,8 @@ void TazDlg::ExportUCModel()
 		"Export X3D", strDirLast, "X3D files (*.x3d *.X3D)", nullptr, fileopt);
 	if(strFile == "")
 		return;
-
+	if(!strFile.endsWith(".x3d", Qt::CaseInsensitive))
+		strFile += ".x3d";
 
 	tl::X3d x3d;
 

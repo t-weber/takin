@@ -749,11 +749,13 @@ void FormfactorDlg::cursorMoved(const QPointF& pt)
 			return;
 		}
 
-		const std::string& strName = lst->GetElem(unsigned(iElem-1)).GetAtomIdent();
-		std::complex<t_real> b_coh = lst->GetElem(unsigned(iElem-1)).GetCoherent();
-		std::complex<t_real> b_inc = lst->GetElem(unsigned(iElem-1)).GetIncoherent();
+		const auto& elem = lst->GetElem(unsigned(iElem-1));
+		const std::string& strName = elem.GetAtomIdent();
+		std::complex<t_real> b_coh = elem.GetCoherent();
+		std::complex<t_real> b_inc = elem.GetIncoherent();
 
 		std::ostringstream ostr;
+		ostr.precision(g_iPrec);
 		ostr << iElem << ", " << strName
 			<< ": b_coh = " << b_coh << ", b_inc = " << b_inc;
 		labelStatus->setText(ostr.str().c_str());
@@ -769,10 +771,58 @@ void FormfactorDlg::cursorMoved(const QPointF& pt)
 			return;
 		}
 
-		const std::string& strName = lst->GetAtom(unsigned(iElem-1)).GetAtomIdent();
+		const auto& elem = lst->GetAtom(unsigned(iElem-1));
+		const std::string& strName = elem.GetAtomIdent();
+
+		t_real dVal1, dVal2;
+		std::string strVal1, strVal2;
+		bool bSel1 = 0, bSel2 = 0;
+		std::string strUnit;
+		if(radioElemMass->isChecked())
+		{
+			strVal1 = "m";
+			dVal1 = elem.GetMass();
+			bSel1 = 1;
+			strUnit = "u";
+		}
+		else if(radioElemRadCov->isChecked() || radioElemRadVdW->isChecked())
+		{
+			strVal1 = "r_cov";
+			strVal2 = "r_vdW";
+			dVal1 = elem.GetRadiusCov();
+			dVal2 = elem.GetRadiusVdW();
+			bSel1 = bSel2 = 1;
+			strUnit = "A";
+		}
+		else if(radioElemIon->isChecked() || radioElemAffin->isChecked())
+		{
+			strVal1 = "E_ion";
+			strVal2 = "E_affin";
+			dVal1 = elem.GetEIon();
+			dVal2 = elem.GetEAffin();
+			bSel1 = bSel2 = 1;
+			strUnit = "eV";
+		}
+		else if(radioElemMelt->isChecked() || radioElemBoil->isChecked())
+		{
+			strVal1 = "T_melt";
+			strVal2 = "T_boil";
+			dVal1 = elem.GetTMelt();
+			dVal2 = elem.GetTBoil();
+			bSel1 = bSel2 = 1;
+			strUnit = "K";
+		}
 
 		std::ostringstream ostr;
+		ostr.precision(g_iPrec);
 		ostr << iElem << ", " << strName;
+
+		if(bSel1 || bSel2)
+			ostr << ": ";
+		if(bSel1)
+			ostr << strVal1 << " = " << dVal1 << " " << strUnit;
+		if(bSel2)
+			ostr << ", " << strVal2 << " = " << dVal2 << " " << strUnit;
 		labelStatus->setText(ostr.str().c_str());
 	}
 }

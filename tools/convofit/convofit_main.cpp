@@ -108,6 +108,18 @@ int main(int argc, char** argv)
 			new opts::option_description("outfile-suffix",
 			opts::value<decltype(g_strOutFileSuffix)>(&g_strOutFileSuffix),
 			"suffix to append to output files")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("plot-points",
+			opts::value<decltype(g_iPlotPoints)>(&g_iPlotSkipBegin),
+			"number of plot points")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("plot-skip-begin",
+			opts::value<decltype(g_iNumNeutrons)>(&g_iPlotSkipBegin),
+			"skip plot points in the beginning of the range")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("plot-skip-end",
+			opts::value<decltype(g_iNumNeutrons)>(&g_iPlotSkipEnd),
+			"skip plot points in the end of the range")));
 
 
 		// positional args

@@ -565,7 +565,7 @@ TazDlg::TazDlg(QWidget* pParent)
 		pMenuCalc->addAction(pFormfactor);
 	}
 
-	QAction *pSgList = new QAction("Space Group Types...", this);
+	QAction *pSgList = new QAction("Space Groups...", this);
 	pMenuCalc->addAction(pSgList);
 
 	QAction *pDisp = new QAction("Dispersions...", this);

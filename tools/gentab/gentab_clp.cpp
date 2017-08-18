@@ -28,7 +28,7 @@ namespace dat = clipper::data;
 // ============================================================================
 
 
-bool gen_formfacts()
+bool gen_formfacts_clp()
 {
 	tl::Prop<std::string> prop;
 	prop.SetSeparator('.');
@@ -69,7 +69,7 @@ bool gen_formfacts()
 // ============================================================================
 
 
-bool gen_spacegroups()
+bool gen_spacegroups_clp()
 {
 	tl::Prop<std::string> prop;
 	prop.SetSeparator('.');

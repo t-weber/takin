@@ -33,8 +33,8 @@ MAGFFACT_J2_4=https://www.ill.eu/sites/ccsl/ffacts/ffactnode12.html
 SCATLENS2=https://raw.githubusercontent.com/neutronpy/neutronpy/master/neutronpy/database/scattering_lengths.json
 MAGFFACT2=https://raw.githubusercontent.com/neutronpy/neutronpy/master/neutronpy/database/magnetic_form_factors.json
 
+SPACEGROUPS=https://raw.githubusercontent.com/egonw/bodr/master/bodr/crystal/space-groups.xml
 ELEMENTS=https://raw.githubusercontent.com/egonw/bodr/master/bodr/elements/elements.xml
-
 
 
 #
@@ -140,6 +140,30 @@ function dl_elements
 			echo -e "Files cannot be automatically downloaded. "
 			echo -e "Please download the following file manually and place them in the ./tmp subfolder:\n"
 			echo -e "\t${ELEMENTS}\n"
+			echo -e "Afterwards, please run this script again.\n"
+		fi
+	fi
+}
+
+
+
+#
+# space groups
+#
+function dl_spacegroups
+{
+	if [ ! -f tmp/${SPACEGROUPS##*/} ]; then
+		echo -e "Obtaining space group tables...\n"
+
+		if ! wget ${SPACEGROUPS} -O tmp/${SPACEGROUPS##*/}; then
+			echo -e "Error: Cannot download space group table.";
+			return -1;
+		fi
+
+		if [ ! -f tmp/${SPACEGROUPS##*/} ]; then
+			echo -e "Files cannot be automatically downloaded. "
+			echo -e "Please download the following file manually and place them in the ./tmp subfolder:\n"
+			echo -e "\t${SPACEGROUPS}\n"
 			echo -e "Afterwards, please run this script again.\n"
 		fi
 	fi
@@ -272,6 +296,7 @@ function dl_magffacts2
 mkdir tmp
 echo -e "--------------------------------------------------------------------------------"
 dl_elements
+dl_spacegroups
 echo -e "--------------------------------------------------------------------------------"
 #dl_scatlens
 dl_scatlens2

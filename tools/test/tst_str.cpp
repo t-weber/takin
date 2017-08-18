@@ -12,6 +12,6 @@ int main()
 {
 	std::string strFile = "/home/tw/test.txt";
 
-	std::cout << tl::get_file_noext(tl::get_file(strFile)) << std::endl;
+	std::cout << tl::get_file_noext(tl::get_file_nodir(strFile)) << std::endl;
 	return 0;
 }

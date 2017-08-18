@@ -13,10 +13,13 @@
 
 
 template<class t_real>
-SpaceGroups<t_real>::SpaceGroups()
+SpaceGroups<t_real>::SpaceGroups(const char* pcMainFile)
 {
+	if(!pcMainFile)
+		pcMainFile = "res/data/sgroups.xml";
+
 	// load general space group list
-	m_bOk = LoadSpaceGroups("res/data/sgroups.xml", 1);
+	m_bOk = LoadSpaceGroups(pcMainFile, 1);
 
 	// load custom-defined space groups
 	LoadSpaceGroups("res/data/sg_user.xml", 0);

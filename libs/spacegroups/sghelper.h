@@ -91,6 +91,98 @@ bool is_vec_in_container(const t_cont<t_vec>& cont, const t_vec& vec)
 }
 
 
+
+template<class T=double>
+ublas::vector<T> _get_desc_vec(const std::string& strTok)
+{
+	if(strTok == "")
+		return tl::make_vec<ublas::vector<T>>({0,0,0,0});
+	else if(strTok == "x" || strTok == "X")
+		return tl::make_vec<ublas::vector<T>>({1,0,0,0});
+	else if(strTok == "y" || strTok == "Y")
+		return tl::make_vec<ublas::vector<T>>({0,1,0,0});
+	else if(strTok == "z" || strTok == "Z")
+		return tl::make_vec<ublas::vector<T>>({0,0,1,0});
+	else
+	{
+		bool bOk;
+		T dTrans;
+		std::tie(bOk, dTrans) = tl::eval_expr<std::string, T>(strTok);
+		if(!bOk)
+			tl::log_err("Unknown expression: \"", strTok, "\".");
+		return tl::make_vec<ublas::vector<T>>({0,0,0,dTrans});
+	}
+
+	std::cerr << "Unknown token: \"" << strTok << "\"." << std::endl;
+	return tl::make_vec<ublas::vector<T>>({0,0,0,0});
+}
+
+
+/**
+ * converts trafo from "xyz" form to matrix form
+ */
+template<class T=double>
+ublas::matrix<T> get_desc_trafo(const std::string& strTrafo)
+{
+	std::vector<std::string> vecComps;
+	tl::get_tokens<std::string, std::string, std::vector<std::string>>
+		(strTrafo, std::string(",;"), vecComps);
+
+	ublas::matrix<T> mat = ublas::zero_matrix<T>(4,4);
+	mat(3,3) = T(1);
+
+	for(std::size_t iComp=0; iComp<std::min<std::size_t>(vecComps.size(), 3); ++iComp)
+	{
+		const std::string& strDesc = vecComps[iComp];
+
+		std::vector<std::string> vecPlusComps, vecMinusComps;
+
+
+		// ---------------------------------------------------------------------
+		// split at "+"
+		std::vector<std::string> _vecPlusComps;
+		tl::get_tokens_seq<std::string, std::string, std::vector>
+			(strDesc, std::string("+"), _vecPlusComps);
+
+		for(const std::string& strPlus : _vecPlusComps)
+		{
+			// split at "-"
+			std::vector<std::string> _vecMinusComps;
+			tl::get_tokens_seq<std::string, std::string, std::vector>
+				(strPlus, std::string("-"), _vecMinusComps);
+
+			// first element in vector is "+", others are "-"
+			for(std::size_t iElem=0; iElem<_vecMinusComps.size(); ++iElem)
+			{
+				std::string strElem = _vecMinusComps[iElem];
+				strElem = tl::remove_char(strElem, '#');
+				tl::trim(strElem);
+
+				if(iElem == 0)
+					vecPlusComps.push_back(strElem);
+				else
+					vecMinusComps.push_back(strElem);
+			}
+		}
+		// ---------------------------------------------------------------------
+
+		ublas::vector<T> vecComp = ublas::zero_vector<T>(4);
+		for(const std::string& str : vecPlusComps)
+			vecComp += _get_desc_vec(str);
+		for(const std::string& str : vecMinusComps)
+			vecComp -= _get_desc_vec(str);
+
+		tl::set_row<decltype(vecComp), decltype(mat)>(mat, iComp, vecComp);
+		//std::cout << strDesc << " ->  " << vecComp << std::endl;
+	}
+
+	return mat;
+}
+
+
+/**
+ * converts matrices into "xyz" form
+ */
 template<class T=double>
 std::string get_trafo_desc(const ublas::matrix<T>& mat)
 {
@@ -260,7 +352,7 @@ t_str get_pointgroup(const t_str& str)
 
 
 /**
- * check allowed Bragg reflections based on centring
+ * check allowed Bragg reflections based on centering
  * see e.g.: http://pd.chem.ucl.ac.uk/pdnn/symm4/centred.htm
  */
 template<class t_int=int>

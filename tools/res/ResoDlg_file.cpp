@@ -51,6 +51,8 @@ void ResoDlg::SaveRes()
 
 	std::string strFile = qstrFile.toStdString();
 	std::string strDir = tl::get_dir(strFile);
+	if(tl::get_fileext(strFile,1) != "taz")
+		strFile += ".taz";
 
 	std::map<std::string, std::string> mapConf;
 	Save(mapConf, strXmlRoot);

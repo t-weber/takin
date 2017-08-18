@@ -21,8 +21,13 @@ enum CrystalSystem
 	CRYS_CUBIC			// a=b=c, alpha=beta=gamma=90
 };
 
+
+extern const unsigned int* get_crystal_system_start_indices();
+extern const char** get_crystal_system_names(bool bCapital=0);
+extern CrystalSystem get_crystal_system_from_space_group(unsigned int iSGNr);
 extern CrystalSystem get_crystal_system_from_laue_group(const char* pcLaue);
 extern const char* get_crystal_system_name(CrystalSystem ty);
+
 
 #ifndef NO_QT
 #include <QLineEdit>

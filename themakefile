@@ -499,7 +499,7 @@ OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o
 	obj/log.o obj/debug.o obj/globals.o obj/globals_qt.o
 
 OBJ_GENTAB = obj/spacegroup_clp.o obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
-	obj/debug.o
+	obj/debug.o obj/eval.o
 
 OBJ_SFACT = obj/sfact.o obj/spacegroup_clp.o obj/crystalsys_noqt.o obj/globals.o \
 	obj/formfact.o obj/log.o obj/debug.o obj/rand.o

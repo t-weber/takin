@@ -143,7 +143,8 @@ public:
 	void SetMinuitParams(const minuit::MnUserParameterState& state)
 	{ SetMinuitParams(state.Parameters()); }
 
-	bool Save(const char *pcFile, t_real_mod dXMin, t_real_mod dXMax, std::size_t) const;
+	bool Save(const char *pcFile, t_real_mod dXMin, t_real_mod dXMax,
+		std::size_t iPts=256, std::size_t iSkipBegin=0, std::size_t iSkipEnd=0) const;
 
 	SqwBase* GetSqwBase() { return m_pSqw.get(); }
 };

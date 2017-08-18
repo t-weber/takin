@@ -294,8 +294,15 @@ minuit::MnUserParameters SqwFuncModel::GetMinuitParams() const
 	return params;
 }
 
-bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax, std::size_t iNum=512) const
+bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax,
+	std::size_t iNum, std::size_t iSkipBegin, std::size_t iSkipEnd) const
 {
+	if(iSkipBegin + iSkipEnd >= iNum)
+	{
+		tl::log_err("No points to plot");
+		return 0;
+	}
+
 	try
 	{
 		std::ofstream ofstr;
@@ -324,7 +331,9 @@ bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax, std::siz
 
 		std::vector<t_real> vecFWHMs[4];
 
-		for(std::size_t i=0; i<iNum; ++i)
+		tl::log_info("Number of plot points: ", iNum, ", skip: ", iSkipBegin, ", ", iSkipEnd, ".");
+
+		for(std::size_t i=iSkipBegin; i<iNum-iSkipEnd; ++i)
 		{
 			t_real dX = tl::lerp(dXMin, dXMax, t_real(i)/t_real(iNum-1));
 			t_real dY = (*this)(dX);
@@ -353,6 +362,8 @@ bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax, std::siz
 			for(t_real dFwhm : vecFwhms)
 				ofstr << std::left << std::setw(NUM_PREC*2) << dFwhm << " ";
 			ofstr << "\n";
+
+			ofstr.flush();
 		}
 
 		for(int iFwhm=0; iFwhm<4; ++iFwhm)

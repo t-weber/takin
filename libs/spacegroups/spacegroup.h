@@ -31,7 +31,7 @@ protected:
 	unsigned int m_iNr = 0;
 	std::string m_strName;
 	std::string m_strLaue, m_strPoint;
-	CrystalSystem m_crystalsys;
+	CrystalSystem m_crystalsys = CRYS_NOT_SET;
 	std::string m_strCrystalSysName;
 
 	std::vector<t_mat> m_vecTrafos, m_vecCentringTrafos;
@@ -84,7 +84,11 @@ public:
 		return bAllowed;
 	}
 
-	void SetNr(unsigned int iNr) { m_iNr = iNr; }
+	void SetNr(unsigned int iNr)
+	{
+		m_iNr = iNr;
+		SetCrystalSystem(get_crystal_system_from_space_group(int(m_iNr)));
+	}
 	unsigned int GetNr() const { return m_iNr; }
 
 	void SetName(const std::string& str)
@@ -96,8 +100,11 @@ public:
 
 	void SetCrystalSystem(const CrystalSystem& crys)
 	{
-		m_crystalsys = crys;
-		m_strCrystalSysName = get_crystal_system_name(m_crystalsys);
+		if(m_crystalsys == CRYS_NOT_SET)
+		{
+			m_crystalsys = crys;
+			m_strCrystalSysName = get_crystal_system_name(m_crystalsys);
+		}
 	}
 	CrystalSystem GetCrystalSystem() const { return m_crystalsys; }
 	const std::string& GetCrystalSystemName() const { return m_strCrystalSysName; }
@@ -144,7 +151,10 @@ class SpaceGroups
 		static std::shared_ptr<SpaceGroups<t_real>> s_inst;
 		static std::mutex s_mutex;
 
-		SpaceGroups();
+#ifdef _SGR_NO_SINGLETON
+	public:
+#endif
+		SpaceGroups(const char* pcMainFile=nullptr);
 
 	protected:
 		t_mapSpaceGroups g_mapSpaceGroups;

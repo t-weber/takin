@@ -590,6 +590,8 @@ bool TazDlg::SaveAs()
 	{
 		std::string strFile1 = strFile.toStdString();
 		std::string strDir = tl::get_dir(strFile1);
+		if(tl::get_fileext(strFile1,1) != "taz")
+			strFile1 += ".taz";
 
 		m_strCurFile = strFile1;
 		setWindowTitle((s_strTitle + " - " + m_strCurFile).c_str());

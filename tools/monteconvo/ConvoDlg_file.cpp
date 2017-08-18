@@ -107,6 +107,8 @@ void ConvoDlg::SaveAs()
 
 	m_strLastFile = _strFile.toStdString();
 	std::string strDir = tl::get_dir(m_strLastFile);
+	if(tl::get_fileext(m_strLastFile,1) != "taz")
+		m_strLastFile += ".taz";
 
 	Save();
 
@@ -270,6 +272,9 @@ void ConvoDlg::SaveConvofit()
 
 	std::string strFile = _strFile.toStdString();
 	std::string strDir = tl::get_dir(strFile);
+	if(tl::get_fileext(strFile,1) != "job")
+		strFile += ".job";
+
 
 	std::map<std::string, std::string> mapConf;
 	Save(mapConf, strXmlRoot);
@@ -309,6 +314,9 @@ void ConvoDlg::SaveResult()
 
 	std::string strFile1 = strFile.toStdString();
 	std::string strDir = tl::get_dir(strFile1);
+	if(tl::get_fileext(strFile1,1) != "dat")
+		strFile1 += ".dat";
+
 
 	std::ofstream ofstr(strFile1);
 	if(!ofstr)

@@ -28,7 +28,7 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 
 	std::string strFile = pcFile;
 	std::string strDir = tl::get_dir(strFile);
-	std::string strMod = tl::get_file_noext(tl::get_file(strFile));
+	std::string strMod = tl::get_file_noext(tl::get_file_nodir(strFile));
 	const bool bSetScriptCWD = 1;
 
 	try	// mandatory stuff

@@ -93,6 +93,9 @@ bool g_bUseValuesFromModel = 0;
 unsigned int g_iNumNeutrons = 0;
 std::string g_strSetParams;
 std::string g_strOutFileSuffix;
+unsigned int g_iPlotPoints = 0;
+unsigned int g_iPlotSkipBegin = 0;
+unsigned int g_iPlotSkipEnd = 0;
 // ----------------------------------------------------------------------------
 
 
@@ -247,7 +250,13 @@ bool Convofit::run_job(const std::string& _strJob)
 	std::string strLogOutFile = prop.Query<std::string>("output/log_file");
 	bool bPlot = prop.Query<bool>("output/plot", 0);
 	bool bPlotIntermediate = prop.Query<bool>("output/plot_intermediate", 0);
+
 	unsigned int iPlotPoints = prop.Query<unsigned>("output/plot_points", 128);
+	unsigned int iPlotPointsSkipBegin = prop.Query<unsigned>("output/plot_points_skip_begin", 0);
+	unsigned int iPlotPointsSkipEnd = prop.Query<unsigned>("output/plot_points_skip_end", 0);
+	if(g_iPlotPoints) iPlotPoints = g_iPlotPoints;
+	if(g_iPlotSkipBegin) iPlotPointsSkipBegin = g_iPlotSkipBegin;
+	if(g_iPlotSkipEnd) iPlotPointsSkipEnd = g_iPlotSkipEnd;
 
 	if(bPlot || bPlotIntermediate)
 	{
@@ -667,7 +676,8 @@ bool Convofit::run_job(const std::string& _strJob)
 		}
 		std::pair<decltype(sc.vecX)::const_iterator, decltype(sc.vecX)::const_iterator> xminmax
 			= std::minmax_element(sc.vecX.begin(), sc.vecX.end());
-		mod.Save(strCurModOutFile.c_str(), *xminmax.first, *xminmax.second, iPlotPoints);
+		mod.Save(strCurModOutFile.c_str(), *xminmax.first, *xminmax.second,
+			iPlotPoints, iPlotPointsSkipBegin, iPlotPointsSkipEnd);
 		save_file(strCurScOutFile.c_str(), sc);
 	}
 	// --------------------------------------------------------------------
