@@ -10,9 +10,11 @@
 INSTDIR=~/.wine/drive_c/takin
 
 
-# main program
+# main programs
 mkdir ${INSTDIR}
-cp -v bin/takin.exe 	${INSTDIR}/
+cp -v bin/takin.exe		${INSTDIR}/
+cp -v bin/convofit.exe	${INSTDIR}/
+cp -v bin/convoseries.exe	${INSTDIR}/
 cp -v COPYING			${INSTDIR}/
 cp -v LICENSES			${INSTDIR}/
 cp -v LITERATURE		${INSTDIR}/

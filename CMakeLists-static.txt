@@ -367,17 +367,43 @@ endif()
 # -----------------------------------------------------------------------------
 # install
 # -----------------------------------------------------------------------------
-install(TARGETS takin DESTINATION bin)
+install(TARGETS takin DESTINATION bin COMPONENT apptakin)
 
 if(Minuit2_FOUND)
-	install(TARGETS convofit convoseries DESTINATION bin)
+	install(TARGETS convofit convoseries DESTINATION bin COMPONENT appconvofit)
 endif()
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/examples ${PROJECT_SOURCE_DIR}/doc
-	DESTINATION share/takin)
+	DESTINATION share/takin COMPONENT takindata1)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/res/data ${PROJECT_SOURCE_DIR}/res/doc ${PROJECT_SOURCE_DIR}/res/icons
-	DESTINATION share/takin/res)
+	DESTINATION share/takin/res COMPONENT takindata2)
 install(FILES ${PROJECT_SOURCE_DIR}/COPYING ${PROJECT_SOURCE_DIR}/AUTHORS 
 	${PROJECT_SOURCE_DIR}/LICENSES ${PROJECT_SOURCE_DIR}/LITERATURE
-	DESTINATION share/takin)
+	DESTINATION share/takin COMPONENT takininfo)
+# -----------------------------------------------------------------------------
+
+
+
+
+# -----------------------------------------------------------------------------
+# TODO: fix package
+# -----------------------------------------------------------------------------
+set(CPACK_PACKAGE_NAME "takin")
+set(CPACK_PACKAGE_CONTACT "tobias.weber@tum.de")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "inelastic neutron scattering package")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/COPYING")
+set(CPACK_PACKAGE_EXECUTABLES "takin;Takin")
+set(CPACK_PACKAGE_VERSION "1.5.3")
+#set(CPACK_COMPONENTS_ALL apptakin appconvofit takindata1 takindata2 takininfo)
+set(CPACK_SET_DESTDIR TRUE)
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "n/a")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6, libboost, libqtcore4 (>=4.8.0), libqtgui4 (>=4.8.0), libqtopengl4 (>=4.8.0), libqtsvg4 (>=4.8.0), libqtxml4 (>=4.8.0), libqwt, python, freetype6")
+
+execute_process(COMMAND dpkg --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_ARCHITECTURE)
+message("Deb Arch: ${CPACK_DEBIAN_ARCHITECTURE}")
+
+
+#include(CPack)
 # -----------------------------------------------------------------------------

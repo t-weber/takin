@@ -6,6 +6,8 @@
 #
 # copy framework libs
 #
+# pack with: hdiutil create takin.dmg -srcfolder takin.app -format "UDBZ" -volname "takin"
+#
 
 
 PRG="takin.app"
