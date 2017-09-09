@@ -43,6 +43,7 @@ takin-data-master.tar.bz2
 takin-data/*
 takin-data
 tango-icon-theme*.tar.gz
+tmp
 tmp/*
 res/data/*
 res/doc/**

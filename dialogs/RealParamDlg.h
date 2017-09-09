@@ -33,6 +33,9 @@ class RealParamDlg : public QDialog, Ui::RealParamDlg
 	protected:
 		QSettings *m_pSettings = 0;
 
+		// lattice
+		const tl::Lattice<t_real_glob>* m_pLatt = nullptr;
+
 		// metric
 		ublas::matrix<t_real_glob> m_matGCov, m_matGCont;
 
@@ -45,6 +48,7 @@ class RealParamDlg : public QDialog, Ui::RealParamDlg
 
 		void CrystalChanged(const LatticeCommon<t_real_glob>&);
 		void CalcVecs();
+		void CalcCrystalRot();
 
 	protected:
 		virtual void closeEvent(QCloseEvent *pEvt) override;

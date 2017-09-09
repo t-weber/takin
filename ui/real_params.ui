@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>464</width>
-    <height>450</height>
+    <width>441</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -157,6 +157,141 @@
            <widget class="QLabel" name="label_8">
             <property name="text">
              <string>Vector 2:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Crystal Rotation</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_10">
+       <property name="margin">
+        <number>4</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Coordinates</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <property name="margin">
+           <number>4</number>
+          </property>
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Reciprocal Direction r (rlu):</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="3">
+           <widget class="QLineEdit" name="editRotCoords">
+            <property name="toolTip">
+             <string>Bragg peak.</string>
+            </property>
+            <property name="text">
+             <string>1, 1, 1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Coord. Vectors x, y, z (rlu):</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="editRotBaseX">
+            <property name="toolTip">
+             <string>Basis x reflection.</string>
+            </property>
+            <property name="text">
+             <string>1, 0, 0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLineEdit" name="editRotBaseY">
+            <property name="toolTip">
+             <string>Basis y reflection.</string>
+            </property>
+            <property name="text">
+             <string>0, 1, 0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLineEdit" name="editRotBaseZ">
+            <property name="toolTip">
+             <string>Basis z reflection.</string>
+            </property>
+            <property name="text">
+             <string>0, 0, 1</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Wavenumber k_i (Å⁻¹):</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="3">
+           <widget class="QLineEdit" name="editRotKi">
+            <property name="text">
+             <string>1.4</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Crystal Plane Normal (rlu):</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="3">
+           <widget class="QLineEdit" name="editRotNorm">
+            <property name="toolTip">
+             <string>Normal &quot;up&quot; vector.</string>
+            </property>
+            <property name="text">
+             <string>0, 0, 1</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="groupBox_5">
+         <property name="title">
+          <string>Results</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <property name="margin">
+           <number>4</number>
+          </property>
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QTextEdit" name="editCalcRot">
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -443,6 +578,14 @@
   <tabstop>editVec1</tabstop>
   <tabstop>editVec2</tabstop>
   <tabstop>editCalc</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>editRotCoords</tabstop>
+  <tabstop>editRotBaseX</tabstop>
+  <tabstop>editRotBaseY</tabstop>
+  <tabstop>editRotBaseZ</tabstop>
+  <tabstop>editRotKi</tabstop>
+  <tabstop>editRotNorm</tabstop>
+  <tabstop>editCalcRot</tabstop>
   <tabstop>listAtoms</tabstop>
   <tabstop>treeNN</tabstop>
   <tabstop>editLenMonoSample</tabstop>
@@ -454,7 +597,6 @@
   <tabstop>editThetaS</tabstop>
   <tabstop>edit2ThetaA</tabstop>
   <tabstop>editThetaA</tabstop>
-  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -465,8 +607,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>493</y>
+     <x>235</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -481,8 +623,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>499</y>
+     <x>303</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

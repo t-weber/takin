@@ -26,8 +26,10 @@ RealParamDlg::RealParamDlg(QWidget* pParent, QSettings* pSett)
 {
 	this->setupUi(this);
 
-	QObject::connect(editVec1, SIGNAL(textChanged(const QString&)), this, SLOT(CalcVecs()));
-	QObject::connect(editVec2, SIGNAL(textChanged(const QString&)), this, SLOT(CalcVecs()));
+	for(QLineEdit* pEdit : { editVec1, editVec2 })
+		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(CalcVecs()));
+	for(QLineEdit* pEdit : { editRotCoords, editRotKi, editRotNorm, editRotBaseX, editRotBaseY, editRotBaseZ })
+		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(CalcCrystalRot()));
 
 	if(m_pSettings)
 	{
@@ -43,6 +45,37 @@ RealParamDlg::RealParamDlg(QWidget* pParent, QSettings* pSett)
 
 
 RealParamDlg::~RealParamDlg() {}
+
+
+
+// ----------------------------------------------------------------------------
+// local helpers
+
+static void print_matrix(std::ostream& ostr, const t_mat& mat)
+{
+	for(std::size_t i=0; i<mat.size1(); ++i)
+	{
+		ostr << "<tr>\n";
+		for(std::size_t j=0; j<mat.size2(); ++j)
+			ostr << "\t<td>" << mat(i,j) << "</td>";
+		ostr << "</tr>\n";
+	}
+};
+
+
+static t_vec get_vec(const QLineEdit* pEdit)
+{
+	std::vector<t_real> _vec;
+	tl::get_tokens<t_real>(pEdit->text().toStdString(), std::string(",;"), _vec);
+
+	t_vec vec = tl::make_vec<t_vec, std::vector>(_vec);
+	vec.resize(3,1);
+
+	return vec;
+};
+
+
+// ----------------------------------------------------------------------------
 
 
 void RealParamDlg::paramsChanged(const RealParams& parms)
@@ -67,6 +100,7 @@ void RealParamDlg::CrystalChanged(const LatticeCommon<t_real>& lattcomm)
 	const tl::Lattice<t_real>& latt = lattcomm.lattice;
 	const tl::Lattice<t_real>& recip = lattcomm.recip;
 	const std::vector<AtomPos<t_real>>* pAtoms = lattcomm.pvecAtomPos;
+	m_pLatt = &latt;
 
 	// crystal coordinates
 	{
@@ -84,6 +118,7 @@ void RealParamDlg::CrystalChanged(const LatticeCommon<t_real>& lattcomm)
 
 		// also update vector calculations
 		CalcVecs();
+		CalcCrystalRot();
 
 		t_mat matReal = latt.GetBaseMatrixCov();
 		//t_mat matRecip = 2.*M_PI * latt.GetBaseMatrixCont();
@@ -94,21 +129,10 @@ void RealParamDlg::CrystalChanged(const LatticeCommon<t_real>& lattcomm)
 		tl::set_eps_0(matReal, g_dEps);
 		tl::set_eps_0(matRecip, g_dEps);
 
-		auto fktPrintMatrix = [](std::ostream& ostr, const t_mat& mat) -> void
-		{
-			for(std::size_t i=0; i<mat.size1(); ++i)
-			{
-				ostr << "<tr>\n";
-				for(std::size_t j=0; j<mat.size2(); ++j)
-					ostr << "\t<td>" << mat(i,j) << "</td>";
-				ostr << "</tr>\n";
-			}			
-		};
-
-		fktPrintMatrix(ostrRealG, m_matGCov);
-		fktPrintMatrix(ostrRecipG, m_matGCont);
-		fktPrintMatrix(ostrBasisReal, matReal);
-		fktPrintMatrix(ostrBasisRecip, matRecip);
+		print_matrix(ostrRealG, m_matGCov);
+		print_matrix(ostrRecipG, m_matGCont);
+		print_matrix(ostrBasisReal, matReal);
+		print_matrix(ostrBasisRecip, matRecip);
 
 		for(std::ostringstream* postr : {&ostrRealG, &ostrRecipG, &ostrBasisReal, &ostrBasisRecip} )
 		{
@@ -223,57 +247,132 @@ void RealParamDlg::CrystalChanged(const LatticeCommon<t_real>& lattcomm)
 }
 
 
+// ----------------------------------------------------------------------------
+
+
+/**
+ * vector calculations in crystal coordinate systems
+ */
 void RealParamDlg::CalcVecs()
 {
 	if(m_matGCont.size1()!=3 || m_matGCov.size1()!=3)
 		return;
 
-	auto fktGetVec = [this](QLineEdit* pEdit) -> t_vec
+	try
 	{
-		std::vector<t_real> _vec;
-		tl::get_tokens<t_real>(pEdit->text().toStdString(), std::string(",;"), _vec);
+		// get vectors 1 & 2
+		t_vec vec1 = get_vec(editVec1);
+		t_vec vec2 = get_vec(editVec2);
 
-		t_vec vec = tl::make_vec<t_vec, std::vector>(_vec);
-		vec.resize(3,1);
+		t_real dAngleReal = tl::r2d(tl::vec_angle(m_matGCov, vec1, vec2));
+		t_real dAngleRecip = tl::r2d(tl::vec_angle(m_matGCont, vec1, vec2));
+		t_real dLen1Real = tl::vec_len(m_matGCov, vec1);
+		t_real dLen2Real = tl::vec_len(m_matGCov, vec2);
+		t_real dLen1Recip = tl::vec_len(m_matGCont, vec1);
+		t_real dLen2Recip = tl::vec_len(m_matGCont, vec2);
 
-		return vec;
-	};
-	
-	// get vectors 1 & 2
-	t_vec vec1 = fktGetVec(editVec1);
-	t_vec vec2 = fktGetVec(editVec2);
+		tl::set_eps_0(dAngleReal, g_dEps);	tl::set_eps_0(dAngleRecip, g_dEps);
+		tl::set_eps_0(dLen1Real, g_dEps);	tl::set_eps_0(dLen2Real, g_dEps);
+		tl::set_eps_0(dLen1Recip, g_dEps);	tl::set_eps_0(dLen2Recip, g_dEps);
 
-	t_real dAngleReal = tl::r2d(tl::vec_angle(m_matGCov, vec1, vec2));
-	t_real dAngleRecip = tl::r2d(tl::vec_angle(m_matGCont, vec1, vec2));
-	t_real dLen1Real = tl::vec_len(m_matGCov, vec1);
-	t_real dLen2Real = tl::vec_len(m_matGCov, vec2);
-	t_real dLen1Recip = tl::vec_len(m_matGCont, vec1);
-	t_real dLen2Recip = tl::vec_len(m_matGCont, vec2);
+		std::ostringstream ostr;
+		ostr.precision(g_iPrec);
+		ostr << "<html><body>\n";
 
-	tl::set_eps_0(dAngleReal, g_dEps);	tl::set_eps_0(dAngleRecip, g_dEps);
-	tl::set_eps_0(dLen1Real, g_dEps);	tl::set_eps_0(dLen2Real, g_dEps);
-	tl::set_eps_0(dLen1Recip, g_dEps);	tl::set_eps_0(dLen2Recip, g_dEps);
+		ostr << "<p><b>Reciprocal Vectors 1 and 2:</b>\n<ul>\n";
+		ostr << "\t<li> Angle: " << dAngleRecip << " deg </li>\n";
+		ostr << "\t<li> Length 1: " << dLen1Recip << " 1/A </li>\n";
+		ostr << "\t<li> Length 2: " << dLen2Recip << " 1/A </li>\n";
+		ostr << "</ul></p>\n";
 
-	std::ostringstream ostr;
-	ostr.precision(g_iPrec);
-	ostr << "<html><body>\n";
+		ostr << "<p><b>Real Vectors 1 and 2:</b>\n<ul>\n";
+		ostr << "\t<li> Angle: " << dAngleReal << " deg </li>\n";
+		ostr << "\t<li> Length 1: " << dLen1Real << " A </li>\n";
+		ostr << "\t<li> Length 2: " << dLen2Real << " A </li>\n";
+		ostr << "</ul></p>\n";
 
-	ostr << "<p><b>Reciprocal Vectors 1 and 2:</b>\n<ul>\n";
-	ostr << "\t<li> Angle: " << dAngleRecip << " deg </li>\n";
-	ostr << "\t<li> Length 1: " << dLen1Recip << " 1/A </li>\n";
-	ostr << "\t<li> Length 2: " << dLen2Recip << " 1/A </li>\n";
-	ostr << "</ul></p>";
-
-	ostr << "<p><b>Real Vectors 1 and 2:</b>\n<ul>\n";
-	ostr << "\t<li> Angle: " << dAngleReal << " deg </li>\n";
-	ostr << "\t<li> Length 1: " << dLen1Real << " A </li>\n";
-	ostr << "\t<li> Length 2: " << dLen2Real << " A </li>\n";
-	ostr << "</ul></p>";
-
-	ostr << "</body></html>\n";
-	editCalc->setHtml(QString::fromUtf8(ostr.str().c_str()));
+		ostr << "</body></html>\n";
+		editCalc->setHtml(QString::fromUtf8(ostr.str().c_str()));
+	}
+	catch(const std::exception& ex)
+	{
+		editCalc->setHtml(ex.what());
+	}
 }
 
+
+/**
+ * calculates the relative orientation of a reciprocal direction towards a given basis x vector
+ * TODO: so far only the direction of the input vector is considered (normalised), not its length
+ */
+void RealParamDlg::CalcCrystalRot()
+{
+	if(!m_pLatt) return;
+
+	try
+	{
+		t_vec vecCoord = get_vec(editRotCoords);
+		t_vec vecUp = get_vec(editRotNorm);
+		t_vec vecBaseX = get_vec(editRotBaseX);
+		t_vec vecBaseY = get_vec(editRotBaseY);
+// 		t_vec vecBaseZ = get_vec(editRotBaseZ);
+
+		t_vec vecBaseZ = tl::cross_3(vecBaseX, vecBaseY);
+		std::ostringstream ostrZ;
+		ostrZ.precision(g_iPrec);
+		ostrZ << vecBaseZ[0] << ", " << vecBaseZ[1] << ", " << vecBaseZ[2];
+		editRotBaseZ->setText(ostrZ.str().c_str());
+
+		t_real dKi = tl::str_to_var<t_real>(editRotKi->text().toStdString());
+
+		t_real dTh, dThX, dTT, dChi, dPsi;
+		auto quatRot = tl::get_euler_angles(*m_pLatt, dKi,
+			vecCoord[0], vecCoord[1], vecCoord[2],
+			&dTh, &dThX, &dTT, &dChi, &dPsi,
+			vecUp[0], vecUp[1], vecUp[2],
+			vecBaseX, vecBaseY, vecBaseZ);
+
+		t_mat matRot = tl::quat_to_rot3<t_mat>(quatRot);
+
+		tl::set_eps_0(dTh, g_dEps);
+		tl::set_eps_0(dThX, g_dEps);
+		tl::set_eps_0(dTT, g_dEps);
+		tl::set_eps_0(dChi, g_dEps);
+		tl::set_eps_0(dPsi, g_dEps);
+		tl::set_eps_0(matRot, g_dEps);
+
+		std::ostringstream ostr;
+		ostr.precision(g_iPrec);
+		ostr << "<html><body>\n";
+
+		ostr << "<p><b>Rotation Matrix:</b>\n";
+		ostr << "<table border=\"0\" width=\"100%\">\n";
+		print_matrix(ostr, matRot);
+		ostr << "</table></p>\n";
+
+		ostr << "<p><b>Quaternion:</b><br>" << quatRot << "</p>\n";
+
+		ostr << "<p><b>Euler Angles:</b>\n<ul>\n";
+		ostr << "\t<li> &Delta;&theta; = " << tl::r2d(dTh) << " deg "
+				<< "(<b>r</b>/r relative to <b>x</b>/x)" << "</li>\n";
+		//ostr << "\t<li> &theta;_x = " << tl::r2d(dThX) << " deg </li>\n";
+		ostr << "\t<li> &theta; = " << tl::r2d(dTh + dThX) << " deg </li>\n";
+		ostr << "\t<li> 2&theta; = " << tl::r2d(dTT) << " deg </li>\n";
+		ostr << "\t<li> &chi; = " << tl::r2d(dChi) << " deg </li>\n";
+		ostr << "\t<li> &psi; = " << tl::r2d(dPsi) << " deg </li>\n";
+		ostr << "</ul></p>\n";
+
+		ostr << "</body></html>\n";
+		editCalcRot->setHtml(QString::fromUtf8(ostr.str().c_str()));
+	}
+	catch(const std::exception& ex)
+	{
+		editCalcRot->setHtml(ex.what());
+	}
+}
+
+
+// ----------------------------------------------------------------------------
 
 void RealParamDlg::closeEvent(QCloseEvent *pEvt)
 {
@@ -293,5 +392,6 @@ void RealParamDlg::showEvent(QShowEvent *pEvt)
 	QDialog::showEvent(pEvt);
 }
 
+// ----------------------------------------------------------------------------
 
 #include "RealParamDlg.moc"
