@@ -350,7 +350,9 @@ void RealParamDlg::CalcCrystalRot()
 		print_matrix(ostr, matRot);
 		ostr << "</table></p>\n";
 
-		ostr << "<p><b>Quaternion:</b><br>" << quatRot << "</p>\n";
+		std::string strQuat = tl::var_to_str(quatRot, g_iPrec);
+		tl::find_all_and_replace<std::string>(strQuat, ",", ", ");
+		ostr << "<p><b>Quaternion:</b><br>" << strQuat << "</p>\n";
 
 		ostr << "<p><b>Euler Angles:</b>\n<ul>\n";
 		ostr << "\t<li> &Delta;&theta; = " << tl::r2d(dTh) << " deg "

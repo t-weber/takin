@@ -203,6 +203,8 @@ int main(int argc, char** argv)
 			return -1;
 		}
 
+		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nChecking resources ...");
+
 		// check tables
 		g_bHasElements = (find_resource("res/data/elements.xml") != "");
 		g_bHasScatlens = (find_resource("res/data/scatlens.xml") != "");
@@ -234,7 +236,6 @@ int main(int argc, char** argv)
 			//QMessageBox::warning(0, "Takin - Warning", pcErr);
 			//return -1;
 		}
-
 		if(!g_bHasSpaceGroups)
 		{
 			const char* pcErr = "Space group table could not be found!" TAKIN_CHECK;
@@ -257,7 +258,6 @@ int main(int argc, char** argv)
 			QMessageBox::critical(0, "Takin - Error", pcErr);
 			return -1;
 		}
-
 
 		// ------------------------------------------------------------
 
@@ -284,7 +284,10 @@ int main(int argc, char** argv)
 		}
 #endif
 
+		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nLoading 1/2 ...");
 		std::unique_ptr<TazDlg> pDlg(new TazDlg(0));
+		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nLoading 2/2 ...");
+
 		pSplash->finish(pDlg.get());
 		if(argc > 1)
 			pDlg->Load(argv[1]);
