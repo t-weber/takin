@@ -28,7 +28,8 @@ RealParamDlg::RealParamDlg(QWidget* pParent, QSettings* pSett)
 
 	for(QLineEdit* pEdit : { editVec1, editVec2 })
 		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(CalcVecs()));
-	for(QLineEdit* pEdit : { editRotCoords, editRotKi, editRotNorm, editRotBaseX, editRotBaseY, editRotBaseZ })
+	for(QLineEdit* pEdit : { editRotCoords, editRotTo, editRotKi, editRotNorm, 
+		editRotBaseX, editRotBaseY, editRotBaseZ })
 		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(CalcCrystalRot()));
 
 	if(m_pSettings)
@@ -312,6 +313,7 @@ void RealParamDlg::CalcCrystalRot()
 	try
 	{
 		t_vec vecCoord = get_vec(editRotCoords);
+		t_vec vecCoordTo = get_vec(editRotTo);
 		t_vec vecUp = get_vec(editRotNorm);
 		t_vec vecBaseX = get_vec(editRotBaseX);
 		t_vec vecBaseY = get_vec(editRotBaseY);
@@ -328,9 +330,10 @@ void RealParamDlg::CalcCrystalRot()
 		t_real dTh, dThX, dTT, dChi, dPsi;
 		auto quatRot = tl::get_euler_angles(*m_pLatt, dKi,
 			vecCoord[0], vecCoord[1], vecCoord[2],
+			vecCoordTo[0], vecCoordTo[1], vecCoordTo[2],
 			&dTh, &dThX, &dTT, &dChi, &dPsi,
 			vecUp[0], vecUp[1], vecUp[2],
-			vecBaseX, vecBaseY, vecBaseZ);
+			vecBaseX, vecBaseY);
 
 		t_mat matRot = tl::quat_to_rot3<t_mat>(quatRot);
 
