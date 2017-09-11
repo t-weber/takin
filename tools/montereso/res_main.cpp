@@ -15,9 +15,11 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <memory>
 
 using namespace ublas;
 using t_real = t_real_reso;
+
 
 static void add_param(std::unordered_map<std::string, std::string>& map, const std::string& strLine)
 {
@@ -33,6 +35,7 @@ static void add_param(std::unordered_map<std::string, std::string>& map, const s
 
 	map.insert(pair);
 }
+
 
 template<class t_map>
 static void print_map(std::ostream& ostr, const t_map& map)
@@ -51,6 +54,7 @@ enum class FileType
 
 	UNKNOWN
 };
+
 
 static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 {
@@ -105,6 +109,7 @@ static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 
 	return reso.bHasRes;
 }
+
 
 static bool load_mc_list(const char* pcFile, Resolution& res)
 {
@@ -178,9 +183,9 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 			istr >> dPos[0] >> dPos[2] >> dPos[1];
 			istr >> dPi >> dPf;
 
-			dKi[1] = -dKi[1];
-			dKf[1] = -dKf[1];
-			dPos[1] = -dPos[1];
+			dKi[0] = -dKi[0];
+			dKf[0] = -dKf[0];
+			dPos[0] = -dPos[0];
 
 			vecKi.push_back(tl::make_vec<vector<t_real>>({dKi[0], dKi[1], dKi[2]}));
 			vecKf.push_back(tl::make_vec<vector<t_real>>({dKf[0], dKf[1], dKf[2]}));
@@ -213,9 +218,11 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 	return 1;
 }
 
+
 static EllipseDlg* show_ellipses(const Resolution& res)
 {
 	EllipseDlg* pdlg = new EllipseDlg(0);
+	pdlg->SetExitOnAccept(1);
 	pdlg->show();
 
 	matrix<t_real> matDummy;
@@ -276,10 +283,10 @@ int main(int argc, char **argv)
 
 	QLocale::setDefault(QLocale::English);
 	QApplication app(argc, argv);
+	app.setQuitOnLastWindowClosed(1);
 
-	EllipseDlg* pElliDlg = show_ellipses(res);
+	std::unique_ptr<EllipseDlg> pElliDlg(show_ellipses(res));
 	int iRet = app.exec();
 
-	if(pElliDlg) delete pElliDlg;
 	return iRet;
 }

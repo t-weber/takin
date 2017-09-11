@@ -376,11 +376,18 @@ void EllipseDlg::accept()
 		m_pSettings->setValue("reso/ellipse_geo", saveGeometry());
 
 	QDialog::accept();
+	if(m_bExitOnAccept) { qApp->exit(); }
 }
 
 void EllipseDlg::showEvent(QShowEvent *pEvt)
 {
 	QDialog::showEvent(pEvt);
+}
+
+void EllipseDlg::closeEvent(QCloseEvent *pEvt)
+{
+	QDialog::closeEvent(pEvt);
+	if(m_bExitOnAccept) { qApp->exit(); }
 }
 
 

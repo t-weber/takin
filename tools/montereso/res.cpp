@@ -47,6 +47,7 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 	tl::set_column(trafo, 0, Q_dir);
 	tl::set_column(trafo, 1, Q_perp);
 	tl::set_column(trafo, 2, vecUp);
+	//trafo(3,3) = -1;
 	tl::log_info("Transformation: ", trafo);
 
 
@@ -92,6 +93,7 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 	return reso;
 }
 
+
 Resolution calc_res(std::vector<vector<t_real>>&& vecQ)
 {
 	vector<t_real> Q_avg = tl::make_vec<vector<t_real>>({0., 0., 0., 0.});
@@ -104,6 +106,7 @@ Resolution calc_res(std::vector<vector<t_real>>&& vecQ)
 
 	return calc_res(std::forward<std::vector<vector<t_real>>&&>(vecQ), Q_avg);
 }
+
 
 /*
  * this function tries to be a 1:1 C++ reimplementation of the Perl function

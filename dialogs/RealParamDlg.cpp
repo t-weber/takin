@@ -359,7 +359,7 @@ void RealParamDlg::CalcCrystalRot()
 
 		ostr << "<p><b>Euler Angles:</b>\n<ul>\n";
 		ostr << "\t<li> &Delta;&theta; = " << tl::r2d(dTh) << " deg "
-				<< "(<b>r</b>/r relative to <b>x</b>/x)" << "</li>\n";
+				<< "(<b>r1</b>/r1 relative to <b>r2</b>/r2)" << "</li>\n";
 		//ostr << "\t<li> &theta;_x = " << tl::r2d(dThX) << " deg </li>\n";
 		ostr << "\t<li> &theta; = " << tl::r2d(dTh + dThX) << " deg </li>\n";
 		ostr << "\t<li> 2&theta; = " << tl::r2d(dTT) << " deg </li>\n";

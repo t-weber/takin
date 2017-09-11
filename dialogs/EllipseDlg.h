@@ -51,6 +51,7 @@ class EllipseDlg : public QDialog, Ui::EllipseDlg
 { Q_OBJECT
 	private:
 		const char* m_pcTitle = "Resolution Ellipses";
+		bool m_bExitOnAccept = 0;
 
 	protected:
 		bool m_bReady = 0;
@@ -88,6 +89,7 @@ class EllipseDlg : public QDialog, Ui::EllipseDlg
 
 	protected:
 		virtual void showEvent(QShowEvent *pEvt) override;
+		virtual void closeEvent(QCloseEvent *pEvt) override;
 		virtual void accept() override;
 
 	protected slots:
@@ -100,6 +102,7 @@ class EllipseDlg : public QDialog, Ui::EllipseDlg
 
 	public:
 		void SetTitle(const char* pcTitle);
+		void SetExitOnAccept(bool b) { m_bExitOnAccept = b; }
 };
 
 #endif
