@@ -13,6 +13,7 @@
 #include "tlibs/math/linalg.h"
 #include <tuple>
 
+
 /**
  * transforms resolution ellipsoid from <Qpara Qperp Qup> 
  * to crystal hkl coordinate system
@@ -41,6 +42,7 @@ conv_lab_to_rlu(t_real dAngleQVec0,
 
 	return std::make_tuple(resoHKL, reso_vHKL, Q_avgHKL);
 }
+
 
 /**
  * transforms resolution ellipsoid from <Qpara Qperp Qup> 

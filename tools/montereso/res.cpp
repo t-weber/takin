@@ -14,6 +14,8 @@
 #include "tlibs/phys/neutrons.h"
 #include "tlibs/math/stat.h"
 #include "tlibs/log/log.h"
+#include "../res/helper.h"
+#include "../res/ellipse.h"
 
 #include <algorithm>
 #include <boost/algorithm/minmax_element.hpp>
@@ -68,16 +70,19 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 
 	if(reso.bHasRes)
 	{
-		reso.dQ.resize(4, 0);
-		for(int iQ=0; iQ<4; ++iQ)
-			reso.dQ[iQ] = tl::get_SIGMA2HWHM<t_real>()/sqrt(reso.res(iQ,iQ));
+		reso.dQ = calc_bragg_fwhms(reso.res);
+		reso.dQinc = get_vanadium_fwhms(reso);
 
 		tl::log_info("Resolution matrix: ", reso.res);
 
 		std::ostringstream ostrVals;
-		ostrVals << "Gaussian HWHM values: ";
+		ostrVals << "Coherent / Bragg FWHM values (Qx, Qy, Qz, E): ";
 		std::copy(reso.dQ.begin(), reso.dQ.end(),
 			std::ostream_iterator<t_real>(ostrVals, ", "));
+
+		std::ostringstream ostrIncVals;
+		ostrIncVals << "Incoherent / Vanadium FWHM values (Qy, E): "
+			<< std::get<0>(reso.dQinc) << ", " << std::get<1>(reso.dQinc);
 
 		std::ostringstream ostrElli;
 		ostrElli << "Ellipsoid offsets: ";
@@ -87,6 +92,7 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 		reso.vecQ = std::move(Q_vec);
 
 		tl::log_info(ostrVals.str());
+		tl::log_info(ostrIncVals.str());
 		tl::log_info(ostrElli.str());
 	}
 
@@ -112,10 +118,10 @@ Resolution calc_res(std::vector<vector<t_real>>&& vecQ)
  * this function tries to be a 1:1 C++ reimplementation of the Perl function
  * 'read_mcstas_res' of the McStas 'mcresplot' program
  */
-Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& vecKi,
-	const std::vector<ublas::vector<t_real_reso>>& vecKf,
-	const std::vector<t_real_reso>* _p_i,
-	const std::vector<t_real_reso>* _p_f)
+Resolution calc_res(const std::vector<ublas::vector<t_real>>& vecKi,
+	const std::vector<ublas::vector<t_real>>& vecKf,
+	const std::vector<t_real>* _p_i,
+	const std::vector<t_real>* _p_f)
 {
 	tl::log_info("Calculating resolution...");
 
@@ -160,4 +166,15 @@ Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& vecKi,
 	tl::log_info("Average Q vector: ", Q_avg);
 
 	return calc_res(std::move(Q_vec), Q_avg, &p_vec);
+}
+
+
+/**
+ * vanadium widths
+ */
+std::tuple<t_real, t_real> get_vanadium_fwhms(const Resolution& reso)
+{
+	ublas::vector<t_real> vec0 = ublas::zero_vector<t_real>(4);
+	return calc_vanadium_fwhms<t_real>(
+		reso.res, vec0, t_real(0), reso.Q_avg);
 }

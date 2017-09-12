@@ -13,8 +13,8 @@
 #include <future>
 
 
-EllipseDlg::EllipseDlg(QWidget* pParent, QSettings* pSett)
-	: QDialog(pParent, Qt::Tool), m_pSettings(pSett)
+EllipseDlg::EllipseDlg(QWidget* pParent, QSettings* pSett, Qt::WindowFlags fl)
+	: QDialog(pParent, fl), m_pSettings(pSett)
 {
 	setupUi(this);
 	setWindowTitle(m_pcTitle);
@@ -376,7 +376,6 @@ void EllipseDlg::accept()
 		m_pSettings->setValue("reso/ellipse_geo", saveGeometry());
 
 	QDialog::accept();
-	if(m_bExitOnAccept) { qApp->exit(); }
 }
 
 void EllipseDlg::showEvent(QShowEvent *pEvt)
@@ -387,7 +386,6 @@ void EllipseDlg::showEvent(QShowEvent *pEvt)
 void EllipseDlg::closeEvent(QCloseEvent *pEvt)
 {
 	QDialog::closeEvent(pEvt);
-	if(m_bExitOnAccept) { qApp->exit(); }
 }
 
 

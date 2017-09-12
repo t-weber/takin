@@ -18,6 +18,7 @@
 #include <ostream>
 #include <cmath>
 #include <vector>
+#include <utility>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -258,6 +259,7 @@ static inline const std::string& ellipse_labels(int iCoord, EllipseCoordSys sys,
 }
 
 
+
 /*
  * this is a 1:1 C++ reimplementation of 'proj_elip' from 'mcresplot' and 'rescal5'
  * iX, iY: dimensions to plot
@@ -385,6 +387,27 @@ Ellipse2d<t_real> calc_res_ellipse(
 #endif
 
 	return ell;
+}
+
+
+/**
+ * incoherent (vanadium) widths
+ */
+template<class t_real = t_real_reso>
+std::tuple<t_real, t_real> calc_vanadium_fwhms(
+	const ublas::matrix<t_real>& matReso,
+	const ublas::vector<t_real>& vecReso,
+	const t_real dScalarReso,
+	const ublas::vector<t_real>& vecQAvg)
+{
+	struct Ellipse2d<t_real> ellVa =
+		calc_res_ellipse<t_real>(matReso, vecReso, dScalarReso,
+		vecQAvg, 0, 3, 1, 2, -1);
+
+	t_real dVanadiumFWHM_Q = ellVa.x_hwhm_bound*2.;
+	t_real dVanadiumFWHM_E = ellVa.y_hwhm_bound*2.;
+
+	return std::make_tuple(dVanadiumFWHM_Q, dVanadiumFWHM_E);
 }
 
 // --------------------------------------------------------------------------------

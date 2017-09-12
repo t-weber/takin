@@ -9,6 +9,7 @@
 #include "tlibs/log/log.h"
 #include "tlibs/string/string.h"
 #include "dialogs/EllipseDlg.h"
+#include "../res/helper.h"
 
 #include <clocale>
 #include <fstream>
@@ -93,18 +94,20 @@ static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 
 	if(reso.bHasRes)
 	{
-		vector<t_real>& dQ = reso.dQ;
-
-		dQ.resize(4, 0);
-		reso.Q_avg.resize(4, 0);
-		for(int iQ=0; iQ<4; ++iQ)
-			dQ[iQ] = tl::get_SIGMA2HWHM<t_real>()/sqrt(res(iQ,iQ));
+		std::vector<t_real>& dQ = reso.dQ;
+		reso.dQ = calc_bragg_fwhms(reso.res);
+		reso.dQinc = get_vanadium_fwhms(reso);
 
 		std::ostringstream ostrVals;
-		ostrVals << "Gaussian HWHM values: ";
-		std::copy(dQ.begin(), dQ.end(), std::ostream_iterator<t_real>(ostrVals, ", "));
+		ostrVals << "Coherent / Bragg FWHM values (Qx, Qy, Qz, E): ";
+		std::copy(reso.dQ.begin(), reso.dQ.end(), std::ostream_iterator<t_real>(ostrVals, ", "));
+
+		std::ostringstream ostrIncVals;
+		ostrIncVals << "Incoherent / Vanadium FWHM values (Qy, E): "
+			<< std::get<0>(reso.dQinc) << ", " << std::get<1>(reso.dQinc);
 
 		tl::log_info(ostrVals.str());
+		tl::log_info(ostrIncVals.str());
 	}
 
 	return reso.bHasRes;
@@ -221,8 +224,7 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 
 static EllipseDlg* show_ellipses(const Resolution& res)
 {
-	EllipseDlg* pdlg = new EllipseDlg(0);
-	pdlg->SetExitOnAccept(1);
+	EllipseDlg* pdlg = new EllipseDlg(0, 0, Qt::Window);
 	pdlg->show();
 
 	matrix<t_real> matDummy;

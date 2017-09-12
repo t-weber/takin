@@ -14,7 +14,9 @@
 
 #include "../res/defs.h"
 #include "tlibs/math/linalg.h"
+#include <utility>
 namespace ublas = boost::numeric::ublas;
+
 
 struct Resolution
 {
@@ -25,8 +27,11 @@ struct Resolution
 	bool bHasRes = 0;
 	ublas::matrix<t_real_reso> res;
 
-	// half-widths
-	ublas::vector<t_real_reso> dQ;	// in 1/A and meV
+	// full-widths (coh)
+	std::vector<t_real_reso> dQ;	// in 1/A and meV
+
+	// full-widths (inc)
+	std::tuple<t_real_reso, t_real_reso> dQinc;
 
 	// ellipse origin
 	ublas::vector<t_real_reso> Q_avg, Q_avg_notrafo;
@@ -35,6 +40,7 @@ struct Resolution
 	std::vector<ublas::vector<t_real_reso>> vecQ;
 };
 
+std::tuple<t_real_reso, t_real_reso> get_vanadium_fwhms(const Resolution& reso);
 
 Resolution calc_res(std::vector<ublas::vector<t_real_reso>>&& Q_vec,
 	const ublas::vector<t_real_reso>& Q_avg,

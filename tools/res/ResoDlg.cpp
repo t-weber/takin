@@ -451,12 +451,10 @@ void ResoDlg::Calc()
 		{
 			// --------------------------------------------------------------------------------
 			// Vanadium width
-			struct Ellipse2d<t_real_reso> ellVa =
-				calc_res_ellipse<t_real_reso>(res.reso, res.reso_v, res.reso_s,
-				res.Q_avg, 0, 3, 1, 2, -1);
-
-			t_real_reso dVanadiumFWHM_Q = ellVa.x_hwhm_bound*2.;
-			t_real_reso dVanadiumFWHM_E = ellVa.y_hwhm_bound*2.;
+			t_real_reso dVanadiumFWHM_Q, dVanadiumFWHM_E;
+			std::tie(dVanadiumFWHM_Q, dVanadiumFWHM_E) =
+				calc_vanadium_fwhms<t_real_reso>(
+					res.reso, res.reso_v, res.reso_s, res.Q_avg);
 			// --------------------------------------------------------------------------------
 
 			const std::string& strAA_1 = tl::get_spec_char_utf8("AA")
