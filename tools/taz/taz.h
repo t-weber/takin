@@ -42,6 +42,7 @@
 #include "tools/scanpos/ScanPosDlg.h"
 #include "dialogs/SpurionDlg.h"
 #include "dialogs/NeutronDlg.h"
+#include "dialogs/TOFDlg.h"
 #include "dialogs/GotoDlg.h"
 #include "dialogs/PowderDlg.h"
 #include "dialogs/DispDlg.h"
@@ -153,6 +154,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		SpurionDlg *m_pSpuri = nullptr;
 		NeutronDlg *m_pNeutronDlg = nullptr;
+		TOFDlg *m_pTofDlg = nullptr;
 		GotoDlg *m_pGotoDlg = nullptr;
 		PowderDlg *m_pPowderDlg = nullptr;
 		DispDlg *m_pDispDlg = nullptr;
@@ -267,6 +269,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void ShowResoConv();
 
 		void ShowNeutronDlg();
+		void ShowTofDlg();
 		void ShowGotoDlg();
 		void ShowPowderDlg();
 		void ShowDispDlg();

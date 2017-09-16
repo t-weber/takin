@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>483</width>
-    <height>464</height>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_6">
          <property name="title">
-          <string>Number Precisions</string>
+          <string>Precisions and Limits</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <property name="margin">
@@ -45,35 +45,6 @@
           <property name="spacing">
            <number>2</number>
           </property>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="spinPrecGfx">
-            <property name="toolTip">
-             <string>Number precision in graphs.</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>16</number>
-            </property>
-            <property name="value">
-             <number>4</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>General:</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_20">
             <property name="sizePolicy">
@@ -123,7 +94,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="2">
+          <item row="4" column="0" colspan="2">
            <spacer name="verticalSpacer_3">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -135,6 +106,58 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="spinPrecGfx">
+            <property name="toolTip">
+             <string>Number precision in graphs.</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>16</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>General:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_46">
+            <property name="text">
+             <string>Max. Threads:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="spinThreads">
+            <property name="toolTip">
+             <string>Maximum number of concurrently executed threads.</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>4</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -343,19 +366,6 @@
           <property name="spacing">
            <number>2</number>
           </property>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="spinBragg">
-            <property name="toolTip">
-             <string>Maximum order of Bragg peaks to calculate.</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="value">
-             <number>10</number>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_16">
             <property name="sizePolicy">
@@ -429,6 +439,32 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="spinBragg">
+            <property name="toolTip">
+             <string>Maximum order of Bragg peaks to calculate.</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <spacer name="verticalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
        </item>
@@ -460,6 +496,19 @@
              <string>Prefer Native UI</string>
             </property>
            </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <spacer name="verticalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -1297,6 +1346,7 @@
   <tabstop>spinPrecGen</tabstop>
   <tabstop>spinPrecGfx</tabstop>
   <tabstop>spinPtsGfx</tabstop>
+  <tabstop>spinThreads</tabstop>
   <tabstop>spinBragg</tabstop>
   <tabstop>spinMaxNN</tabstop>
   <tabstop>comboBZ</tabstop>

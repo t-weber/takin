@@ -549,14 +549,14 @@ TazDlg::TazDlg(QWidget* pParent)
 	pNeutronProps->setIcon(load_icon("res/icons/x-office-spreadsheet-template.svg"));
 	pMenuCalc->addAction(pNeutronProps);
 
+	QAction *pCompProps = new QAction("Components...", this);
+	//pCompProps->setIcon(load_icon("res/icons/x-office-spreadsheet-template.svg"));
+	pMenuCalc->addAction(pCompProps);
+
 	pMenuCalc->addSeparator();
 
-	QAction *pPowder = new QAction("Powder Lines...", this);
-	pPowder->setIcon(load_icon("res/icons/weather-snow.svg"));
-	pMenuCalc->addAction(pPowder);
-
-	QAction *pDW = new QAction("Scattering Factors...", this);
-	pMenuCalc->addAction(pDW);
+	QAction *pSgList = new QAction("Space Groups...", this);
+	pMenuCalc->addAction(pSgList);
 
 	QAction *pFormfactor = nullptr;
 	if(g_bHasFormfacts && g_bHasScatlens)
@@ -565,8 +565,14 @@ TazDlg::TazDlg(QWidget* pParent)
 		pMenuCalc->addAction(pFormfactor);
 	}
 
-	QAction *pSgList = new QAction("Space Groups...", this);
-	pMenuCalc->addAction(pSgList);
+	QAction *pDW = new QAction("Scattering Factors...", this);
+	pMenuCalc->addAction(pDW);
+
+	pMenuCalc->addSeparator();
+
+	QAction *pPowder = new QAction("Powder Lines...", this);
+	pPowder->setIcon(load_icon("res/icons/weather-snow.svg"));
+	pMenuCalc->addAction(pPowder);
 
 	QAction *pDisp = new QAction("Dispersions...", this);
 	//pDisp->setIcon(load_icon("disp.svg"));
@@ -720,6 +726,7 @@ TazDlg::TazDlg(QWidget* pParent)
 	QObject::connect(pResoConv, SIGNAL(triggered()), this, SLOT(ShowResoConv()));
 
 	QObject::connect(pNeutronProps, SIGNAL(triggered()), this, SLOT(ShowNeutronDlg()));
+	QObject::connect(pCompProps, SIGNAL(triggered()), this, SLOT(ShowTofDlg()));
 	QObject::connect(m_pGoto, SIGNAL(triggered()), this, SLOT(ShowGotoDlg()));
 	QObject::connect(pPowder, SIGNAL(triggered()), this, SLOT(ShowPowderDlg()));
 	QObject::connect(pDisp, SIGNAL(triggered()), this, SLOT(ShowDispDlg()));
@@ -895,6 +902,7 @@ void TazDlg::DeleteDialogs()
 	if(m_pConvoDlg) { delete m_pConvoDlg; m_pConvoDlg = 0; }
 	if(m_pSpuri) { delete m_pSpuri; m_pSpuri = 0; }
 	if(m_pNeutronDlg) { delete m_pNeutronDlg; m_pNeutronDlg = 0; }
+	if(m_pTofDlg) { delete m_pTofDlg; m_pTofDlg = 0; }
 	if(m_pPowderDlg) { delete m_pPowderDlg; m_pPowderDlg = 0; }
 	if(m_pDispDlg) { delete m_pDispDlg; m_pDispDlg = 0; }
 	if(m_pDWDlg) { delete m_pDWDlg; m_pDWDlg = 0; }
@@ -1045,6 +1053,15 @@ void TazDlg::ShowNeutronDlg()
 
 	focus_dlg(m_pNeutronDlg);
 }
+
+void TazDlg::ShowTofDlg()
+{
+	if(!m_pTofDlg)
+		m_pTofDlg = new TOFDlg(this, &m_settings);
+
+	focus_dlg(m_pTofDlg);
+}
+
 
 void TazDlg::InitGoto()
 {

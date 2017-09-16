@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>443</width>
-    <height>499</height>
+    <width>514</width>
+    <height>537</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -182,6 +182,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Filter out space groups.</string>
+        </property>
        </widget>
       </item>
       <item row="2" column="0">
@@ -199,6 +202,9 @@
       </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="editCrystalSystem">
+        <property name="toolTip">
+         <string>Crystal System.</string>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>
@@ -228,6 +234,42 @@
       <property name="margin">
        <number>4</number>
       </property>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spinCentreIdx">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Index of the central atom.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>ε Shell (Å):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLineEdit" name="editEpsShell">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Size of the epsilon shell for nearest neighbours.</string>
+        </property>
+        <property name="text">
+         <string>0.01</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_9">
         <property name="text">
@@ -251,7 +293,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Size of Super Cell</string>
+         <string>Size of super cell.</string>
         </property>
         <property name="prefix">
          <string>N = </string>
@@ -277,7 +319,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Number of nearest neighbours</string>
+         <string>Number of nearest neighbours.</string>
         </property>
         <property name="prefix">
          <string>n = </string>
@@ -287,39 +329,17 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="spinCentreIdx">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>1</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Index of Centre Atom</string>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>q Direction:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="label_11">
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="editqDir">
         <property name="text">
-         <string>ε Shell (Å):</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLineEdit" name="editEpsShell">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>1</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Size of the Epsilon Shell for Nearest Neighbours</string>
-        </property>
-        <property name="text">
-         <string>0.01</string>
+         <string>1, 0, 0</string>
         </property>
        </widget>
       </item>
@@ -347,6 +367,13 @@
       <property name="margin">
        <number>4</number>
       </property>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="editS">
+        <property name="text">
+         <string>0.5</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QPushButton" name="btnAtoms">
         <property name="text">
@@ -361,10 +388,20 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="editS">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_12">
         <property name="text">
-         <string>0.5</string>
+         <string>Couplings:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="editJ">
+        <property name="toolTip">
+         <string>List of coupling constants J for each order.</string>
+        </property>
+        <property name="text">
+         <string>1, 1</string>
         </property>
        </widget>
       </item>
@@ -545,10 +582,12 @@
   <tabstop>editCrystalSystem</tabstop>
   <tabstop>spinNN</tabstop>
   <tabstop>spinCentreIdx</tabstop>
+  <tabstop>editqDir</tabstop>
   <tabstop>spinSC</tabstop>
   <tabstop>editEpsShell</tabstop>
   <tabstop>btnAtoms</tabstop>
   <tabstop>editS</tabstop>
+  <tabstop>editJ</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>tableNN</tabstop>
   <tabstop>btnSave</tabstop>

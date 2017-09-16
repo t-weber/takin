@@ -19,11 +19,13 @@ enum class AtInfo : int
 	POS_Y = 2,
 	POS_Z = 3,
 
-	J = 4
+	SPIN_X = 4,
+	SPIN_Y = 5,
+	SPIN_Z = 6
 };
 
-AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableJ)
-	: QDialog(pParent), m_pSettings(pSettings), m_bEnableJ(bEnableJ)
+AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableSpin)
+	: QDialog(pParent), m_pSettings(pSettings), m_bEnableSpin(bEnableSpin)
 {
 	setupUi(this);
 	if(m_pSettings)
@@ -33,10 +35,12 @@ AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableJ)
 			setFont(font);
 	}
 
-	if(m_bEnableJ)
+	if(m_bEnableSpin)
 	{
-		tableAtoms->setColumnCount(5);
-		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::J), new QTableWidgetItem("J (meV/K)"));
+		tableAtoms->setColumnCount(7);
+		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::SPIN_X), new QTableWidgetItem("Spin x"));
+		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::SPIN_Y), new QTableWidgetItem("Spin y"));
+		tableAtoms->setHorizontalHeaderItem(static_cast<int>(AtInfo::SPIN_Z), new QTableWidgetItem("Spin z"));
 	}
 
 	tableAtoms->setColumnWidth(int(AtInfo::NAME), 75);
@@ -97,8 +101,9 @@ void AtomsDlg::AddAtom()
 	tableAtoms->setItem(iRow, 0, new QTableWidgetItem("H"));
 	for(unsigned int i=0; i<3; ++i)
 		tableAtoms->setItem(iRow, static_cast<int>(AtInfo::POS_X)+i, new QTableWidgetItem("0"));
-	if(m_bEnableJ)
-		tableAtoms->setItem(iRow, static_cast<int>(AtInfo::J), new QTableWidgetItem("0"));
+	if(m_bEnableSpin)
+		for(unsigned int i=0; i<3; ++i)
+			tableAtoms->setItem(iRow, static_cast<int>(AtInfo::SPIN_X)+i, new QTableWidgetItem("0"));
 
 	tableAtoms->setSortingEnabled(bSort);
 }
@@ -123,8 +128,9 @@ void AtomsDlg::SetAtoms(const std::vector<AtomPos<t_real>>& vecAtoms)
 		for(unsigned int i=0; i<3; ++i)
 			tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_X)+i)->setText(tl::var_to_str(atom.vecPos[i]).c_str());
 
-		if(m_bEnableJ)
-			tableAtoms->item(iRow, static_cast<int>(AtInfo::J))->setText(tl::var_to_str(atom.J).c_str());
+		if(m_bEnableSpin)
+			for(unsigned int i=0; i<3; ++i)
+				tableAtoms->item(iRow, static_cast<int>(AtInfo::SPIN_X)+i)->setText(tl::var_to_str(atom.vecSpin[i]).c_str());
 	}
 
 	tableAtoms->setSortingEnabled(bSort);
@@ -145,8 +151,13 @@ void AtomsDlg::SendApplyAtoms()
 		t_real dZ = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::POS_Z))->text().toStdString());
 		atom.vecPos = tl::make_vec({dX, dY, dZ});
 
-		if(m_bEnableJ)
-			atom.J = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::J))->text().toStdString());
+		if(m_bEnableSpin)
+		{
+			t_real dSx = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::SPIN_X))->text().toStdString());
+			t_real dSy = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::SPIN_Y))->text().toStdString());
+			t_real dSz = tl::str_to_var_parse<t_real>(tableAtoms->item(iRow, static_cast<int>(AtInfo::SPIN_Z))->text().toStdString());
+			atom.vecSpin = tl::make_vec({dSx, dSy, dSz});
+		}
 
 		vecAtoms.emplace_back(std::move(atom));
 	}

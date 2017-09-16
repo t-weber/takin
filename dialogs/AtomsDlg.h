@@ -28,7 +28,7 @@ class AtomsDlg : public QDialog, Ui::AtomsDlg
 { Q_OBJECT
 protected:
 	QSettings *m_pSettings = nullptr;
-	bool m_bEnableJ = 0;
+	bool m_bEnableSpin = 0;
 
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
@@ -41,7 +41,7 @@ protected slots:
 
 public:
 	AtomsDlg(QWidget* pParent = nullptr, QSettings *pSettings = nullptr,
-		bool bEnableJ=0);
+		bool bEnableSpin=0);
 	virtual ~AtomsDlg();
 
 	void SetAtoms(const std::vector<AtomPos<t_real_glob>>& vecAtoms);

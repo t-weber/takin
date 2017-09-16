@@ -100,6 +100,8 @@ DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 	QObject::connect(comboSpaceGroups, SIGNAL(currentIndexChanged(int)), this, SLOT(SpaceGroupChanged()));
 
 	QObject::connect(editS, SIGNAL(textChanged(const QString&)), this, SLOT(Calc()));
+	QObject::connect(editJ, SIGNAL(textChanged(const QString&)), this, SLOT(Calc()));
+	QObject::connect(editqDir, SIGNAL(textChanged(const QString&)), this, SLOT(Calc()));
 
 	std::vector<QSpinBox*> vecSpins = {spinNN, spinSC, spinCentreIdx};
 	for(QSpinBox* pSpin : vecSpins)
@@ -143,6 +145,14 @@ void DispDlg::Calc()
 		const t_real dGamma = tl::d2r(editGamma->text().toDouble());
 
 		const t_real dS = editS->text().toDouble();
+		std::string strJ = editJ->text().toStdString();
+		std::string strqDir = editqDir->text().toStdString();
+		std::vector<t_real> vecJbyOrder, vecqDir;
+		tl::get_tokens<t_real, std::string, std::vector<t_real>>(strJ, ",;", vecJbyOrder);
+		tl::get_tokens<t_real, std::string, std::vector<t_real>>(strqDir, ",;", vecqDir);
+		while(vecqDir.size() < 3)
+			vecqDir.push_back(t_real(0));
+
 		const int iNN = spinNN->value();
 		const int iSC = spinSC->value();
 		int iIdxCentre = spinCentreIdx->value();
@@ -177,12 +187,9 @@ void DispDlg::Calc()
 
 		// all primitive atoms
 		std::vector<t_vec> vecAtoms, vecAtomsUC, vecAtomsSC, vecAtomsNN;
-		std::vector<t_cplx> vecJ, vecJUC, vecJSC, vecJNN;
+		std::vector<t_cplx> vecJUC, vecJNN;
 		for(const AtomPos<t_real>& atom : m_vecAtoms)
-		{
 			vecAtoms.push_back(atom.vecPos);
-			vecJ.push_back(atom.J * t_real(k_B / one_meV * kelvin));
-		}
 
 		// all atoms in unit cell
 		std::vector<std::size_t> vecIdxUC, vecIdxSC;
@@ -190,20 +197,15 @@ void DispDlg::Calc()
 		tl::generate_all_atoms<t_mat, t_vec, std::vector, std::string>
 			(vecSymTrafos, vecAtoms, nullptr, matA,
 			t_real(-0.5), t_real(0.5), g_dEps);
-		for(std::size_t iIdxUC : vecIdxUC)
-			vecJUC.push_back(vecJ[iIdxUC]);
 
 
 		// all atoms in super cell
-		std::tie(vecAtomsSC, vecJSC, vecIdxSC) =
+		std::tie(vecAtomsSC, std::ignore, vecIdxSC) =
 			tl::generate_supercell<t_vec, std::vector, t_real>
 				(lattice, vecAtomsUC, vecJUC, iSC);
 		std::vector<std::string> vecNamesSC;
 		for(std::size_t iIdxSC : vecIdxSC)
 			vecNamesSC.push_back(m_vecAtoms[vecIdxUC[iIdxSC]].strAtomName);
-
-		//for(std::size_t iAtom=0; iAtom<vecAtomsSC.size(); ++iAtom)
-		//	std::cout << vecNamesSC[iAtom] << ": " << vecAtomsSC[iAtom] << std::endl;
 
 
 		// neighbours
@@ -227,13 +229,16 @@ void DispDlg::Calc()
 			for(std::size_t iIdx : vecIdxNNInner)
 			{
 				const t_vec& vecThisAtom = vecAtomsSC[iIdx];
-				const t_cplx& cplxThisJ = vecJSC[iIdx];
 				const std::string& strThisAtom = vecNamesSC[iIdx];
 
 				if(iOuterIdx > 0 && int(iOuterIdx) <= iNN)
 				{
 					vecAtomsNN.push_back(vecThisAtom - vecCentre);
-					vecJNN.push_back(cplxThisJ);
+
+					t_real dJ = iOuterIdx > vecJbyOrder.size() 
+						? t_real(0) : vecJbyOrder[iOuterIdx-1];
+					t_cplx J = dJ * t_real(k_B / one_meV * kelvin);
+					vecJNN.push_back(J);
 				}
 
 				if(!tableNN->item(iRow, TABLE_NN_ATOM))
@@ -266,9 +271,6 @@ void DispDlg::Calc()
 			++iOuterIdx;
 		}
 
-		//for(const auto& vec : vecAtomsNN) std::cout << vec << std::endl;
-		//for(const auto& vec : vecJNN) std::cout << vec << std::endl;
-
 		tableNN->setSortingEnabled(bSortTable);
 		labStatus->setText("OK.");
 
@@ -283,7 +285,8 @@ void DispDlg::Calc()
 		for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 		{
 			t_real tPos = t_real(iPt)/t_real(GFX_NUM_POINTS-1) * 1.5;
-			t_vec vecq = tl::make_vec<t_vec>({1.,0.,0.}) * tPos;
+			t_vec vecq = tl::make_vec<t_vec>({vecqDir[0], vecqDir[1], vecqDir[2]}) * tPos
+				/ std::sqrt(vecqDir[0]*vecqDir[0] + vecqDir[1]*vecqDir[1] + vecqDir[2]*vecqDir[2]);
 			t_vec vecq_AA = tl::mult<t_mat, t_vec>(matB, vecq);
 			t_real dE = tl::ferromag<t_vec, t_real, std::vector>
 				(vecAtomsNN, vecJNN, vecq_AA, dS);
@@ -482,6 +485,8 @@ void DispDlg::Save(std::map<std::string, std::string>& mapConf, const std::strin
 	mapConf[strXmlRoot + "disp/supercell"] = tl::var_to_str<int>(spinSC->value(), g_iPrec);
 	mapConf[strXmlRoot + "disp/centre_idx"] = tl::var_to_str<int>(spinCentreIdx->value(), g_iPrec);
 	mapConf[strXmlRoot + "disp/S"] = editS->text().toStdString();
+	mapConf[strXmlRoot + "disp/J"] = editJ->text().toStdString();
+	mapConf[strXmlRoot + "disp/q_dir"] = editqDir->text().toStdString();
 	mapConf[strXmlRoot + "disp/eps_shell"] = editEpsShell->text().toStdString();
 
 	mapConf[strXmlRoot + "sample/spacegroup"] = comboSpaceGroups->currentText().toStdString();
@@ -501,8 +506,8 @@ void DispDlg::Save(std::map<std::string, std::string>& mapConf, const std::strin
 			tl::var_to_str(atom.vecPos[1], g_iPrec);
 		mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/z"] =
 			tl::var_to_str(atom.vecPos[2], g_iPrec);
-		mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/J"] =
-			tl::var_to_str(atom.J, g_iPrec);
+		//mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/J"] =
+		//	tl::var_to_str(atom.J, g_iPrec);
 	}
 }
 
@@ -524,6 +529,8 @@ void DispDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 	spinCentreIdx->setValue(xml.Query<int>((strXmlRoot + "disp/centre_idx").c_str(), 0, &bOk));
 
 	editS->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "disp/S").c_str(), 0.5, &bOk), g_iPrec).c_str());
+	editJ->setText(xml.Query<std::string>((strXmlRoot + "disp/J").c_str(), "1", &bOk).c_str());
+	editqDir->setText(xml.Query<std::string>((strXmlRoot + "disp/q_dir").c_str(), "1, 0, 0", &bOk).c_str());
 	editEpsShell->setText(tl::var_to_str(xml.Query<t_real>((strXmlRoot + "disp/eps_shell").c_str(), 0.01, &bOk), g_iPrec).c_str());
 
 	std::string strSpaceGroup = xml.Query<std::string>((strXmlRoot + "sample/spacegroup").c_str(), "", &bOk);
@@ -554,7 +561,7 @@ void DispDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 			atom.vecPos[0] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/x").c_str(), 0.);
 			atom.vecPos[1] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/y").c_str(), 0.);
 			atom.vecPos[2] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/z").c_str(), 0.);
-			atom.J = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/J").c_str(), 0.);
+			//atom.J = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/J").c_str(), 0.);
 
 			m_vecAtoms.push_back(atom);
 		}
@@ -578,7 +585,7 @@ void DispDlg::ShowAtomDlg()
 {
 	if(!m_pAtomsDlg)
 	{
-		m_pAtomsDlg = new AtomsDlg(this, m_pSettings, true);
+		m_pAtomsDlg = new AtomsDlg(this, m_pSettings, false);
 		m_pAtomsDlg->setWindowTitle(m_pAtomsDlg->windowTitle() + QString(" (Dispersion)"));
 
 		QObject::connect(m_pAtomsDlg, SIGNAL(ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&)),

@@ -9,6 +9,7 @@
 #include "tlibs/log/log.h"
 #include "tlibs/file/file.h"
 #include "tlibs/string/string.h"
+#include <thread>
 
 
 // -----------------------------------------------------------------------------
@@ -32,6 +33,16 @@ std::size_t g_iMaxNN = 4;
 
 t_real_glob g_dFontSize = 10.;
 
+
+// -----------------------------------------------------------------------------
+
+unsigned int g_iMaxThreads = std::thread::hardware_concurrency();
+
+unsigned int get_max_threads()
+{
+	unsigned int iMaxThreads = std::thread::hardware_concurrency();
+	return std::min(iMaxThreads, g_iMaxThreads);
+}
 
 // -----------------------------------------------------------------------------
 

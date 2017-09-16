@@ -26,8 +26,8 @@ struct AtomPos
 	// position in fractional units
 	ublas::vector<t_real> vecPos;
 
-	// optional: coupling
-	t_real J;
+	// spin
+	ublas::vector<t_real> vecSpin;
 };
 
 

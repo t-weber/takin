@@ -501,7 +501,7 @@ Ellipsoid4d<t_real> TASReso::GenerateMC(std::size_t iNum, std::vector<t_vec>& ve
 		Ellipsoid4d<t_real> ell4d = calc_res_ellipsoid4d<t_real>(
 			resores.reso, resores.reso_v, resores.reso_s, resores.Q_avg);
 
-		unsigned int iNumThreads = std::thread::hardware_concurrency();
+		unsigned int iNumThreads = get_max_threads();
 		std::size_t iNumPerThread = iNum / iNumThreads;
 		std::size_t iRemaining = iNum % iNumThreads;
 
