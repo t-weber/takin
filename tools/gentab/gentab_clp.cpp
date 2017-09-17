@@ -106,9 +106,9 @@ bool gen_spacegroups_clp()
 		unsigned int iTrafo = 0;
 		for(const t_mat& matTrafo : vecTrafos)
 		{
-			bool bIsInv = is_mat_in_container(vecInv, matTrafo);
-			bool bIsPrim = is_mat_in_container(vecPrim, matTrafo);
-			bool bIsCenter = is_mat_in_container(vecCenter, matTrafo);
+			bool bIsInv = is_mat_in_container<std::vector, t_mat>(vecInv, matTrafo);
+			bool bIsPrim = is_mat_in_container<std::vector, t_mat>(vecPrim, matTrafo);
+			bool bIsCenter = is_mat_in_container<std::vector, t_mat>(vecCenter, matTrafo);
 
 			std::string strOpts = "; ";
 			if(bIsPrim) strOpts += "p";

@@ -66,7 +66,7 @@ bool gen_scatlens()
 		if(!bTableStarted)
 		{
 			std::vector<std::string> vecHdr;
-			tl::get_tokens_seq<std::string, std::string>(strLine, "<th>", vecHdr, 0);
+			tl::get_tokens_seq<std::string, std::string, std::vector>(strLine, "<th>", vecHdr, 0);
 			if(vecHdr.size() < 9)
 				continue;
 			bTableStarted = 1;
@@ -85,7 +85,7 @@ bool gen_scatlens()
 
 
 	std::vector<std::string> vecRows;
-	tl::get_tokens_seq<std::string, std::string>(strTable, "<tr>", vecRows, 0);
+	tl::get_tokens_seq<std::string, std::string, std::vector>(strTable, "<tr>", vecRows, 0);
 
 
 	tl::Prop<std::string> prop;
@@ -106,7 +106,7 @@ bool gen_scatlens()
 
 
 		std::vector<std::string> vecCol;
-		tl::get_tokens_seq<std::string, std::string>(strRow, "<td>", vecCol, 0);
+		tl::get_tokens_seq<std::string, std::string, std::vector>(strRow, "<td>", vecCol, 0);
 		if(vecCol.size() < 9)
 		{
 			tl::log_warn("Invalid number of table entries in row \"", strRow, "\".");
