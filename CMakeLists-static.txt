@@ -318,7 +318,7 @@ add_executable(convofit
 	tlibs/math/rand.cpp
 	tlibs/file/tmp.cpp
 	#tlibs/file/loadinstr.cpp
-	#libs/globals.cpp
+	libs/globals.cpp
 )
 
 set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")

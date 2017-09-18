@@ -12,6 +12,7 @@
 
 #include "convofit.h"
 #include "libs/version.h"
+#include "libs/globals.h"
 #include "tlibs/time/stopwatch.h"
 #include "tlibs/helper/thread.h"
 
@@ -114,12 +115,16 @@ int main(int argc, char** argv)
 			"number of plot points")));
 		args.add(boost::shared_ptr<opts::option_description>(
 			new opts::option_description("plot-skip-begin",
-			opts::value<decltype(g_iNumNeutrons)>(&g_iPlotSkipBegin),
+			opts::value<decltype(g_iPlotSkipBegin)>(&g_iPlotSkipBegin),
 			"skip plot points in the beginning of the range")));
 		args.add(boost::shared_ptr<opts::option_description>(
 			new opts::option_description("plot-skip-end",
-			opts::value<decltype(g_iNumNeutrons)>(&g_iPlotSkipEnd),
+			opts::value<decltype(g_iPlotSkipEnd)>(&g_iPlotSkipEnd),
 			"skip plot points in the end of the range")));
+		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("max-threads",
+			opts::value<decltype(g_iMaxThreads)>(&g_iMaxThreads),
+			"maximum number of threads")));
 
 
 		// positional args
@@ -161,7 +166,7 @@ int main(int argc, char** argv)
 		// --------------------------------------------------------------------
 
 
-		unsigned int iNumThreads = std::thread::hardware_concurrency();
+		unsigned int iNumThreads = get_max_threads();
 		tl::ThreadPool<bool()> tp(iNumThreads);
 
 		for(std::size_t iJob=0; iJob<vecJobs.size(); ++iJob)
