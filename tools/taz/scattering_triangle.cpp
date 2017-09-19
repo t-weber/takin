@@ -910,6 +910,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	std::list<std::vector<t_real>> lstPeaksForKd;
 	t_real dMinF = std::numeric_limits<t_real>::max(), dMaxF = -1.;
 
+	const int iMaxNN = g_iMaxNN <= 4 ? 2 : g_iMaxNN-2;	// TODO
 	// iterate over all bragg peaks
 	const int iMaxPeaks = bIsPowder ? m_iMaxPeaks/2 : m_iMaxPeaks;
 	for(int ih=-iMaxPeaks; ih<=iMaxPeaks; ++ih)
@@ -945,7 +946,9 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 				{
 					if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
 						m_bz3.SetCentralReflex(vecPeak, &vecPeakHKL);
-					else if(std::abs(ih-veciCent[0]) <= 2 && std::abs(ik-veciCent[1]) <= 2 && std::abs(il-veciCent[2]) <= 2)
+					else if(std::abs(ih-veciCent[0]) <= iMaxNN &&
+						std::abs(ik-veciCent[1]) <= iMaxNN &&
+						std::abs(il-veciCent[2]) <= iMaxNN)
 						m_bz3.AddReflex(vecPeak, &vecPeakHKL);
 				}
 
