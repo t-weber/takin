@@ -352,7 +352,7 @@ void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
 
 	if(g_b3dBZ)
 	{
-		m_ws3.CalcBZ();
+		m_ws3.CalcBZ(get_max_threads());
 
 		// ----------------------------------------------------------------
 		// calculate intersection with real plane

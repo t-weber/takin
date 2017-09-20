@@ -1053,7 +1053,7 @@ void ScatteringTriangle::CalcPeaks(const LatticeCommon<t_real>& recipcommon, boo
 	{
 		if(g_b3dBZ)
 		{
-			m_bz3.CalcBZ();
+			m_bz3.CalcBZ(get_max_threads());
 
 			// ----------------------------------------------------------------
 			// calculate points of high symmetry
