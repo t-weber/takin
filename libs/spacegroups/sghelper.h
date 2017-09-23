@@ -415,7 +415,10 @@ bool is_reflection_allowed(int h, int k, int l, const t_cont<t_mat>& vecTrafos)
 			// not allowed if vecTrans and vecHKLrot not perpendicular or parallel
 			if(!tl::float_equal<t_real>(dInner, t_real(0), dEps) &&
 				!tl::float_equal<t_real>(dInner, t_real(1), dEps))
+			{
+				//tl::log_debug("No allowed: t*r = ", dInner, ", mat = ", mat);
 				return false;
+			}
 		}
 	}
 	return true;

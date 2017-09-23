@@ -19,8 +19,9 @@
 #include "libs/spacegroups/spacegroup_clp.h"
 
 
-typedef tl::ublas::vector<double> t_vec;
-typedef tl::ublas::matrix<double> t_mat;
+typedef double t_real;
+typedef tl::ublas::vector<t_real> t_vec;
+typedef tl::ublas::matrix<t_real> t_mat;
 
 void gen_atoms()
 {
@@ -42,7 +43,7 @@ void gen_atoms()
 		{ 0., 0., 0., 1.}	});
 
 
-	double a,b,c, alpha,beta,gamma;
+	t_real a,b,c, alpha,beta,gamma;
 	std::cout << "Enter unit cell lattice constants: ";
 	std::cin >> a >> b >> c;
 	std::cout << "Enter unit cell angles: ";
@@ -52,7 +53,7 @@ void gen_atoms()
 	beta = tl::d2r(beta);
 	gamma = tl::d2r(gamma);
 
-	const tl::Lattice<double> lattice(a,b,c, alpha,beta,gamma);
+	const tl::Lattice<t_real> lattice(a,b,c, alpha,beta,gamma);
 	const t_mat matA = lattice.GetMetric();
 
 
@@ -98,7 +99,7 @@ void gen_atoms()
 
 
 
-	tl::X3d x3d;
+	tl::X3d<t_real> x3d;
 
 	std::cout << std::endl;
 	//const t_vec vecOffs = tl::make_vec({0.5, 0.5, 0.5, 0.});
@@ -116,7 +117,7 @@ void gen_atoms()
 
 			// map back to unit cell
 			t_vec vecCoord = vec;
-			const double dUCSize = 1.;
+			const t_real dUCSize = 1.;
 			for(int iComp=0; iComp<vecCoord.size(); ++iComp)
 			{
 				while(vecCoord[iComp] > dUCSize*0.5)
@@ -130,9 +131,9 @@ void gen_atoms()
 			vecCoord = matA * vecCoord;
 			vecCoord.resize(4,1); vecCoord[3] = 1.;
 
-			tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+			tl::X3dTrafo<t_real> *pTrafo = new tl::X3dTrafo<t_real>();
 			pTrafo->SetTrans(matGlobal * vecCoord);
-			tl::X3dSphere *pSphere = new tl::X3dSphere(0.1);
+			tl::X3dSphere<t_real> *pSphere = new tl::X3dSphere<t_real>(0.1);
 			pSphere->SetColor(vecColors[iAtom % vecColors.size()]);
 			pTrafo->AddChild(pSphere);
 
@@ -143,7 +144,7 @@ void gen_atoms()
 
 
 	// test: only for cubic unit cells!
-	tl::X3dCube *pCube = new tl::X3dCube(a,b,c);
+	tl::X3dCube<t_real> *pCube = new tl::X3dCube<t_real>(a,b,c);
 	pCube->SetColor(tl::make_vec({1., 1., 1., 0.75}));
 	x3d.GetScene().AddChild(pCube);
 

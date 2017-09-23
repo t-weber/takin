@@ -237,8 +237,11 @@ void SgListDlg::RecalcBragg()
 	const int h = spinH->value();
 	const int k = spinK->value();
 	const int l = spinL->value();
+	const bool bOnlyCentring = 0;
 
-	//std::cout << h << k << l << std::endl;
+	bool (SpaceGroup<t_real>::*pAllowedFkt)(int, int, int) const =
+		bOnlyCentring ? &SpaceGroup<t_real>::HasGenReflection
+			: &SpaceGroup<t_real>::HasReflection;
 
 	std::shared_ptr<const SpaceGroups<t_real>> sgs = SpaceGroups<t_real>::GetInstance();
 	const SpaceGroups<t_real>::t_vecSpaceGroups* pvecSG = sgs->get_space_groups_vec();
@@ -247,7 +250,7 @@ void SgListDlg::RecalcBragg()
 		return;
 
 	const SpaceGroup<t_real>* psg = pvecSG->at(iSG);
-	const bool bForbidden = !psg->HasReflection(h,k,l);;
+	const bool bForbidden = !(psg->*pAllowedFkt)(h,k,l);;
 
 	QFont font = spinH->font();
 	font.setStrikeOut(bForbidden);

@@ -412,45 +412,57 @@ void PlotGl::paintGLThread()
 		glPushMatrix();
 		if(obj.plttype == PLOT_SPHERE)
 		{
-			tl::gl_traits<t_real>::SetTranslate(obj.vecPos[0], obj.vecPos[1], obj.vecPos[2]);
-			tl::gl_traits<t_real>::SetScale(
-				obj.vecScale[0] * obj.dScaleMult,
-				obj.vecScale[0] * obj.dScaleMult,
-				obj.vecScale[0] * obj.dScaleMult);
+			if(m_bDrawSpheres)
+			{
+				tl::gl_traits<t_real>::SetTranslate(obj.vecPos[0], obj.vecPos[1], obj.vecPos[2]);
+				tl::gl_traits<t_real>::SetScale(
+					obj.vecScale[0] * obj.dScaleMult,
+					obj.vecScale[0] * obj.dScaleMult,
+					obj.vecScale[0] * obj.dScaleMult);
 
-			bIsSphereLikeObj = 1;
+				bIsSphereLikeObj = 1;
+			}
 		}
 		else if(obj.plttype == PLOT_ELLIPSOID)
 		{
-			tl::gl_traits<t_real>::SetTranslate(obj.vecPos[0], obj.vecPos[1], obj.vecPos[2]);
+			if(m_bDrawSpheres)
+			{
+				tl::gl_traits<t_real>::SetTranslate(obj.vecPos[0], obj.vecPos[1], obj.vecPos[2]);
 
-			t_real dMatRot[] = {obj.vecRotMat[0], obj.vecRotMat[1], obj.vecRotMat[2], 0.,
-				obj.vecRotMat[3], obj.vecRotMat[4], obj.vecRotMat[5], 0.,
-				obj.vecRotMat[6], obj.vecRotMat[7], obj.vecRotMat[8], 0.,
-				0., 0., 0., 1. };
-			tl::gl_traits<t_real>::MultMatrix(dMatRot);
-			tl::gl_traits<t_real>::SetScale(
-				obj.vecScale[0] * obj.dScaleMult,
-				obj.vecScale[1] * obj.dScaleMult,
-				obj.vecScale[2] * obj.dScaleMult);
+				t_real dMatRot[] = {obj.vecRotMat[0], obj.vecRotMat[1], obj.vecRotMat[2], 0.,
+					obj.vecRotMat[3], obj.vecRotMat[4], obj.vecRotMat[5], 0.,
+					obj.vecRotMat[6], obj.vecRotMat[7], obj.vecRotMat[8], 0.,
+					0., 0., 0., 1. };
+				tl::gl_traits<t_real>::MultMatrix(dMatRot);
+				tl::gl_traits<t_real>::SetScale(
+					obj.vecScale[0] * obj.dScaleMult,
+					obj.vecScale[1] * obj.dScaleMult,
+					obj.vecScale[2] * obj.dScaleMult);
 
-			bIsSphereLikeObj = 1;
+				bIsSphereLikeObj = 1;
+			}
 		}
 		else if(obj.plttype == PLOT_POLY)
 		{
-			glBegin(GL_POLYGON);
-				tl::gl_traits<t_real>::SetNorm(obj.vecNorm[0], obj.vecNorm[1], obj.vecNorm[2]);
-				for(const ublas::vector<t_real>& vec : obj.vecVertices)
-					tl::gl_traits<t_real>::SetVertex(vec[0], vec[1], vec[2]);
-			glEnd();
+			if(m_bDrawPolys)
+			{
+				glBegin(GL_POLYGON);
+					tl::gl_traits<t_real>::SetNorm(obj.vecNorm[0], obj.vecNorm[1], obj.vecNorm[2]);
+					for(const ublas::vector<t_real>& vec : obj.vecVertices)
+						tl::gl_traits<t_real>::SetVertex(vec[0], vec[1], vec[2]);
+				glEnd();
+			}
 		}
 		else if(obj.plttype == PLOT_LINES)
 		{
-			glLineWidth(obj.dLineWidth);
-			glBegin(GL_LINE_LOOP);
-				for(const ublas::vector<t_real>& vec : obj.vecVertices)
-					tl::gl_traits<t_real>::SetVertex(vec[0], vec[1], vec[2]);
- 			glEnd();
+			if(m_bDrawLines)
+			{
+				glLineWidth(obj.dLineWidth);
+				glBegin(GL_LINE_LOOP);
+					for(const ublas::vector<t_real>& vec : obj.vecVertices)
+						tl::gl_traits<t_real>::SetVertex(vec[0], vec[1], vec[2]);
+ 				glEnd();
+			}
 		}
 		else
 		{
@@ -941,6 +953,12 @@ void PlotGl::keyPressEvent(QKeyEvent* pEvt)
 		TogglePerspective();
 	else if(pEvt->key() == Qt::Key_Z)
 		ToggleZTest();
+	else if(pEvt->key() == Qt::Key_P)
+		ToggleDrawPolys();
+	else if(pEvt->key() == Qt::Key_L)
+		ToggleDrawLines();
+	else if(pEvt->key() == Qt::Key_S)
+		ToggleDrawSpheres();
 
 	t_qglwidget::keyPressEvent(pEvt);
 }

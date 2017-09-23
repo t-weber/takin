@@ -99,6 +99,9 @@ protected:
 	bool m_bPerspective = 1; // perspective or orthogonal projection?
 	ublas::vector<t_real_glob> m_vecCam;
 	bool m_bDoZTest = 0;
+	bool m_bDrawPolys = 1;
+	bool m_bDrawLines = 1;
+	bool m_bDrawSpheres = 1;
 
 	tl::GlFontMap<t_real_glob> *m_pFont = nullptr;
 
@@ -171,6 +174,9 @@ public:
 	void clear();
 	void TogglePerspective();
 	void ToggleZTest() { m_bDoZTest = !m_bDoZTest; }
+	void ToggleDrawPolys() { m_bDrawPolys = !m_bDrawPolys; }
+	void ToggleDrawLines() { m_bDrawLines = !m_bDrawLines; }
+	void ToggleDrawSpheres() { m_bDrawSpheres = !m_bDrawSpheres; }
 
 	void PlotSphere(const ublas::vector<t_real_glob>& vecPos, t_real_glob dRadius, int iObjIdx=-1);
 	void PlotEllipsoid(const ublas::vector<t_real_glob>& widths,

@@ -141,15 +141,15 @@ void TazDlg::ExportBZ3DModel()
 
 
 	using t_vec = ublas::vector<t_real>;
-	tl::X3d x3d;
+	tl::X3d<t_real> x3d;
 
 	/*// vertices
 	for(const t_vec& vec : bz.GetVertices())
 	{
-		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		tl::X3dTrafo<t_real> *pTrafo = new tl::X3dTrafo<t_real>();
 		pTrafo->SetTrans(vec - bz.GetCentralReflex());
 
-		tl::X3dSphere *pSphere = new tl::X3dSphere(0.025);
+		tl::X3dSphere<t_real> *pSphere = new tl::X3dSphere<t_real>(0.025);
 		pSphere->SetColor(tl::make_vec({1., 0., 0.}));
 		pTrafo->AddChild(pSphere);
 
@@ -159,10 +159,10 @@ void TazDlg::ExportBZ3DModel()
 	// symmetry points
 	for(const t_vec& vec : pTri->GetBZ3DSymmVerts())
 	{
-		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		tl::X3dTrafo<t_real> *pTrafo = new tl::X3dTrafo<t_real>();
 		pTrafo->SetTrans(vec - bz.GetCentralReflex());
 
-		tl::X3dSphere *pSphere = new tl::X3dSphere(0.025);
+		tl::X3dSphere<t_real> *pSphere = new tl::X3dSphere<t_real>(0.025);
 		pSphere->SetColor(tl::make_vec({1., 0., 0.}));
 		pTrafo->AddChild(pSphere);
 
@@ -172,7 +172,7 @@ void TazDlg::ExportBZ3DModel()
 	// polygons
 	for(const std::vector<t_vec>& vecPoly : bz.GetPolys())
 	{
-		tl::X3dPolygon *pPoly = new tl::X3dPolygon();
+		tl::X3dPolygon<t_real> *pPoly = new tl::X3dPolygon<t_real>();
 		pPoly->SetColor(tl::make_vec({0., 0., 1.}));
 
 		for(const t_vec& vec : vecPoly)
@@ -188,10 +188,10 @@ void TazDlg::ExportBZ3DModel()
 
 	for(const t_vec& vec : std::get<1>(tupLinesandVerts))
 	{
-		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		tl::X3dTrafo<t_real> *pTrafo = new tl::X3dTrafo<t_real>();
 		pTrafo->SetTrans(vec);
 
-		tl::X3dSphere *pSphere = new tl::X3dSphere(0.05);
+		tl::X3dSphere<t_real> *pSphere = new tl::X3dSphere<t_real>(0.05);
 		pSphere->SetColor(tl::make_vec({1., 1., 0.}));
 		pTrafo->AddChild(pSphere);
 
@@ -367,7 +367,7 @@ void TazDlg::ExportUCModel()
 	if(!strFile.endsWith(".x3d", Qt::CaseInsensitive))
 		strFile += ".x3d";
 
-	tl::X3d x3d;
+	tl::X3d<t_real> x3d;
 
 	for(std::size_t iAtom=0; iAtom<m_latticecommon.vecAllAtoms.size(); ++iAtom)
 	//for(std::size_t iAtom=0; iAtom<m_latticecommon.vecIdxSC.size(); ++iAtom)
@@ -383,12 +383,12 @@ void TazDlg::ExportUCModel()
 
 		vecCoord.resize(4,1); vecCoord[3] = 1.;
 
-		tl::X3dTrafo *pTrafo = new tl::X3dTrafo();
+		tl::X3dTrafo<t_real> *pTrafo = new tl::X3dTrafo<t_real>();
 		//pTrafo->SetTrans(tl::mult<t_mat, t_vec>(matGlobal, vecCoord));
 		pTrafo->SetTrans(vecCoord);
 
 		t_real dRadius = vecRadii[iAtomType % vecRadii.size()] * dRadScale;
-		tl::X3dSphere *pSphere = new tl::X3dSphere(dRadius);
+		tl::X3dSphere<t_real> *pSphere = new tl::X3dSphere<t_real>(dRadius);
 		pSphere->SetColor(vecColors[iAtomType % vecColors.size()]);
 		pTrafo->AddChild(pSphere);
 
@@ -398,7 +398,7 @@ void TazDlg::ExportUCModel()
 		{
 			for(const auto& vecPoly : m_latticecommon.vecAllAtomPosAux[iAtom].vecPolys)
 			{
-				tl::X3dPolygon *pPoly = new tl::X3dPolygon();
+				tl::X3dPolygon<t_real> *pPoly = new tl::X3dPolygon<t_real>();
 				pPoly->SetColor(vecColors[iAtomType % vecColors.size()]);
 
 				for(const t_vec& vecVertex : vecPoly)
@@ -415,7 +415,7 @@ void TazDlg::ExportUCModel()
 	// unit cell
 	for(const std::vector<t_vec>& vecPoly : ws.GetPolys())
 	{
-		tl::X3dLines *pPoly = new tl::X3dLines();
+		tl::X3dLines<t_real> *pPoly = new tl::X3dLines<t_real>();
 		pPoly->SetColor(tl::make_vec({0., 0., 0., 1.}));
 
 		for(const t_vec& vec : vecPoly)
