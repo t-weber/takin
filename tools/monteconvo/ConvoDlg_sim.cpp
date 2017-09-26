@@ -228,7 +228,7 @@ void ConvoDlg::Start1D()
 					}
 
 					Ellipsoid4d<t_real> elli =
-						localreso.GenerateMC(iNumNeutrons, vecNeutrons);
+						localreso.GenerateMC_deferred(iNumNeutrons, vecNeutrons);
 
 					for(const ublas::vector<t_real>& vecHKLE : vecNeutrons)
 					{
@@ -543,6 +543,7 @@ void ConvoDlg::Start2D()
 
 
 		TASReso reso;
+
 		if(!reso.LoadRes(editRes->text().toStdString().c_str()))
 		{
 			//QMessageBox::critical(this, "Error", "Could not load resolution file.");
@@ -661,7 +662,7 @@ void ConvoDlg::Start2D()
 					}
 
 					Ellipsoid4d<t_real> elli =
-						localreso.GenerateMC(iNumNeutrons, vecNeutrons);
+						localreso.GenerateMC_deferred(iNumNeutrons, vecNeutrons);
 
 					for(const ublas::vector<t_real>& vecHKLE : vecNeutrons)
 					{

@@ -1,13 +1,18 @@
 /**
  * Scattering Triangle Tool
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date mar-2014
+ * @date 2014 - 2017
  * @license GPLv2
  */
 
 #include "recip3d.h"
 #include "tlibs/math/geo.h"
 #include <QGridLayout>
+
+
+#define DEF_PEAK_SIZE 0.04
+#define MIN_PEAK_SIZE 0.015
+#define MAX_PEAK_SIZE 0.15
 
 
 using t_real = t_real_glob;
@@ -74,6 +79,14 @@ Recip3DDlg::~Recip3DDlg()
 }
 
 
+struct Peak3d
+{
+	std::string strName;
+	t_vec vecPeak;
+	t_real dF = -1.;
+	const std::vector<t_real>* pvecColor = nullptr;
+};
+
 void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 {
 	const tl::Lattice<t_real>& recip = recipcommon.recip;
@@ -93,20 +106,14 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 	bool bShowScatPlane = 1;
 	bool bShowCurQ = 1;
 
-	std::size_t iObjCnt = (unsigned int)((m_dMaxPeaks*2 + 1)*
-		(m_dMaxPeaks*2 + 1) * (m_dMaxPeaks*2 + 1));
-	if(bShowScatPlane) iObjCnt += 2;
-	if(bShowCurQ) ++iObjCnt;
-
-	m_pPlot->SetEnabled(0);
-	m_pPlot->clear();
-	m_pPlot->SetObjectCount(iObjCnt);
-
-	std::size_t iCurObjIdx = 0;
 	const t_real dLimMax = std::numeric_limits<t_real>::max();
 
 	std::vector<t_real> vecMin = {dLimMax, dLimMax, dLimMax},
 		vecMax = {-dLimMax, -dLimMax, -dLimMax};
+	t_real dMinF = std::numeric_limits<t_real>::max(), dMaxF = -1.;
+
+
+	std::vector<Peak3d> vecPeaks;
 
 	for(t_real h=-m_dMaxPeaks; h<=m_dMaxPeaks; h+=1.)
 		for(t_real k=-m_dMaxPeaks; k<=m_dMaxPeaks; k+=1.)
@@ -115,22 +122,55 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 				int ih = int(h), ik = int(k), il = int(l);
 				if(pSpaceGroup)
 				{
+					// if reflection is not allowed, skip it
 					if(!pSpaceGroup->HasReflection(ih, ik, il))
 						continue;
 				}
 
-				bool bInScatteringPlane = 0;
-				t_vec vecPeak = recip.GetPos(h,k,l);
+				Peak3d peak;
+				peak.vecPeak = recip.GetPos(h,k,l);
 				for(int i=0; i<3; ++i)
 				{
-					vecMin[i] = std::min(vecPeak[i], vecMin[i]);
-					vecMax[i] = std::max(vecPeak[i], vecMax[i]);
+					vecMin[i] = std::min(peak.vecPeak[i], vecMin[i]);
+					vecMax[i] = std::max(peak.vecPeak[i], vecMax[i]);
 				}
 
-				t_real dDist = 0.;
-				t_vec vecDropped = plane.GetDroppedPerp(vecPeak, &dDist);
 
-				const std::vector<t_real> *pvecColor = &vecColPeak;
+				// -------------------------------------------------------------
+				// get structure factor
+				std::string strStructfact;
+				t_real dFsq = -1.;
+
+				if(pSpaceGroup && recipcommon.CanCalcStructFact())
+				{
+					std::tie(std::ignore, peak.dF, dFsq) =
+						recipcommon.GetStructFact(peak.vecPeak);
+
+					tl::set_eps_0(dFsq, g_dEpsGfx);
+					tl::set_eps_0(peak.dF, g_dEpsGfx);
+
+					dMinF = std::min(peak.dF, dMinF);
+					dMaxF = std::max(peak.dF, dMaxF);
+
+					std::ostringstream ostrStructfact;
+					ostrStructfact.precision(g_iPrecGfx);
+					if(g_bShowFsq)
+						ostrStructfact << "\nS = " << dFsq;
+					else
+						ostrStructfact << "\nF = " << peak.dF;
+					strStructfact = ostrStructfact.str();
+				}
+				// -------------------------------------------------------------
+
+
+				// -------------------------------------------------------------
+				// is the reflection in the scattering plane?
+				t_real dDist = 0.;
+				t_vec vecDropped = plane.GetDroppedPerp(peak.vecPeak, &dDist);
+
+				bool bInScatteringPlane = 0;
+
+				peak.pvecColor = &vecColPeak;
 				if(tl::float_equal<t_real>(dDist, 0., m_dPlaneDistTolerance))
 				{
 					// (000) peak?
@@ -138,25 +178,57 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 						tl::float_equal<t_real>(k, 0., g_dEps) &&
 						tl::float_equal<t_real>(l, 0., g_dEps))
 					{
-						pvecColor = &vecCol000;
+						peak.pvecColor = &vecCol000;
 					}
 					else
 					{
-						pvecColor = &vecColPeakPlane;
+						peak.pvecColor = &vecColPeakPlane;
 					}
 
 					bInScatteringPlane = 1;
 				}
+				// -------------------------------------------------------------
 
-				m_pPlot->PlotSphere(vecPeak, 0.05, iCurObjIdx);
-				m_pPlot->SetObjectColor(iCurObjIdx, *pvecColor);
 
 				std::ostringstream ostrLab;
-				ostrLab << "(" << ih << " " << ik << " " << il << ")";
-				m_pPlot->SetObjectLabel(iCurObjIdx, ostrLab.str());
+				ostrLab << "(" << ih << " " << ik << " " << il << ")"
+					<< strStructfact;
+				peak.strName = ostrLab.str();
 
-				++iCurObjIdx;
+				vecPeaks.emplace_back(std::move(peak));
 			}
+
+
+
+	std::size_t iObjCnt = vecPeaks.size();
+	if(bShowScatPlane) iObjCnt += 2;
+	if(bShowCurQ) ++iObjCnt;
+
+	m_pPlot->SetEnabled(0);
+	m_pPlot->clear();
+	m_pPlot->SetObjectCount(iObjCnt);
+
+	std::size_t iCurObjIdx = 0;
+
+
+	// plot all allowed reflections
+	for(const Peak3d& peak : vecPeaks)
+	{
+		t_real dFRad = DEF_PEAK_SIZE;
+
+		// valid structure factors
+		if(peak.dF >= 0. && !tl::float_equal(dMinF, dMaxF, g_dEpsGfx))
+		{
+			t_real dFScale = (peak.dF-dMinF) / (dMaxF-dMinF);
+			dFRad = tl::lerp(MIN_PEAK_SIZE, MAX_PEAK_SIZE, dFScale);
+		}
+
+		m_pPlot->PlotSphere(peak.vecPeak, dFRad, iCurObjIdx);
+		m_pPlot->SetObjectColor(iCurObjIdx, *peak.pvecColor);
+		m_pPlot->SetObjectLabel(iCurObjIdx, peak.strName);
+
+		++iCurObjIdx;
+	}
 
 
 	// scattering plane
@@ -199,7 +271,6 @@ void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
 		++iCurObjIdx;
 	}
 
-	m_pPlot->SetObjectCount(iCurObjIdx);	// actual count (some peaks forbidden by sg)
 	m_pPlot->SetMinMax(vecMin, vecMax);
 	m_pPlot->SetEnabled(1);
 }
