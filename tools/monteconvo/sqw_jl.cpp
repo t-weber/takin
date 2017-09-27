@@ -32,7 +32,7 @@ SqwJl::SqwJl(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 	static bool bInited = 0;
 	if(!bInited)
 	{
-		jl_init(0);
+		jl_init(/*0*/);
 		std::string strJl = jl_ver_string();
 		tl::log_debug("Initialised Julia interpreter version ", strJl, ".");
 		bInited = 1;

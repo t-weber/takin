@@ -39,7 +39,7 @@ USE_GIL = 1
 
 # compile the python or julia interfaces?
 USE_PY = 1
-USE_JL = 0
+USE_JL = 1
 
 # enable the plugin interface?
 USE_PLUGINS = 1
