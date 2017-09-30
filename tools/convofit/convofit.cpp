@@ -674,6 +674,7 @@ bool Convofit::run_job(const std::string& _strJob)
 			strCurModOutFile += tl::var_to_str(iSc);
 			strCurScOutFile += tl::var_to_str(iSc);
 		}
+		mod.SetParamSet(iSc);
 		std::pair<decltype(sc.vecX)::const_iterator, decltype(sc.vecX)::const_iterator> xminmax
 			= std::minmax_element(sc.vecX.begin(), sc.vecX.end());
 		mod.Save(strCurModOutFile.c_str(), *xminmax.first, *xminmax.second,
@@ -686,7 +687,7 @@ bool Convofit::run_job(const std::string& _strJob)
 
 	// --------------------------------------------------------------------
 	// Plotting
-	if(bPlot)
+	if(bPlot && vecSc.size() <= 1)
 	{
 		tl::DatFile<t_real, char> datMod;
 		if(datMod.Load(strModOutFile))

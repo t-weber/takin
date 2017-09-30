@@ -393,7 +393,7 @@ void SqwFuncModel::SetParamSet(std::size_t iSet)
 
 	if(iSet >= m_pScans->size())
 	{
-		tl::log_err("Requested invalid scan group ", iSet);
+		tl::log_err("Requested invalid scan group ", iSet, ".");
 		return;
 	}
 
@@ -407,6 +407,17 @@ void SqwFuncModel::SetParamSet(std::size_t iSet)
 		else
 			set_tasreso_params_from_scan(/*m_reso*/ m_vecResos[0], sc);
 		set_model_params_from_scan(*this, sc);
+
+		if(m_psigParamsChanged)
+		{
+			std::ostringstream ostrDescr;
+			ostrDescr << "Scan group " << m_iCurParamSet << ".";
+			(*m_psigParamsChanged)(ostrDescr.str());
+		}
+	}
+	else
+	{
+		tl::log_info("Scan group ", iSet, " requested, which is already set.");
 	}
 }
 
