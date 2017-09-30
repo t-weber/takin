@@ -12,6 +12,9 @@
 #include <fstream>
 
 
+/**
+ * saving a scan file
+ */
 bool save_file(const char* pcFile, const Scan& sc)
 {
 	std::ofstream ofstr(pcFile);
@@ -55,8 +58,11 @@ bool save_file(const char* pcFile, const Scan& sc)
 }
 
 
+/**
+ * loading multiple scan files
+ */
 bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormToMon,
-	const Filter& filter, bool bFlipCoords)
+	const Filter& filter, bool bFlipCoords, bool bUseFirstAndLastPoints)
 {
 	if(!vecFiles.size()) return 0;
 	tl::log_info("Loading \"", vecFiles[0], "\".");
@@ -171,6 +177,13 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	}
 
 
+	// component-wise minima and maxima
+	ScanPoint ptMin, ptMax;
+	ptMin.h = ptMin.k = ptMin.l = std::numeric_limits<t_real_sc>::max();
+	ptMax.h = ptMax.k = ptMax.l = -std::numeric_limits<t_real_sc>::max();
+	ptMin.E = std::numeric_limits<t_real_sc>::max() * tl::get_one_meV<t_real_sc>();
+	ptMax.E = -std::numeric_limits<t_real_sc>::max() * tl::get_one_meV<t_real_sc>();
+
 	const std::size_t iNumPts = pInstr->GetScanCount();
 	for(std::size_t iPt=0; iPt<iNumPts; ++iPt)
 	{
@@ -181,12 +194,23 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 		pt.ki = sc[3]/tl::get_one_angstrom<t_real_sc>();
 		pt.kf = sc[4]/tl::get_one_angstrom<t_real_sc>();
 		pt.Ei = tl::k2E(pt.ki); pt.Ef = tl::k2E(pt.kf);
-		pt.E = pt.Ei-pt.Ef;
+		pt.E = pt.Ei - pt.Ef;
+
+		// component-wise minima and maxima
+		if(pt.h > ptMax.h) ptMax.h = pt.h;
+		if(pt.k > ptMax.k) ptMax.k = pt.k;
+		if(pt.l > ptMax.l) ptMax.l = pt.l;
+		if(pt.E > ptMax.E) ptMax.E = pt.E;
+
+		if(pt.h < ptMin.h) ptMin.h = pt.h;
+		if(pt.k < ptMin.k) ptMin.k = pt.k;
+		if(pt.l < ptMin.l) ptMin.l = pt.l;
+		if(pt.E < ptMin.E) ptMin.E = pt.E;
 
 		tl::log_info("Point ", iPt+1, ": ", "h=", pt.h, ", k=", pt.k, ", l=", pt.l,
-			", ki=", t_real_sc(pt.ki*tl::get_one_angstrom<t_real_sc>()), 
-			", kf=", t_real_sc(pt.kf*tl::get_one_angstrom<t_real_sc>()),
-			", E=", t_real_sc(pt.E/tl::get_one_meV<t_real_sc>())/*, ", Q=", pt.Q*tl::angstrom*/,
+			", ki=", t_real_sc(pt.ki * tl::get_one_angstrom<t_real_sc>()), 
+			", kf=", t_real_sc(pt.kf * tl::get_one_angstrom<t_real_sc>()),
+			", E=", t_real_sc(pt.E / tl::get_one_meV<t_real_sc>())/*, ", Q=", pt.Q*tl::angstrom*/,
 			", Cts=", scan.vecCts[iPt]/*, "+-", scan.vecCtsErr[iPt]*/,
 			", Mon=", scan.vecMon[iPt]/*, "+-", scan.vecMonErr[iPt]*/, ".");
 
@@ -194,19 +218,26 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	}
 
 
+	// TODO: find start and end point of scan when the points are unsorted
+	const ScanPoint* ptBegin = &ptMin; 
+	const ScanPoint* ptEnd = &ptMax; 
 
-	const ScanPoint& ptBegin = *scan.vecPoints.cbegin();
-	const ScanPoint& ptEnd = *scan.vecPoints.crbegin();
+	// old behaviour: first and last points instead of component-wise min and max
+	if(bUseFirstAndLastPoints)
+	{
+		ptBegin = &*scan.vecPoints.cbegin();
+		ptEnd = &*scan.vecPoints.crbegin();
+	}
 
-	scan.vecScanOrigin[0] = ptBegin.h;
-	scan.vecScanOrigin[1] = ptBegin.k;
-	scan.vecScanOrigin[2] = ptBegin.l;
-	scan.vecScanOrigin[3] = ptBegin.E / tl::get_one_meV<t_real_sc>();
+	scan.vecScanOrigin[0] = ptBegin->h;
+	scan.vecScanOrigin[1] = ptBegin->k;
+	scan.vecScanOrigin[2] = ptBegin->l;
+	scan.vecScanOrigin[3] = ptBegin->E / tl::get_one_meV<t_real_sc>();
 
-	scan.vecScanDir[0] = ptEnd.h - ptBegin.h;
-	scan.vecScanDir[1] = ptEnd.k - ptBegin.k;
-	scan.vecScanDir[2] = ptEnd.l - ptBegin.l;
-	scan.vecScanDir[3] = (ptEnd.E - ptBegin.E) / tl::get_one_meV<t_real_sc>();
+	scan.vecScanDir[0] = ptEnd->h - ptBegin->h;
+	scan.vecScanDir[1] = ptEnd->k - ptBegin->k;
+	scan.vecScanDir[2] = ptEnd->l - ptBegin->l;
+	scan.vecScanDir[3] = (ptEnd->E - ptBegin->E) / tl::get_one_meV<t_real_sc>();
 
 	const t_real_sc dEps = 0.01;
 
@@ -274,8 +305,13 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	return true;
 }
 
-bool load_file(const char* pcFile, Scan& scan, bool bNormToMon, const Filter& filter, bool bFlip)
+
+/**
+ * loading a scan file
+ */
+bool load_file(const char* pcFile, Scan& scan, bool bNormToMon, const Filter& filter,
+	bool bFlip, bool bUseFirstAndLastPoints)
 {
 	std::vector<std::string> vec{pcFile};
-	return load_file(vec, scan, bNormToMon, filter, bFlip);
+	return load_file(vec, scan, bNormToMon, filter, bFlip, bUseFirstAndLastPoints);
 }

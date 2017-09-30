@@ -154,6 +154,7 @@ bool Convofit::run_job(const std::string& _strJob)
 	std::string strSetParams = prop.Query<std::string>("input/sqw_set_params", "");
 	bool bNormToMon = prop.Query<bool>("input/norm_to_monitor", 1);
 	bool bFlipCoords = prop.Query<bool>("input/flip_lhs_rhs", 0);
+	bool bUseFirstAndLastScanPt = prop.Query<bool>("input/use_first_last_pt", 0);
 
 	if(g_strSetParams != "")
 	{
@@ -375,6 +376,7 @@ bool Convofit::run_job(const std::string& _strJob)
 	}
 
 
+
 	// --------------------------------------------------------------------
 	// Scan files
 	std::vector<Scan> vecSc;
@@ -390,7 +392,8 @@ bool Convofit::run_job(const std::string& _strJob)
 
 		if(vecvecScFiles.size() > 1)
 			tl::log_info("Loading scan group ", iSc, ".");
-		if(!load_file(vecvecScFiles[iSc], sc, bNormToMon, filter, bFlipCoords))
+		if(!load_file(vecvecScFiles[iSc], sc, bNormToMon, filter,
+			bFlipCoords, bUseFirstAndLastScanPt))
 		{
 			tl::log_err("Cannot load scan files of group ", iSc, ".");
 			continue;
