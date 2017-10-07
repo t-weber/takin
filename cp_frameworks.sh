@@ -27,8 +27,6 @@ declare -a SRC_LIBS=(
 	"/usr/local/opt/qt5/lib/QtSvg.framework"
 	"/usr/local/opt/qt5/lib/QtPrintSupport.framework"
 	"/usr/local/opt/qwt/lib/qwt.framework"
-	"/usr/lib/libz.1.dylib"
-	"/usr/lib/libbz2.1.0.dylib"
 	"/usr/local/opt/minuit2/lib/libMinuit2.0.dylib"
 	"/usr/local/opt/boost/lib/libboost_system.dylib"
 	"/usr/local/opt/boost/lib/libboost_filesystem.dylib"
@@ -38,7 +36,12 @@ declare -a SRC_LIBS=(
 	"/usr/local/opt/boost-python/lib/libboost_python.dylib"
 	"/usr/local/opt/freetype/lib/libfreetype.6.dylib"
 	"/usr/local/opt/libpng/lib/libpng16.16.dylib"
+	"/usr/local/opt/libjpeg/lib/libjpeg.9.dylib"
+	"/usr/local/opt/libtiff/lib/libtiff.5.dylib"
+#	"/usr/local/lib/libz.1.dylib"
+#	"/usr/local/lib/libbz2.1.0.dylib"
 )
+
 
 declare -a SRC_PLUGINS=(
 	"printsupport/libcocoaprintersupport.dylib"

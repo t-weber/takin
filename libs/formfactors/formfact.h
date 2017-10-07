@@ -45,7 +45,7 @@ class PeriodicElement
 		int GetNr() const { return iNr; }
 		int GetPeriod() const { return iPeriod; }
 		int GetGroup() const { return iGroup; }
-		
+
 		T GetMass() const { return dMass; }
 		T GetRadiusCov() const { return dRadCov; }
 		T GetRadiusVdW() const { return dRadVdW; }

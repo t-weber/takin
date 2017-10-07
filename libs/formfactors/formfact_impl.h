@@ -345,8 +345,18 @@ ScatlenList<T>::ScatlenList()
 
 		slen.xsec_coh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_coh").c_str(), 0.);
 		slen.xsec_incoh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_incoh").c_str(), 0.);
-		slen.xsec_scat = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_scat").c_str(), 0.);
 		slen.xsec_abs = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_abs").c_str(), 0.);
+
+		if(xml.Exists((strAtom + "/xsec_scat").c_str()))
+		{
+			slen.xsec_scat = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_scat").c_str(), 0.);
+			//tl::log_debug("Total scattering xsec exists for: ", slen.strAtom, ".");
+		}
+		else
+		{
+			slen.xsec_scat = slen.xsec_coh + slen.xsec_incoh;
+		}
+
 		slen.abund = xml.QueryOpt<ScatlenList<T>::real_type>((strAtom + "/abund").c_str());
 		slen.hl = xml.QueryOpt<ScatlenList<T>::real_type>((strAtom + "/hl").c_str());
 
