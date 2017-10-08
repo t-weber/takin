@@ -343,9 +343,15 @@ ScatlenList<T>::ScatlenList()
 		slen.coh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/coh").c_str(), 0.);
 		slen.incoh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/incoh").c_str(), 0.);
 
-		slen.xsec_coh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_coh").c_str(), 0.);
-		slen.xsec_incoh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_incoh").c_str(), 0.);
-		slen.xsec_abs = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_abs").c_str(), 0.);
+		if(xml.Exists((strAtom + "/xsec_coh").c_str()))
+			slen.xsec_coh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_coh").c_str(), 0.);
+		else
+			slen.xsec_coh = (slen.coh*std::conj(slen.coh)).real()*T(4)*tl::get_pi<T>();
+
+		if(xml.Exists((strAtom + "/xsec_incoh").c_str()))
+			slen.xsec_incoh = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_incoh").c_str(), 0.);
+		else
+			slen.xsec_incoh = (slen.incoh*std::conj(slen.incoh)).real()*T(4)*tl::get_pi<T>();
 
 		if(xml.Exists((strAtom + "/xsec_scat").c_str()))
 		{
@@ -356,6 +362,9 @@ ScatlenList<T>::ScatlenList()
 		{
 			slen.xsec_scat = slen.xsec_coh + slen.xsec_incoh;
 		}
+
+		slen.xsec_abs = xml.Query<ScatlenList<T>::value_type>((strAtom + "/xsec_abs").c_str(), 0.);
+
 
 		slen.abund = xml.QueryOpt<ScatlenList<T>::real_type>((strAtom + "/abund").c_str());
 		slen.hl = xml.QueryOpt<ScatlenList<T>::real_type>((strAtom + "/hl").c_str());

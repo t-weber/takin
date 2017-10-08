@@ -306,6 +306,8 @@ struct ffact
 	t_real dScatXs, dAbsXs;
 	t_real dCohXs, dIncXs;
 
+	bool bIncCohXs = 0;
+	bool bIncIncXs = 0;
 	bool bIncScatXs = 0;
 
 	std::string strAbund;
@@ -335,20 +337,37 @@ bool gen_scatlens_npy()
 		ff.strName = strNucl;
 		ff.cCohb = propIn.Query<t_real>("/" + strNucl + "/Coh b");
 		ff.cIncb = propIn.Query<t_real>("/" + strNucl + "/Inc b");
-		ff.dAbsXs = propIn.Query<t_real>("/" + strNucl + "/Abs xs");
-		ff.dCohXs = propIn.Query<t_real>("/" + strNucl + "/Coh xs");
-		ff.dIncXs = propIn.Query<t_real>("/" + strNucl + "/Inc xs");
+		ff.dAbsXs = propIn.Query<t_real>("/" + strNucl + "/Abs xs") * t_real(100); // in fm^2
+		ff.dCohXs = propIn.Query<t_real>("/" + strNucl + "/Coh xs") * t_real(100);
+		ff.dIncXs = propIn.Query<t_real>("/" + strNucl + "/Inc xs") * t_real(100);
 		ff.dScatXs = propIn.Query<t_real>("/" + strNucl + "/Scatt xs");
 		ff.strAbund = propIn.Query<std::string>("/" + strNucl + "/conc");
 
 		// include total scattering cross-section only if it is not the sum
 		// of the coherent and incoherent cross-sections
-		if(!tl::float_equal(ff.dScatXs, ff.dCohXs + ff.dIncXs, 0.01))
+		if(!tl::float_equal(ff.dScatXs, ff.dCohXs + ff.dIncXs, 1.))
 		{
 			ff.bIncScatXs = 1;
 			//tl::log_warn("Mismatch in scattering cross-section for ", ff.strName, ": ",
 			//	ff.dCohXs + ff.dIncXs, " != ", ff.dScatXs, ".");
 		}
+
+		if(!tl::float_equal(ff.dCohXs, (ff.cCohb*std::conj(ff.cCohb)).real()*t_real(4)*tl::get_pi<t_real>(), 1.))
+		{
+			ff.bIncCohXs = 1;
+			//tl::log_warn("Mismatch in coherent cross-section for ", ff.strName, ": ",
+			//	(ff.cCohb*std::conj(ff.cCohb)).real()*t_real(4)*tl::get_pi<t_real>(),
+			//	" != ", ff.dCohXs, ".");
+		}
+
+		if(!tl::float_equal(ff.dIncXs, (ff.cIncb*std::conj(ff.cIncb)).real()*t_real(4)*tl::get_pi<t_real>(), 1.))
+		{
+			ff.bIncIncXs = 1;
+			//tl::log_warn("Mismatch in incoherent cross-section for ", ff.strName, ": ",
+			//	(ff.cIncb*std::conj(ff.cIncb)).real()*t_real(4)*tl::get_pi<t_real>(),
+			//	" != ", ff.dIncXs, ".");
+		}
+
 
 		// complex?
 		auto vecValsCohb = propIn.GetChildValues<t_real>("/" + strNucl + "/Coh b");
@@ -409,15 +428,21 @@ bool gen_scatlens_npy()
 		std::string strAtom = ostr.str();
 
 		propOut.Add(strAtom + ".name", ff.strName);
+
+		// scattering lengths
 		propOut.Add(strAtom + ".coh", tl::var_to_str(ff.cCohb, g_iPrec));
 		propOut.Add(strAtom + ".incoh", tl::var_to_str(ff.cIncb, g_iPrec));
 
-		propOut.Add(strAtom + ".xsec_coh", tl::var_to_str(ff.dCohXs, g_iPrec));
-		propOut.Add(strAtom + ".xsec_incoh", tl::var_to_str(ff.dIncXs, g_iPrec));
+		// cross-sections
+		if(ff.bIncCohXs)
+			propOut.Add(strAtom + ".xsec_coh", tl::var_to_str(ff.dCohXs, g_iPrec));
+		if(ff.bIncIncXs)
+			propOut.Add(strAtom + ".xsec_incoh", tl::var_to_str(ff.dIncXs, g_iPrec));
 		if(ff.bIncScatXs)
 			propOut.Add(strAtom + ".xsec_scat", tl::var_to_str(ff.dScatXs, g_iPrec));
 		propOut.Add(strAtom + ".xsec_absorp", tl::var_to_str(ff.dAbsXs, g_iPrec));
 
+		// abundances
 		if(ff.bAb)
 			propOut.Add(strAtom + ".abund", tl::var_to_str(ff.dAbOrHL, g_iPrec));
 		else
