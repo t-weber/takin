@@ -32,6 +32,18 @@ SpaceGroups<t_real>::~SpaceGroups() {}
 
 
 template<class t_real>
+const SpaceGroup<t_real>* SpaceGroups<t_real>::Find(const std::string& strSG) const
+{
+	if(!IsOk()) return nullptr;
+
+	typename t_mapSpaceGroups::const_iterator iterSG = g_mapSpaceGroups.find(strSG);
+	if(iterSG == g_mapSpaceGroups.end())
+		return nullptr;
+	return &iterSG->second;
+}
+
+
+template<class t_real>
 bool SpaceGroups<t_real>::LoadSpaceGroups(const char* pcFile, bool bMandatory)
 {
 	using t_mat = typename SpaceGroup<t_real>::t_mat;

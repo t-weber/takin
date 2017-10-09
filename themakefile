@@ -501,7 +501,7 @@ OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o
 OBJ_GENTAB = obj/spacegroup_clp.o obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
 	obj/debug.o obj/eval.o
 
-OBJ_SFACT = obj/sfact.o obj/spacegroup_clp.o obj/crystalsys_noqt.o obj/globals.o \
+OBJ_SFACT = obj/sfact.o obj/spacegroup.o obj/crystalsys_noqt.o obj/globals.o \
 	obj/formfact.o obj/log.o obj/debug.o obj/rand.o
 
 
@@ -598,7 +598,7 @@ gentab: ${OBJ_GENTAB}
 
 sfact: ${OBJ_SFACT}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sfact $+ \
-		${BASIC_LIBS} -lclipper-core ${STD_LIBS}
+		${BASIC_LIBS} ${STD_LIBS}
 
 doc: doc/takin.qhcp doc/takin.qhp doc/*.html
 	qcollectiongenerator doc/takin.qhcp -o doc/takin.qhc

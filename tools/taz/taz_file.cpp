@@ -280,12 +280,12 @@ bool TazDlg::Load(const char* pcFile)
 
 
 		m_vecAtoms.clear();
-		unsigned int iNumAtoms = xml.Query<unsigned int>((strXmlRoot + "sample/atoms/num").c_str(), 0, &bOk);
+		std::size_t iNumAtoms = xml.Query<std::size_t>((strXmlRoot + "sample/atoms/num").c_str(), 0, &bOk);
 		if(bOk)
 		{
 			m_vecAtoms.reserve(iNumAtoms);
 
-			for(unsigned int iAtom=0; iAtom<iNumAtoms; ++iAtom)
+			for(std::size_t iAtom=0; iAtom<iNumAtoms; ++iAtom)
 			{
 				AtomPos<t_real> atom;
 				atom.vecPos.resize(3,0);

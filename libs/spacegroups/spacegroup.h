@@ -173,6 +173,8 @@ class SpaceGroups
 		const t_vecSpaceGroups* get_space_groups_vec() const;
 		const std::string& get_sgsource(bool bUrl=0) const;
 
+		const SpaceGroup<t_real>* Find(const std::string& pcSG) const;
+
 		bool IsOk() const { return m_bOk; }
 };
 
