@@ -220,6 +220,7 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 	const t_real dVol = lattice.GetVol();
 	const t_mat matA = lattice.GetBaseMatrixCov();
 	const t_mat matB = lattice.GetRecip().GetBaseMatrixCov();
+	std::cout << "Unit cell volume: " << dVol << " A^3" << std::endl;
 	std::cout << "A = " << matA << std::endl;
 	std::cout << "B = " << matB << std::endl;
 	// --------------------------------------------------------------------------------------------
@@ -276,6 +277,11 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 	std::vector<std::complex<t_real>> vecMagScatlens;
 	std::vector<int> vecAtomIndices;
 
+	t_real dsigCoh = 0.;
+	t_real dsigInc = 0.;
+	t_real dsigScat = 0.;
+	t_real dsigAbs = 0.;
+
 	t_real dSigAbs = 0.;
 	t_real dSigScat = 0.;
 
@@ -301,6 +307,13 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 		std::complex<t_real> b = pElem->GetCoherent();
 
 
+		// microscopic cross-sections
+		dsigCoh += pElem->GetXSecCoherent().real()*vecNumAtoms[iAtom];
+		dsigInc += pElem->GetXSecIncoherent().real()*vecNumAtoms[iAtom];
+		dsigScat += pElem->GetXSecScatter().real()*vecNumAtoms[iAtom];
+		dsigAbs += pElem->GetXSecAbsorption().real()*vecNumAtoms[iAtom];
+
+
 		// get magnetic scattering lengths
 		std::complex<t_real> p(0.);
 		auto iterMag = mapMag.find(vecElems[iAtom]);
@@ -315,6 +328,7 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 		}
 
 
+		// macroscopic cross-sections
 		dSigScat += tl::macro_xsect(pElem->GetXSecScatter().real()*tl::get_one_femtometer<t_real>()*tl::get_one_femtometer<t_real>(),
 			vecNumAtoms[iAtom],
 			dVol*tl::get_one_angstrom<t_real>()*tl::get_one_angstrom<t_real>()*tl::get_one_angstrom<t_real>()) * tl::get_one_centimeter<t_real>();
@@ -324,6 +338,7 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 			dVol*tl::get_one_angstrom<t_real>()*tl::get_one_angstrom<t_real>()*tl::get_one_angstrom<t_real>()) * tl::get_one_centimeter<t_real>();
 
 
+		// store calculations
 		for(t_vec vecThisAtom : vecPos)
 		{
 			vecThisAtom.resize(3,1);
@@ -333,6 +348,11 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 			vecAtomIndices.push_back(iAtom);
 		}
 	}
+
+	std::cout << "\nMicroscopic coherent cross-section: " << dsigCoh << " fm^2." << std::endl;
+	std::cout << "Microscopic incoherent cross-section: " << dsigInc << " fm^2." << std::endl;
+	std::cout << "Microscopic total scattering cross-section: " << dsigScat << " fm^2." << std::endl;
+	std::cout << "Microscopic absorption cross-section: " << dsigAbs << " fm^2." << std::endl;
 
 	const t_real dLam0 = 1.8;	// thermal
 	const t_real dLam = 4.5;
