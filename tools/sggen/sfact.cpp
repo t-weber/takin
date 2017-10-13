@@ -36,10 +36,11 @@ const std::string g_strXmlRoot("taz/");
 // --------------------------------------------------------------------------------------------
 static inline tl::Lattice<t_real> enter_lattice()
 {
+	std::cout << "\n----------------------------------------------------------------------\n" << std::endl;
 	t_real a,b,c, alpha,beta,gamma;
-	std::cout << "Enter unit cell lattice constants: ";
+	std::cout << "Enter unit cell lattice constants [a b c (in A)]: ";
 	std::cin >> a >> b >> c;
-	std::cout << "Enter unit cell angles: ";
+	std::cout << "Enter unit cell angles [alpha beta gamma (in deg)]: ";
 	std::cin >> alpha >> beta >> gamma;
 
 	alpha = tl::d2r(alpha);
@@ -74,7 +75,7 @@ static tl::Lattice<t_real> load_lattice(const tl::Prop<>& file)
 // --------------------------------------------------------------------------------------------
 static inline std::string enter_spacegroup()
 {
-	std::cout << std::endl;
+	std::cout << "\n----------------------------------------------------------------------\n" << std::endl;
 	std::string strSg;
 	std::cout << "Enter spacegroup: ";
 	std::cin.ignore();
@@ -103,7 +104,7 @@ static inline
 std::tuple<std::vector<std::string>, std::vector<t_vec>, std::unordered_map<std::string, t_real>>
 enter_atoms()
 {
-	std::cout << std::endl;
+	std::cout << "\n----------------------------------------------------------------------\n" << std::endl;
 	int iAtom=0;
 	std::vector<std::string> vecElems;
 	std::vector<t_vec> vecAtoms;
@@ -111,14 +112,14 @@ enter_atoms()
 
 	while(1)
 	{
-		std::cout << "Enter element " << (++iAtom) << " name (or <Enter> to finish): ";
+		std::cout << "Enter element name " << (++iAtom) << " name (or <Enter> to finish): ";
 		std::string strElem;
 		std::getline(std::cin, strElem);
 		tl::trim(strElem);
 		if(strElem == "")
 			break;
 
-		std::cout << "Enter atom position " << (iAtom) << ": ";
+		std::cout << "Enter atom position " << (iAtom) << " [x y z (in frac. units)]: ";
 		std::string strAtom;
 		std::getline(std::cin, strAtom);
 		tl::trim(strAtom);
@@ -242,8 +243,7 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 		std::cerr << "Error: Unknown spacegroup." << std::endl;
 		return;
 	}
-	const int iSGNum = pSg->GetNr();
-	std::cout << "Spacegroup number: " << iSGNum << std::endl;
+	std::cout << "Spacegroup " << pSg->GetNr() << ": " << pSg->GetName() << "." << std::endl;
 
 	const std::vector<t_mat>& vecTrafos = pSg->GetTrafos();
 	std::cout << vecTrafos.size() << " symmetry operations in spacegroup." << std::endl;
@@ -254,7 +254,6 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 	// --------------------------------------------------------------------------------------------
 	// Atom positions
 	// --------------------------------------------------------------------------------------------
-	std::cout << std::endl;
 	int iAtom=0;
 	std::vector<std::string> vecElems;
 	std::vector<t_vec> vecAtoms;
@@ -375,10 +374,10 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 
 	while(1)
 	{
-		std::cout << std::endl;
+		std::cout << "\n----------------------------------------------------------------------\n" << std::endl;
 
 		t_real h=0., k=0., l=0.;
-		std::cout << "Enter hkl: ";
+		std::cout << "Enter h k l [rlu]: ";
 		std::cin >> h >> k >> l;
 
 		t_vec vecG = tl::mult<t_mat, t_vec>(matB, tl::make_vec({h,k,l}));
@@ -458,15 +457,46 @@ void gen_atoms_sfact(const char *pcFile = nullptr)
 		std::cout << "Fx = " << Fx << std::endl;
 		std::cout << "|Fx| = " << std::sqrt(dFxsq) << std::endl;
 		std::cout << "|Fx|^2 = " << dFxsq << std::endl;
-
-		std::cout << "------------------------------------------------------------" << std::endl;
 	}
 	// --------------------------------------------------------------------------------------------
 }
 
 
+#include "libs/version.h"
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 int main(int argc, char** argv)
 {
+#ifdef NO_TERM_CMDS
+	tl::Log::SetUseTermCmds(0);
+#endif
+
+	// plain C locale
+	/*std::*/setlocale(LC_ALL, "C");
+	std::locale::global(std::locale::classic());
+
+
+	// possible resource paths
+	const char* pcProg = argv[0];
+	fs::path path(pcProg);
+	path.remove_filename();
+	tl::log_info("Program path: ", path.string());
+
+	add_resource_path(path.string());
+	add_resource_path((path / "..").string());
+	add_resource_path((path / "resources").string());
+	add_resource_path((path / "Resources").string());
+	add_resource_path((path / ".." / "resources").string());
+	add_resource_path((path / ".." / "Resources").string());
+
+
+	// Header
+	tl::log_info("This is the Takin structure factor calculator, version " TAKIN_VER ".");
+	tl::log_info("Written by Tobias Weber <tobias.weber@tum.de>, 2014-2017.");
+	tl::log_info(TAKIN_LICENSE("Takin/Sfact"));
+
+
 	// load a taz file if given
 	const char *pcFile = nullptr;
 	if(argc >= 2)

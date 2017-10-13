@@ -64,6 +64,13 @@ SqwPy::SqwPy(const char* pcFile) : m_pmtx(std::make_shared<std::mutex>())
 
 		// import takin functions
 		m_mod = py::import(strMod.c_str());
+		if(m_mod.is_none())
+		{
+			tl::log_err("Invalid Python module \"", strMod, "\".");
+			m_bOk = 0;
+			return;
+		}
+
 		py::dict moddict = py::extract<py::dict>(m_mod.attr("__dict__"));
 		m_Sqw = moddict["TakinSqw"];
 		m_bOk = !!m_Sqw;

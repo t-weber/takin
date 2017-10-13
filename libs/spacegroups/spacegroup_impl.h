@@ -36,10 +36,26 @@ const SpaceGroup<t_real>* SpaceGroups<t_real>::Find(const std::string& strSG) co
 {
 	if(!IsOk()) return nullptr;
 
+	// search space groups by name
 	typename t_mapSpaceGroups::const_iterator iterSG = g_mapSpaceGroups.find(strSG);
-	if(iterSG == g_mapSpaceGroups.end())
-		return nullptr;
-	return &iterSG->second;
+	if(iterSG != g_mapSpaceGroups.end())
+		return &iterSG->second;
+
+	// search space groups by number
+	if(tl::str_is_digits(strSG))
+	{
+		unsigned int iSGNr = tl::str_to_var<unsigned int>(strSG);
+
+		const t_vecSpaceGroups* pVec = get_space_groups_vec();
+		for(const SpaceGroup<t_real>* pSG : *pVec)
+		{
+			if(pSG->GetNr() == iSGNr)
+				return pSG;
+		}
+	}
+
+	// nothing found
+	return nullptr;
 }
 
 

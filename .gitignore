@@ -20,6 +20,8 @@ gmon.out
 Debug/*
 Release/*
 build/*
+takin.app/*
+.DS_*
 .clang/*
 .codelite/*
 .settings/*

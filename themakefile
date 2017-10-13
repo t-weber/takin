@@ -53,6 +53,8 @@ USE_CPP11_ABI = 1
 # enable Framework libs
 USE_FRAMEWORKS = 0
 
+USE_CLP = 1
+
 # is Minuit a non-standalone installation?
 NON_STANDALONE_MINUIT_HACK = 1
 
@@ -76,12 +78,12 @@ QWT5_SUFFIX = -qt4
 #QWT5_SUFFIX = 5-qt4
 
 # ... and prefixes
-JL_APP = /Applications/Julia-0.5.app/Contents/Resources/julia
+JL_APP = /Applications/Julia-0.6.app/Contents/Resources/julia
 # -----------------------------------------------------------------------------
 
 
 
-STD_CPP = -std=c++11
+STD_CPP = -std=c++11 -mmacosx-version-min=10.9
 #STD_CPP += -stdlib=libc++
 
 ifeq ($(CC), gcc)
@@ -416,7 +418,7 @@ endif
 ifeq ($(USE_JL), 1)
 	JL_LIBS = -L${JL_APP}/lib -ljulia
 	JL_OBJS = obj/sqw_jl.o 
-	JL_INC = -I/usr/include/julia -I${JL_APP}/include/julia
+	JL_INC = -I/usr/local/include/julia -I/usr/include/julia -I${JL_APP}/include/julia
 else
 	JL_LIBS =
 	JL_OBJS =
@@ -435,6 +437,13 @@ else
 	DL_LIBS =
 endif
 
+ifeq ($(USE_CLP), 1)
+	DEFINES += -DUSE_CLP
+	CLP_LIBS = -lclipper-core
+else
+	DEFINES += -DNO_CLP
+	CLP_LIBS = 
+endif
 
 LIBS_TAZ = ${BASIC_LIBS} ${FAD_LIBS} ${QT_LIB} ${QWT_LIB} ${GL_LIBS} \
 	${PY_LIBS} ${JL_LIBS} ${GIL_LIBS} ${DL_LIBS} ${LAPACK_LIBS} ${STD_LIBS}
@@ -498,12 +507,16 @@ OBJ_SCANVIEWER = obj/scanviewer_main.o obj/scanviewer.o \
 OBJ_SGLIST = obj/sglist_main.o obj/SgListDlg.o obj/spacegroup.o obj/crystalsys.o \
 	obj/log.o obj/debug.o obj/globals.o obj/globals_qt.o
 
-OBJ_GENTAB = obj/spacegroup_clp.o obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
+OBJ_GENTAB = obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
 	obj/debug.o obj/eval.o
 
 OBJ_SFACT = obj/sfact.o obj/spacegroup.o obj/crystalsys_noqt.o obj/globals.o \
 	obj/formfact.o obj/log.o obj/debug.o obj/rand.o
 
+
+ifeq ($(USE_CLP), 1)
+	OBJ_GENTAB += obj/spacegroup_clp.o
+endif
 
 ifeq ($(USE_3D), 1)
 	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/real3d.o obj/bz3d.o obj/EllipseDlg3D.o
@@ -594,7 +607,7 @@ sglist: ${OBJ_SGLIST}
 
 gentab: ${OBJ_GENTAB}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/gentab $+ \
-		${BASIC_LIBS} -lclipper-core ${STD_LIBS}
+		${BASIC_LIBS} ${CLP_LIBS} ${STD_LIBS}
 
 sfact: ${OBJ_SFACT}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sfact $+ \

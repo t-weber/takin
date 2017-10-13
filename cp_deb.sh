@@ -31,6 +31,7 @@ echo -e "Depends: libstdc++6, libboost-system1.58.0 (>=1.58.0), libboost-filesys
 cp -v bin/takin			${INSTDIR}/usr/local/bin
 cp -v bin/convofit		${INSTDIR}/usr/local/bin
 cp -v bin/convoseries		${INSTDIR}/usr/local/bin
+cp -v bin/sfact			${INSTDIR}/usr/local/bin
 cp -rv res/*			${INSTDIR}/usr/local/share/takin/res/
 cp -v COPYING			${INSTDIR}/usr/local/share/takin
 cp -v LICENSES			${INSTDIR}/usr/local/share/takin

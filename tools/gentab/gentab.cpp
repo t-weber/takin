@@ -16,8 +16,9 @@
 #include "tlibs/log/log.h"
 #include "tlibs/math/linalg.h"
 #include "libs/spacegroups/sghelper.h"
-#include "libs/spacegroups/spacegroup_clp.h"
-
+#ifndef NO_CLP
+	#include "libs/spacegroups/spacegroup_clp.h"
+#endif
 
 #ifndef USE_BOOST_REX
 	#include <regex>
@@ -43,8 +44,10 @@ unsigned g_iPrec = std::numeric_limits<t_real>::max_digits10-1;
 
 // ============================================================================
 
-#include "gentab_clp.cpp"
 #include "gentab_web.cpp"
+#ifndef NO_CLP
+	#include "gentab_clp.cpp"
+#endif
 
 // ============================================================================
 
@@ -630,8 +633,10 @@ int main()
 	bool bHasElems = gen_elements();
 	if(bHasElems) std::cout << "OK" << std::endl;
 
+#ifndef NO_CLP
 	std::cout << "Generating atomic form factor coefficient table ... ";
 	if(gen_formfacts_clp()) std::cout << "OK" << std::endl;
+#endif
 
 	std::cout << "Generating scattering length table ... ";
 	if(gen_scatlens_npy())
@@ -651,8 +656,11 @@ int main()
 	}
 	else
 	{
-		std::cout << "FAILED.\nGenerating space group type table (alternative) ... ";
+		std::cout << "FAILED.\n";
+#ifndef NO_CLP
+		std::cout << "Generating space group type table (alternative) ... ";
 		if(gen_spacegroups_clp()) std::cout << "OK" << std::endl;
+#endif
 	}
 
 	//std::cout << "Generating magnetic form factor coefficient table ... ";

@@ -11,7 +11,7 @@
 
 
 PRG="takin.app"
-OS_BIN="bin"	# set accordingly
+OS_BIN="$BIN_DIR"	# set accordingly
 
 PLUGIN_DIR="/usr/local/opt/qt5/plugins/"
 DST_DIR="${PRG}/Contents/Frameworks/"
@@ -81,6 +81,7 @@ done
 cp -v bin/takin "${PRG}/Contents/${OS_BIN}/"
 cp -v bin/convofit "${PRG}/Contents/${OS_BIN}/"
 cp -v bin/convoseries "${PRG}/Contents/${OS_BIN}/"
+cp -v bin/sfact "${PRG}/Contents/${OS_BIN}/"
 
 
 # attribs

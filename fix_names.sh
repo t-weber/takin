@@ -8,9 +8,10 @@
 #
 
 PRG="takin.app"
-OS_BIN="bin"	# set accordingly
+OS_BIN="$BIN_DIR"	# set accordingly
 
 TOOL=install_name_tool
+STRIP=strip
 QT_VER="5.9.1"
 
 
@@ -44,6 +45,7 @@ declare -a filestochange=(
 	"${PRG}/Contents/${OS_BIN}/takin"
 	"${PRG}/Contents/${OS_BIN}/convofit"
 	"${PRG}/Contents/${OS_BIN}/convoseries"
+	"${PRG}/Contents/${OS_BIN}/sfact"
 )
 
 declare -a changefrom=(
@@ -170,5 +172,6 @@ for cfile in ${filestochange[@]}; do
 		${TOOL} -change ${cfrom} ${cto} ${cfile}
 	done
 
+	${STRIP} ${cfile}
 	echo -e ""
 done
