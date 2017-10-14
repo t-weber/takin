@@ -476,7 +476,7 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
 	obj/tlibs_ver.o obj/libcrystal_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o \
 	obj/convofit_import.o obj/ConvoDlg_fit.o obj/ConvoDlg_sim.o \
-	obj/DeadAnglesDlg.o
+	obj/DeadAnglesDlg.o obj/LogDlg.o
 
 OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
 	obj/qthelper.o obj/qwthelper.o obj/globals.o obj/globals_qt.o
@@ -701,6 +701,8 @@ obj/nicos.o: tools/taz/nicos.cpp tools/taz/nicos.h
 obj/sics.o: tools/taz/sics.cpp tools/taz/sics.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/DeadAnglesDlg.o: dialogs/DeadAnglesDlg.cpp dialogs/DeadAnglesDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/LogDlg.o: dialogs/LogDlg.cpp dialogs/LogDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 
 obj/tlibs_ver.o: tlibs/version.cpp tlibs/version.h

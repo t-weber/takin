@@ -353,7 +353,7 @@ int main(int argc, char** argv)
 #endif
 
 		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nLoading 1/2 ...");
-		std::shared_ptr<TazDlg> pTakDlg(new TazDlg(nullptr));
+		std::shared_ptr<TazDlg> pTakDlg(new TazDlg(nullptr, strLog));
 		app->SetTakDlg(pTakDlg);
 		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nLoading 2/2 ...");
 		app->DoPendingRequests();

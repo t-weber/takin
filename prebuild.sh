@@ -104,6 +104,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/dialogs/AboutDlg.h"
 	"${TAKINROOT}/dialogs/DispDlg.h"
 	"${TAKINROOT}/dialogs/DeadAnglesDlg.h"
+	"${TAKINROOT}/dialogs/LogDlg.h"
 	"${TAKINROOT}/libs/qwthelper.h"
 )
 

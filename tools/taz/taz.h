@@ -51,6 +51,7 @@
 #include "dialogs/DynPlaneDlg.h"
 #include "dialogs/AtomsDlg.h"
 #include "dialogs/DeadAnglesDlg.h"
+#include "dialogs/LogDlg.h"
 #include "dialogs/AboutDlg.h"
 
 #if !defined NO_3D
@@ -109,10 +110,11 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		bool m_bReady = false;
 		QSettings m_settings;
 		SettingsDlg *m_pSettingsDlg = nullptr;
+		std::string m_strLogFile;
 
-		QLabel* m_pStatusMsg = nullptr;
-		QLabel* m_pCoordQStatusMsg = nullptr;
-		QLabel* m_pCoordCursorStatusMsg = nullptr;
+		QLabel *m_pStatusMsg = nullptr;
+		QLabel *m_pCoordQStatusMsg = nullptr;
+		QLabel *m_pCoordCursorStatusMsg = nullptr;
 
 		QMenu *m_pMenuViewRecip = nullptr;
 		QMenu *m_pMenuViewReal = nullptr;
@@ -164,6 +166,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		FormfactorDlg* m_pFormfactorDlg = nullptr;
 		AtomsDlg *m_pAtomsDlg = nullptr;
 		DeadAnglesDlg *m_pDeadAnglesDlg = nullptr;
+		LogDlg *m_pLogDlg = nullptr;
 		AboutDlg *m_pAboutDlg = nullptr;
 
 		ScanViewerDlg *m_pScanViewer = nullptr;
@@ -202,7 +205,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		virtual void keyReleaseEvent(QKeyEvent *pEvt) override;
 
 	public:
-		TazDlg(QWidget *pParent);
+		TazDlg(QWidget *pParent, const std::string& strLogFile = "");
 		TazDlg() : TazDlg(0) { }
 		virtual ~TazDlg();
 
@@ -236,6 +239,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		void ShowHelp();
 		void ShowDevelDoc();
+		void ShowLog();
 		void ShowAbout();
 
 		void New();

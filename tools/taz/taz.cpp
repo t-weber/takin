@@ -40,9 +40,10 @@ const t_real_glob TazDlg::s_dPlaneDistTolerance = std::cbrt(tl::get_epsilon<t_re
 //#define NO_HELP_ASSISTANT
 
 
-TazDlg::TazDlg(QWidget* pParent)
+TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	: QMainWindow(pParent), m_settings("tobis_stuff", "takin"),
 		m_pSettingsDlg(new SettingsDlg(this, &m_settings)),
+		m_strLogFile(strLogFile),
 		m_pStatusMsg(new QLabel(this)),
 		m_pCoordQStatusMsg(new QLabel(this)),
 		m_pCoordCursorStatusMsg(new QLabel(this)),
@@ -52,7 +53,6 @@ TazDlg::TazDlg(QWidget* pParent)
 		m_pGotoDlg(new GotoDlg(this, &m_settings))
 {
 	//log_debug("In ", __func__, ".");
-
 	const bool bSmallqVisible = 0;
 	const bool bBZVisible = 1;
 	const bool bWSVisible = 1;
@@ -643,6 +643,11 @@ TazDlg::TazDlg(QWidget* pParent)
 
 	pMenuHelp->addSeparator();
 
+	QAction *pLog = new QAction("Log...", this);
+	pMenuHelp->addAction(pLog);
+
+	pMenuHelp->addSeparator();
+
 	QAction *pAboutQt = new QAction("About Qt...", this);
 	pAboutQt->setMenuRole(QAction::AboutQtRole);
 	//pAboutQt->setIcon(QIcon::fromTheme("help-about"));
@@ -750,6 +755,7 @@ TazDlg::TazDlg(QWidget* pParent)
 
 	QObject::connect(pHelp, SIGNAL(triggered()), this, SLOT(ShowHelp()));
 	QObject::connect(pDevelDoc, SIGNAL(triggered()), this, SLOT(ShowDevelDoc()));
+	QObject::connect(pLog, SIGNAL(triggered()), this, SLOT(ShowLog()));
 	QObject::connect(pAbout, SIGNAL(triggered()), this, SLOT(ShowAbout()));
 	QObject::connect(pAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
@@ -897,6 +903,7 @@ TazDlg::~TazDlg()
 void TazDlg::DeleteDialogs()
 {
 	if(m_pAboutDlg) { delete m_pAboutDlg; m_pAboutDlg = 0; }
+	if(m_pLogDlg) { delete m_pLogDlg; m_pLogDlg = 0; }
 	if(m_pEllipseDlg) { delete m_pEllipseDlg; m_pEllipseDlg = 0; }
 	if(m_pReso) { delete m_pReso; m_pReso = 0; }
 	if(m_pConvoDlg) { delete m_pConvoDlg; m_pConvoDlg = 0; }
@@ -1466,7 +1473,7 @@ void TazDlg::ApplyDeadAngles(const std::vector<DeadAngle<t_real>>& vecAngles)
 
 
 //--------------------------------------------------------------------------------
-// about & help dialogs
+// about, log & help dialogs
 
 void TazDlg::ShowAbout()
 {
@@ -1474,6 +1481,14 @@ void TazDlg::ShowAbout()
 		m_pAboutDlg = new AboutDlg(this, &m_settings);
 
 	focus_dlg(m_pAboutDlg);
+}
+
+void TazDlg::ShowLog()
+{
+	if(!m_pLogDlg)
+		m_pLogDlg = new LogDlg(this, &m_settings, m_strLogFile);
+
+	focus_dlg(m_pLogDlg);
 }
 
 void TazDlg::ShowHelp()

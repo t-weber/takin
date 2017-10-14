@@ -195,7 +195,7 @@ add_executable(takin
 	dialogs/SrvDlg.cpp dialogs/NetCacheDlg.cpp dialogs/ScanMonDlg.cpp
 	dialogs/EllipseDlg.cpp tools/ffact/FormfactorDlg.cpp
 	dialogs/AtomsDlg.cpp dialogs/AboutDlg.cpp
-	dialogs/DeadAnglesDlg.cpp
+	dialogs/DeadAnglesDlg.cpp dialogs/LogDlg.cpp
 
 	libs/spacegroups/spacegroup.cpp tools/sglist/SgListDlg.cpp
 	libs/globals.cpp libs/globals_qt.cpp libs/spacegroups/crystalsys.cpp

@@ -623,7 +623,7 @@ main(args)
 
 
 /**
- * convert to Roots
+ * convert to Root
  */
 void ScanViewerDlg::GenerateForRoot()
 {
