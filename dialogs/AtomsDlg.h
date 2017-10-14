@@ -44,10 +44,10 @@ public:
 		bool bEnableSpin=0);
 	virtual ~AtomsDlg();
 
-	void SetAtoms(const std::vector<AtomPos<t_real_glob>>& vecAtoms);
+	void SetAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);
 
 signals:
-	void ApplyAtoms(const std::vector<AtomPos<t_real_glob>>& vecAtoms);
+	void ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);
 };
 
 

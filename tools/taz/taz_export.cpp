@@ -308,10 +308,10 @@ void TazDlg::ExportUCModel()
 		return;
 	}
 
-	SpaceGroup<t_real>* pSpaceGroup = nullptr;
+	xtl::SpaceGroup<t_real>* pSpaceGroup = nullptr;
 	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
 	if(iSpaceGroupIdx != 0)
-		pSpaceGroup = (SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
+		pSpaceGroup = (xtl::SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
 	if(!pSpaceGroup)
 	{
 		QMessageBox::critical(this, "Error", "Invalid space group.");
@@ -322,7 +322,7 @@ void TazDlg::ExportUCModel()
 
 	std::vector<t_vec> vecAtoms;
 	std::vector<std::string> vecAtomNames;
-	for(const AtomPos<t_real>& atom : m_vecAtoms)
+	for(const xtl::AtomPos<t_real>& atom : m_vecAtoms)
 	{
 		t_vec vecAtomPos = atom.vecPos;
 		vecAtomPos.resize(4, 1);

@@ -96,11 +96,11 @@ void RealParamDlg::paramsChanged(const RealParams& parms)
 }
 
 
-void RealParamDlg::CrystalChanged(const LatticeCommon<t_real>& lattcomm)
+void RealParamDlg::CrystalChanged(const xtl::LatticeCommon<t_real>& lattcomm)
 {
 	const tl::Lattice<t_real>& latt = lattcomm.lattice;
 	const tl::Lattice<t_real>& recip = lattcomm.recip;
-	const std::vector<AtomPos<t_real>>* pAtoms = lattcomm.pvecAtomPos;
+	const std::vector<xtl::AtomPos<t_real>>* pAtoms = lattcomm.pvecAtomPos;
 	m_pLatt = &latt;
 
 	// crystal coordinates
@@ -180,8 +180,8 @@ void RealParamDlg::CrystalChanged(const LatticeCommon<t_real>& lattcomm)
 			// get neighbours of all atoms
 			for(std::size_t iAtom=0; iAtom<pAtoms->size(); ++iAtom)
 			{
-				const AtomPos<t_real>& atom = (*pAtoms)[iAtom];
-				const AtomPosAux<t_real>& atomaux = lattcomm.vecAtomPosAux[iAtom];
+				const xtl::AtomPos<t_real>& atom = (*pAtoms)[iAtom];
+				const xtl::AtomPosAux<t_real>& atomaux = lattcomm.vecAtomPosAux[iAtom];
 
 				const std::string& strName = atom.strAtomName;
 				const t_vec& vecCentreAA = atomaux.vecPosAA;

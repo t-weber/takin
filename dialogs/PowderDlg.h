@@ -60,11 +60,11 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 		bool m_bDontCalc = 1;
 		QSettings *m_pSettings = 0;
 
-		CrystalSystem m_crystalsys = CRYS_NOT_SET;
-		const SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups;
+		xtl::CrystalSystem m_crystalsys = xtl::CrystalSystem::CRYS_NOT_SET;
+		const xtl::SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups;
 
 		AtomsDlg *m_pAtomsDlg = nullptr;
-		std::vector<AtomPos<t_real_glob>> m_vecAtoms;
+		std::vector<xtl::AtomPos<t_real_glob>> m_vecAtoms;
 
 		t_real_glob m_dExtKi = 0.;
 		t_real_glob m_dExtKf = 0.;
@@ -88,7 +88,7 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 		void LoadPowder();
 
 		void ShowAtomDlg();
-		void ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&);
+		void ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>&);
 
 		void cursorMoved(const QPointF& pt);
 
@@ -103,7 +103,7 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 		virtual void showEvent(QShowEvent *pEvt) override;
 		virtual void accept() override;
 
-		const SpaceGroup<t_real_glob>* GetCurSpaceGroup() const;
+		const xtl::SpaceGroup<t_real_glob>* GetCurSpaceGroup() const;
 
 		void Save(std::map<std::string, std::string>& mapConf, const std::string& strXmlRoot);
 		void Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot);

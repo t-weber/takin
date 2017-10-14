@@ -37,7 +37,7 @@ public:
 	virtual ~BZ3DDlg() = default;
 
 	void RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
-		const LatticeCommon<t_real_glob>& lattice,
+		const xtl::LatticeCommon<t_real_glob>& lattice,
 		const std::vector<ublas::vector<t_real_glob>>* pScatPlaneVerts = nullptr,
 		const std::vector<ublas::vector<t_real_glob>>* pvecSymmPts = nullptr);
 

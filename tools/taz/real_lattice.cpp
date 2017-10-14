@@ -210,7 +210,7 @@ void RealLattice::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWi
 /**
  * calculate real space representation
  */
-void RealLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon)
+void RealLattice::CalcPeaks(const xtl::LatticeCommon<t_real>& latticecommon)
 {
 	ClearPeaks();
 	m_kdLattice.Unload();

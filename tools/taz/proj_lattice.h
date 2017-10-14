@@ -105,7 +105,7 @@ class ProjLattice : public QGraphicsItem
 	public:
 		bool HasPeaks() const { return m_vecPeaks.size()!=0 && m_lattice.IsInited(); }
 		void ClearPeaks();
-		void CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon, bool bIsRecip=1);
+		void CalcPeaks(const xtl::LatticeCommon<t_real_glob>& recipcommon, bool bIsRecip=1);
 
 		void SetMaxPeaks(int iMax) { m_iMaxPeaks = iMax; }
 		unsigned int GetMaxPeaks() const { return m_iMaxPeaks; }

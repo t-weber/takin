@@ -35,11 +35,11 @@ class DispDlg : public QDialog, Ui::DispDlg
 		QSettings *m_pSettings = 0;
 		bool m_bDontCalc = 1;
 
-		CrystalSystem m_crystalsys = CRYS_NOT_SET;
-		const SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups;
+		xtl::CrystalSystem m_crystalsys = xtl::CrystalSystem::CRYS_NOT_SET;
+		const xtl::SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups;
 
 		AtomsDlg *m_pAtomsDlg = nullptr;
-		std::vector<AtomPos<t_real_glob>> m_vecAtoms;
+		std::vector<xtl::AtomPos<t_real_glob>> m_vecAtoms;
 
 		std::vector<t_real_glob> m_vecFerroQ, m_vecFerroE;
 		std::unique_ptr<QwtPlotWrapper> m_plotwrapFerro;
@@ -59,7 +59,7 @@ class DispDlg : public QDialog, Ui::DispDlg
 		void Load();
 
 		void ShowAtomDlg();
-		void ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&);
+		void ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>&);
 
 		void cursorMoved(const QPointF& pt);
 
@@ -70,7 +70,7 @@ class DispDlg : public QDialog, Ui::DispDlg
 		virtual void showEvent(QShowEvent *pEvt) override;
 		virtual void accept() override;
 
-		const SpaceGroup<t_real_glob>* GetCurSpaceGroup() const;
+		const xtl::SpaceGroup<t_real_glob>* GetCurSpaceGroup() const;
 
 		void Save(std::map<std::string, std::string>& mapConf, const std::string& strXmlRoot);
 		void Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot);

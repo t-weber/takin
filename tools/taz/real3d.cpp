@@ -65,7 +65,7 @@ Real3DDlg::Real3DDlg(QWidget* pParent, QSettings *pSettings)
 
 
 void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
-	const LatticeCommon<t_real_glob>& lattice)
+	const xtl::LatticeCommon<t_real_glob>& lattice)
 {
 	if(!ws.IsValid() || !m_pPlot)
 		return;

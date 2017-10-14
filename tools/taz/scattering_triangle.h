@@ -172,7 +172,7 @@ class ScatteringTriangle : public QGraphicsItem
 	public:
 		bool HasPeaks() const { return m_vecPeaks.size()!=0 && m_recip.IsInited(); }
 		void ClearPeaks();
-		void CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon, bool bIsPowder=0);
+		void CalcPeaks(const xtl::LatticeCommon<t_real_glob>& recipcommon, bool bIsPowder=0);
 
 		void SetPlaneDistTolerance(t_real_glob dTol) { m_dPlaneDistTolerance = dTol; }
 		void SetMaxPeaks(int iMax) { m_iMaxPeaks = iMax; }

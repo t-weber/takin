@@ -474,7 +474,7 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} \
 	obj/tasreso.o obj/ConvoDlg.o obj/ConvoDlg_file.o obj/SqwParamDlg.o \
 	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
-	obj/tlibs_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o \
+	obj/tlibs_ver.o obj/libcrystal_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o \
 	obj/convofit_import.o obj/ConvoDlg_fit.o obj/ConvoDlg_sim.o \
 	obj/DeadAnglesDlg.o
 
@@ -684,7 +684,7 @@ obj/FilePreviewDlg.o: dialogs/FilePreviewDlg.cpp dialogs/FilePreviewDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/DynPlaneDlg.o: dialogs/DynPlaneDlg.cpp dialogs/DynPlaneDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/FormfactorDlg.o: dialogs/FormfactorDlg.cpp dialogs/FormfactorDlg.h
+obj/FormfactorDlg.o: tools/ffact/FormfactorDlg.cpp tools/ffact/FormfactorDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/NeutronDlg.o: dialogs/NeutronDlg.cpp dialogs/NeutronDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
@@ -704,6 +704,8 @@ obj/DeadAnglesDlg.o: dialogs/DeadAnglesDlg.cpp dialogs/DeadAnglesDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
 
 obj/tlibs_ver.o: tlibs/version.cpp tlibs/version.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/libcrystal_ver.o: libcrystal/version.cpp libcrystal/version.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/spec_char.o: tlibs/string/spec_char.cpp tlibs/string/spec_char.h
 	${CC} ${FLAGS} -c -o $@ $<

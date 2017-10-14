@@ -76,7 +76,7 @@ BZ3DDlg::BZ3DDlg(QWidget* pParent, QSettings *pSettings)
  * assumes to be centred around (0,0,0): see CALC_BZ_AROUND_ZERO in scattering_triangle.cpp
  */
 void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
-	const LatticeCommon<t_real_glob>& lattice,
+	const xtl::LatticeCommon<t_real_glob>& lattice,
 	const std::vector<ublas::vector<t_real_glob>>* pScatPlaneVerts,
 	const std::vector<ublas::vector<t_real_glob>>* pvecSymmPts)
 {

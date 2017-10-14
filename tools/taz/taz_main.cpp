@@ -11,10 +11,12 @@
 #include "tlibs/math/rand.h"
 #include "tlibs/log/debug.h"
 #include "tlibs/time/chrono.h"
-#include "tlibs/version.h"
-#include "libs/version.h"
 #include "libs/globals.h"
 #include "dialogs/NetCacheDlg.h"
+
+#include "tlibs/version.h"
+#include "libs/version.h"
+#include "libcrystal/version.h"
 
 #include <system_error>
 #include <boost/version.hpp>
@@ -245,7 +247,7 @@ int main(int argc, char** argv)
 
 
 		// ------------------------------------------------------------
-		// tlibs version check
+		// tlibs & libcrystal version checks
 		tl::log_info("Using tlibs version ", tl::get_tlibs_version(), ".");
 		if(!tl::check_tlibs_version(TLIBS_VERSION))
 		{
@@ -256,6 +258,18 @@ int main(int argc, char** argv)
 			QMessageBox::critical(0, "Takin - Error", "Broken build: Mismatch in tlibs version.");
 			return -1;
 		}
+
+		tl::log_info("Using libcrystal version ", xtl::get_libcrystal_version(), ".");
+		if(!xtl::check_libcrystal_version(LIBCRYSTAL_VERSION))
+		{
+			tl::log_crit("Version mismatch in LibCrystal. Please recompile.");
+			tl::log_crit("LibCrystal versions: library: ", xtl::get_libcrystal_version(),
+				", headers: ", LIBCRYSTAL_VERSION, ".");
+
+			QMessageBox::critical(0, "Takin - Error", "Broken build: Mismatch in libcrystal version.");
+			return -1;
+		}
+
 
 		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nChecking resources ...");
 

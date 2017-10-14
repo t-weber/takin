@@ -46,7 +46,7 @@ class RealParamDlg : public QDialog, Ui::RealParamDlg
 	public slots:
 		void paramsChanged(const RealParams& parms);
 
-		void CrystalChanged(const LatticeCommon<t_real_glob>&);
+		void CrystalChanged(const xtl::LatticeCommon<t_real_glob>&);
 		void CalcVecs();
 		void CalcCrystalRot();
 

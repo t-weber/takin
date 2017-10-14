@@ -117,7 +117,7 @@ class RealLattice : public QGraphicsItem
 	public:
 		bool HasPeaks() const { return m_vecPeaks.size()!=0 && m_lattice.IsInited(); }
 		void ClearPeaks();
-		void CalcPeaks(const LatticeCommon<t_real_glob>& latticecommon);
+		void CalcPeaks(const xtl::LatticeCommon<t_real_glob>& latticecommon);
 
 		void SetPlaneDistTolerance(t_real_glob dTol) { m_dPlaneDistTolerance = dTol; }
 		void SetMaxPeaks(int iMax) { m_iMaxPeaks = iMax; }

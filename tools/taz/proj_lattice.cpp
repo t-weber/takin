@@ -116,7 +116,7 @@ static void to_proj(T x, T y, T z, T& xg, T& yg, bool bGnom=1)
 		std::tie(xg, yg) = tl::stereographic_proj(phi_crys, theta_crys, T(1));
 }
 
-void ProjLattice::CalcPeaks(const LatticeCommon<t_real>& latticecommon, bool bIsRecip)
+void ProjLattice::CalcPeaks(const xtl::LatticeCommon<t_real>& latticecommon, bool bIsRecip)
 {
 	ClearPeaks();
 

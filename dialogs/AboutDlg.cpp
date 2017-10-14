@@ -11,6 +11,7 @@
 #include <boost/version.hpp>
 #include <qwt_global.h>
 #include "tlibs/version.h"
+#include "libcrystal/version.h"
 
 #include "tlibs/string/string.h"
 #include "libs/formfactors/formfact.h"
@@ -94,6 +95,14 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrLibs << "<dd><a href=\"https://github.com/t-weber/tlibs\">https://github.com/t-weber/tlibs</a><br></dd>";
 #else
 	ostrLibs << "<dd><a href=\"https://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tlibs.git\">https://forge.frm2.tum.de/cgit/cgit.cgi/frm2/mira/tlibs.git</a><br></dd>";
+#endif
+
+	ostrLibs << "<dt>Uses LibCrystal version " << LIBCRYSTAL_VERSION << ".</dt>";
+#ifdef PRIVATE_SRC_VERSION
+	ostrLibs << "<dd><a href=\"https://github.com/t-weber/libcrystal\">https://github.com/t-weber/libcrystal</a><br></dd>";
+#else
+	// TODO
+	ostrLibs << "<dd><br></dd>";
 #endif
 
 #ifndef NO_LAPACK
@@ -242,14 +251,14 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrConst << "<dt>Physical constants from Boost Units.</dt>";
 	ostrConst << "<dd><a href=\"http://www.boost.org/doc/libs/release/libs/units/\">http://www.boost.org/doc/libs/release/libs/units/</a><br></dd>";
 
-	std::shared_ptr<const SpaceGroups<t_real_glob>> sgs = SpaceGroups<t_real_glob>::GetInstance();
+	std::shared_ptr<const xtl::SpaceGroups<t_real_glob>> sgs = xtl::SpaceGroups<t_real_glob>::GetInstance();
 	ostrConst << "<dt>" << sgs->get_sgsource(0) <<"</dt>";
 	ostrConst << "<dd><a href=\"" << sgs->get_sgsource(1) << "\">" << sgs->get_sgsource(1) << "</a><br></dd>";
 
-	std::shared_ptr<const FormfactList<t_real_glob>> ff = FormfactList<t_real_glob>::GetInstance();
-	std::shared_ptr<const MagFormfactList<t_real_glob>> mff = MagFormfactList<t_real_glob>::GetInstance();
-	std::shared_ptr<const ScatlenList<t_real_glob>> sl = ScatlenList<t_real_glob>::GetInstance();
-	std::shared_ptr<const PeriodicSystem<t_real_glob>> pt = PeriodicSystem<t_real_glob>::GetInstance();
+	std::shared_ptr<const xtl::FormfactList<t_real_glob>> ff = xtl::FormfactList<t_real_glob>::GetInstance();
+	std::shared_ptr<const xtl::MagFormfactList<t_real_glob>> mff = xtl::MagFormfactList<t_real_glob>::GetInstance();
+	std::shared_ptr<const xtl::ScatlenList<t_real_glob>> sl = xtl::ScatlenList<t_real_glob>::GetInstance();
+	std::shared_ptr<const xtl::PeriodicSystem<t_real_glob>> pt = xtl::PeriodicSystem<t_real_glob>::GetInstance();
 
 	if(g_bHasFormfacts)
 	{

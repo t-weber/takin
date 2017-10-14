@@ -100,7 +100,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/dialogs/DWDlg.h"
 	"${TAKINROOT}/dialogs/DynPlaneDlg.h"
 	"${TAKINROOT}/dialogs/FilePreviewDlg.h"
-	"${TAKINROOT}/dialogs/FormfactorDlg.h"
+	"${TAKINROOT}/tools/ffact/FormfactorDlg.h"
 	"${TAKINROOT}/dialogs/AboutDlg.h"
 	"${TAKINROOT}/dialogs/DispDlg.h"
 	"${TAKINROOT}/dialogs/DeadAnglesDlg.h"

@@ -28,7 +28,7 @@ static int find_sg_from_combo(QComboBox* pCombo, const std::string& str)
 
 	for(int iIdx=0; iIdx<pCombo->count(); ++iIdx)
 	{
-		SpaceGroup<t_real> *pSG = reinterpret_cast<SpaceGroup<t_real>*>
+		xtl::SpaceGroup<t_real> *pSG = reinterpret_cast<xtl::SpaceGroup<t_real>*>
 			(pCombo->itemData(iIdx).value<void*>());
 		if(pSG && pSG->GetName() == str)
 			return iIdx;
@@ -287,7 +287,7 @@ bool TazDlg::Load(const char* pcFile)
 
 			for(std::size_t iAtom=0; iAtom<iNumAtoms; ++iAtom)
 			{
-				AtomPos<t_real> atom;
+				xtl::AtomPos<t_real> atom;
 				atom.vecPos.resize(3,0);
 
 				std::string strNr = tl::var_to_str(iAtom);
@@ -499,11 +499,11 @@ bool TazDlg::Save()
 
 
 	// space group
-	SpaceGroup<t_real> *pSpaceGroup = nullptr;
+	xtl::SpaceGroup<t_real> *pSpaceGroup = nullptr;
 	std::string strSG = "-1";
 	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
 	if(iSpaceGroupIdx != 0)
-		pSpaceGroup = (SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
+		pSpaceGroup = (xtl::SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
 	if(pSpaceGroup)
 		strSG = pSpaceGroup->GetName();
 	mapConf[strXmlRoot + "sample/spacegroup"] = strSG;
@@ -513,7 +513,7 @@ bool TazDlg::Save()
 	mapConf[strXmlRoot + "sample/atoms/num"] = tl::var_to_str(m_vecAtoms.size());
 	for(unsigned int iAtom=0; iAtom<m_vecAtoms.size(); ++iAtom)
 	{
-		const AtomPos<t_real>& atom = m_vecAtoms[iAtom];
+		const xtl::AtomPos<t_real>& atom = m_vecAtoms[iAtom];
 
 		std::string strAtomNr = tl::var_to_str(iAtom);
 		mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/name"] =

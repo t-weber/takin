@@ -46,7 +46,7 @@ enum : unsigned int
 
 PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 	: QDialog(pParent), m_pSettings(pSett),
-	m_pmapSpaceGroups(SpaceGroups<t_real>::GetInstance()->get_space_groups())
+	m_pmapSpaceGroups(xtl::SpaceGroups<t_real>::GetInstance()->get_space_groups())
 {
 	this->setupUi(this);
 	if(m_pSettings)
@@ -214,13 +214,13 @@ void PowderDlg::CalcPeaks()
 		const t_mat matA = lattice.GetBaseMatrixCov();
 		//const t_mat matB = recip.GetBaseMatrixCov();
 
-		const SpaceGroup<t_real>* pSpaceGroup = GetCurSpaceGroup();
+		const xtl::SpaceGroup<t_real>* pSpaceGroup = GetCurSpaceGroup();
 
 
 		// ----------------------------------------------------------------------------
 		// structure factor stuff
-		std::shared_ptr<const ScatlenList<t_real>> lstsl = ScatlenList<t_real>::GetInstance();
-		std::shared_ptr<const FormfactList<t_real>> lstff = FormfactList<t_real>::GetInstance();
+		std::shared_ptr<const xtl::ScatlenList<t_real>> lstsl = xtl::ScatlenList<t_real>::GetInstance();
+		std::shared_ptr<const xtl::FormfactList<t_real>> lstff = xtl::FormfactList<t_real>::GetInstance();
 
 		std::vector<std::string> vecElems;
 		std::vector<t_vec> vecAllAtoms, vecAllAtomsFrac;
@@ -250,7 +250,7 @@ void PowderDlg::CalcPeaks()
 
 			for(const std::string& strElem : vecElems)
 			{
-				const ScatlenList<t_real>::elem_type* pElem = lstsl->Find(strElem);
+				const xtl::ScatlenList<t_real>::elem_type* pElem = lstsl->Find(strElem);
 				vecScatlens.push_back(pElem ? pElem->GetCoherent() : std::complex<t_real>(0.,0.));
 				if(!pElem)
 					tl::log_err("Element \"", strElem, "\" not found in scattering length table.",
@@ -318,7 +318,7 @@ void PowderDlg::CalcPeaks()
 						for(std::size_t iAtom=0; iAtom<vecAllAtoms.size(); ++iAtom)
 						{
 							//const t_vec& vecAtom = vecAllAtoms[iAtom];
-							const FormfactList<t_real>::elem_type* pElemff = lstff->Find(vecElems[iAtom]);
+							const xtl::FormfactList<t_real>::elem_type* pElemff = lstff->Find(vecElems[iAtom]);
 
 							if(pElemff == nullptr)
 							{
@@ -469,21 +469,21 @@ void PowderDlg::CalcPeaks()
 }
 
 
-const SpaceGroup<t_real>* PowderDlg::GetCurSpaceGroup() const
+const xtl::SpaceGroup<t_real>* PowderDlg::GetCurSpaceGroup() const
 {
-	SpaceGroup<t_real>* pSpaceGroup = 0;
+	xtl::SpaceGroup<t_real>* pSpaceGroup = 0;
 	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
 	if(iSpaceGroupIdx != 0)
-		pSpaceGroup = (SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
+		pSpaceGroup = (xtl::SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
 	return pSpaceGroup;
 }
 
 void PowderDlg::SpaceGroupChanged()
 {
-	m_crystalsys = CrystalSystem::CRYS_NOT_SET;
+	m_crystalsys = xtl::CrystalSystem::CRYS_NOT_SET;
 	std::string strCryTy = "<not set>";
 
-	const SpaceGroup<t_real>* pSpaceGroup = GetCurSpaceGroup();
+	const xtl::SpaceGroup<t_real>* pSpaceGroup = GetCurSpaceGroup();
 	if(pSpaceGroup)
 	{
 		m_crystalsys = pSpaceGroup->GetCrystalSystem();
@@ -505,7 +505,7 @@ void PowderDlg::RepopulateSpaceGroups()
 
 	std::string strFilter = editSpaceGroupsFilter->text().toStdString();
 
-	for(const SpaceGroups<t_real>::t_mapSpaceGroups::value_type& pair : *m_pmapSpaceGroups)
+	for(const xtl::SpaceGroups<t_real>::t_mapSpaceGroups::value_type& pair : *m_pmapSpaceGroups)
 	{
 		const std::string& strName = pair.second.GetName();
 
@@ -655,7 +655,7 @@ void PowderDlg::Save(std::map<std::string, std::string>& mapConf, const std::str
 	mapConf[strXmlRoot + "sample/atoms/num"] = tl::var_to_str(m_vecAtoms.size());
 	for(std::size_t iAtom=0; iAtom<m_vecAtoms.size(); ++iAtom)
 	{
-		const AtomPos<t_real>& atom = m_vecAtoms[iAtom];
+		const xtl::AtomPos<t_real>& atom = m_vecAtoms[iAtom];
 
 		std::string strAtomNr = tl::var_to_str(iAtom);
 		mapConf[strXmlRoot + "sample/atoms/" + strAtomNr + "/name"] =
@@ -705,7 +705,7 @@ void PowderDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 
 		for(std::size_t iAtom=0; iAtom<std::size_t(iNumAtoms); ++iAtom)
 		{
-			AtomPos<t_real> atom;
+			xtl::AtomPos<t_real> atom;
 			atom.vecPos.resize(3,0);
 
 			std::string strNr = tl::var_to_str(iAtom);
@@ -768,7 +768,7 @@ void PowderDlg::SetExtKf()
 }
 
 
-void PowderDlg::ApplyAtoms(const std::vector<AtomPos<t_real>>& vecAtoms)
+void PowderDlg::ApplyAtoms(const std::vector<xtl::AtomPos<t_real>>& vecAtoms)
 {
 	m_vecAtoms = vecAtoms;
 	CalcPeaks();
@@ -781,8 +781,8 @@ void PowderDlg::ShowAtomDlg()
 		m_pAtomsDlg = new AtomsDlg(this, m_pSettings);
 		m_pAtomsDlg->setWindowTitle(m_pAtomsDlg->windowTitle() + QString(" (Powder)"));
 
-		QObject::connect(m_pAtomsDlg, SIGNAL(ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&)),
-			this, SLOT(ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&)));
+		QObject::connect(m_pAtomsDlg, SIGNAL(ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>&)),
+			this, SLOT(ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>&)));
 	}
 
 	m_pAtomsDlg->SetAtoms(m_vecAtoms);

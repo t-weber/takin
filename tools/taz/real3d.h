@@ -32,7 +32,7 @@ public:
 	virtual ~Real3DDlg() = default;
 
 	void CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
-		const LatticeCommon<t_real_glob>& realcommon);
+		const xtl::LatticeCommon<t_real_glob>& realcommon);
 
 protected:
 	virtual void hideEvent(QHideEvent*) override;

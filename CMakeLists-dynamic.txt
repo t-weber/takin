@@ -193,7 +193,7 @@ add_executable(takin
 	dialogs/DispDlg.cpp dialogs/FavDlg.cpp
 	dialogs/RecipParamDlg.cpp dialogs/RealParamDlg.cpp
 	dialogs/SrvDlg.cpp dialogs/NetCacheDlg.cpp dialogs/ScanMonDlg.cpp
-	dialogs/EllipseDlg.cpp dialogs/FormfactorDlg.cpp
+	dialogs/EllipseDlg.cpp tools/ffact/FormfactorDlg.cpp
 	dialogs/AtomsDlg.cpp dialogs/AboutDlg.cpp
 	dialogs/DeadAnglesDlg.cpp
 
@@ -201,6 +201,8 @@ add_executable(takin
 	libs/globals.cpp libs/globals_qt.cpp libs/spacegroups/crystalsys.cpp
 	libs/formfactors/formfact.cpp libs/qthelper.cpp libs/qwthelper.cpp
 	libs/recent.cpp
+
+	libcrystal/version.cpp
 
 	${SRCS_3D}
 )

@@ -87,10 +87,10 @@ struct Peak3d
 	const std::vector<t_real>* pvecColor = nullptr;
 };
 
-void Recip3DDlg::CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon)
+void Recip3DDlg::CalcPeaks(const xtl::LatticeCommon<t_real_glob>& recipcommon)
 {
 	const tl::Lattice<t_real>& recip = recipcommon.recip;
-	const SpaceGroup<t_real>* pSpaceGroup = recipcommon.pSpaceGroup;
+	const xtl::SpaceGroup<t_real>* pSpaceGroup = recipcommon.pSpaceGroup;
 	const tl::Plane<t_real>& plane = recipcommon.plane;
 	const t_vec &vec0 = plane.GetDir0(),
 		&vec1 = plane.GetDir1(),

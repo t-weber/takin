@@ -40,7 +40,7 @@ public:
 	Recip3DDlg(QWidget* pParent, QSettings* = 0);
 	virtual ~Recip3DDlg();
 
-	void CalcPeaks(const LatticeCommon<t_real_glob>& recipcommon);
+	void CalcPeaks(const xtl::LatticeCommon<t_real_glob>& recipcommon);
 
 	void SetPlaneDistTolerance(t_real_glob dTol) { m_dPlaneDistTolerance = dTol; }
 	void SetMaxPeaks(t_real_glob dMax) { m_dMaxPeaks = dMax; }

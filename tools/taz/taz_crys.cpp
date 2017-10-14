@@ -58,12 +58,12 @@ void TazDlg::emitSampleParams()
 
 void TazDlg::SetCrystalType()
 {
-	m_crystalsys = CrystalSystem::CRYS_NOT_SET;
+	m_crystalsys = xtl::CrystalSystem::CRYS_NOT_SET;
 
-	SpaceGroup<t_real> *pSpaceGroup = 0;
+	xtl::SpaceGroup<t_real> *pSpaceGroup = 0;
 	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
 	if(iSpaceGroupIdx != 0)
-		pSpaceGroup = (SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
+		pSpaceGroup = (xtl::SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
 	if(pSpaceGroup)
 		m_crystalsys = pSpaceGroup->GetCrystalSystem();
 
@@ -254,10 +254,10 @@ void TazDlg::CalcPeaks()
 
 
 		std::string strCryTy = "<not set>";
-		SpaceGroup<t_real>* pSpaceGroup = nullptr;
+		xtl::SpaceGroup<t_real>* pSpaceGroup = nullptr;
 		int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
 		if(iSpaceGroupIdx != 0)
-			pSpaceGroup = (SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
+			pSpaceGroup = (xtl::SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();
 
 		if(pSpaceGroup)
 			strCryTy = pSpaceGroup->GetCrystalSystemName();
@@ -265,7 +265,7 @@ void TazDlg::CalcPeaks()
 		editCrystalSystem->setText(strCryTy.c_str());
 
 
-		m_latticecommon = LatticeCommon<t_real_glob>();
+		m_latticecommon = xtl::LatticeCommon<t_real_glob>();
 		if(m_latticecommon.Calc(lattice, recip, planeRLU, planeRealFrac, pSpaceGroup, &m_vecAtoms))
 		{
 			m_sceneRecip.GetTriangle()->CalcPeaks(m_latticecommon, bPowder);
@@ -488,8 +488,8 @@ void TazDlg::RotatePlane(unsigned iAxis, t_real dAngle)
 
 void TazDlg::RepopulateSpaceGroups()
 {
-	std::shared_ptr<const SpaceGroups<t_real>> sgs = SpaceGroups<t_real>::GetInstance();
-	const SpaceGroups<t_real>::t_mapSpaceGroups* pmapSpaceGroups = sgs->get_space_groups();
+	std::shared_ptr<const xtl::SpaceGroups<t_real>> sgs = xtl::SpaceGroups<t_real>::GetInstance();
+	const xtl::SpaceGroups<t_real>::t_mapSpaceGroups* pmapSpaceGroups = sgs->get_space_groups();
 	if(!pmapSpaceGroups)
 		return;
 
@@ -509,7 +509,7 @@ void TazDlg::RepopulateSpaceGroups()
 	std::vector<t_sgitem> vecSGs;
 
 	// get all space groups and apply filter
-	for(const SpaceGroups<t_real>::t_mapSpaceGroups::value_type& pair : *pmapSpaceGroups)
+	for(const xtl::SpaceGroups<t_real>::t_mapSpaceGroups::value_type& pair : *pmapSpaceGroups)
 	{
 		// space group number and name
 		const std::string strSGNr = tl::var_to_str(pair.second.GetNr());
@@ -753,15 +753,15 @@ void TazDlg::ShowAtomsDlg()
 	if(!m_pAtomsDlg)
 	{
 		m_pAtomsDlg = new AtomsDlg(this, &m_settings);
-		QObject::connect(m_pAtomsDlg, SIGNAL(ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&)),
-			this, SLOT(ApplyAtoms(const std::vector<AtomPos<t_real_glob>>&)));
+		QObject::connect(m_pAtomsDlg, SIGNAL(ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>&)),
+			this, SLOT(ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>&)));
 	}
 
 	m_pAtomsDlg->SetAtoms(m_vecAtoms);
 	focus_dlg(m_pAtomsDlg);
 }
 
-void TazDlg::ApplyAtoms(const std::vector<AtomPos<t_real>>& vecAtoms)
+void TazDlg::ApplyAtoms(const std::vector<xtl::AtomPos<t_real>>& vecAtoms)
 {
 	m_vecAtoms = vecAtoms;
 	CalcPeaks();

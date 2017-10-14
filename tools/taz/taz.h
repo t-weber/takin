@@ -49,7 +49,6 @@
 #include "dialogs/SettingsDlg.h"
 #include "dialogs/DWDlg.h"
 #include "dialogs/DynPlaneDlg.h"
-#include "dialogs/FormfactorDlg.h"
 #include "dialogs/AtomsDlg.h"
 #include "dialogs/DeadAnglesDlg.h"
 #include "dialogs/AboutDlg.h"
@@ -62,6 +61,8 @@
 #endif
 
 #include "tools/sglist/SgListDlg.h"
+#include "tools/ffact/FormfactorDlg.h"
+
 #include "libs/spacegroups/spacegroup.h"
 #include "libs/spacegroups/latticehelper.h"
 #include "libs/globals.h"
@@ -122,7 +123,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		QMenu *m_pMenuRecentImport = nullptr;
 
 		// reciprocal lattice
-		LatticeCommon<t_real_glob> m_latticecommon;
+		xtl::LatticeCommon<t_real_glob> m_latticecommon;
 		ScatteringTriangleView *m_pviewRecip = nullptr;
 		ScatteringTriangleScene m_sceneRecip;
 		ProjLatticeView *m_pviewProjRecip = nullptr;
@@ -139,8 +140,8 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		std::string m_strCurFile;
 		static const std::string s_strTitle;
 
-		std::vector<AtomPos<t_real_glob>> m_vecAtoms;
-		CrystalSystem m_crystalsys = CRYS_NOT_SET;
+		std::vector<xtl::AtomPos<t_real_glob>> m_vecAtoms;
+		xtl::CrystalSystem m_crystalsys = xtl::CRYS_NOT_SET;
 
 		std::vector<DeadAngle<t_real_glob>> m_vecDeadAngles;
 
@@ -286,7 +287,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void ShowFormfactorDlg();
 
 		void ShowAtomsDlg();
-		void ApplyAtoms(const std::vector<AtomPos<t_real_glob>>& vecAtoms);
+		void ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);
 
 		void ShowDeadAnglesDlg();
 		void ApplyDeadAngles(const std::vector<DeadAngle<t_real_glob>>& vecAngles);
