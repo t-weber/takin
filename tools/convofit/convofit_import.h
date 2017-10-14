@@ -13,6 +13,7 @@
 
 
 extern std::string convert_monteconvo(
-	const tl::Prop<std::string>& propMC, std::string strFile="");
+	const tl::Prop<std::string>& propMC, std::string strFile="",
+	bool bRelPaths=0);
 
 #endif

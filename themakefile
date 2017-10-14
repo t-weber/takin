@@ -83,7 +83,7 @@ JL_APP = /Applications/Julia-0.6.app/Contents/Resources/julia
 
 
 
-STD_CPP = -std=c++11 -mmacosx-version-min=10.9
+STD_CPP = -std=c++11
 #STD_CPP += -stdlib=libc++
 
 ifeq ($(CC), gcc)

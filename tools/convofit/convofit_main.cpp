@@ -33,6 +33,7 @@ static inline void get_prog_option(opts::variables_map& map, const char* pcKey, 
 		var = map[pcKey].as<T>();
 }
 
+
 int main(int argc, char** argv)
 {
 	try
@@ -78,6 +79,7 @@ int main(int argc, char** argv)
 		tl::log_info(TAKIN_LICENSE("Takin/Convofit"));
 		tl::log_debug("Resolution calculation uses ", sizeof(t_real_reso)*8, " bit ", tl::get_typename<t_real_reso>(), "s.");
 		tl::log_debug("Fitting uses ", sizeof(tl::t_real_min)*8, " bit ", tl::get_typename<tl::t_real_min>(), "s.");
+
 
 		// --------------------------------------------------------------------
 		// get job files and program options

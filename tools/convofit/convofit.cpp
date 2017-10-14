@@ -15,6 +15,9 @@
 #include <fstream>
 #include <locale>
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 #include "convofit.h"
 #include "convofit_import.h"
 #include "scan.h"
@@ -101,6 +104,20 @@ unsigned int g_iPlotSkipEnd = 0;
 
 bool Convofit::run_job(const std::string& _strJob)
 {
+	// --------------------------------------------------------------------
+	// set working directory for job
+	fs::path pathProg = fs::system_complete(_strJob).remove_filename();
+	if(pathProg.filename().string() == ".")		// remove "./"
+		pathProg.remove_filename();
+	fs::path pathCWD = fs::system_complete(fs::current_path());
+	if(pathProg != pathCWD)
+	{
+		fs::current_path(pathProg);
+		tl::log_debug("Working directory: ", pathProg.string(), ".");
+	}
+	// --------------------------------------------------------------------
+
+
 	std::string strJob;
 
 	// if a monteconvo file is given, convert it to a convofit job file

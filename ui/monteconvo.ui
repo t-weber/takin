@@ -1055,6 +1055,16 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="checkRel">
+            <property name="text">
+             <string>Use Relative Paths (if possible)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -1568,6 +1578,7 @@
   <tabstop>checkRnd</tabstop>
   <tabstop>checkNorm</tabstop>
   <tabstop>checkFlip</tabstop>
+  <tabstop>checkRel</tabstop>
   <tabstop>comboFitter</tabstop>
   <tabstop>spinStrategy</tabstop>
   <tabstop>spinMaxCalls</tabstop>

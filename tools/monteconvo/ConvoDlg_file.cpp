@@ -282,7 +282,7 @@ void ConvoDlg::SaveConvofit()
 	tl::Prop<std::string> xml;
 	xml.Add(mapConf);
 
-	if(convert_monteconvo(xml, strFile) != strFile)
+	if(convert_monteconvo(xml, strFile, checkRel->isChecked()) != strFile)
 	{
 		QMessageBox::critical(this, "Error", "Could not export convofit job file.");
 		return;
