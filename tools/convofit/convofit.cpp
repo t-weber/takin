@@ -106,6 +106,7 @@ bool Convofit::run_job(const std::string& _strJob)
 {
 	// --------------------------------------------------------------------
 	// set working directory for job
+	bool bChangedCWD = 0;
 	fs::path pathProg = fs::system_complete(_strJob).remove_filename();
 	if(pathProg.filename().string() == ".")		// remove "./"
 		pathProg.remove_filename();
@@ -113,27 +114,28 @@ bool Convofit::run_job(const std::string& _strJob)
 	if(pathProg != pathCWD)
 	{
 		fs::current_path(pathProg);
+		bChangedCWD = 1;
 		tl::log_debug("Working directory: ", pathProg.string(), ".");
 	}
 	// --------------------------------------------------------------------
 
 
-	std::string strJob;
+	std::string strJob = _strJob;
+
+	if(bChangedCWD)
+		strJob = fs::path(strJob).filename().string();
+
 
 	// if a monteconvo file is given, convert it to a convofit job file
 	tl::Prop<std::string> propMC;
-	if(propMC.Load(_strJob.c_str(), tl::PropType::XML) &&
+	if(propMC.Load(strJob.c_str(), tl::PropType::XML) &&
 		propMC.Exists("taz/monteconvo"))
 	{
-		tl::log_info("Importing monteconvo file \"", _strJob, "\".");
+		tl::log_info("Importing monteconvo file \"", strJob, "\".");
 		strJob = convert_monteconvo(propMC);
 		if(strJob == "")
 			return false;
 		tl::log_info("Converted convofit file is \"", strJob, "\".");
-	}
-	else	// use the job file directly
-	{
-		strJob = _strJob;
 	}
 
 
