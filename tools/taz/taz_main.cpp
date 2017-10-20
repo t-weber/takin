@@ -152,6 +152,8 @@ int main(int argc, char** argv)
 {
 	try
 	{
+		std::ios_base::sync_with_stdio(0);
+
 #ifdef NO_TERM_CMDS
 		tl::Log::SetUseTermCmds(0);
 #endif

@@ -28,7 +28,7 @@ RealParamDlg::RealParamDlg(QWidget* pParent, QSettings* pSett)
 
 	for(QLineEdit* pEdit : { editVec1, editVec2 })
 		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(CalcVecs()));
-	for(QLineEdit* pEdit : { editRotCoords, editRotTo, editRotKi, editRotNorm, 
+	for(QLineEdit* pEdit : { editRotCoords, editRotTo, editRotKi, editRotNorm,
 		editRotBaseX, editRotBaseY, editRotBaseZ })
 		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(CalcCrystalRot()));
 
@@ -145,6 +145,31 @@ void RealParamDlg::CrystalChanged(const xtl::LatticeCommon<t_real>& lattcomm)
 		editMetricCont->setHtml(QString::fromUtf8(ostrRecipG.str().c_str()));
 		editBaseCov->setHtml(QString::fromUtf8(ostrBasisReal.str().c_str()));
 		editBaseCont->setHtml(QString::fromUtf8(ostrBasisRecip.str().c_str()));
+	}
+
+
+	// crystal infos
+	{
+		std::ostringstream ostr;
+		ostr.precision(g_iPrec);
+		ostr << "<html><body>\n";
+
+		ostr << "<p><b>Unit Cell Volume:</b> " << lattcomm.dVol << " A^3\n";
+
+		ostr << "<p><b>Microscopic cross-sections:</b>\n<ul>\n";
+		ostr << "\t<li> Coherent: " << lattcomm.dsigCoh << " fm^2 </li>\n";
+		ostr << "\t<li> Incoherent: " << lattcomm.dsigInc << " fm^2 </li>\n";
+		ostr << "\t<li> Scattering: " << lattcomm.dsigScat << " fm^2 </li>\n";
+		ostr << "\t<li> Absorption: " << lattcomm.dsigAbs << " fm^2 </li>\n";
+		ostr << "</ul></p>\n";
+
+		ostr << "<p><b>Macroscopic cross-sections (thermal):</b>\n<ul>\n";
+		ostr << "\t<li> Scattering: " << lattcomm.dSigScat << " / cm </li>\n";
+		ostr << "\t<li> Absorption: " << lattcomm.dSigAbs << " / cm </li>\n";
+		ostr << "</ul></p>\n";
+
+		ostr << "</body></html>\n";
+		editCell->setHtml(QString::fromUtf8(ostr.str().c_str()));
 	}
 
 

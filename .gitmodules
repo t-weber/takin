@@ -1,9 +1,12 @@
 [submodule "tlibs"]
 	path = tlibs
 	url = https://t-weber@github.com/t-weber/tlibs.git
+	branch = master
 [submodule "takin-data"]
 	path = takin-data
 	url = https://t-weber@github.com/t-weber/takin-data
+	branch = master
 [submodule "libcrystal"]
 	path = libcrystal
 	url = https://github.com/t-weber/libcrystal
+	branch = master
