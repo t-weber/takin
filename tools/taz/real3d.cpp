@@ -79,6 +79,8 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 
 	t_mat matAinv = lattice.matB / (tl::get_pi<t_real>()*t_real(2));
 
+
+	// colours
 	t_real dA = 0.7;
 	std::vector<std::vector<t_real>> vecColor = {
 		{0., 0., 1., dA},
@@ -99,7 +101,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 		{0., 0., 0., dA},
 		{0.5, 0.5, 0.5, dA},
 	};
-	
+
 	static const std::vector<t_real> vecColVertices = { 0., 0., 0., 0.85 };
 	static const std::vector<t_real> vecColPolys = { 0., 0., 1., 0.85 };
 	static const std::vector<t_real> vecColEdges = { 0., 0., 0., 1. };
@@ -118,6 +120,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 		lattice.lattice.GetPos(0,0,-d), lattice.lattice.GetPos(0,0,d),
 	};
 
+
 	// minimum and maximum coordinates
 	for(const t_vec& vecPeak : vecPeaks)
 	{
@@ -128,6 +131,11 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 		}
 	}
 
+
+	// iterate atoms
+	std::shared_ptr<const xtl::PeriodicSystem<t_real>> pElems =
+		xtl::PeriodicSystem<t_real>::GetInstance();
+
 	for(std::size_t iAtom=0; iAtom<lattice.vecAllAtoms.size(); ++iAtom)
 	{
 		const std::string& strElem = lattice.vecAllNames[iAtom];
@@ -135,7 +143,13 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 		const t_vec& vecThisAtomFrac = lattice.vecAllAtomsFrac[iAtom];
 		std::size_t iCurAtomType = lattice.vecAllAtomTypes[iAtom];
 
-		m_pPlot->PlotSphere(vecThisAtom, 0.1/**0.1*g_dFontSize*/, iCurObjIdx);
+		// use covalent atom radii if available
+		t_real dElemRad = 0.1;
+		const auto* pElem = pElems->Find(strElem);
+		if(pElem)
+			dElemRad = pElem->GetRadiusCov()*0.1;
+
+		m_pPlot->PlotSphere(vecThisAtom, dElemRad, iCurObjIdx);
 		m_pPlot->SetObjectColor(iCurObjIdx, vecColor[iCurAtomType % vecColor.size()]);
 
 		std::ostringstream ostrTip;

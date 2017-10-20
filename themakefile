@@ -39,7 +39,7 @@ USE_GIL = 1
 
 # compile the python or julia interfaces?
 USE_PY = 1
-USE_JL = 1
+USE_JL = 0
 
 # enable the plugin interface?
 USE_PLUGINS = 1
@@ -53,10 +53,10 @@ USE_CPP11_ABI = 1
 # enable Framework libs
 USE_FRAMEWORKS = 0
 
-USE_CLP = 1
+USE_CLP = 0
 
 # is Minuit a non-standalone installation?
-NON_STANDALONE_MINUIT_HACK = 1
+NON_STANDALONE_MINUIT_HACK = 0
 
 # build tools needed for setup?
 BUILD_SETUP_PROGS = 1
