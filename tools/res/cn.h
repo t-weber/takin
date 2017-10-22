@@ -18,7 +18,9 @@
 #include "defs.h"
 #include "tlibs/phys/neutrons.h"
 #include "tlibs/math/linalg.h"
+#include "refl_curve.h"
 #include <tuple>
+#include <memory>
 
 namespace units = boost::units;
 namespace codata = boost::units::si::constants::codata;
@@ -67,6 +69,8 @@ struct CNParams
 	// resolution volume stuff
 	t_real_reso dmono_refl;
 	t_real_reso dana_effic;
+	std::shared_ptr<ReflCurve<t_real_reso>> mono_refl_curve;
+	std::shared_ptr<ReflCurve<t_real_reso>> ana_effic_curve;
 
 	std::size_t flags = CALC_R0 | CALC_RESVOL | CALC_KI3 | CALC_KF3 | CALC_KFKI;
 };

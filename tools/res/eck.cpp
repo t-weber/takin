@@ -270,6 +270,8 @@ ResoResults calc_eck(const EckParams& eck)
 
 	t_real dmono_refl = eck.dmono_refl * std::get<0>(tupScFact);
 	t_real dana_effic = eck.dana_effic * std::get<1>(tupScFact);
+	if(eck.mono_refl_curve) dmono_refl *= (*eck.mono_refl_curve)(eck.ki);
+	if(eck.ana_effic_curve) dana_effic *= (*eck.ana_effic_curve)(eck.kf);
 	t_real dxsec = std::get<2>(tupScFact);
 
 

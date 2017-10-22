@@ -121,8 +121,26 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 	m_reso.coll_v_post_sample = tl::m2r(xml.Query<t_real>((strXmlRoot + "reso/v_coll_after_sample").c_str(), 0.)) * rads;
 	m_reso.coll_v_post_ana = tl::m2r(xml.Query<t_real>((strXmlRoot + "reso/v_coll_ana").c_str(), 0.)) * rads;
 
+
 	m_reso.dmono_refl = xml.Query<t_real>((strXmlRoot + "reso/mono_refl").c_str(), 0.);
 	m_reso.dana_effic = xml.Query<t_real>((strXmlRoot + "reso/ana_effic").c_str(), 0.);
+
+	std::string strMonoRefl = xml.Query<std::string>((strXmlRoot + "reso/mono_refl_file").c_str(), "");
+	std::string strAnaEffic = xml.Query<std::string>((strXmlRoot + "reso/ana_effic_file").c_str(), "");
+
+	if(strMonoRefl != "")
+	{
+		m_reso.mono_refl_curve = std::make_shared<ReflCurve<t_real_reso>>(strMonoRefl);
+		if(!m_reso.mono_refl_curve)
+			tl::log_err("Cannot load mono reflectivity file \"", strMonoRefl, "\".");
+	}
+	if(strAnaEffic != "")
+	{
+		m_reso.ana_effic_curve = std::make_shared<ReflCurve<t_real_reso>>(strAnaEffic);
+		if(!m_reso.ana_effic_curve)
+			tl::log_err("Cannot load ana reflectivity file \"", strAnaEffic, "\".");
+	}
+
 
 	if(xml.Query<int>((strXmlRoot + "reso/use_ki3").c_str(), 1))
 		m_reso.flags |= CALC_KI3;

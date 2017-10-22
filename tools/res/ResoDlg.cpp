@@ -125,6 +125,9 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	m_vecIntSpinBoxes = { spinMCNeutronsLive, spinMCSampleLive };
 	m_vecIntSpinNames = { "reso/mc_live_neutrons", "reso/mc_live_sample_neutrons" };
 
+	m_vecEditBoxes = {editMonoRefl, editAnaEffic};
+	m_vecEditNames = {"reso/mono_refl_file", "reso/ana_effic_file"};
+
 	m_vecPosEditBoxes = {editE, editQ, editKi, editKf};
 	m_vecPosEditNames = {"reso/E", "reso/Q", "reso/ki", "reso/kf"};
 
@@ -161,6 +164,8 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 		QObject::connect(pSpinBox, SIGNAL(valueChanged(double)), this, SLOT(Calc()));
 	for(QSpinBox* pSpinBox : m_vecIntSpinBoxes)
 		QObject::connect(pSpinBox, SIGNAL(valueChanged(int)), this, SLOT(Calc()));
+	for(QLineEdit* pEditBox : m_vecEditBoxes)
+		QObject::connect(pEditBox, SIGNAL(textChanged(const QString&)), this, SLOT(Calc()));
 	for(QLineEdit* pEditBox : m_vecPosEditBoxes)
 		QObject::connect(pEditBox, SIGNAL(textEdited(const QString&)), this, SLOT(RefreshQEPos()));
 	for(QRadioButton* pRadio : m_vecRadioPlus)
@@ -178,7 +183,8 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	connect(btnSave, SIGNAL(clicked()), this, SLOT(SaveRes()));
 	connect(btnLoad, SIGNAL(clicked()), this, SLOT(LoadRes()));
 	connect(btnTOFCalc, SIGNAL(clicked()), this, SLOT(ShowTOFCalcDlg()));
-
+	connect(btnMonoRefl, SIGNAL(clicked()), this, SLOT(LoadMonoRefl()));
+	connect(btnAnaEffic, SIGNAL(clicked()), this, SLOT(LoadAnaEffic()));
 
 	m_bDontCalc = 0;
 	RefreshQEPos();
@@ -240,6 +246,35 @@ void ResoDlg::RefreshQEPos()
 	}
 }
 
+
+/**
+ * loads a reflectivity curve and caches it in a map
+ */
+std::shared_ptr<ReflCurve<t_real_reso>> ResoDlg::load_cache_refl(const std::string& strFile)
+{
+	std::shared_ptr<ReflCurve<t_real_reso>> pRefl = nullptr;
+	if(strFile == "")
+		return pRefl;
+
+	auto iter = m_mapRefl.find(strFile);
+	if(iter == m_mapRefl.end())
+	{ // no yet cached -> load curve
+		pRefl = std::make_shared<ReflCurve<t_real_reso>>(strFile);
+		if(pRefl && *pRefl)
+			m_mapRefl[strFile] = pRefl;
+	}
+	else
+	{ // curve available in cache
+		pRefl = iter->second;
+	}
+
+	return pRefl;
+}
+
+
+/**
+ * calculates the resolution
+ */
 void ResoDlg::Calc()
 {
 	try
@@ -279,6 +314,21 @@ void ResoDlg::Calc()
 
 		cn.dmono_refl = spinMonoRefl->value();
 		cn.dana_effic = spinAnaEffic->value();
+		std::string strMonoRefl = editMonoRefl->text().toStdString();
+		std::string strAnaEffic = editAnaEffic->text().toStdString();
+		if(strMonoRefl != "")
+		{
+			cn.mono_refl_curve = load_cache_refl(strMonoRefl);
+			if(!cn.mono_refl_curve)
+				tl::log_err("Cannot load mono reflectivity file \"", strMonoRefl, "\".");
+		}
+		if(strAnaEffic != "")
+		{
+			cn.ana_effic_curve = load_cache_refl(strAnaEffic);
+			if(!cn.ana_effic_curve)
+				tl::log_err("Cannot load ana reflectivity file \"", strAnaEffic, "\".");
+		}
+
 
 		if(checkUseR0->isChecked())
 			cn.flags |= CALC_R0;

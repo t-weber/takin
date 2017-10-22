@@ -210,6 +210,8 @@ ResoResults calc_pop(const PopParams& pop)
 
 	t_real dmono_refl = pop.dmono_refl * std::get<0>(tupScFact);
 	t_real dana_effic = pop.dana_effic * std::get<1>(tupScFact);
+	if(pop.mono_refl_curve) dmono_refl *= (*pop.mono_refl_curve)(pop.ki);
+	if(pop.ana_effic_curve) dana_effic *= (*pop.ana_effic_curve)(pop.kf);
 	t_real dxsec = std::get<2>(tupScFact);
 
 

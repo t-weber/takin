@@ -182,6 +182,8 @@ ResoResults calc_cn(const CNParams& cn)
 
 	t_real dmono_refl = cn.dmono_refl * std::get<0>(tupScFact);
 	t_real dana_effic = cn.dana_effic * std::get<1>(tupScFact);
+	if(cn.mono_refl_curve) dmono_refl *= (*cn.mono_refl_curve)(cn.ki);
+	if(cn.ana_effic_curve) dana_effic *= (*cn.ana_effic_curve)(cn.kf);
 	t_real dxsec = std::get<2>(tupScFact);
 
 

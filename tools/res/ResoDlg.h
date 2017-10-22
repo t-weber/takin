@@ -15,6 +15,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <string>
 
 #include "ui/ui_reso.h"
@@ -55,6 +56,10 @@ struct SampleParams
 
 class ResoDlg : public QDialog, Ui::ResoDlg
 {Q_OBJECT
+private:
+	std::unordered_map<std::string, std::shared_ptr<ReflCurve<t_real_reso>>> m_mapRefl;
+	std::shared_ptr<ReflCurve<t_real_reso>> load_cache_refl(const std::string& strFile);
+
 protected:
 	std::vector<QDoubleSpinBox*> m_vecSpinBoxes;
 	std::vector<std::string> m_vecSpinNames;
@@ -67,6 +72,9 @@ protected:
 
 	std::vector<QLineEdit*> m_vecPosEditBoxes;
 	std::vector<std::string> m_vecPosEditNames;
+
+	std::vector<QLineEdit*> m_vecEditBoxes;
+	std::vector<std::string> m_vecEditNames;
 
 	std::vector<QRadioButton*> m_vecRadioPlus;
 	std::vector<QRadioButton*> m_vecRadioMinus;
@@ -130,6 +138,9 @@ protected slots:
 
 	void SaveRes();
 	void LoadRes();
+
+	void LoadMonoRefl();
+	void LoadAnaEffic();
 
 	void ButtonBoxClicked(QAbstractButton*);
 	void hideEvent (QHideEvent *event);
