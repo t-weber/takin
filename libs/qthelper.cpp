@@ -98,7 +98,7 @@ std::vector<std::string> get_qt_std_path(QtStdPath path)
 	QStringList lst = QStandardPaths::standardLocations(iLoc);
 
 	std::vector<std::string> vecPaths;
-	for(std::size_t iStr=0; iStr<lst.size(); ++iStr)
+	for(int iStr=0; iStr<lst.size(); ++iStr)
 		vecPaths.push_back(lst.at(iStr).toStdString());
 	return vecPaths;
 }

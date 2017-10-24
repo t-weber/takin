@@ -974,7 +974,7 @@ void ResoDlg::MCGenerate()
 
 	QString strLastDir = m_pSettings ? m_pSettings->value("reso/mc_dir", ".").toString() : ".";
 	QString _strFile = QFileDialog::getSaveFileName(this, "Save MC neutron data...",
-		strLastDir, "DAT files (*.dat);;All files (*.*)", nullptr, fileopt);
+		strLastDir, "Data files (*.dat *.DAT);;All files (*.*)", nullptr, fileopt);
 	if(_strFile == "")
 		return;
 

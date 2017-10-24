@@ -117,7 +117,7 @@ void ResoDlg::LoadMonoRefl()
 	QString qstrFile = QFileDialog::getOpenFileName(this,
 		"Open reflectivity file...",
 		strDirLast,
-		"Data files (*.dat *.DAT)", nullptr,
+		"Data files (*.dat *.DAT);;All files (*.*)", nullptr,
 		fileopt);
 	if(qstrFile == "")
 		return;
@@ -137,7 +137,7 @@ void ResoDlg::LoadAnaEffic()
 	QString qstrFile = QFileDialog::getOpenFileName(this,
 		"Open reflectivity file...",
 		strDirLast,
-		"Data files (*.dat *.DAT)", nullptr,
+		"Data files (*.dat *.DAT);;All files (*.*)", nullptr,
 		fileopt);
 	if(qstrFile == "")
 		return;
