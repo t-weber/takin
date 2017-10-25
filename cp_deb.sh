@@ -19,7 +19,7 @@ mkdir -p ${INSTDIR}/DEBIAN
 
 
 # control file
-echo -e "Package: takin\nVersion: 1.5.3" > ${INSTDIR}/DEBIAN/control
+echo -e "Package: takin\nVersion: 1.5.4" > ${INSTDIR}/DEBIAN/control
 echo -e "Description: inelastic neutron scattering software" >> ${INSTDIR}/DEBIAN/control
 echo -e "Maintainer: n/a" >> ${INSTDIR}/DEBIAN/control
 echo -e "Architecture: $(dpkg --print-architecture)" >> ${INSTDIR}/DEBIAN/control
@@ -32,6 +32,7 @@ cp -v bin/takin			${INSTDIR}/usr/local/bin
 cp -v bin/convofit		${INSTDIR}/usr/local/bin
 cp -v bin/convoseries		${INSTDIR}/usr/local/bin
 cp -v bin/sfact			${INSTDIR}/usr/local/bin
+cp -v takin_local.sh		${INSTDIR}/usr/local/bin
 cp -rv res/*			${INSTDIR}/usr/local/share/takin/res/
 cp -v COPYING			${INSTDIR}/usr/local/share/takin
 cp -v LICENSES			${INSTDIR}/usr/local/share/takin
@@ -39,6 +40,10 @@ cp -v LITERATURE		${INSTDIR}/usr/local/share/takin
 cp -v AUTHORS			${INSTDIR}/usr/local/share/takin
 cp -v /usr/local/lib/libMinuit2.so.0 ${INSTDIR}/usr/local/lib
 cp -v takin.desktop		${INSTDIR}/usr/share/applications
+
+
+# permissions
+chmod a+x ${INSTDIR}/usr/local/bin/*
 
 
 # stripping
