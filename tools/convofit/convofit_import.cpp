@@ -63,6 +63,7 @@ std::string convert_monteconvo(
 	mapJob["input/sqw_file"] = propMC.Query<std::string>("taz/monteconvo/sqw_conf");
 	mapJob["input/counts_col"] = propMC.Query<std::string>("taz/convofit/counter");
 	mapJob["input/monitor_col"] = propMC.Query<std::string>("taz/convofit/monitor");
+	mapJob["input/flip_lhs_rhs"] = propMC.Query<std::string>("taz/convofit/flip_coords", "0");
 
 	if(bRelPaths)
 	{
@@ -100,7 +101,6 @@ std::string convert_monteconvo(
 		propMC.Query<std::string>("taz/monteconvo/sample_step_count", "1");
 	mapJob["montecarlo/recycle_neutrons"] =
 		propMC.Query<std::string>("taz/convofit/recycle_neutrons", "1");
-
 
 	// fitting
 	std::string strMin = "simplex";
