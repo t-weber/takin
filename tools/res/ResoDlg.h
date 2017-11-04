@@ -57,6 +57,7 @@ struct SampleParams
 class ResoDlg : public QDialog, Ui::ResoDlg
 {Q_OBJECT
 private:
+	std::string m_strCurDir;
 	std::unordered_map<std::string, std::shared_ptr<ReflCurve<t_real_reso>>> m_mapRefl;
 	std::shared_ptr<ReflCurve<t_real_reso>> load_cache_refl(const std::string& strFile);
 

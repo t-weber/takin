@@ -99,6 +99,8 @@ void ResoDlg::LoadRes()
 	}
 
 	Load(xml, strXmlRoot);
+	m_strCurDir = strDir;
+
 	if(m_pSettings)
 		m_pSettings->setValue("reso/last_dir", QString(strDir.c_str()));
 

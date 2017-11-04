@@ -479,7 +479,7 @@ void ConvoDlg::Start2D()
 		// -------------------------------------------------------------------------
 		// find axis labels and ranges
 		std::string strScanVar1 = "";
-		t_real dStart1, dStop1;
+		t_real dStart1{}, dStop1{};
 		if(!tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu))
 		{
 			strScanVar1 = "h (rlu)";
@@ -506,7 +506,7 @@ void ConvoDlg::Start2D()
 		}
 
 		std::string strScanVar2 = "";
-		t_real dStart2, dStop2;
+		t_real dStart2{}, dStop2{};
 		if(!tl::float_equal(spinStartH->value(), spinStopH2->value(), g_dEpsRlu))
 		{
 			strScanVar2 = "h (rlu)";

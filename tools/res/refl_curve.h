@@ -10,6 +10,7 @@
 
 #include "tlibs/phys/neutrons.h"
 #include "tlibs/file/loaddat.h"
+#include "tlibs/file/file.h"
 #include "tlibs/fit/interpolation.h"
 #include "tlibs/log/log.h"
 
@@ -29,11 +30,27 @@ class ReflCurve
 		std::unique_ptr<tl::LinInterp<t_real>> m_pinterp;
 
 	public:
-		ReflCurve(const std::string& strFile)
+		ReflCurve(const std::string& strFile, const std::vector<std::string>* pPaths = nullptr)
 		{
 			m_bOk = 0;
-			if(!m_file.Load(strFile))
-				return;
+
+			if(!pPaths)
+			{ // use given file
+				if(!m_file.Load(strFile))
+					return;
+			}
+			else
+			{ // try to find file in given paths
+				std::string _strFile;
+				bool bOk = 0;
+				std::tie(bOk, _strFile) = 
+					tl::find_file<std::string, std::vector>(*pPaths, strFile);
+
+				if(!bOk)
+					return;
+				if(!m_file.Load(_strFile))
+					return;
+			}
 
 			if(m_file.GetColumnCount() < 2)
 				return;

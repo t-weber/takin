@@ -6,7 +6,7 @@
 #
 # copy framework libs
 #
-# pack with: hdiutil create takin.dmg -srcfolder takin.app -format "UDBZ" -volname "takin"
+# pack with: hdiutil create takin.dmg -srcfolder takin.app -fs UDF -format "UDBZ" -volname "takin"
 #
 
 

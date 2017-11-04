@@ -256,10 +256,12 @@ std::shared_ptr<ReflCurve<t_real_reso>> ResoDlg::load_cache_refl(const std::stri
 	if(strFile == "")
 		return pRefl;
 
+	std::vector<std::string> vecRelDirs = { m_strCurDir, "." };
+
 	auto iter = m_mapRefl.find(strFile);
 	if(iter == m_mapRefl.end())
 	{ // no yet cached -> load curve
-		pRefl = std::make_shared<ReflCurve<t_real_reso>>(strFile);
+		pRefl = std::make_shared<ReflCurve<t_real_reso>>(strFile, &vecRelDirs);
 		if(pRefl && *pRefl)
 			m_mapRefl[strFile] = pRefl;
 	}

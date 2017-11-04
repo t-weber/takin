@@ -9,8 +9,8 @@
 # system-specific build flags
 
 # which compiler?
-#CC = gcc
-CC = clang
+CC = gcc
+#CC = clang
 
 # debug or unstable version?
 DO_DEBUG = 0
@@ -53,7 +53,7 @@ USE_CPP11_ABI = 1
 # enable Framework libs
 USE_FRAMEWORKS = 0
 
-USE_CLP = 0
+USE_CLP = 1
 
 # is Minuit a non-standalone installation?
 NON_STANDALONE_MINUIT_HACK = 0
