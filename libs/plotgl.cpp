@@ -53,7 +53,7 @@ static inline void sleep_nano(long ns)
 PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings, t_real dMouseScale)
 	: t_qglwidget(pParent), m_pSettings(pSettings),
 		m_bEnabled(true), m_mutex(QMutex::Recursive), m_mutex_resize(QMutex::Recursive),
-		m_matProj(tl::unit_matrix<t_mat4>(4)), m_matView(tl::unit_matrix<t_mat4>(4))
+		m_matProj(tl::unit_m<t_mat4>(4)), m_matView(tl::unit_m<t_mat4>(4))
 {
 	QGLFormat form = format();
 	form.setSampleBuffers(1);
