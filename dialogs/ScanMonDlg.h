@@ -13,8 +13,8 @@
 #include "ui/ui_scanmon.h"
 
 #include "libs/globals.h"
-#include "libs/qthelper.h"
-#include "libs/qwthelper.h"
+#include "libs/qt/qthelper.h"
+#include "libs/qt/qwthelper.h"
 #include "NetCacheDlg.h"
 
 

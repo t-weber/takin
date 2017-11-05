@@ -105,7 +105,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/dialogs/DispDlg.h"
 	"${TAKINROOT}/dialogs/DeadAnglesDlg.h"
 	"${TAKINROOT}/dialogs/LogDlg.h"
-	"${TAKINROOT}/libs/qwthelper.h"
+	"${TAKINROOT}/libs/qt/qwthelper.h"
 )
 
 for hfile in ${hfiles[@]}; do

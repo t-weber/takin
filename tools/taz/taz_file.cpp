@@ -9,7 +9,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/time/chrono.h"
 #include "libs/version.h"
-#include "libs/recent.h"
+#include "libs/qt/recent.h"
 #include "dialogs/FilePreviewDlg.h"
 
 #include <QMessageBox>

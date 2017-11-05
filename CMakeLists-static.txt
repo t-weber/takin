@@ -241,13 +241,13 @@ add_executable(takin
 
 	libs/spacegroups/spacegroup.cpp tools/sglist/SgListDlg.cpp
 	libs/globals.cpp libs/globals_qt.cpp libs/spacegroups/crystalsys.cpp
-	libs/formfactors/formfact.cpp libs/qthelper.cpp libs/qwthelper.cpp
+	libs/formfactors/formfact.cpp libs/qt/qthelper.cpp libs/qt/qwthelper.cpp
 
 	${SRCS_3D}
 
 	# statically link tlibs externals
 	#tlibs/file/loadinstr.cpp
-	libs/recent.cpp  tlibs/file/x3d.cpp
+	libs/qt/recent.cpp  tlibs/file/x3d.cpp
 	tlibs/log/log.cpp tlibs/log/debug.cpp
 	tlibs/math/rand.cpp
 	tlibs/string/spec_char.cpp

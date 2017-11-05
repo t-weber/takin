@@ -21,8 +21,8 @@
 #include "tools/res/ellipse.h"
 #include "tools/res/pop.h"
 #include "ui/ui_ellipses.h"
-#include "libs/qthelper.h"
-#include "libs/qwthelper.h"
+#include "libs/qt/qthelper.h"
+#include "libs/qt/qwthelper.h"
 
 
 struct EllipseDlgParams

@@ -14,8 +14,8 @@
 
 #include <vector>
 #include <memory>
-#include "libs/qthelper.h"
-#include "libs/qwthelper.h"
+#include "libs/qt/qthelper.h"
+#include "libs/qt/qwthelper.h"
 #include "libs/globals.h"
 #include <qwt_legend.h>
 

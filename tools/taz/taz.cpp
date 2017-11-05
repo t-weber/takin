@@ -28,7 +28,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"
 #include "tlibs/log/log.h"
-#include "libs/recent.h"
+#include "libs/qt/recent.h"
 
 namespace algo = boost::algorithm;
 namespace fs = boost::filesystem;

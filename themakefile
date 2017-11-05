@@ -668,9 +668,9 @@ obj/globals.o: libs/globals.cpp libs/globals.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/globals_qt.o: libs/globals_qt.cpp libs/globals_qt.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/qthelper.o: libs/qthelper.cpp libs/qthelper.h
+obj/qthelper.o: libs/qt/qthelper.cpp libs/qt/qthelper.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/qwthelper.o: libs/qwthelper.cpp libs/qwthelper.h
+obj/qwthelper.o: libs/qt/qwthelper.cpp libs/qt/qwthelper.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/PowderDlg.o: dialogs/PowderDlg.cpp dialogs/PowderDlg.h tlibs/phys/lattice.h
 	${CC} ${FLAGS} -c -o $@ $<
@@ -739,7 +739,7 @@ obj/loadinstr.o: tlibs/file/loadinstr.cpp tlibs/file/loadinstr.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/x3d.o: tlibs/file/x3d.cpp tlibs/file/x3d.h
 	${CC} ${FLAGS} -c -o $@ $<
-obj/recent.o: libs/recent.cpp libs/recent.h
+obj/recent.o: libs/qt/recent.cpp libs/qt/recent.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/tmp.o: tlibs/file/tmp.cpp tlibs/file/tmp.h
 	${CC} ${FLAGS} -c -o $@ $<

@@ -16,7 +16,6 @@
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
 #include "libs/formfactors/formfact.h"
-#include "libs/qthelper.h"
 
 #include <iostream>
 #include <boost/algorithm/string.hpp>

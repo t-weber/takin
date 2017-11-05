@@ -13,7 +13,7 @@
 #endif
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
-#include "libs/qthelper.h"
+#include "libs/qt/qthelper.h"
 
 #include <QFileDialog>
 #include <QFontDialog>

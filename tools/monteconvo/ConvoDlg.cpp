@@ -16,7 +16,7 @@
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
-#include "libs/recent.h"
+#include "libs/qt/recent.h"
 
 #include <iostream>
 #include <fstream>

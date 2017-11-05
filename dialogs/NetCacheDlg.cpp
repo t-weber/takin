@@ -10,7 +10,7 @@
 #include "tlibs/helper/flags.h"
 #include "tlibs/log/log.h"
 #include "tlibs/time/stopwatch.h"
-#include "libs/qthelper.h"
+#include "libs/qt/qthelper.h"
 #include <chrono>
 #include <iostream>
 

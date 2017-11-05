@@ -11,8 +11,8 @@
 #include "ui/ui_disp.h"
 
 #include "libs/spacegroups/spacegroup.h"
-#include "libs/qthelper.h"
-#include "libs/qwthelper.h"
+#include "libs/qt/qthelper.h"
+#include "libs/qt/qwthelper.h"
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
 #include "tlibs/file/prop.h"

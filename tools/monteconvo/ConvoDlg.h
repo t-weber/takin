@@ -20,8 +20,8 @@
 
 #include "ui/ui_monteconvo.h"
 
-#include "libs/qthelper.h"
-#include "libs/qwthelper.h"
+#include "libs/qt/qthelper.h"
+#include "libs/qt/qwthelper.h"
 #include "tlibs/file/prop.h"
 
 #include "sqwfactory.h"

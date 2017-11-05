@@ -20,7 +20,7 @@
 #include "tlibs/phys/lattice.h"
 
 #include "libs/globals.h"
-#include "libs/qthelper.h"
+#include "libs/qt/qthelper.h"
 #include "helper.h"
 #include "mc.h"
 

@@ -8,7 +8,6 @@
 #include "SpurionDlg.h"
 #include "tlibs/phys/neutrons.h"
 #include "tlibs/string/string.h"
-#include "libs/qthelper.h"
 
 #include <sstream>
 #include <iostream>

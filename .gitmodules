@@ -10,3 +10,7 @@
 	path = libcrystal
 	url = https://github.com/t-weber/libcrystal
 	branch = master
+[submodule "qthelpers"]
+	path = qthelpers
+	url = https://github.com/t-weber/qthelpers
+	branch = master

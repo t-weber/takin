@@ -18,8 +18,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "libs/qthelper.h"
-#include "libs/qwthelper.h"
+#include "libs/qt/qthelper.h"
+#include "libs/qt/qwthelper.h"
 #include "libs/globals.h"
 
 

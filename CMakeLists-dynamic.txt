@@ -199,8 +199,8 @@ add_executable(takin
 
 	libs/spacegroups/spacegroup.cpp tools/sglist/SgListDlg.cpp
 	libs/globals.cpp libs/globals_qt.cpp libs/spacegroups/crystalsys.cpp
-	libs/formfactors/formfact.cpp libs/qthelper.cpp libs/qwthelper.cpp
-	libs/recent.cpp
+	libs/formfactors/formfact.cpp libs/qt/qthelper.cpp libs/qt/qwthelper.cpp
+	libs/qt/recent.cpp
 
 	libcrystal/version.cpp
 
