@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 			ioSrv.stop();
 	#ifdef SIGKILL
 			// TODO: use specific PIDs
-			std::system("killall -s KILL gnuplot");
+			//std::system("killall -s KILL gnuplot");
 			std::raise(SIGKILL);
 	#endif
 			exit(-1);
