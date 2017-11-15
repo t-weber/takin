@@ -3,17 +3,23 @@
  * @license GPLv2
  */
 
-// gcc -DNO_QT -I. -I../.. -o tst_refl tst_refl.cpp ../../libs/spacegroups/spacegroup_clp.cpp ../../libs/spacegroups/crystalsys.cpp ../../tlibs/log/log.cpp -lstdc++ -std=c++11 -lclipper-core -lm
+// gcc -DNO_QT -I. -I../.. -o tst_refl tst_refl.cpp ../../libs/spacegroups/spacegroup.cpp ../../libs/spacegroups/crystalsys.cpp ../../tlibs/log/log.cpp ../../libs/globals.cpp -lstdc++ -std=c++11 -lm -lboost_iostreams -lboost_filesystem -lboost_system
 
 #include <iostream>
-#include "libs/spacegroups/spacegroup_clp.h"
+#include "libs/spacegroups/spacegroup.h"
+
+using t_real = double;
+using t_mapSpaceGroups = xtl::SpaceGroups<t_real>::t_mapSpaceGroups;
+
 
 void check_allowed_refls()
 {
+	std::shared_ptr<const xtl::SpaceGroups<t_real>> sgs = xtl::SpaceGroups<t_real>::GetInstance();
+
 	const int HKL_MAX = 10;
 	unsigned int iSG = 0;
 
-	const t_mapSpaceGroups *pSGs = get_space_groups();
+	const t_mapSpaceGroups *pSGs = sgs->get_space_groups();
 	for(const t_mapSpaceGroups::value_type& sg : *pSGs)
 	{
 		++iSG;
@@ -42,8 +48,6 @@ void check_allowed_refls()
 
 int main()
 {
-	init_space_groups();
 	check_allowed_refls();
-
 	return 0;
 }
