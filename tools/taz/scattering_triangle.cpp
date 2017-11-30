@@ -852,6 +852,27 @@ void ScatteringTriangle::RotateKiVec0To(bool bSense, t_real dAngle)
 	nodeMoved(m_pNodeKfQ.get());
 }
 
+
+template<class T=double>
+static inline std::string print_complex(const std::complex<T>& c)
+{
+	T r = c.real();
+	T i = c.imag();
+
+	tl::set_eps_0(r, g_dEps);
+	tl::set_eps_0(i, g_dEps);
+
+	std::ostringstream ostr;
+	ostr.precision(g_iPrec);
+
+	// imaginary part 0?
+	if(tl::float_equal<T>(i, 0))
+		ostr << r;
+	else
+		ostr << "(" << r << (i>=0. ? " +" : " -") << std::abs(i) << " i)";
+	return ostr.str();
+}
+
 void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon, bool bIsPowder)
 {
 	ClearPeaks();
@@ -907,6 +928,8 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 	static const std::string strAA = tl::get_spec_char_utf8("AA") +
 		tl::get_spec_char_utf8("sup-") +
 		tl::get_spec_char_utf8("sup1");
+	static const std::string strSup2 = tl::get_spec_char_utf8("sup2");
+
 	std::list<std::vector<t_real>> lstPeaksForKd;
 	t_real dMinF = std::numeric_limits<t_real>::max(), dMaxF = -1.;
 
@@ -958,12 +981,12 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 
 				// --------------------------------------------------------------------
 				// structure factors
-				std::string strStructfact;
+				std::complex<t_real> cF(-1., -1.);
 				t_real dF = -1., dFsq = -1.;
 
 				if(bHasRefl && recipcommon.CanCalcStructFact() && (bInPlane || bIsPowder))
 				{
-					std::tie(std::ignore, dF, dFsq) =
+					std::tie(cF, dF, dFsq) =
 						recipcommon.GetStructFact(vecPeak);
 
 					//dFsq *= tl::lorentz_factor(dAngle);
@@ -996,28 +1019,28 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 
 							std::ostringstream ostrLabel, ostrTip;
 							ostrLabel.precision(g_iPrecGfx);
-							ostrTip.precision(g_iPrecGfx);
+							ostrTip.precision(g_iPrec);
 
 							ostrLabel << "(" << ih << " " << ik << " " << il << ")";
-							ostrTip << "(" << ih << " " << ik << " " << il << ") rlu";
+							ostrTip << "G = (" << ih << " " << ik << " " << il << ") rlu";
+
+							tl::set_eps_0(vecPeak, g_dEps);
+							ostrTip << "\nG = (" << vecPeak[0] << ", "
+								<< vecPeak[1] << ", "
+								<< vecPeak[2] << ") " << strAA;
+
 							if(dFsq > -1.)
 							{
-								std::ostringstream ostrStructfact;
-								ostrStructfact.precision(g_iPrecGfx);
 								if(g_bShowFsq)
-									ostrStructfact << "S = " << dFsq;
+									ostrLabel << "\nS = " << dFsq;
 								else
-									ostrStructfact << "F = " << dF;
-								strStructfact = ostrStructfact.str();
+									ostrLabel << "\nF = " << dF;
 
-								ostrLabel << "\n" << strStructfact;
-								ostrTip << "\n" << strStructfact << " fm";
+								ostrTip << "\nF = " << print_complex<t_real>(cF) << " fm";
+								ostrTip << "\nS = " << dFsq << " fm" << strSup2;
 							}
 
 							pPeak->SetLabel(ostrLabel.str().c_str());
-
-							tl::set_eps_0(vecPeak);
-							ostrTip << "\n(" << vecPeak[0] << ", " << vecPeak[1] << ", " << vecPeak[2] << ") " << strAA;
 
 							//ostrTip << "\ndistance to plane: " << dDist << " " << strAA;
 							pPeak->setToolTip(QString::fromUtf8(ostrTip.str().c_str(), ostrTip.str().length()));
