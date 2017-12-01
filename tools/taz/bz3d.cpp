@@ -93,7 +93,7 @@ void BZ3DDlg::RenderBZ(const tl::Brillouin3D<t_real_glob>& bz,
 	m_pPlot->SetEnabled(0);
 	m_pPlot->clear();
 
-	t_mat matBinv = lattice.matA / (tl::get_pi<t_real>()*t_real(2));
+	t_mat matBinv = tl::transpose(lattice.matA) / (tl::get_pi<t_real>()*t_real(2));
 
 
 	const bool bShowVerts = 0;

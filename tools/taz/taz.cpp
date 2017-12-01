@@ -1276,7 +1276,8 @@ void TazDlg::Show3D()
 		m_pRecip3d->show();
 	m_pRecip3d->activateWindow();
 
-	CalcPeaks();
+	m_pRecip3d->CalcPeaks(m_latticecommon);
+	//CalcPeaks();
 }
 
 void TazDlg::Show3DReal()
@@ -1288,7 +1289,8 @@ void TazDlg::Show3DReal()
 		m_pReal3d->show();
 	m_pReal3d->activateWindow();
 
-	CalcPeaks();
+	m_pReal3d->CalcPeaks(m_sceneRealLattice.GetLattice()->GetWS3D(), m_latticecommon);
+	//CalcPeaks();
 }
 
 void TazDlg::Show3DBZ()
@@ -1307,7 +1309,11 @@ void TazDlg::Show3DBZ()
 		m_pBZ3d->show();
 	m_pBZ3d->activateWindow();
 
-	CalcPeaks();
+	m_pBZ3d->RenderBZ(m_sceneRecip.GetTriangle()->GetBZ3D(),
+		m_latticecommon,
+		&m_sceneRecip.GetTriangle()->GetBZ3DPlaneVerts(),
+		&m_sceneRecip.GetTriangle()->GetBZ3DSymmVerts());
+	//CalcPeaks();
 }
 
 #else

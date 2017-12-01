@@ -244,8 +244,7 @@ void PowderDlg::CalcPeaks()
 
 			std::tie(vecElems, vecAllAtoms, vecAllAtomsFrac, vecAllAtomTypes) =
 			tl::generate_all_atoms<t_mat, t_vec, std::vector>
-				(*pvecSymTrafos, vecAtoms, &vecNames, matA,
-				t_real(0), t_real(1), g_dEps);
+				(*pvecSymTrafos, vecAtoms, &vecNames, matA, g_dEps);
 
 			for(const std::string& strElem : vecElems)
 			{

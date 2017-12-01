@@ -194,8 +194,7 @@ void DispDlg::Calc()
 		std::vector<std::size_t> vecIdxUC, vecIdxSC;
 		std::tie(std::ignore, vecAtomsUC, std::ignore, vecIdxUC) =
 		tl::generate_all_atoms<t_mat, t_vec, std::vector, std::string>
-			(vecSymTrafos, vecAtoms, nullptr, matA,
-			t_real(-0.5), t_real(0.5), g_dEps);
+			(vecSymTrafos, vecAtoms, nullptr, matA, g_dEps);
 
 
 		// all atoms in super cell

@@ -77,7 +77,7 @@ void Real3DDlg::CalcPeaks(const tl::Brillouin3D<t_real_glob>& ws,
 	m_pPlot->clear();
 	m_pPlot->SetObjectCount(lattice.vecAllAtoms.size());
 
-	t_mat matAinv = lattice.matB / (tl::get_pi<t_real>()*t_real(2));
+	t_mat matAinv = tl::transpose(lattice.matB) / (tl::get_pi<t_real>()*t_real(2));
 
 
 	// colours
