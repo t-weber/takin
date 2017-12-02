@@ -222,6 +222,8 @@ void PlotGl::resizeGLThread(int w, int h)
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	doneCurrent();
 }
 
 
@@ -529,6 +531,7 @@ void PlotGl::paintGLThread()
 	}
 
 	swapBuffers();
+	doneCurrent();
 }
 
 
