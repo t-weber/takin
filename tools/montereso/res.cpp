@@ -11,11 +11,11 @@
 
 #include "res.h"
 
+#include "../res/ellipse.h"
+#include "../res/helper.h"
 #include "tlibs/phys/neutrons.h"
 #include "tlibs/math/stat.h"
 #include "tlibs/log/log.h"
-#include "../res/helper.h"
-#include "../res/ellipse.h"
 
 #include <algorithm>
 #include <boost/algorithm/minmax_element.hpp>

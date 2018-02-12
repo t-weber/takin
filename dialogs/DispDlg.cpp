@@ -355,6 +355,13 @@ void DispDlg::RepopulateSpaceGroups()
 
 void DispDlg::CheckCrystalType()
 {
+	if(m_pSettings && m_pSettings->value("main/ignore_xtal_restrictions", 0).toBool())
+	{
+		for(QLineEdit* pEdit : {editA, editB, editC, editAlpha, editBeta, editGamma})
+			pEdit->setEnabled(true);
+		return;
+	}
+
 	set_crystal_system_edits(m_crystalsys, editA, editB, editC,
 		editAlpha, editBeta, editGamma);
 }

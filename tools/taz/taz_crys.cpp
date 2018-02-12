@@ -72,6 +72,15 @@ void TazDlg::SetCrystalType()
 
 void TazDlg::CheckCrystalType()
 {
+	if(m_settings.value("main/ignore_xtal_restrictions", 0).toBool())
+	{
+		for(QLineEdit* pEdit : {editA, editB, editC, editAlpha, editBeta, editGamma,
+			editARecip, editBRecip, editCRecip,
+			editAlphaRecip, editBetaRecip, editGammaRecip})
+			pEdit->setEnabled(true);
+		return;
+	}
+
 	set_crystal_system_edits(m_crystalsys, editA, editB, editC,
 		editAlpha, editBeta, editGamma,
 		editARecip, editBRecip, editCRecip,

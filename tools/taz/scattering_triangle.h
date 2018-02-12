@@ -311,6 +311,7 @@ class ScatteringTriangleView : public QGraphicsView
 		virtual void wheelEvent(QWheelEvent* pEvt) override;
 		virtual void keyPressEvent(QKeyEvent *pEvt) override;
 		virtual void keyReleaseEvent(QKeyEvent *pEvt) override;
+		virtual bool event(QEvent *pEvt) override;
 
 	public:
 		ScatteringTriangleView(QWidget* pParent = 0);

@@ -379,6 +379,16 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QCheckBox" name="checkIgnoreXtalRestrictions">
+            <property name="text">
+             <string>Ignore Crystal Restrictions</string>
+            </property>
+            <property name="toolTip">
+             <string>Always allow setting of lattice constants and angles, disregarding the space group. WARNING: Only used for testing!</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="0" colspan="2">
            <widget class="QComboBox" name="comboSFact">
             <property name="sizePolicy">
@@ -452,7 +462,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
+          <item row="5" column="0" colspan="2">
            <spacer name="verticalSpacer_6">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -1351,6 +1361,7 @@
   <tabstop>spinMaxNN</tabstop>
   <tabstop>comboBZ</tabstop>
   <tabstop>comboSFact</tabstop>
+  <tabstop>checkIgnoreXtalRestrictions</tabstop>
   <tabstop>checkNativeDlg</tabstop>
   <tabstop>checkPreview</tabstop>
   <tabstop>spinNetPoll</tabstop>

@@ -1963,4 +1963,10 @@ void ScatteringTriangleView::wheelEvent(QWheelEvent *pEvt)
 }
 
 
+bool ScatteringTriangleView::event(QEvent *pEvt)
+{
+	return QGraphicsView::event(pEvt);
+}
+
+
 #include "scattering_triangle.moc"

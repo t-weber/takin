@@ -16,9 +16,9 @@
 #define __TAKIN_CN_H__
 
 #include "defs.h"
+#include "refl_curve.h"
 #include "tlibs/phys/neutrons.h"
 #include "tlibs/math/linalg.h"
-#include "refl_curve.h"
 #include <tuple>
 #include <memory>
 

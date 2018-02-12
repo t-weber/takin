@@ -55,9 +55,11 @@ PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings, t_real dMouseScale)
 		m_bEnabled(true), m_mutex(QMutex::Recursive), m_mutex_resize(QMutex::Recursive),
 		m_matProj(tl::unit_m<t_mat4>(4)), m_matView(tl::unit_m<t_mat4>(4))
 {
-	QGLFormat form = format();
+	/*QGLFormat form = format();
+	form.setDoubleBuffer(1);
+	form.setOverlay(0);
 	form.setSampleBuffers(1);
-	setFormat(form);
+	setFormat(form);*/
 
 	m_dMouseRot[0] = m_dMouseRot[1] = 0.;
 	m_dMouseScale = dMouseScale;
@@ -206,6 +208,7 @@ void PlotGl::freeGLThread()
 
 void PlotGl::resizeGLThread(int w, int h)
 {
+	//tl::log_debug("GL size: ", w, ", ", h, ".");
 	makeCurrent();
 
 	if(w <= 0) w = 1;
@@ -578,11 +581,17 @@ void PlotGl::run()
 // ----------------------------------------------------------------------------
 
 
+bool PlotGl::event(QEvent *pEvt)
+{
+	return t_qglwidget::event(pEvt);
+}
+
 void PlotGl::paintEvent(QPaintEvent *)
 {}
 
 void PlotGl::resizeEvent(QResizeEvent *pEvt)
 {
+	//tl::log_debug("resizeEvent");
 	if(!pEvt) return;
 
 	std::lock_guard<QMutex> _lck(m_mutex_resize);

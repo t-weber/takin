@@ -910,14 +910,14 @@ void TazDlg::DeleteDialogs()
 	if(m_pSpuri) { delete m_pSpuri; m_pSpuri = 0; }
 	if(m_pNeutronDlg) { delete m_pNeutronDlg; m_pNeutronDlg = 0; }
 	if(m_pTofDlg) { delete m_pTofDlg; m_pTofDlg = 0; }
-	if(m_pPowderDlg) { delete m_pPowderDlg; m_pPowderDlg = 0; }
-	if(m_pDispDlg) { delete m_pDispDlg; m_pDispDlg = 0; }
 	if(m_pDWDlg) { delete m_pDWDlg; m_pDWDlg = 0; }
 	if(m_pDynPlaneDlg) { delete m_pDynPlaneDlg; m_pDynPlaneDlg = 0; }
 	if(m_pScanViewer) { delete m_pScanViewer; m_pScanViewer = nullptr; }
 	if(m_pScanPos) { delete m_pScanPos; m_pScanPos = nullptr; }
 	if(m_pAtomsDlg) { delete m_pAtomsDlg; m_pAtomsDlg = nullptr; }
 	if(m_pDeadAnglesDlg) { delete m_pDeadAnglesDlg; m_pDeadAnglesDlg = nullptr; }
+	//if(m_pPowderDlg) { delete m_pPowderDlg; m_pPowderDlg = 0; }
+	//if(m_pDispDlg) { delete m_pDispDlg; m_pDispDlg = 0; }
 
 #if !defined NO_3D
 	if(m_pRecip3d) { delete m_pRecip3d; m_pRecip3d = 0; }

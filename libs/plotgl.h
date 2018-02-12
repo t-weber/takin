@@ -90,7 +90,7 @@ struct PlotGlSize
 class PlotGl : public t_qglwidget, QThread
 {
 protected:
-	QSettings *m_pSettings = 0;
+	QSettings *m_pSettings = nullptr;
 	std::atomic<bool> m_bEnabled;
 	mutable QMutex m_mutex, m_mutex_resize;
 
@@ -119,6 +119,7 @@ protected:
 
 
 protected:
+	virtual bool event(QEvent*) override;
 	virtual void resizeEvent(QResizeEvent*) override;
 	virtual void paintEvent(QPaintEvent*) override;
 
