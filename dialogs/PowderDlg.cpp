@@ -105,13 +105,13 @@ PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 	QObject::connect(editSpaceGroupsFilter, SIGNAL(textChanged(const QString&)), this, SLOT(RepopulateSpaceGroups()));
 	QObject::connect(comboSpaceGroups, SIGNAL(currentIndexChanged(int)), this, SLOT(SpaceGroupChanged()));
 
-	connect(btnSaveTable, SIGNAL(clicked()), this, SLOT(SaveTable()));
-	connect(btnSave, SIGNAL(clicked()), this, SLOT(SavePowder()));
-	connect(btnLoad, SIGNAL(clicked()), this, SLOT(LoadPowder()));
-	connect(btnAtoms, SIGNAL(clicked()), this, SLOT(ShowAtomDlg()));
+	QObject::connect(btnSaveTable, SIGNAL(clicked()), this, SLOT(SaveTable()));
+	QObject::connect(btnSave, SIGNAL(clicked()), this, SLOT(SavePowder()));
+	QObject::connect(btnLoad, SIGNAL(clicked()), this, SLOT(LoadPowder()));
+	QObject::connect(btnAtoms, SIGNAL(clicked()), this, SLOT(ShowAtomDlg()));
 
-	connect(btnSyncKi, SIGNAL(clicked()), this, SLOT(SetExtKi()));
-	connect(btnSyncKf, SIGNAL(clicked()), this, SLOT(SetExtKf()));
+	QObject::connect(btnSyncKi, SIGNAL(clicked()), this, SLOT(SetExtKi()));
+	QObject::connect(btnSyncKf, SIGNAL(clicked()), this, SLOT(SetExtKf()));
 
 	m_bDontCalc = 0;
 	RepopulateSpaceGroups();
@@ -124,7 +124,11 @@ PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 }
 
 PowderDlg::~PowderDlg()
-{}
+{
+	setAcceptDrops(0);
+	m_bDontCalc = 1;
+	if(m_pAtomsDlg) { delete m_pAtomsDlg; m_pAtomsDlg = nullptr; }
+}
 
 
 void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
@@ -469,7 +473,7 @@ void PowderDlg::CalcPeaks()
 
 const xtl::SpaceGroup<t_real>* PowderDlg::GetCurSpaceGroup() const
 {
-	xtl::SpaceGroup<t_real>* pSpaceGroup = 0;
+	xtl::SpaceGroup<t_real>* pSpaceGroup = nullptr;
 	int iSpaceGroupIdx = comboSpaceGroups->currentIndex();
 	if(iSpaceGroupIdx != 0)
 		pSpaceGroup = (xtl::SpaceGroup<t_real>*)comboSpaceGroups->itemData(iSpaceGroupIdx).value<void*>();

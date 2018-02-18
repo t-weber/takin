@@ -147,7 +147,7 @@ if(OPENGL_FOUND AND FREETYPE_FOUND)
 		include_directories("${OPENGL_INCLUDE_DIR}/GL" "${OPENGL_INCLUDE_DIR}/OpenGL")
 	else()
 		message("Empty OGL dirs, guessing some defaults.")
-		include_directories("/usr/include/GL" "/usr/include/OpenGL")
+		include_directories("/usr/include/GL" "/usr/include/OpenGL" "/usr/x86_64-w64-mingw32/sys-root/mingw/include/GL")
 	endif()
 
 	add_definitions(-DUSE_3D)

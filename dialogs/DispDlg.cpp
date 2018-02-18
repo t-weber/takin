@@ -46,6 +46,7 @@ enum : unsigned
 	TABLE_NN_DIST	= 5
 };
 
+
 DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 	: QDialog(pParent), m_pSettings(pSett),
 	m_pmapSpaceGroups(xtl::SpaceGroups<t_real>::GetInstance()->get_space_groups())
@@ -61,7 +62,6 @@ DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 	btnSave->setIcon(load_icon("res/icons/document-save.svg"));
 	btnLoad->setIcon(load_icon("res/icons/document-open.svg"));
 
-
 	//tableNN->sortByColumn(TABLE_NN_ORDER);
 	tableNN->sortItems(TABLE_NN_ORDER);
 	tableNN->verticalHeader()->setDefaultSectionSize(tableNN->verticalHeader()->defaultSectionSize()*0.8);
@@ -73,7 +73,6 @@ DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 	tableNN->setColumnWidth(TABLE_NN_Z, 75);
 	tableNN->setColumnWidth(TABLE_NN_DIST, 75);
 
-
 	m_plotwrapFerro.reset(new QwtPlotWrapper(plotFerro));
 	m_plotwrapFerro->GetCurve(0)->setTitle("Ferromagnetic Dispersion");
 	m_plotwrapFerro->GetPlot()->setAxisTitle(QwtPlot::xBottom, "q (rlu)");
@@ -82,9 +81,7 @@ DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 		connect(m_plotwrapFerro->GetPicker(), SIGNAL(moved(const QPointF&)),
 			this, SLOT(cursorMoved(const QPointF&)));
 
-
 	spinCentreIdx->setMinimum(0);
-
 
 	std::vector<QLineEdit*> vecEditsUC = {editA, editB, editC, editAlpha, editBeta, editGamma};
 	for(QLineEdit* pEdit : vecEditsUC)
@@ -120,7 +117,12 @@ DispDlg::DispDlg(QWidget* pParent, QSettings* pSett)
 		restoreGeometry(m_pSettings->value("disp/geo").toByteArray());
 }
 
-DispDlg::~DispDlg() {}
+DispDlg::~DispDlg()
+{
+	setAcceptDrops(0);
+	m_bDontCalc = 1;
+	m_pmapSpaceGroups = nullptr;
+}
 
 
 void DispDlg::Calc()
@@ -233,7 +235,7 @@ void DispDlg::Calc()
 				{
 					vecAtomsNN.push_back(vecThisAtom - vecCentre);
 
-					t_real dJ = iOuterIdx > vecJbyOrder.size() 
+					t_real dJ = iOuterIdx > vecJbyOrder.size()
 						? t_real(0) : vecJbyOrder[iOuterIdx-1];
 					t_cplx J = dJ * t_real(k_B / one_meV * kelvin);
 					vecJNN.push_back(J);
