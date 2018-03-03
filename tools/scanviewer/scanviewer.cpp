@@ -863,12 +863,14 @@ void ScanViewerDlg::UpdateFileList()
 }
 
 
+
 #ifndef NO_FIT
 
 void ScanViewerDlg::ShowFitParams()
 {
 	focus_dlg(m_pFitParamDlg);
 }
+
 
 /**
  * fit a function to data points
@@ -1056,18 +1058,20 @@ void ScanViewerDlg::FitGauss()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
-	auto func = tl::gauss_model_amp<t_real>;
-	constexpr std::size_t iFuncArgs = 5;
+	auto func = tl::gauss_model_amp_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 6;
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dSig = m_pFitParamDlg->GetSig(),	dSigErr = m_pFitParamDlg->GetSigErr();
 	t_real_glob dX0 = m_pFitParamDlg->GetX0(),		dX0Err = m_pFitParamDlg->GetX0Err();
 	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),	dOffsErr = m_pFitParamDlg->GetOffsErr();
+	t_real_glob dSlope = m_pFitParamDlg->GetSlope(),	dSlopeErr = m_pFitParamDlg->GetSlopeErr();
 
 	bool bAmpFixed = m_pFitParamDlg->GetAmpFixed();
 	bool bSigFixed = m_pFitParamDlg->GetSigFixed();
 	bool bX0Fixed = m_pFitParamDlg->GetX0Fixed();
 	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+	bool bSlopeFixed = m_pFitParamDlg->GetSlopeFixed();
 
 	// automatic parameter determination
 	if(!m_pFitParamDlg->WantParams())
@@ -1088,10 +1092,10 @@ void ScanViewerDlg::FitGauss()
 		bAmpFixed = bSigFixed = bX0Fixed = bOffsFixed = 0;
 	}
 
-	std::vector<std::string> vecParamNames = { "x0", "sig", "amp", "offs" };
-	std::vector<t_real> vecVals = { dX0, dSig, dAmp, dOffs };
-	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dAmpErr, dOffsErr };
-	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bAmpFixed, bOffsFixed };
+	std::vector<std::string> vecParamNames = { "x0", "sig", "amp", "offs", "slope" };
+	std::vector<t_real> vecVals = { dX0, dSig, dAmp, dOffs, dSlope };
+	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dAmpErr, dOffsErr, dSlopeErr };
+	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bAmpFixed, bOffsFixed, bSlopeFixed };
 
 	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
 		return;
@@ -1103,6 +1107,7 @@ void ScanViewerDlg::FitGauss()
 	m_pFitParamDlg->SetSig(vecVals[1]);		m_pFitParamDlg->SetSigErr(vecErrs[1]);
 	m_pFitParamDlg->SetAmp(vecVals[2]);		m_pFitParamDlg->SetAmpErr(vecErrs[2]);
 	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
+	m_pFitParamDlg->SetSlope(vecVals[4]);	m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
 }
 
 
@@ -1111,18 +1116,20 @@ void ScanViewerDlg::FitLorentz()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
-	auto func = tl::lorentz_model_amp<t_real>;
-	constexpr std::size_t iFuncArgs = 5;
+	auto func = tl::lorentz_model_amp_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 6;
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dHWHM = m_pFitParamDlg->GetHWHM(),	dHWHMErr = m_pFitParamDlg->GetHWHMErr();
 	t_real_glob dX0 = m_pFitParamDlg->GetX0(),		dX0Err = m_pFitParamDlg->GetX0Err();
 	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),	dOffsErr = m_pFitParamDlg->GetOffsErr();
+	t_real_glob dSlope = m_pFitParamDlg->GetSlope(),	dSlopeErr = m_pFitParamDlg->GetSlopeErr();
 
 	bool bAmpFixed = m_pFitParamDlg->GetAmpFixed();
 	bool bHWHMFixed = m_pFitParamDlg->GetHWHMFixed();
 	bool bX0Fixed = m_pFitParamDlg->GetX0Fixed();
 	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+	bool bSlopeFixed = m_pFitParamDlg->GetSlopeFixed();
 
 	// automatic parameter determination
 	if(!m_pFitParamDlg->WantParams())
@@ -1143,10 +1150,10 @@ void ScanViewerDlg::FitLorentz()
 		bAmpFixed = bHWHMFixed = bX0Fixed = bOffsFixed = 0;
 	}
 
-	std::vector<std::string> vecParamNames = { "x0", "hwhm", "amp", "offs" };
-	std::vector<t_real> vecVals = { dX0, dHWHM, dAmp, dOffs };
-	std::vector<t_real> vecErrs = { dX0Err, dHWHMErr, dAmpErr, dOffsErr };
-	std::vector<bool> vecFixed = { bX0Fixed, bHWHMFixed, bAmpFixed, bOffsFixed };
+	std::vector<std::string> vecParamNames = { "x0", "hwhm", "amp", "offs", "slope" };
+	std::vector<t_real> vecVals = { dX0, dHWHM, dAmp, dOffs, dSlope };
+	std::vector<t_real> vecErrs = { dX0Err, dHWHMErr, dAmpErr, dOffsErr, dSlopeErr };
+	std::vector<bool> vecFixed = { bX0Fixed, bHWHMFixed, bAmpFixed, bOffsFixed, bSlopeFixed };
 
 	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
 		return;
@@ -1158,6 +1165,7 @@ void ScanViewerDlg::FitLorentz()
 	m_pFitParamDlg->SetHWHM(vecVals[1]);	m_pFitParamDlg->SetHWHMErr(vecErrs[1]);
 	m_pFitParamDlg->SetAmp(vecVals[2]);		m_pFitParamDlg->SetAmpErr(vecErrs[2]);
 	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
+	m_pFitParamDlg->SetSlope(vecVals[4]);	m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
 }
 
 
@@ -1172,20 +1180,22 @@ void ScanViewerDlg::FitVoigt()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
-	auto func = tl::voigt_model_amp<t_real>;
-	constexpr std::size_t iFuncArgs = 6;
+	auto func = tl::voigt_model_amp_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 7;
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dSig = m_pFitParamDlg->GetSig(),	dSigErr = m_pFitParamDlg->GetSigErr();
 	t_real_glob dHWHM = m_pFitParamDlg->GetHWHM(),	dHWHMErr = m_pFitParamDlg->GetHWHMErr();
 	t_real_glob dX0 = m_pFitParamDlg->GetX0(),		dX0Err = m_pFitParamDlg->GetX0Err();
 	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),	dOffsErr = m_pFitParamDlg->GetOffsErr();
+	t_real_glob dSlope = m_pFitParamDlg->GetSlope(),	dSlopeErr = m_pFitParamDlg->GetSlopeErr();
 
 	bool bAmpFixed = m_pFitParamDlg->GetAmpFixed();
 	bool bSigFixed = m_pFitParamDlg->GetSigFixed();
 	bool bHWHMFixed = m_pFitParamDlg->GetHWHMFixed();
 	bool bX0Fixed = m_pFitParamDlg->GetX0Fixed();
 	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+	bool bSlopeFixed = m_pFitParamDlg->GetSlopeFixed();
 
 	// automatic parameter determination
 	if(!m_pFitParamDlg->WantParams())
@@ -1207,10 +1217,10 @@ void ScanViewerDlg::FitVoigt()
 		bAmpFixed = bHWHMFixed = bSigFixed = bX0Fixed = bOffsFixed = 0;
 	}
 
-	std::vector<std::string> vecParamNames = { "x0", "sig", "hwhm", "amp", "offs" };
-	std::vector<t_real> vecVals = { dX0, dSig, dHWHM, dAmp, dOffs };
-	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dHWHMErr, dAmpErr, dOffsErr };
-	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bHWHMFixed, bAmpFixed, bOffsFixed };
+	std::vector<std::string> vecParamNames = { "x0", "sig", "hwhm", "amp", "offs", "slope" };
+	std::vector<t_real> vecVals = { dX0, dSig, dHWHM, dAmp, dOffs, dSlope };
+	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dHWHMErr, dAmpErr, dOffsErr, dSlopeErr };
+	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bHWHMFixed, bAmpFixed, bOffsFixed, bSlopeFixed };
 
 	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
 		return;
@@ -1224,6 +1234,7 @@ void ScanViewerDlg::FitVoigt()
 	m_pFitParamDlg->SetHWHM(vecVals[2]);	m_pFitParamDlg->SetHWHMErr(vecErrs[2]);
 	m_pFitParamDlg->SetAmp(vecVals[3]);		m_pFitParamDlg->SetAmpErr(vecErrs[3]);
 	m_pFitParamDlg->SetOffs(vecVals[4]);	m_pFitParamDlg->SetOffsErr(vecErrs[4]);
+	m_pFitParamDlg->SetSlope(vecVals[5]);	m_pFitParamDlg->SetSlopeErr(vecErrs[5]);
 }
 #endif
 

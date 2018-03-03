@@ -111,25 +111,29 @@ void ConvoDlg::Start1D()
 
 		// -------------------------------------------------------------------------
 		// Load reso file
+		const std::vector<std::string>& vecGlobPaths = get_global_paths();
+
 		TASReso reso;
 		bool bResoLoaded = 0;
 		const std::string strResoFile = editRes->text().toStdString();
-		//const std::string strResoFileOnly = tl::get_file_nodir(strResoFile);
-
-		std::vector<std::string> vecResoFile;
-		vecResoFile.push_back(strResoFile);
-
-		const std::vector<std::string>& vecGlobPaths = get_global_paths();
-		for(const std::string& strGlobPath : vecGlobPaths)
-			vecResoFile.push_back(strGlobPath + "/" + strResoFile);
-		//for(const std::string& strGlobPath : vecGlobPaths)
-		//	vecResoFile.push_back(strGlobPath + "/" + strResoFileOnly);
-
-		for(const std::string& strResoFile : vecResoFile)
+		if(strResoFile != "")
 		{
-			tl::log_debug("Loading \"", strResoFile, "\".");
-			if((bResoLoaded = reso.LoadRes(strResoFile.c_str())))
-				break;
+			//const std::string strResoFileOnly = tl::get_file_nodir(strResoFile);
+
+			std::vector<std::string> vecResoFile;
+			vecResoFile.push_back(strResoFile);
+
+			for(const std::string& strGlobPath : vecGlobPaths)
+				vecResoFile.push_back(strGlobPath + "/" + strResoFile);
+			//for(const std::string& strGlobPath : vecGlobPaths)
+			//	vecResoFile.push_back(strGlobPath + "/" + strResoFileOnly);
+
+			for(const std::string& strResoFile : vecResoFile)
+			{
+				tl::log_debug("Loading \"", strResoFile, "\".");
+				if((bResoLoaded = reso.LoadRes(strResoFile.c_str())))
+					break;
+			}
 		}
 
 		if(!bResoLoaded)
@@ -152,28 +156,31 @@ void ConvoDlg::Start1D()
 				m_scan.sample.alpha, m_scan.sample.beta, m_scan.sample.gamma,
 				vec1, vec2);
 		}
-		else			// use crystal config file
+		else	// use crystal config file
 		{
 
 			// -------------------------------------------------------------------------
 			// Load lattice
 			bool bLatticeLoaded = 0;
 			const std::string strLatticeFile = editCrys->text().toStdString();
-			//const std::string strLatticeFileOnly = tl::get_file_nodir(strLatticeFile);
-
-			std::vector<std::string> vecLatticeFile;
-			vecLatticeFile.push_back(strLatticeFile);
-
-			for(const std::string& strGlobPath : vecGlobPaths)
-				vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFile);
-			//for(const std::string& strGlobPath : vecGlobPaths)
-			//	vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFileOnly);
-
-			for(const std::string& strLatticeFile : vecLatticeFile)
+			if(strLatticeFile != "")
 			{
-				tl::log_debug("Loading \"", strLatticeFile, "\".");
-				if((bLatticeLoaded = reso.LoadLattice(strLatticeFile.c_str())))
-					break;
+				//const std::string strLatticeFileOnly = tl::get_file_nodir(strLatticeFile);
+
+				std::vector<std::string> vecLatticeFile;
+				vecLatticeFile.push_back(strLatticeFile);
+
+				for(const std::string& strGlobPath : vecGlobPaths)
+					vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFile);
+				//for(const std::string& strGlobPath : vecGlobPaths)
+				//	vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFileOnly);
+
+				for(const std::string& strLatticeFile : vecLatticeFile)
+				{
+					tl::log_debug("Loading \"", strLatticeFile, "\".");
+					if((bLatticeLoaded = reso.LoadLattice(strLatticeFile.c_str())))
+						break;
+				}
 			}
 
 			if(!bLatticeLoaded)
@@ -592,25 +599,29 @@ void ConvoDlg::Start2D()
 
 		// -------------------------------------------------------------------------
 		// Load reso file
+		const std::vector<std::string>& vecGlobPaths = get_global_paths();
+
 		TASReso reso;
 		bool bResoLoaded = 0;
 		const std::string strResoFile = editRes->text().toStdString();
-		//const std::string strResoFileOnly = tl::get_file_nodir(strResoFile);
-
-		std::vector<std::string> vecResoFile;
-		vecResoFile.push_back(strResoFile);
-
-		const std::vector<std::string>& vecGlobPaths = get_global_paths();
-		for(const std::string& strGlobPath : vecGlobPaths)
-			vecResoFile.push_back(strGlobPath + "/" + strResoFile);
-		//for(const std::string& strGlobPath : vecGlobPaths)
-		//	vecResoFile.push_back(strGlobPath + "/" + strResoFileOnly);
-
-		for(const std::string& strResoFile : vecResoFile)
+		if(strResoFile != "")
 		{
-			tl::log_debug("Loading \"", strResoFile, "\".");
-			if((bResoLoaded = reso.LoadRes(strResoFile.c_str())))
-				break;
+			//const std::string strResoFileOnly = tl::get_file_nodir(strResoFile);
+
+			std::vector<std::string> vecResoFile;
+			vecResoFile.push_back(strResoFile);
+
+			for(const std::string& strGlobPath : vecGlobPaths)
+				vecResoFile.push_back(strGlobPath + "/" + strResoFile);
+			//for(const std::string& strGlobPath : vecGlobPaths)
+			//	vecResoFile.push_back(strGlobPath + "/" + strResoFileOnly);
+
+			for(const std::string& strResoFile : vecResoFile)
+			{
+				tl::log_debug("Loading \"", strResoFile, "\".");
+				if((bResoLoaded = reso.LoadRes(strResoFile.c_str())))
+					break;
+			}
 		}
 
 		if(!bResoLoaded)
@@ -626,21 +637,24 @@ void ConvoDlg::Start2D()
 		// Load lattice
 		bool bLatticeLoaded = 0;
 		const std::string strLatticeFile = editCrys->text().toStdString();
-		//const std::string strLatticeFileOnly = tl::get_file_nodir(strLatticeFile);
-
-		std::vector<std::string> vecLatticeFile;
-		vecLatticeFile.push_back(strLatticeFile);
-
-		for(const std::string& strGlobPath : vecGlobPaths)
-			vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFile);
-		//for(const std::string& strGlobPath : vecGlobPaths)
-		//	vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFileOnly);
-
-		for(const std::string& strLatticeFile : vecLatticeFile)
+		if(strLatticeFile != "")
 		{
-			tl::log_debug("Loading \"", strLatticeFile, "\".");
-			if((bLatticeLoaded = reso.LoadLattice(strLatticeFile.c_str())))
-				break;
+			//const std::string strLatticeFileOnly = tl::get_file_nodir(strLatticeFile);
+
+			std::vector<std::string> vecLatticeFile;
+			vecLatticeFile.push_back(strLatticeFile);
+
+			for(const std::string& strGlobPath : vecGlobPaths)
+				vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFile);
+			//for(const std::string& strGlobPath : vecGlobPaths)
+			//	vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFileOnly);
+
+			for(const std::string& strLatticeFile : vecLatticeFile)
+			{
+				tl::log_debug("Loading \"", strLatticeFile, "\".");
+				if((bLatticeLoaded = reso.LoadLattice(strLatticeFile.c_str())))
+					break;
+			}
 		}
 
 		if(!bLatticeLoaded)

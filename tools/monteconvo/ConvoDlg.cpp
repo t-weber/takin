@@ -570,6 +570,7 @@ void ConvoDlg::scanCheckToggled(bool bChecked)
 		scanFileChanged(editScan->text());
 }
 
+
 void ConvoDlg::scanFileChanged(const QString& qstrFile)
 {
 	m_bUseScan = 0;
@@ -633,6 +634,7 @@ void ConvoDlg::scanFileChanged(const QString& qstrFile)
 
 	m_bUseScan = 1;
 }
+
 
 void ConvoDlg::scaleChanged()
 {

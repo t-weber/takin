@@ -29,12 +29,14 @@ using t_real = t_real_reso;
 // -----------------------------------------------------------------------------
 // file operations
 
+
 void ConvoDlg::New()
 {
 	clear_global_paths();
 	m_strLastFile = "";
 	setWindowTitle(s_strTitle.c_str());
 }
+
 
 void ConvoDlg::Load()
 {
@@ -51,6 +53,7 @@ void ConvoDlg::Load()
 
 	Load(_strFile);
 }
+
 
 void ConvoDlg::Load(const QString& _strFile)
 {
@@ -211,6 +214,10 @@ void ConvoDlg::Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot)
 			emit SqwLoaded(m_pSqw->GetVars(), &m_pSqw->GetFitVars());
 		}
 	}
+
+
+	if(checkScan->isChecked())
+		scanFileChanged(editScan->text());
 	m_bAllowSqwReinit = 1;
 }
 
