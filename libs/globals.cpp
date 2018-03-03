@@ -27,6 +27,7 @@ bool g_bHasScatlens = 0;
 bool g_bHasSpaceGroups = 0;
 bool g_bShowFsq = 1;
 bool g_b3dBZ = 1;
+bool g_bUseGlobalPaths = 1;
 
 std::size_t GFX_NUM_POINTS = 512;
 std::size_t g_iMaxNN = 4;
@@ -101,5 +102,30 @@ std::vector<std::string> find_resource_dirs(const std::string& strDir, bool bLog
 
 	return vecDirs;
 }
+
+// -----------------------------------------------------------------------------
+
+
+static std::vector<std::string> g_vecPaths;
+
+void add_global_path(const std::string& strPath, bool bToBack)
+{
+	if(bToBack)
+		g_vecPaths.push_back(strPath);
+	else
+		g_vecPaths.insert(g_vecPaths.begin()+1, strPath);
+}
+
+const std::vector<std::string>& get_global_paths()
+{
+	static const std::vector<std::string> vecEmpty;
+	return g_bUseGlobalPaths ? g_vecPaths : vecEmpty;
+}
+
+void clear_global_paths()
+{
+	g_vecPaths.clear();
+}
+
 
 // -----------------------------------------------------------------------------

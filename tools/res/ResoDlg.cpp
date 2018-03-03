@@ -257,6 +257,9 @@ std::shared_ptr<ReflCurve<t_real_reso>> ResoDlg::load_cache_refl(const std::stri
 		return pRefl;
 
 	std::vector<std::string> vecRelDirs = { m_strCurDir, "." };
+	const std::vector<std::string>& vecGlobalPaths = get_global_paths();
+	for(const std::string& strGlobalPath : vecGlobalPaths)
+		vecRelDirs.push_back(strGlobalPath);
 
 	auto iter = m_mapRefl.find(strFile);
 	if(iter == m_mapRefl.end())

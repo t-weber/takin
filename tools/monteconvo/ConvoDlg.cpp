@@ -584,12 +584,30 @@ void ConvoDlg::scanFileChanged(const QString& qstrFile)
 	std::for_each(vecFiles.begin(), vecFiles.end(), [](std::string& str){ tl::trim(str); });
 
 	Filter filter;
+	const bool bFlip = checkFlip->isChecked();
 	m_scan = Scan();
-	if(!::load_file(vecFiles, m_scan, 1, filter, checkFlip->isChecked()))
+
+
+	bool bLoaded = ::load_file(vecFiles, m_scan, 1, filter, bFlip);
+
+	// alternatively search file in global paths
+	const std::vector<std::string>& vecGlobPaths = get_global_paths();
+	for(const std::string& strGlobPath : vecGlobPaths)
+	{
+		std::vector<std::string> _vecFiles;
+		for(const std::string& _strFile : vecFiles)
+			_vecFiles.push_back(strGlobPath + "/" + _strFile);
+
+		if(bLoaded = ::load_file(_vecFiles, m_scan, 1, filter, bFlip))
+			break;
+	}
+
+	if(!bLoaded)
 	{
 		tl::log_err("Cannot load scan(s).");
 		return;
 	}
+
 
 	if(!m_scan.vecPoints.size())
 	{

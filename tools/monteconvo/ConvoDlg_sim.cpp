@@ -109,13 +109,37 @@ void ConvoDlg::Start1D()
 			Q_ARG(const QString&, QString(strScanVar.c_str())));
 
 
+		// -------------------------------------------------------------------------
+		// Load reso file
 		TASReso reso;
-		if(!reso.LoadRes(editRes->text().toStdString().c_str()))
+		bool bResoLoaded = 0;
+		const std::string strResoFile = editRes->text().toStdString();
+		//const std::string strResoFileOnly = tl::get_file_nodir(strResoFile);
+
+		std::vector<std::string> vecResoFile;
+		vecResoFile.push_back(strResoFile);
+
+		const std::vector<std::string>& vecGlobPaths = get_global_paths();
+		for(const std::string& strGlobPath : vecGlobPaths)
+			vecResoFile.push_back(strGlobPath + "/" + strResoFile);
+		//for(const std::string& strGlobPath : vecGlobPaths)
+		//	vecResoFile.push_back(strGlobPath + "/" + strResoFileOnly);
+
+		for(const std::string& strResoFile : vecResoFile)
+		{
+			tl::log_debug("Loading \"", strResoFile, "\".");
+			if((bResoLoaded = reso.LoadRes(strResoFile.c_str())))
+				break;
+		}
+
+		if(!bResoLoaded)
 		{
 			//QMessageBox::critical(this, "Error", "Could not load resolution file.");
 			fktEnableButtons();
 			return;
 		}
+		// -------------------------------------------------------------------------
+
 
 		if(bUseScan)	// get crystal definition from scan file
 		{
@@ -130,12 +154,35 @@ void ConvoDlg::Start1D()
 		}
 		else			// use crystal config file
 		{
-			if(!reso.LoadLattice(editCrys->text().toStdString().c_str()))
+
+			// -------------------------------------------------------------------------
+			// Load lattice
+			bool bLatticeLoaded = 0;
+			const std::string strLatticeFile = editCrys->text().toStdString();
+			//const std::string strLatticeFileOnly = tl::get_file_nodir(strLatticeFile);
+
+			std::vector<std::string> vecLatticeFile;
+			vecLatticeFile.push_back(strLatticeFile);
+
+			for(const std::string& strGlobPath : vecGlobPaths)
+				vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFile);
+			//for(const std::string& strGlobPath : vecGlobPaths)
+			//	vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFileOnly);
+
+			for(const std::string& strLatticeFile : vecLatticeFile)
+			{
+				tl::log_debug("Loading \"", strLatticeFile, "\".");
+				if((bLatticeLoaded = reso.LoadLattice(strLatticeFile.c_str())))
+					break;
+			}
+
+			if(!bLatticeLoaded)
 			{
 				//QMessageBox::critical(this, "Error", "Could not load crystal file.");
 				fktEnableButtons();
 				return;
 			}
+			// -------------------------------------------------------------------------
 		}
 
 		reso.SetAlgo(ResoAlgo(comboAlgo->currentIndex()+1));
@@ -542,21 +589,68 @@ void ConvoDlg::Start2D()
 		// -------------------------------------------------------------------------
 
 
-		TASReso reso;
 
-		if(!reso.LoadRes(editRes->text().toStdString().c_str()))
+		// -------------------------------------------------------------------------
+		// Load reso file
+		TASReso reso;
+		bool bResoLoaded = 0;
+		const std::string strResoFile = editRes->text().toStdString();
+		//const std::string strResoFileOnly = tl::get_file_nodir(strResoFile);
+
+		std::vector<std::string> vecResoFile;
+		vecResoFile.push_back(strResoFile);
+
+		const std::vector<std::string>& vecGlobPaths = get_global_paths();
+		for(const std::string& strGlobPath : vecGlobPaths)
+			vecResoFile.push_back(strGlobPath + "/" + strResoFile);
+		//for(const std::string& strGlobPath : vecGlobPaths)
+		//	vecResoFile.push_back(strGlobPath + "/" + strResoFileOnly);
+
+		for(const std::string& strResoFile : vecResoFile)
+		{
+			tl::log_debug("Loading \"", strResoFile, "\".");
+			if((bResoLoaded = reso.LoadRes(strResoFile.c_str())))
+				break;
+		}
+
+		if(!bResoLoaded)
 		{
 			//QMessageBox::critical(this, "Error", "Could not load resolution file.");
 			fktEnableButtons();
 			return;
 		}
+		// -------------------------------------------------------------------------
 
-		if(!reso.LoadLattice(editCrys->text().toStdString().c_str()))
+
+		// -------------------------------------------------------------------------
+		// Load lattice
+		bool bLatticeLoaded = 0;
+		const std::string strLatticeFile = editCrys->text().toStdString();
+		//const std::string strLatticeFileOnly = tl::get_file_nodir(strLatticeFile);
+
+		std::vector<std::string> vecLatticeFile;
+		vecLatticeFile.push_back(strLatticeFile);
+
+		for(const std::string& strGlobPath : vecGlobPaths)
+			vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFile);
+		//for(const std::string& strGlobPath : vecGlobPaths)
+		//	vecLatticeFile.push_back(strGlobPath + "/" + strLatticeFileOnly);
+
+		for(const std::string& strLatticeFile : vecLatticeFile)
+		{
+			tl::log_debug("Loading \"", strLatticeFile, "\".");
+			if((bLatticeLoaded = reso.LoadLattice(strLatticeFile.c_str())))
+				break;
+		}
+
+		if(!bLatticeLoaded)
 		{
 			//QMessageBox::critical(this, "Error", "Could not load crystal file.");
 			fktEnableButtons();
 			return;
 		}
+		// -------------------------------------------------------------------------
+
 
 		reso.SetAlgo(ResoAlgo(comboAlgo->currentIndex()+1));
 		reso.SetKiFix(comboFixedK->currentIndex()==0);

@@ -41,6 +41,10 @@ extern void add_resource_path(const std::string& strPath, bool bToBack=1);
 extern std::string find_resource(const std::string& strFile, bool bLogErr=1);
 extern std::vector<std::string> find_resource_dirs(const std::string& strDir, bool bLogErr=1);
 
+extern void add_global_path(const std::string& strPath, bool bToBack=1);
+extern const std::vector<std::string>& get_global_paths();
+extern void clear_global_paths();
+
 extern unsigned int get_max_threads();
 
 #endif

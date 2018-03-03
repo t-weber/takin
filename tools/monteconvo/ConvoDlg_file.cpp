@@ -31,6 +31,7 @@ using t_real = t_real_reso;
 
 void ConvoDlg::New()
 {
+	clear_global_paths();
 	m_strLastFile = "";
 	setWindowTitle(s_strTitle.c_str());
 }
@@ -61,6 +62,13 @@ void ConvoDlg::Load(const QString& _strFile)
 	std::string strFile = _strFile.toStdString();
 	if(!tl::file_exists(strFile.c_str()))
 		return;
+
+	// add the location of the convo file as a possible global path
+	std::string strGlobDir = tl::get_dir(strFile);
+	clear_global_paths();
+	if(strGlobDir != "")
+		add_global_path(strGlobDir);
+
 
 	tl::Prop<std::string> xml;
 	if(!xml.Load(strFile, tl::PropType::XML))

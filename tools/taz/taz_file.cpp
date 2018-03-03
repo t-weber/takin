@@ -77,6 +77,7 @@ void TazDlg::New()
 	m_strCurFile = "";
 	setWindowTitle(s_strTitle.c_str());
 
+	clear_global_paths();
 	DeleteDialogs();
 	Disconnect();
 	VarsChanged(crys, triag);
@@ -116,6 +117,7 @@ bool TazDlg::Load(const char* pcFile)
 		m_sceneRecip.SetEmitChanges(true);
 	} BOOST_SCOPE_EXIT_END
 
+	clear_global_paths();
 	Disconnect();
 
 	const std::string strXmlRoot("taz/");

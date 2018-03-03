@@ -93,6 +93,7 @@ bool TASReso::LoadLattice(const char* pcXmlFile)
 	return true;
 }
 
+
 bool TASReso::LoadRes(const char* pcXmlFile)
 {
 	const std::string strXmlRoot("taz/");
@@ -131,6 +132,9 @@ bool TASReso::LoadRes(const char* pcXmlFile)
 	std::string strAnaEffic = xml.Query<std::string>((strXmlRoot + "reso/ana_effic_file").c_str(), "");
 
 	std::vector<std::string> vecRelDirs = { strXmlDir, "." };
+	const std::vector<std::string>& vecGlobalPaths = get_global_paths();
+	for(const std::string& strGlobalPath : vecGlobalPaths)
+		vecRelDirs.push_back(strGlobalPath);
 
 	if(strMonoRefl != "")
 	{
