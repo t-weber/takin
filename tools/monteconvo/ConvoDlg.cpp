@@ -591,16 +591,19 @@ void ConvoDlg::scanFileChanged(const QString& qstrFile)
 
 	bool bLoaded = ::load_file(vecFiles, m_scan, 1, filter, bFlip);
 
-	// alternatively search file in global paths
-	const std::vector<std::string>& vecGlobPaths = get_global_paths();
-	for(const std::string& strGlobPath : vecGlobPaths)
+	// if file was not found, alternatively look in global paths
+	if(!bLoaded)
 	{
-		std::vector<std::string> _vecFiles;
-		for(const std::string& _strFile : vecFiles)
-			_vecFiles.push_back(strGlobPath + "/" + _strFile);
+		const std::vector<std::string>& vecGlobPaths = get_global_paths();
+		for(const std::string& strGlobPath : vecGlobPaths)
+		{
+			std::vector<std::string> _vecFiles;
+			for(const std::string& _strFile : vecFiles)
+				_vecFiles.push_back(strGlobPath + "/" + _strFile);
 
-		if(bLoaded = ::load_file(_vecFiles, m_scan, 1, filter, bFlip))
-			break;
+			if(bLoaded = ::load_file(_vecFiles, m_scan, 1, filter, bFlip))
+				break;
+		}
 	}
 
 	if(!bLoaded)
@@ -668,7 +671,7 @@ void ConvoDlg::ShowAboutDlg()
 	std::ostringstream ostrAbout;
 	ostrAbout << "Takin/Monteconvo version " << TAKIN_VER << ".\n";
 	ostrAbout << "Written by Tobias Weber <tobias.weber@tum.de>,\n";
-	ostrAbout << "2015 - 2017.\n";
+	ostrAbout << "2015 - 2018.\n";
 	ostrAbout << "\n" << TAKIN_LICENSE("Takin/Monteconvo");
 
 	QMessageBox::about(this, "About Monteconvo", ostrAbout.str().c_str());
