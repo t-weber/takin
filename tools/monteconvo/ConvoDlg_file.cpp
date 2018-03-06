@@ -403,11 +403,13 @@ void ConvoDlg::LoadSettings()
 		restoreGeometry(m_pSett->value("monteconvo/geo").toByteArray());
 }
 
+
 void ConvoDlg::showEvent(QShowEvent *pEvt)
 {
 	//LoadSettings();
 	QDialog::showEvent(pEvt);
 }
+
 
 void ConvoDlg::accept()
 {
@@ -435,6 +437,7 @@ void ConvoDlg::accept()
 
 // -----------------------------------------------------------------------------
 
+
 void ConvoDlg::browseCrysFiles()
 {
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
@@ -456,6 +459,7 @@ void ConvoDlg::browseCrysFiles()
 	if(m_pSett)
 		m_pSett->setValue("convo/last_dir_crys", QString(strDir.c_str()));
 }
+
 
 void ConvoDlg::browseResoFiles()
 {
@@ -479,6 +483,7 @@ void ConvoDlg::browseResoFiles()
 		m_pSett->setValue("convo/last_dir_reso", QString(strDir.c_str()));
 }
 
+
 void ConvoDlg::browseSqwFiles()
 {
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
@@ -500,6 +505,7 @@ void ConvoDlg::browseSqwFiles()
 	if(m_pSett)
 		m_pSett->setValue("convo/last_dir_sqw", QString(strDir.c_str()));
 }
+
 
 void ConvoDlg::browseScanFiles()
 {

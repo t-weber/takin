@@ -69,6 +69,7 @@ struct Scan
 	std::string strMonCol = "";
 	std::vector<ScanPoint> vecPoints;
 
+	std::vector<t_real_sc> vechklE[4];
 	std::vector<t_real_sc> vecX;
 	std::vector<t_real_sc> vecCts, vecMon;
 	std::vector<t_real_sc> vecCtsErr, vecMonErr;

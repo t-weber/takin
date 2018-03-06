@@ -116,16 +116,55 @@ void add_global_path(const std::string& strPath, bool bToBack)
 		g_vecPaths.insert(g_vecPaths.begin()+1, strPath);
 }
 
+
 const std::vector<std::string>& get_global_paths()
 {
 	static const std::vector<std::string> vecEmpty;
 	return g_bUseGlobalPaths ? g_vecPaths : vecEmpty;
 }
 
+
+std::string find_file_in_global_paths(const std::string& strFile, bool bAlsoTryFileOnly)
+{
+	// no file given
+	if(strFile == "")
+		return "";
+
+	// if the file exists, use it
+	if(tl::file_exists(strFile.c_str()))
+		return strFile;
+
+
+	const std::vector<std::string>& vecGlobPaths = get_global_paths();
+
+	// add full path of "strFile" to global paths
+	for(const std::string& strGlobPath : vecGlobPaths)
+	{
+		std::string strNewFile = strGlobPath + "/" + strFile;
+		if(tl::file_exists(strNewFile.c_str()))
+			return strNewFile;
+	}
+
+	if(bAlsoTryFileOnly)
+	{
+		// add only the file name in "strFile" to global paths
+		const std::string strFileOnly = tl::get_file_nodir(strFile);
+		for(const std::string& strGlobPath : vecGlobPaths)
+		{
+			std::string strNewFile = strGlobPath + "/" + strFileOnly;
+			if(tl::file_exists(strNewFile.c_str()))
+				return strNewFile;
+		}
+	}
+
+	// nothing found
+	return "";
+}
+
+
 void clear_global_paths()
 {
 	g_vecPaths.clear();
 }
-
 
 // -----------------------------------------------------------------------------

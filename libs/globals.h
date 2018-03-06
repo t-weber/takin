@@ -44,6 +44,7 @@ extern std::vector<std::string> find_resource_dirs(const std::string& strDir, bo
 extern void add_global_path(const std::string& strPath, bool bToBack=1);
 extern const std::vector<std::string>& get_global_paths();
 extern void clear_global_paths();
+extern std::string find_file_in_global_paths(const std::string& strFile, bool bAlsoTryFileOnly=true);
 
 extern unsigned int get_max_threads();
 

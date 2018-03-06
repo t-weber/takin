@@ -185,9 +185,9 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	// file menu
 	QMenu *pMenuFile = new QMenu("File", this);
 
-    QAction *pNew = new QAction("New", this);
-    pNew->setIcon(load_icon("res/icons/document-new.svg"));
-    pMenuFile->addAction(pNew);
+	QAction *pNew = new QAction("New", this);
+	pNew->setIcon(load_icon("res/icons/document-new.svg"));
+	pMenuFile->addAction(pNew);
 
 	pMenuFile->addSeparator();
 
@@ -384,6 +384,7 @@ void ConvoDlg::SqwModelChanged(int)
 	//emit SqwLoaded(std::vector<SqwBase::t_var>{}, nullptr);
 }
 
+
 void ConvoDlg::createSqwModel(const QString& qstrFile)
 {
 	if(!m_bAllowSqwReinit) return;
@@ -395,8 +396,9 @@ void ConvoDlg::createSqwModel(const QString& qstrFile)
 	}
 
 	std::string strSqwIdent = comboSqw->itemData(comboSqw->currentIndex()).toString().toStdString();
-	std::string strSqwFile = qstrFile.toStdString();
-	tl::trim(strSqwFile);
+	std::string _strSqwFile = qstrFile.toStdString();
+	tl::trim(_strSqwFile);
+	std::string strSqwFile = find_file_in_global_paths(_strSqwFile);
 
 	if(strSqwFile == "")
 	{
@@ -601,7 +603,7 @@ void ConvoDlg::scanFileChanged(const QString& qstrFile)
 			for(const std::string& _strFile : vecFiles)
 				_vecFiles.push_back(strGlobPath + "/" + _strFile);
 
-			if(bLoaded = ::load_file(_vecFiles, m_scan, 1, filter, bFlip))
+			if((bLoaded = ::load_file(_vecFiles, m_scan, 1, filter, bFlip)))
 				break;
 		}
 	}

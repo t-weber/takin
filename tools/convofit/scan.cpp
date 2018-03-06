@@ -276,6 +276,10 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 
 		t_real_sc dPos[] = { pt.h, pt.k, pt.l, pt.E/tl::get_one_meV<t_real_sc>() };
 		scan.vecX.push_back(dPos[iScIdx]);
+
+		for(int ihklE=0; ihklE<4; ++ihklE)
+			scan.vechklE[ihklE].push_back(dPos[ihklE]);
+
 		//tl::log_info("Added pos: ", *scan.vecX.rbegin());
 	}
 
@@ -284,6 +288,8 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 	// filter
 	decltype(scan.vecX) vecXNew;
 	decltype(scan.vecCts) vecCtsNew, vecMonNew, vecCtsErrNew, vecMonErrNew;
+	decltype(scan.vechklE) vechklENew;
+
 	for(std::size_t i=0; i<scan.vecX.size(); ++i)
 	{
 		if(filter.bLower && scan.vecX[i] <= filter.dLower) continue;
@@ -294,12 +300,20 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 		vecMonNew.push_back(scan.vecMon[i]);
 		vecCtsErrNew.push_back(scan.vecCtsErr[i]);
 		vecMonErrNew.push_back(scan.vecMonErr[i]);
+
+		for(int ihklE=0; ihklE<4; ++ihklE)
+			vechklENew[ihklE].push_back(scan.vechklE[ihklE][i]);
+
 	}
+
 	scan.vecX = std::move(vecXNew);
 	scan.vecCts = std::move(vecCtsNew);
 	scan.vecMon = std::move(vecMonNew);
 	scan.vecCtsErr = std::move(vecCtsErrNew);
 	scan.vecMonErr = std::move(vecMonErrNew);
+
+	for(int ihklE=0; ihklE<4; ++ihklE)
+		scan.vechklE[ihklE] = std::move(vechklENew[ihklE]);
 
 
 	return true;
