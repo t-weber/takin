@@ -185,6 +185,7 @@ add_executable(takin
 	tools/convofit/scan.cpp
 	tools/scanviewer/scanviewer.cpp tools/scanviewer/FitParamDlg.cpp
 	tools/scanpos/ScanPosDlg.cpp
+	tools/powderfit/PowderFitDlg.cpp
 
 	dialogs/SettingsDlg.cpp dialogs/FilePreviewDlg.cpp
 	dialogs/GotoDlg.cpp dialogs/DWDlg.cpp dialogs/DynPlaneDlg.cpp

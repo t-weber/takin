@@ -19,7 +19,7 @@ mkdir -p ${INSTDIR}/DEBIAN
 
 
 # control file
-echo -e "Package: takin\nVersion: 1.5.4" > ${INSTDIR}/DEBIAN/control
+echo -e "Package: takin\nVersion: 1.5.6" > ${INSTDIR}/DEBIAN/control
 echo -e "Description: inelastic neutron scattering software" >> ${INSTDIR}/DEBIAN/control
 echo -e "Maintainer: n/a" >> ${INSTDIR}/DEBIAN/control
 echo -e "Architecture: $(dpkg --print-architecture)" >> ${INSTDIR}/DEBIAN/control
@@ -38,7 +38,7 @@ cp -v COPYING			${INSTDIR}/usr/local/share/takin
 cp -v LICENSES			${INSTDIR}/usr/local/share/takin
 cp -v LITERATURE		${INSTDIR}/usr/local/share/takin
 cp -v AUTHORS			${INSTDIR}/usr/local/share/takin
-cp -v /usr/local/lib/libMinuit2.so.0 ${INSTDIR}/usr/local/lib
+cp -v /usr/local/lib/libMinuit2.so* ${INSTDIR}/usr/local/lib
 cp -v takin.desktop		${INSTDIR}/usr/share/applications
 
 

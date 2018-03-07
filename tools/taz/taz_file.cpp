@@ -779,3 +779,11 @@ void TazDlg::ShowScanPos()
 
 	focus_dlg(m_pScanPos);
 }
+
+void TazDlg::ShowPowderFit()
+{
+	if(!m_pPowderFit)
+		m_pPowderFit = new PowderFitDlg(this, &m_settings);
+
+	focus_dlg(m_pPowderFit);
+}

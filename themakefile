@@ -474,7 +474,8 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} \
 	obj/tasreso.o obj/ConvoDlg.o obj/ConvoDlg_file.o obj/SqwParamDlg.o \
 	obj/scanviewer.o obj/FitParamDlg.o obj/x3d.o obj/eval.o \
-	obj/tlibs_ver.o obj/libcrystal_ver.o obj/AboutDlg.o obj/convo_scan.o obj/ScanPosDlg.o \
+	obj/tlibs_ver.o obj/libcrystal_ver.o obj/AboutDlg.o obj/convo_scan.o \
+	obj/ScanPosDlg.o obj/PowderFitDlg.o \
 	obj/convofit_import.o obj/ConvoDlg_fit.o obj/ConvoDlg_sim.o \
 	obj/DeadAnglesDlg.o obj/LogDlg.o
 
@@ -824,6 +825,8 @@ obj/FitParamDlg.o: tools/scanviewer/FitParamDlg.cpp tools/scanviewer/FitParamDlg
 
 obj/ScanPosDlg.o: tools/scanpos/ScanPosDlg.cpp tools/scanpos/ScanPosDlg.h
 	${CC} ${FLAGS} -c -o $@ $<
+obj/PowderFitDlg.o: tools/powderfit/PowderFitDlg.cpp tools/powderfit/PowderFitDlg.h
+	${CC} ${FLAGS} -c -o $@ $<
 
 obj/gentab.o: tools/gentab/gentab.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
@@ -855,6 +858,7 @@ clean:
 	rm -f tools/res/*.moc
 	rm -f tools/scanviewer/*.moc
 	rm -f tools/scanpos/*.moc
+	rm -f tools/powderfit/*.moc
 	rm -f tools/monteconvo/*.moc
 	rm -f tools/sglist/*.moc
 	rm -f dialogs/*.moc

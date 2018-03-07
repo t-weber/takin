@@ -82,6 +82,7 @@ declare -a hfiles=(
 	"${TAKINROOT}/tools/monteconvo/SqwParamDlg.h"
 	"${TAKINROOT}/tools/sglist/SgListDlg.h"
 	"${TAKINROOT}/tools/scanpos/ScanPosDlg.h"
+	"${TAKINROOT}/tools/powderfit/PowderFitDlg.h"
 	"${TAKINROOT}/dialogs/EllipseDlg.h"
 	"${TAKINROOT}/dialogs/EllipseDlg3D.h"
 	"${TAKINROOT}/dialogs/RecipParamDlg.h"

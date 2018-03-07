@@ -40,6 +40,7 @@
 #include "tools/monteconvo/ConvoDlg.h"
 #include "tools/scanviewer/scanviewer.h"
 #include "tools/scanpos/ScanPosDlg.h"
+#include "tools/powderfit/PowderFitDlg.h"
 #include "dialogs/SpurionDlg.h"
 #include "dialogs/NeutronDlg.h"
 #include "dialogs/TOFDlg.h"
@@ -171,6 +172,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		ScanViewerDlg *m_pScanViewer = nullptr;
 		ScanPosDlg *m_pScanPos = nullptr;
+		PowderFitDlg *m_pPowderFit = nullptr;
 
 #if !defined NO_NET
 		SrvDlg *m_pSrvDlg = nullptr;
@@ -250,6 +252,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		void ShowScanViewer();
 		void ShowScanPos();
+		void ShowPowderFit();
 
 		bool LoadFile(const QString& strFile);
 		bool ImportFile(const QString& strFile);

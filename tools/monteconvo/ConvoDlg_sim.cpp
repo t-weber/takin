@@ -77,25 +77,26 @@ void ConvoDlg::Start1D()
 
 		std::string strScanVar = "";
 		std::vector<t_real> *pVecScanX = nullptr;
-		if(iScanAxis==1 || !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu))
+		// either scan axis is directly selected OR (automatic is set AND the start/stop values are different)
+		if(iScanAxis==1 || (iScanAxis==0 && !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecH;
 			strScanVar = "h (rlu)";
 			iScanAxisIdx = 0;
 		}
-		else if(iScanAxis==2 || !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu))
+		else if(iScanAxis==2 || (iScanAxis==0 && !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecK;
 			strScanVar = "k (rlu)";
 			iScanAxisIdx = 1;
 		}
-		else if(iScanAxis==3 || !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu))
+		else if(iScanAxis==3 || (iScanAxis==0 && !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecL;
 			strScanVar = "l (rlu)";
 			iScanAxisIdx = 2;
 		}
-		else if(iScanAxis==4 || !tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu))
+		else if(iScanAxis==4 || (iScanAxis==0 && !tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecE;
 			strScanVar = "E (meV)";
@@ -508,25 +509,25 @@ void ConvoDlg::Start2D()
 
 		std::string strScanVar1 = "";
 		t_real dStart1{}, dStop1{};
-		if(iScanAxis1==1 || !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu))
+		if(iScanAxis1==1 || (iScanAxis1==0 && !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu)))
 		{
 			strScanVar1 = "h (rlu)";
 			dStart1 = spinStartH->value();
 			dStop1 = spinStopH->value();
 		}
-		else if(iScanAxis1==2 || !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu))
+		else if(iScanAxis1==2 || (iScanAxis1==0 && !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu)))
 		{
 			strScanVar1 = "k (rlu)";
 			dStart1 = spinStartK->value();
 			dStop1 = spinStopK->value();
 		}
-		else if(iScanAxis1==3 || !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu))
+		else if(iScanAxis1==3 || (iScanAxis1==0 && !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu)))
 		{
 			strScanVar1 = "l (rlu)";
 			dStart1 = spinStartL->value();
 			dStop1 = spinStopL->value();
 		}
-		else if(iScanAxis1==4 || !tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu))
+		else if(iScanAxis1==4 || (iScanAxis1==0 && !tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu)))
 		{
 			strScanVar1 = "E (meV)";
 			dStart1 = spinStartE->value();
@@ -535,25 +536,25 @@ void ConvoDlg::Start2D()
 
 		std::string strScanVar2 = "";
 		t_real dStart2{}, dStop2{};
-		if(iScanAxis2==1 || !tl::float_equal(spinStartH->value(), spinStopH2->value(), g_dEpsRlu))
+		if(iScanAxis2==1 || (iScanAxis2==0 && !tl::float_equal(spinStartH->value(), spinStopH2->value(), g_dEpsRlu)))
 		{
 			strScanVar2 = "h (rlu)";
 			dStart2 = spinStartH->value();
 			dStop2 = spinStopH2->value();
 		}
-		else if(iScanAxis2==2 || !tl::float_equal(spinStartK->value(), spinStopK2->value(), g_dEpsRlu))
+		else if(iScanAxis2==2 || (iScanAxis2==0 && !tl::float_equal(spinStartK->value(), spinStopK2->value(), g_dEpsRlu)))
 		{
 			strScanVar2 = "k (rlu)";
 			dStart2 = spinStartK->value();
 			dStop2 = spinStopK2->value();
 		}
-		else if(iScanAxis2==3 || !tl::float_equal(spinStartL->value(), spinStopL2->value(), g_dEpsRlu))
+		else if(iScanAxis2==3 || (iScanAxis2==0 && !tl::float_equal(spinStartL->value(), spinStopL2->value(), g_dEpsRlu)))
 		{
 			strScanVar2 = "l (rlu)";
 			dStart2 = spinStartL->value();
 			dStop2 = spinStopL2->value();
 		}
-		else if(iScanAxis2==4 || !tl::float_equal(spinStartE->value(), spinStopE2->value(), g_dEpsRlu))
+		else if(iScanAxis2==4 || (iScanAxis2==0 && !tl::float_equal(spinStartE->value(), spinStopE2->value(), g_dEpsRlu)))
 		{
 			strScanVar2 = "E (meV)";
 			dStart2 = spinStartE->value();
@@ -860,17 +861,17 @@ void ConvoDlg::StartDisp()
 		const int iScanAxis = comboAxis->currentIndex();
 		std::string strScanVar = "";
 		std::vector<t_real> *pVecScanX = nullptr;
-		if(iScanAxis==1 || !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu))
+		if(iScanAxis==1 || (iScanAxis==0 && !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecH;
 			strScanVar = "h (rlu)";
 		}
-		else if(iScanAxis==2 || !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu))
+		else if(iScanAxis==2 || (iScanAxis==0 && !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecK;
 			strScanVar = "k (rlu)";
 		}
-		else if(iScanAxis==3 || !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu))
+		else if(iScanAxis==3 || (iScanAxis==0 && !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu)))
 		{
 			pVecScanX = &vecL;
 			strScanVar = "l (rlu)";

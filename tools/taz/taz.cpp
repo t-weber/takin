@@ -625,6 +625,11 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	QAction *pScanPos = new QAction("Scan Positions Plot...", this);
 	pMenuTools->addAction(pScanPos);
 
+	pMenuTools->addSeparator();
+
+	QAction *pPowderFit = new QAction("Powder Fitting...", this);
+	pMenuTools->addAction(pPowderFit);
+
 
 
 	// --------------------------------------------------------------------------------
@@ -684,6 +689,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	QObject::connect(pImport, SIGNAL(triggered()), this, SLOT(Import()));
 	QObject::connect(pScanViewer, SIGNAL(triggered()), this, SLOT(ShowScanViewer()));
 	QObject::connect(pScanPos, SIGNAL(triggered()), this, SLOT(ShowScanPos()));
+	QObject::connect(pPowderFit, SIGNAL(triggered()), this, SLOT(ShowPowderFit()));
 	QObject::connect(pSettings, SIGNAL(triggered()), this, SLOT(ShowSettingsDlg()));
 	QObject::connect(pExit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -914,6 +920,7 @@ void TazDlg::DeleteDialogs()
 	if(m_pDynPlaneDlg) { delete m_pDynPlaneDlg; m_pDynPlaneDlg = 0; }
 	if(m_pScanViewer) { delete m_pScanViewer; m_pScanViewer = nullptr; }
 	if(m_pScanPos) { delete m_pScanPos; m_pScanPos = nullptr; }
+	if(m_pPowderFit) { delete m_pPowderFit; m_pPowderFit = nullptr; }
 	if(m_pAtomsDlg) { delete m_pAtomsDlg; m_pAtomsDlg = nullptr; }
 	if(m_pDeadAnglesDlg) { delete m_pDeadAnglesDlg; m_pDeadAnglesDlg = nullptr; }
 	if(m_pPowderDlg) { delete m_pPowderDlg; m_pPowderDlg = 0; }
