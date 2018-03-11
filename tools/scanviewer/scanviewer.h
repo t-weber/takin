@@ -46,6 +46,9 @@ public:
 	ScanViewerDlg(QWidget* pParent = nullptr);
 	virtual ~ScanViewerDlg();
 
+private:
+	void SetAbout();
+
 protected:
 	void ClearPlot();
 	void PlotScan();

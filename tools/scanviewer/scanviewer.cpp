@@ -17,6 +17,9 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
+
+#include <boost/config.hpp>
+#include <boost/version.hpp>
 #include <boost/filesystem.hpp>
 
 #include "tlibs/math/math.h"
@@ -24,6 +27,7 @@
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
 #include "tlibs/log/log.h"
+#include "libs/version.h"
 
 #ifndef NO_FIT
 	#include "tlibs/fit/minuit.h"
@@ -44,10 +48,12 @@ namespace fs = boost::filesystem;
 ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	: QDialog(pParent, Qt::WindowTitleHint|Qt::WindowCloseButtonHint|Qt::WindowMinMaxButtonsHint),
 		m_settings("tobis_stuff", "scanviewer"),
-		m_vecExts({	".dat", ".DAT", ".scn", ".SCN", ".ng0", ".NG0", ".log", ".LOG" }),
+		m_vecExts({	".dat", ".DAT", ".scn", ".SCN", ".ng0", ".NG0", ".log", ".LOG"/*, ""*/ }),
 		m_pFitParamDlg(new FitParamDlg(this, &m_settings))
 {
 	this->setupUi(this);
+	SetAbout();
+
 	QFont font;
 	if(m_settings.contains("main/font_gen") && font.fromString(m_settings.value("main/font_gen", "").toString()))
 		setFont(font);
@@ -165,6 +171,29 @@ ScanViewerDlg::~ScanViewerDlg()
 	ClearPlot();
 	tableProps->setRowCount(0);
 	if(m_pFitParamDlg) { delete m_pFitParamDlg; m_pFitParamDlg = nullptr; }
+}
+
+
+void ScanViewerDlg::SetAbout()
+{
+	labelVersion->setText("Version " TAKIN_VER ".");
+	labelWritten->setText("Written by Tobias Weber <tobias.weber@tum.de>.");
+	labelYears->setText("Years: 2015 - 2018.");
+
+	std::string strCC = "Built";
+#ifdef BOOST_PLATFORM
+	strCC += " for " + std::string(BOOST_PLATFORM);
+#endif
+	strCC += " using " + std::string(BOOST_COMPILER);
+#ifdef __cplusplus
+	strCC += " (standard: " + tl::var_to_str(__cplusplus) + ")";
+#endif
+#ifdef BOOST_STDLIB
+	strCC += " with " + std::string(BOOST_STDLIB);
+#endif
+	strCC += " on " + std::string(__DATE__) + ", " + std::string(__TIME__);
+	strCC += ".";
+	labelCC->setText(strCC.c_str());
 }
 
 
@@ -1058,8 +1087,12 @@ void ScanViewerDlg::FitGauss()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
-	auto func = tl::gauss_model_amp_slope<t_real>;
-	constexpr std::size_t iFuncArgs = 6;
+	const bool bUseSlope = checkSloped->isChecked();
+
+	auto func = tl::gauss_model_amp<t_real>;
+	auto funcSloped = tl::gauss_model_amp_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 5;
+	constexpr std::size_t iFuncArgsSloped = iFuncArgs+1;
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dSig = m_pFitParamDlg->GetSig(),	dSigErr = m_pFitParamDlg->GetSigErr();
@@ -1092,12 +1125,25 @@ void ScanViewerDlg::FitGauss()
 		bAmpFixed = bSigFixed = bX0Fixed = bOffsFixed = 0;
 	}
 
-	std::vector<std::string> vecParamNames = { "x0", "sig", "amp", "offs", "slope" };
-	std::vector<t_real> vecVals = { dX0, dSig, dAmp, dOffs, dSlope };
-	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dAmpErr, dOffsErr, dSlopeErr };
-	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bAmpFixed, bOffsFixed, bSlopeFixed };
+	std::vector<std::string> vecParamNames = { "x0", "sig", "amp", "offs" };
+	std::vector<t_real> vecVals = { dX0, dSig, dAmp, dOffs };
+	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dAmpErr, dOffsErr };
+	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bAmpFixed, bOffsFixed };
 
-	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
+	if(bUseSlope)
+	{
+		vecParamNames.push_back("slope");
+		vecVals.push_back(dSlope);
+		vecErrs.push_back(dSlopeErr);
+		vecFixed.push_back(bSlopeFixed);
+	}
+
+	bool bOk = false;
+	if(bUseSlope)
+		bOk = Fit<iFuncArgsSloped>(funcSloped, vecParamNames, vecVals, vecErrs, vecFixed);
+	else
+		bOk = Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed);
+	if(!bOk)
 		return;
 
 	for(t_real &d : vecErrs) d = std::abs(d);
@@ -1107,7 +1153,12 @@ void ScanViewerDlg::FitGauss()
 	m_pFitParamDlg->SetSig(vecVals[1]);		m_pFitParamDlg->SetSigErr(vecErrs[1]);
 	m_pFitParamDlg->SetAmp(vecVals[2]);		m_pFitParamDlg->SetAmpErr(vecErrs[2]);
 	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
-	m_pFitParamDlg->SetSlope(vecVals[4]);	m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
+
+	if(bUseSlope)
+	{
+		m_pFitParamDlg->SetSlope(vecVals[4]);
+		m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
+	}
 }
 
 
@@ -1116,8 +1167,12 @@ void ScanViewerDlg::FitLorentz()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
-	auto func = tl::lorentz_model_amp_slope<t_real>;
-	constexpr std::size_t iFuncArgs = 6;
+	const bool bUseSlope = checkSloped->isChecked();
+
+	auto func = tl::lorentz_model_amp<t_real>;
+	auto funcSloped = tl::lorentz_model_amp_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 5;
+	constexpr std::size_t iFuncArgsSloped = iFuncArgs+1;
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dHWHM = m_pFitParamDlg->GetHWHM(),	dHWHMErr = m_pFitParamDlg->GetHWHMErr();
@@ -1150,12 +1205,25 @@ void ScanViewerDlg::FitLorentz()
 		bAmpFixed = bHWHMFixed = bX0Fixed = bOffsFixed = 0;
 	}
 
-	std::vector<std::string> vecParamNames = { "x0", "hwhm", "amp", "offs", "slope" };
-	std::vector<t_real> vecVals = { dX0, dHWHM, dAmp, dOffs, dSlope };
-	std::vector<t_real> vecErrs = { dX0Err, dHWHMErr, dAmpErr, dOffsErr, dSlopeErr };
-	std::vector<bool> vecFixed = { bX0Fixed, bHWHMFixed, bAmpFixed, bOffsFixed, bSlopeFixed };
+	std::vector<std::string> vecParamNames = { "x0", "hwhm", "amp", "offs" };
+	std::vector<t_real> vecVals = { dX0, dHWHM, dAmp, dOffs };
+	std::vector<t_real> vecErrs = { dX0Err, dHWHMErr, dAmpErr, dOffsErr  };
+	std::vector<bool> vecFixed = { bX0Fixed, bHWHMFixed, bAmpFixed, bOffsFixed };
 
-	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
+	if(bUseSlope)
+	{
+		vecParamNames.push_back("slope");
+		vecVals.push_back(dSlope);
+		vecErrs.push_back(dSlopeErr);
+		vecFixed.push_back(bSlopeFixed);
+	}
+
+	bool bOk = false;
+	if(bUseSlope)
+		bOk = Fit<iFuncArgsSloped>(funcSloped, vecParamNames, vecVals, vecErrs, vecFixed);
+	else
+		bOk = Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed);
+	if(!bOk)
 		return;
 
 	for(t_real &d : vecErrs) d = std::abs(d);
@@ -1165,7 +1233,12 @@ void ScanViewerDlg::FitLorentz()
 	m_pFitParamDlg->SetHWHM(vecVals[1]);	m_pFitParamDlg->SetHWHMErr(vecErrs[1]);
 	m_pFitParamDlg->SetAmp(vecVals[2]);		m_pFitParamDlg->SetAmpErr(vecErrs[2]);
 	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
-	m_pFitParamDlg->SetSlope(vecVals[4]);	m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
+
+	if(bUseSlope)
+	{
+		m_pFitParamDlg->SetSlope(vecVals[4]);
+		m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
+	}
 }
 
 
@@ -1180,8 +1253,12 @@ void ScanViewerDlg::FitVoigt()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
-	auto func = tl::voigt_model_amp_slope<t_real>;
-	constexpr std::size_t iFuncArgs = 7;
+	const bool bUseSlope = checkSloped->isChecked();
+
+	auto func = tl::voigt_model_amp<t_real>;
+	auto funcSloped = tl::voigt_model_amp_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 6;
+	constexpr std::size_t iFuncArgsSloped = iFuncArgs+1;
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dSig = m_pFitParamDlg->GetSig(),	dSigErr = m_pFitParamDlg->GetSigErr();
@@ -1217,12 +1294,25 @@ void ScanViewerDlg::FitVoigt()
 		bAmpFixed = bHWHMFixed = bSigFixed = bX0Fixed = bOffsFixed = 0;
 	}
 
-	std::vector<std::string> vecParamNames = { "x0", "sig", "hwhm", "amp", "offs", "slope" };
-	std::vector<t_real> vecVals = { dX0, dSig, dHWHM, dAmp, dOffs, dSlope };
-	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dHWHMErr, dAmpErr, dOffsErr, dSlopeErr };
-	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bHWHMFixed, bAmpFixed, bOffsFixed, bSlopeFixed };
+	std::vector<std::string> vecParamNames = { "x0", "sig", "hwhm", "amp", "offs" };
+	std::vector<t_real> vecVals = { dX0, dSig, dHWHM, dAmp, dOffs };
+	std::vector<t_real> vecErrs = { dX0Err, dSigErr, dHWHMErr, dAmpErr, dOffsErr };
+	std::vector<bool> vecFixed = { bX0Fixed, bSigFixed, bHWHMFixed, bAmpFixed, bOffsFixed };
 
-	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
+	if(bUseSlope)
+	{
+		vecParamNames.push_back("slope");
+		vecVals.push_back(dSlope);
+		vecErrs.push_back(dSlopeErr);
+		vecFixed.push_back(bSlopeFixed);
+	}
+
+	bool bOk = false;
+	if(bUseSlope)
+		bOk = Fit<iFuncArgsSloped>(funcSloped, vecParamNames, vecVals, vecErrs, vecFixed);
+	else
+		bOk = Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed);
+	if(!bOk)
 		return;
 
 	for(t_real &d : vecErrs) d = std::abs(d);
@@ -1234,7 +1324,12 @@ void ScanViewerDlg::FitVoigt()
 	m_pFitParamDlg->SetHWHM(vecVals[2]);	m_pFitParamDlg->SetHWHMErr(vecErrs[2]);
 	m_pFitParamDlg->SetAmp(vecVals[3]);		m_pFitParamDlg->SetAmpErr(vecErrs[3]);
 	m_pFitParamDlg->SetOffs(vecVals[4]);	m_pFitParamDlg->SetOffsErr(vecErrs[4]);
-	m_pFitParamDlg->SetSlope(vecVals[5]);	m_pFitParamDlg->SetSlopeErr(vecErrs[5]);
+
+	if(bUseSlope)
+	{
+		m_pFitParamDlg->SetSlope(vecVals[5]);
+		m_pFitParamDlg->SetSlopeErr(vecErrs[5]);
+	}
 }
 #endif
 
