@@ -473,7 +473,12 @@ end)RAWSTR";
 
 
 	std::vector<t_real> vecYErr = m_vecY;
-	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d) { d = std::sqrt(d); });
+	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
+	{
+		if(tl::float_equal(d, t_real(0.), g_dEps))
+			d = 1.;
+		d = std::sqrt(d);
+	});
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
@@ -558,7 +563,12 @@ plt.show())RAWSTR";
 
 
 	std::vector<t_real> vecYErr = m_vecY;
-	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d) { d = std::sqrt(d); });
+	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
+	{
+		if(tl::float_equal(d, t_real(0.), g_dEps))
+			d = 1.;
+		d = std::sqrt(d);
+	});
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
@@ -689,7 +699,12 @@ R"RAWSTR(void scan_plot()
 
 
 	std::vector<t_real> vecYErr = m_vecY;
-	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d) { d = std::sqrt(d); });
+	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
+	{
+		if(tl::float_equal(d, t_real(0.), g_dEps))
+			d = 1.;
+		d = std::sqrt(d);
+	});
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
