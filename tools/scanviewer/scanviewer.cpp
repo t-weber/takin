@@ -115,6 +115,8 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 #endif
 	QObject::connect(comboX, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::XAxisSelected);
 	QObject::connect(comboY, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::YAxisSelected);
+	QObject::connect(spinStart, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
+	QObject::connect(spinSkip, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(tableProps, &QTableWidget::currentItemChanged, pThis, &ScanViewerDlg::PropSelected);
 	QObject::connect(comboExport, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::GenerateExternal);
 #else
@@ -136,6 +138,8 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 		this, SLOT(XAxisSelected(const QString&)));
 	QObject::connect(comboY, SIGNAL(currentIndexChanged(const QString&)),
 		this, SLOT(YAxisSelected(const QString&)));
+	QObject::connect(spinStart, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
+	QObject::connect(spinSkip, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(tableProps, SIGNAL(currentItemChanged(QTableWidgetItem*, QTableWidgetItem*)),
 		this, SLOT(PropSelected(QTableWidgetItem*, QTableWidgetItem*)));
 	QObject::connect(comboExport, SIGNAL(currentIndexChanged(int)),
@@ -238,6 +242,8 @@ void ScanViewerDlg::ClearPlot()
 	comboX->clear();
 	comboY->clear();
 	textRoot->clear();
+	spinStart->setValue(0);
+	spinSkip->setValue(0);
 
 	m_plotwrap->GetPlot()->replot();
 }
@@ -264,6 +270,7 @@ void ScanViewerDlg::SelectDir()
 
 void ScanViewerDlg::XAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::YAxisSelected(const QString& strLab) { PlotScan(); }
+void ScanViewerDlg::StartOrSkipChanged(int) { PlotScan(); }
 
 /**
  * new file selected
@@ -369,12 +376,46 @@ void ScanViewerDlg::PlotScan()
 
 	m_strX = comboX->itemData(comboX->currentIndex(), Qt::UserRole).toString().toStdString();
 	m_strY = comboY->itemData(comboY->currentIndex(), Qt::UserRole).toString().toStdString();
-	std::string strTitle = m_pInstr->GetTitle();
+	const int iStartIdx = spinStart->value();
+	const int iSkipRows = spinSkip->value();
+	const std::string strTitle = m_pInstr->GetTitle();
 	m_strCmd = m_pInstr->GetScanCommand();
 
 	m_vecX = m_pInstr->GetCol(m_strX.c_str());
 	m_vecY = m_pInstr->GetCol(m_strY.c_str());
-	//tl::log_debug("Number of points: ", m_vecX.size(), ", ", m_vecY.size());
+
+
+	// remove points from start
+	if(iStartIdx != 0)
+	{
+		if(std::size_t(iStartIdx) >= m_vecX.size())
+			m_vecX.clear();
+		else
+			m_vecX.erase(m_vecX.begin(), m_vecX.begin()+iStartIdx);
+
+		if(std::size_t(iStartIdx) >= m_vecY.size())
+			m_vecY.clear();
+		else
+			m_vecY.erase(m_vecY.begin(), m_vecY.begin()+iStartIdx);
+	}
+
+	// interleave rows
+	if(iSkipRows != 0)
+	{
+		decltype(m_vecX) vecXNew, vecYNew;
+
+		for(std::size_t iRow=0; iRow<std::min(m_vecX.size(), m_vecY.size()); ++iRow)
+		{
+			vecXNew.push_back(m_vecX[iRow]);
+			vecYNew.push_back(m_vecY[iRow]);
+
+			iRow += iSkipRows;
+		}
+
+		m_vecX = std::move(vecXNew);
+		m_vecY = std::move(vecYNew);
+	}
+
 
 	std::array<t_real, 3> arrLatt = m_pInstr->GetSampleLattice();
 	std::array<t_real, 3> arrAng = m_pInstr->GetSampleAngles();
@@ -412,8 +453,8 @@ void ScanViewerDlg::PlotScan()
 	plot->setTitle(m_strCmd.c_str());
 
 
-	if(m_vecX.size()==0 || m_vecY.size()==0)
-		return;
+	//if(m_vecX.size()==0 || m_vecY.size()==0)
+	//	return;
 
 	if(m_vecFitX.size())
 		set_qwt_data<t_real>()(*m_plotwrap, m_vecFitX, m_vecFitY, 0, 0);
@@ -992,6 +1033,7 @@ bool ScanViewerDlg::Fit(t_func&& func,
 	}
 
 	PlotScan();
+	m_pFitParamDlg->UnsetAllBold();
 	return true;
 }
 
@@ -1046,19 +1088,28 @@ void ScanViewerDlg::FitSine()
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return;
 
+	const bool bUseSlope = checkSloped->isChecked();
+
 	auto func = [](t_real x, t_real amp, t_real freq, t_real phase, t_real offs) -> t_real
 		{ return amp*std::sin(freq*x + phase) + offs; };
 	constexpr std::size_t iFuncArgs = 5;
+
+	auto funcSloped = [](t_real x, t_real amp, t_real freq, t_real phase, t_real offs, t_real slope) -> t_real
+	{ return amp*std::sin(freq*x + phase) + slope*x + offs; };
+	constexpr std::size_t iFuncArgsSloped = 6;
+
 
 	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
 	t_real_glob dFreq = m_pFitParamDlg->GetFreq(),	dFreqErr = m_pFitParamDlg->GetFreqErr();
 	t_real_glob dPhase = m_pFitParamDlg->GetPhase(),dPhaseErr = m_pFitParamDlg->GetPhaseErr();
 	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),	dOffsErr = m_pFitParamDlg->GetOffsErr();
+	t_real_glob dSlope = m_pFitParamDlg->GetSlope(),	dSlopeErr = m_pFitParamDlg->GetSlopeErr();
 
 	bool bAmpFixed = m_pFitParamDlg->GetAmpFixed();
 	bool bFreqFixed = m_pFitParamDlg->GetFreqFixed();
 	bool bPhaseFixed = m_pFitParamDlg->GetPhaseFixed();
 	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+	bool bSlopeFixed = m_pFitParamDlg->GetSlopeFixed();
 
 	// automatic parameter determination
 	if(!m_pFitParamDlg->WantParams())
@@ -1067,12 +1118,13 @@ void ScanViewerDlg::FitSine()
 		auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
 
 		dFreq = t_real(2.*M_PI) / (*minmaxX.second - *minmaxX.first);
-		dOffs = *minmaxY.first + (*minmaxY.second - *minmaxY.first)*0.5;
-		dAmp = *minmaxY.second - dOffs;
+		//dOffs = *minmaxY.first + (*minmaxY.second - *minmaxY.first)*0.5;
+		dOffs = tl::mean_value(m_vecY);
+		dAmp = (std::abs(*minmaxY.second - dOffs) + std::abs(dOffs - *minmaxY.first)) * 0.5;
 		dPhase = 0.;
 
 		dFreqErr = dFreq * 0.1;
-		dOffsErr = dOffs * 0.1;
+		dOffsErr = tl::std_dev(m_vecY);;
 		dAmpErr = dAmp * 0.1;
 		dPhaseErr = M_PI;
 
@@ -1084,7 +1136,20 @@ void ScanViewerDlg::FitSine()
 	std::vector<t_real> vecErrs = { dAmpErr, dFreqErr, dPhaseErr, dOffsErr };
 	std::vector<bool> vecFixed = { bAmpFixed, bFreqFixed, bPhaseFixed, bOffsFixed };
 
-	if(!Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed))
+	if(bUseSlope)
+	{
+		vecParamNames.push_back("slope");
+		vecVals.push_back(dSlope);
+		vecErrs.push_back(dSlopeErr);
+		vecFixed.push_back(bSlopeFixed);
+	}
+
+	bool bOk = false;
+	if(bUseSlope)
+		bOk = Fit<iFuncArgsSloped>(funcSloped, vecParamNames, vecVals, vecErrs, vecFixed);
+	else
+		bOk = Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed);
+	if(!bOk)
 		return;
 
 	for(t_real &d : vecErrs)
@@ -1094,6 +1159,12 @@ void ScanViewerDlg::FitSine()
 	m_pFitParamDlg->SetFreq(vecVals[1]);	m_pFitParamDlg->SetFreqErr(vecErrs[1]);
 	m_pFitParamDlg->SetPhase(vecVals[2]);	m_pFitParamDlg->SetPhaseErr(vecErrs[2]);
 	m_pFitParamDlg->SetOffs(vecVals[3]);	m_pFitParamDlg->SetOffsErr(vecErrs[3]);
+
+	if(bUseSlope)
+	{
+		m_pFitParamDlg->SetSlope(vecVals[4]);
+		m_pFitParamDlg->SetSlopeErr(vecErrs[4]);
+	}
 }
 
 

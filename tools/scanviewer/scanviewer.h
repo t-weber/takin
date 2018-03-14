@@ -83,6 +83,7 @@ protected slots:
 
 	void XAxisSelected(const QString&);
 	void YAxisSelected(const QString&);
+	void StartOrSkipChanged(int);
 
 	void ShowFitParams();
 	void FitGauss();

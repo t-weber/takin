@@ -26,6 +26,21 @@ FitParamDlg::FitParamDlg(QWidget* pParent, QSettings *pSett)
 FitParamDlg::~FitParamDlg()
 {}
 
+
+void FitParamDlg::SetBold(QLabel* pLab, bool bBold)
+{
+	QFont fontLabel = pLab->font();
+	fontLabel.setBold(bBold);
+	pLab->setFont(fontLabel);
+}
+
+void FitParamDlg::UnsetAllBold()
+{
+	for(QLabel* pLab : {labelAmp, labelSig, labelHWHM, labelX0, labelOffs, labelSlope, labelFreq, labelPhase})
+		SetBold(pLab, 0);
+}
+
+
 void FitParamDlg::accept()
 {
 	if(m_pSettings)
@@ -33,5 +48,6 @@ void FitParamDlg::accept()
 
 	QDialog::accept();
 }
+
 
 #include "FitParamDlg.moc"

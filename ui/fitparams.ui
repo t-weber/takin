@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>359</width>
-    <height>310</height>
+    <height>314</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,14 +55,14 @@
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QLabel" name="label_13">
+       <widget class="QLabel" name="labelFreq">
         <property name="text">
          <string>Frequency:</string>
         </property>
        </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="labelSlope">
         <property name="text">
          <string>Slope:</string>
         </property>
@@ -103,7 +103,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="labelSig">
         <property name="text">
          <string>Sigma:</string>
         </property>
@@ -120,7 +120,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="labelX0">
         <property name="text">
          <string>x Mean:</string>
         </property>
@@ -166,14 +166,14 @@
        <widget class="QLineEdit" name="editAmp"/>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_10">
+       <widget class="QLabel" name="labelOffs">
         <property name="text">
          <string>y Offset:</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_8">
+       <widget class="QLabel" name="labelAmp">
         <property name="text">
          <string>Amplitude:</string>
         </property>
@@ -197,7 +197,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="labelHWHM">
         <property name="text">
          <string>HWHM:</string>
         </property>
@@ -228,7 +228,7 @@
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QLabel" name="label_15">
+       <widget class="QLabel" name="labelPhase">
         <property name="text">
          <string>Phase:</string>
         </property>
