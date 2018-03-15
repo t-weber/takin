@@ -1083,6 +1083,36 @@ void ScanViewerDlg::FitLine()
 }
 
 
+/**
+ * sin(x + pi) = -sin(x)
+ * sin(-x + phi) = -sin(x - phi)
+ */
+template<class t_real = double>
+void sanitise_sine_params(t_real& amp, t_real& freq, t_real& phase, t_real& offs)
+{
+	if(freq < t_real(0))
+	{
+		freq = -freq;
+		phase = -phase;
+		amp = -amp;
+	}
+
+	if(amp < t_real(0))
+	{
+		amp = -amp;
+		phase += tl::get_pi<t_real>();
+	}
+
+	if(phase < t_real(0))
+	{
+		int iNum = std::abs(int(phase / (t_real(2)*tl::get_pi<t_real>()))) + 1;
+		phase += t_real(2*iNum) * tl::get_pi<t_real>();
+	}
+
+	phase = std::fmod(phase, t_real(2)*tl::get_pi<t_real>());
+}
+
+
 void ScanViewerDlg::FitSine()
 {
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
@@ -1154,6 +1184,9 @@ void ScanViewerDlg::FitSine()
 
 	for(t_real &d : vecErrs)
 		d = std::abs(d);
+
+	sanitise_sine_params<t_real>(vecVals[0], vecVals[1], vecVals[2], vecVals[3]);
+
 
 	m_pFitParamDlg->SetAmp(vecVals[0]);		m_pFitParamDlg->SetAmpErr(vecErrs[0]);
 	m_pFitParamDlg->SetFreq(vecVals[1]);	m_pFitParamDlg->SetFreqErr(vecErrs[1]);
