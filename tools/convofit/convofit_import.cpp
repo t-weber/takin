@@ -64,6 +64,7 @@ std::string convert_monteconvo(
 	mapJob["input/counts_col"] = propMC.Query<std::string>("taz/convofit/counter");
 	mapJob["input/monitor_col"] = propMC.Query<std::string>("taz/convofit/monitor");
 	mapJob["input/flip_lhs_rhs"] = propMC.Query<std::string>("taz/convofit/flip_coords", "0");
+	mapJob["input/scan_axis"] = propMC.Query<std::string>("taz/convofit/scanaxis", "0");
 
 	if(bRelPaths)
 	{

@@ -62,7 +62,8 @@ bool save_file(const char* pcFile, const Scan& sc)
  * loading multiple scan files
  */
 bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormToMon,
-	const Filter& filter, bool bFlipCoords, bool bUseFirstAndLastPoints)
+	const Filter& filter, bool bFlipCoords, bool bUseFirstAndLastPoints,
+	unsigned iScanAxis)
 {
 	if(!vecFiles.size()) return 0;
 	tl::log_info("Loading \"", vecFiles[0], "\".");
@@ -241,16 +242,49 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 
 	const t_real_sc dEps = 0.01;
 
-	for(unsigned int i=0; i<4; ++i)
+
+	// principal scan axis
+	if(iScanAxis == 1)	// h
 	{
-		if(!tl::float_equal<t_real_sc>(scan.vecScanDir[i], 0., dEps))
+		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
+		scan.vecScanDir[0] = 1.;
+		scan.vecScanOrigin[0] = 0.;
+	}
+	else if(iScanAxis == 2)	// k
+	{
+		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
+		scan.vecScanDir[1] = 1.;
+		scan.vecScanOrigin[1] = 0.;
+	}
+	else if(iScanAxis == 3)	// l
+	{
+		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
+		scan.vecScanDir[2] = 1.;
+		scan.vecScanOrigin[2] = 0.;
+	}
+	else if(iScanAxis == 4)	// E
+	{
+		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
+		scan.vecScanDir[3] = 1.;
+		scan.vecScanOrigin[3] = 0.;
+	}
+	else	// automatic determination
+	{
+		bool bHasMainScanDir = 0;
+
+		for(unsigned int i=0; i<4; ++i)
 		{
-			scan.vecScanDir[i] = 1.;
-			scan.vecScanOrigin[i] = 0.;
-		}
-		else
-		{
-			scan.vecScanDir[i] = 0.;
+			if(!bHasMainScanDir && !tl::float_equal<t_real_sc>(scan.vecScanDir[i], 0., dEps))
+			{
+				scan.vecScanDir[i] = 1.;
+				scan.vecScanOrigin[i] = 0.;
+
+				bHasMainScanDir = 1;
+			}
+			else
+			{
+				scan.vecScanDir[i] = 0.;
+			}
 		}
 	}
 

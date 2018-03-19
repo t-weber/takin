@@ -50,8 +50,9 @@ const TASReso* SqwFuncModel::GetTASReso() const
 bool SqwFuncModel::SetTASPos(t_real dX, TASReso& reso) const
 {
 	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + dX*m_vecScanDir;
+	//tl::log_debug("Scan pos: ", vecScanPos, "(origin: ", m_vecScanOrigin, ", dir: ", m_vecScanDir, ").");
 
-	if(!reso.SetHKLE(vecScanPos[0],vecScanPos[1],vecScanPos[2],vecScanPos[3]))
+	if(!reso.SetHKLE(vecScanPos[0], vecScanPos[1], vecScanPos[2], vecScanPos[3]))
 	{
 		std::ostringstream ostrErr;
 		ostrErr << "Invalid crystal position: ("

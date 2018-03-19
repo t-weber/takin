@@ -356,8 +356,9 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 	m_tofreso.Q = m_reso.Q = ublas::norm_2(vecQ) / angs;
 	m_tofreso.E = m_reso.E = E * meV;
 
-	//tl::log_info("kfix = ", m_dKFix);
+	//tl::log_info("kfix = ", m_dKFix, ", E = ", E, ", Q = ", vecQ);
 	wavenumber kother = tl::get_other_k(m_reso.E, m_dKFix/angs, m_bKiFix);
+	//tl::log_info("kother = ", t_real(kother*angs));
 	if(m_bKiFix)
 	{
 		m_tofreso.ki = m_reso.ki = m_dKFix / angs;
@@ -368,9 +369,6 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		m_tofreso.ki = m_reso.ki = kother;
 		m_tofreso.kf = m_reso.kf = m_dKFix / angs;
 	}
-
-	//tl::log_info("ki = ", m_reso.ki, ", kf = ", m_reso.kf);
-	//tl::log_info("Q = ", m_reso.Q, ", E = ", m_reso.E/meV, " meV");
 
 	m_reso.thetam = units::abs(tl::get_mono_twotheta(m_reso.ki, m_reso.mono_d, /*m_reso.dmono_sense>=0.*/1)*t_real(0.5));
 	m_reso.thetaa = units::abs(tl::get_mono_twotheta(m_reso.kf, m_reso.ana_d, /*m_reso.dana_sense>=0.*/1)*t_real(0.5));
@@ -510,6 +508,7 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 			tl::log_debug("res: ", resores_cur.reso);
 		}
 	}
+
 	return resores.bOk;
 }
 
