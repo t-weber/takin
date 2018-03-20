@@ -23,12 +23,12 @@ bool save_file(const char* pcFile, const Scan& sc)
 
 	ofstr.precision(16);
 
-	ofstr << "# scan_origin = " 
+	ofstr << "# scan_origin = "
 		<< sc.vecScanOrigin[0] << " "
 		<< sc.vecScanOrigin[1] << " "
 		<< sc.vecScanOrigin[2] << " "
 		<< sc.vecScanOrigin[3] << "\n";
-	ofstr << "# scan_dir = " 
+	ofstr << "# scan_dir = "
 		<< sc.vecScanDir[0] << " "
 		<< sc.vecScanDir[1] << " "
 		<< sc.vecScanDir[2] << " "
@@ -209,7 +209,7 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 		if(pt.E < ptMin.E) ptMin.E = pt.E;
 
 		tl::log_info("Point ", iPt+1, ": ", "h=", pt.h, ", k=", pt.k, ", l=", pt.l,
-			", ki=", t_real_sc(pt.ki * tl::get_one_angstrom<t_real_sc>()), 
+			", ki=", t_real_sc(pt.ki * tl::get_one_angstrom<t_real_sc>()),
 			", kf=", t_real_sc(pt.kf * tl::get_one_angstrom<t_real_sc>()),
 			", E=", t_real_sc(pt.E / tl::get_one_meV<t_real_sc>())/*, ", Q=", pt.Q*tl::angstrom*/,
 			", Cts=", scan.vecCts[iPt]/*, "+-", scan.vecCtsErr[iPt]*/,
@@ -220,8 +220,8 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 
 
 	// TODO: find start and end point of scan when the points are unsorted
-	const ScanPoint* ptBegin = &ptMin; 
-	const ScanPoint* ptEnd = &ptMax; 
+	const ScanPoint* ptBegin = &ptMin;
+	const ScanPoint* ptEnd = &ptMax;
 
 	// old behaviour: first and last points instead of component-wise min and max
 	if(bUseFirstAndLastPoints)
@@ -244,61 +244,35 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 
 
 	// principal scan axis
-	if(iScanAxis == 1)	// h
+	for(unsigned iAx=0; iAx<4; ++iAx)
+		scan.vecMainScanDir[iAx] = 0.;
+
+	scan.m_iScIdx = 0;
+
+	if(iScanAxis >= 1 && iScanAxis <=4)
 	{
-		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
-		scan.vecScanDir[0] = 1.;
-		scan.vecScanOrigin[0] = 0.;
-	}
-	else if(iScanAxis == 2)	// k
-	{
-		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
-		scan.vecScanDir[1] = 1.;
-		scan.vecScanOrigin[1] = 0.;
-	}
-	else if(iScanAxis == 3)	// l
-	{
-		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
-		scan.vecScanDir[2] = 1.;
-		scan.vecScanOrigin[2] = 0.;
-	}
-	else if(iScanAxis == 4)	// E
-	{
-		for(unsigned iAx=0; iAx<4; ++iAx) scan.vecScanDir[iAx] = 0.;
-		scan.vecScanDir[3] = 1.;
-		scan.vecScanOrigin[3] = 0.;
+		scan.m_iScIdx = iScanAxis-1;
+		scan.vecMainScanDir[scan.m_iScIdx] = 1.;
 	}
 	else	// automatic determination
 	{
-		bool bHasMainScanDir = 0;
-
 		for(unsigned int i=0; i<4; ++i)
 		{
-			if(!bHasMainScanDir && !tl::float_equal<t_real_sc>(scan.vecScanDir[i], 0., dEps))
+			if(!tl::float_equal<t_real_sc>(scan.vecScanDir[i], 0., dEps))
 			{
-				scan.vecScanDir[i] = 1.;
-				scan.vecScanOrigin[i] = 0.;
-
-				bHasMainScanDir = 1;
-			}
-			else
-			{
-				scan.vecScanDir[i] = 0.;
+				scan.vecMainScanDir[i] = 1.;
+				scan.m_iScIdx = i;
+				break;
 			}
 		}
 	}
 
 	tl::log_info("Scan origin: (", scan.vecScanOrigin[0], " ", scan.vecScanOrigin[1], " ", scan.vecScanOrigin[2], " ", scan.vecScanOrigin[3], ").");
 	tl::log_info("Scan dir: [", scan.vecScanDir[0], " ", scan.vecScanDir[1], " ", scan.vecScanDir[2], " ", scan.vecScanDir[3], "].");
+	tl::log_info("Principal scan axis: [", scan.vecMainScanDir[0], " ", scan.vecMainScanDir[1], " ", scan.vecMainScanDir[2], " ", scan.vecMainScanDir[3], "].");
 
 
-
-	unsigned int iScIdx = 0;
-	for(iScIdx=0; iScIdx<4; ++iScIdx)
-		if(!tl::float_equal<t_real_sc>(scan.vecScanDir[iScIdx], 0., dEps))
-			break;
-
-	if(iScIdx >= 4)
+	if(scan.m_iScIdx >= 4)
 	{
 		tl::log_err("No scan variable found!");
 		return false;
@@ -309,7 +283,7 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 		const ScanPoint& pt = scan.vecPoints[iPt];
 
 		t_real_sc dPos[] = { pt.h, pt.k, pt.l, pt.E/tl::get_one_meV<t_real_sc>() };
-		scan.vecX.push_back(dPos[iScIdx]);
+		scan.vecX.push_back(dPos[scan.m_iScIdx]);
 
 		for(int ihklE=0; ihklE<4; ++ihklE)
 			scan.vechklE[ihklE].push_back(dPos[ihklE]);

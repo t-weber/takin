@@ -699,10 +699,7 @@ bool Convofit::run_job(const std::string& _strJob)
 			strCurScOutFile += tl::var_to_str(iSc);
 		}
 		mod.SetParamSet(iSc);
-		std::pair<decltype(sc.vecX)::const_iterator, decltype(sc.vecX)::const_iterator> xminmax
-			= std::minmax_element(sc.vecX.begin(), sc.vecX.end());
-		mod.Save(strCurModOutFile.c_str(), *xminmax.first, *xminmax.second,
-			iPlotPoints, iPlotPointsSkipBegin, iPlotPointsSkipEnd);
+		mod.Save(strCurModOutFile.c_str(), iPlotPoints, iPlotPointsSkipBegin, iPlotPointsSkipEnd);
 		save_file(strCurScOutFile.c_str(), sc);
 	}
 	// --------------------------------------------------------------------

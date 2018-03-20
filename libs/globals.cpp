@@ -50,10 +50,12 @@ unsigned int get_max_threads()
 
 static std::vector<std::string> s_vecInstallPaths =
 {
-	".",
+	".",				// local resource dir
 #ifdef INSTALL_PREFIX
-	INSTALL_PREFIX "/share/takin",
+	INSTALL_PREFIX "/share/takin",	// resource dir from install path
 #endif
+	"/usr/local/share/takin",	// some default fallback paths
+	"/usr/share/takin",
 };
 
 

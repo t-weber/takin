@@ -47,16 +47,20 @@ const TASReso* SqwFuncModel::GetTASReso() const
 	return const_cast<SqwFuncModel*>(this)->GetTASReso();
 }
 
-bool SqwFuncModel::SetTASPos(t_real dX, TASReso& reso) const
+
+bool SqwFuncModel::SetTASPos(t_real dPrincipalX, TASReso& reso) const
 {
-	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + dX*m_vecScanDir;
+	const t_real xrange = t_real(m_dPrincipalAxisMax - m_dPrincipalAxisMin);
+	const t_real xscale = (t_real(dPrincipalX) - t_real(m_dPrincipalAxisMin)) / xrange;
+
+	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + xscale*m_vecScanDir;
 	//tl::log_debug("Scan pos: ", vecScanPos, "(origin: ", m_vecScanOrigin, ", dir: ", m_vecScanDir, ").");
 
 	if(!reso.SetHKLE(vecScanPos[0], vecScanPos[1], vecScanPos[2], vecScanPos[3]))
 	{
 		std::ostringstream ostrErr;
 		ostrErr << "Invalid crystal position: ("
-			<< vecScanPos[0] << " " << vecScanPos[1] << " " << vecScanPos[2] 
+			<< vecScanPos[0] << " " << vecScanPos[1] << " " << vecScanPos[2]
 			<< ") rlu, " << vecScanPos[3] << " meV.";
 		tl::log_err(ostrErr.str());
 		return false;
@@ -64,13 +68,17 @@ bool SqwFuncModel::SetTASPos(t_real dX, TASReso& reso) const
 	return true;
 }
 
-tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x) const
+
+tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x_principal) const
 {
 	TASReso/*&*/ reso = *GetTASReso();
-	if(!SetTASPos(t_real_mod(x), reso))
+	if(!SetTASPos(t_real_mod(x_principal), reso))
 		return 0.;
 
-	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + t_real(x)*m_vecScanDir;
+	const t_real xrange = t_real(m_dPrincipalAxisMax - m_dPrincipalAxisMin);
+	const t_real xscale = (t_real(x_principal) - t_real(m_dPrincipalAxisMin)) / xrange;
+
+	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + t_real(xscale)*m_vecScanDir;
 	std::vector<ublas::vector<t_real_reso>> vecNeutrons;
 	Ellipsoid4d<t_real_reso> elli;
 	if(m_bUseThreads)
@@ -106,6 +114,7 @@ tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x) const
 	return tl::t_real_min(dS*m_dScale + m_dOffs);
 }
 
+
 SqwFuncModel* SqwFuncModel::copy() const
 {
 	// cannot rebuild kd tree in phonon model with only a shallow copy
@@ -113,6 +122,8 @@ SqwFuncModel* SqwFuncModel::copy() const
 		std::shared_ptr<SqwBase>(m_pSqw->shallow_copy())/*, m_reso*/, m_vecResos);
 	pMod->m_vecScanOrigin = this->m_vecScanOrigin;
 	pMod->m_vecScanDir = this->m_vecScanDir;
+	pMod->m_dPrincipalAxisMin = this->m_dPrincipalAxisMin;
+	pMod->m_dPrincipalAxisMax = this->m_dPrincipalAxisMax;
 	pMod->m_iNumNeutrons = this->m_iNumNeutrons;
 	pMod->m_bUseThreads = this->m_bUseThreads;
 	pMod->m_dScale = this->m_dScale;
@@ -132,11 +143,13 @@ SqwFuncModel* SqwFuncModel::copy() const
 	return pMod;
 }
 
+
 void SqwFuncModel::SetOtherParamNames(std::string strTemp, std::string strField)
 {
 	m_strTempParamName = strTemp;
 	m_strFieldParamName = strField;
 }
+
 
 void SqwFuncModel::SetOtherParams(t_real dTemperature, t_real dField)
 {
@@ -147,6 +160,7 @@ void SqwFuncModel::SetOtherParams(t_real dTemperature, t_real dField)
 		vecVars.push_back(std::make_tuple(m_strFieldParamName, "double", tl::var_to_str(dField)));
 	m_pSqw->SetVars(vecVars);
 }
+
 
 void SqwFuncModel::SetModelParams()
 {
@@ -163,6 +177,7 @@ void SqwFuncModel::SetModelParams()
 
 	m_pSqw->SetVars(vecVars);
 }
+
 
 bool SqwFuncModel::SetParams(const std::vector<tl::t_real_min>& vecParams)
 {
@@ -213,6 +228,7 @@ bool SqwFuncModel::SetParams(const std::vector<tl::t_real_min>& vecParams)
 	return true;
 }
 
+
 bool SqwFuncModel::SetErrs(const std::vector<tl::t_real_min>& vecErrs)
 {
 	m_dScaleErr = t_real(vecErrs[0]);
@@ -225,6 +241,7 @@ bool SqwFuncModel::SetErrs(const std::vector<tl::t_real_min>& vecErrs)
 	return true;
 }
 
+
 std::vector<std::string> SqwFuncModel::GetParamNames() const
 {
 	std::vector<std::string> vecNames = {"scale", "offs"};
@@ -234,6 +251,7 @@ std::vector<std::string> SqwFuncModel::GetParamNames() const
 
 	return vecNames;
 }
+
 
 std::vector<tl::t_real_min> SqwFuncModel::GetParamValues() const
 {
@@ -245,6 +263,7 @@ std::vector<tl::t_real_min> SqwFuncModel::GetParamValues() const
 	return vecVals;
 }
 
+
 std::vector<tl::t_real_min> SqwFuncModel::GetParamErrors() const
 {
 	std::vector<tl::t_real_min> vecErrs = {m_dScaleErr, m_dOffsErr};
@@ -254,6 +273,7 @@ std::vector<tl::t_real_min> SqwFuncModel::GetParamErrors() const
 
 	return vecErrs;
 }
+
 
 void SqwFuncModel::SetMinuitParams(const minuit::MnUserParameters& state)
 {
@@ -276,6 +296,7 @@ void SqwFuncModel::SetMinuitParams(const minuit::MnUserParameters& state)
 	SetErrs(tl::container_cast<tl::t_real_min, t_real, std::vector>()(vecNewErrs));
 }
 
+
 minuit::MnUserParameters SqwFuncModel::GetMinuitParams() const
 {
 	minuit::MnUserParameters params;
@@ -295,8 +316,8 @@ minuit::MnUserParameters SqwFuncModel::GetMinuitParams() const
 	return params;
 }
 
-bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax,
-	std::size_t iNum, std::size_t iSkipBegin, std::size_t iSkipEnd) const
+
+bool SqwFuncModel::Save(const char *pcFile, std::size_t iNum, std::size_t iSkipBegin, std::size_t iSkipEnd) const
 {
 	if(iSkipBegin + iSkipEnd >= iNum)
 	{
@@ -336,7 +357,7 @@ bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax,
 
 		for(std::size_t i=iSkipBegin; i<iNum-iSkipEnd; ++i)
 		{
-			t_real dX = tl::lerp(dXMin, dXMax, t_real(i)/t_real(iNum-1));
+			t_real dX = tl::lerp(t_real(m_dPrincipalAxisMin), t_real(m_dPrincipalAxisMax), t_real(i)/t_real(iNum-1));
 			t_real dY = (*this)(dX);
 
 			ofstr << std::left << std::setw(NUM_PREC*2) << dX << " "
@@ -386,6 +407,7 @@ bool SqwFuncModel::Save(const char *pcFile, t_real dXMin, t_real dXMax,
 }
 
 
+
 // -----------------------------------------------------------------------------
 // optional, for multi-fits
 void SqwFuncModel::SetParamSet(std::size_t iSet)
@@ -422,6 +444,7 @@ void SqwFuncModel::SetParamSet(std::size_t iSet)
 	}
 }
 
+
 std::size_t SqwFuncModel::GetParamSetCount() const
 {
 	// multi-fits
@@ -432,12 +455,14 @@ std::size_t SqwFuncModel::GetParamSetCount() const
 	return 1;
 }
 
+
 std::size_t SqwFuncModel::GetExpLen() const
 {
 	if(m_pScans)
 		return m_pScans->operator[](m_iCurParamSet).vecX.size();
 	return 0;
 }
+
 
 const t_real_mod* SqwFuncModel::GetExpX() const
 {
@@ -446,12 +471,14 @@ const t_real_mod* SqwFuncModel::GetExpX() const
 	return nullptr;
 }
 
+
 const t_real_mod* SqwFuncModel::GetExpY() const
 {
 	if(m_pScans)
 		return m_pScans->operator[](m_iCurParamSet).vecCts.data();
 	return nullptr;
 }
+
 
 const t_real_mod* SqwFuncModel::GetExpDY() const
 {

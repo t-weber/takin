@@ -43,6 +43,7 @@ protected:
 
 	ublas::vector<t_real_mod> m_vecScanOrigin;	// hklE
 	ublas::vector<t_real_mod> m_vecScanDir;		// hklE
+	t_real_mod m_dPrincipalAxisMin, m_dPrincipalAxisMax;
 
 	t_real_mod m_dScale = 1., m_dOffs = 0.;
 	t_real_mod m_dScaleErr = 0.1, m_dOffsErr = 0.;
@@ -63,7 +64,7 @@ protected:
 protected:
 	// -------------------------------------------------------------------------
 	// signals
-	public: using t_sigFuncResult = sig::signal<void(t_real_mod h, t_real_mod k, t_real_mod l, 
+	public: using t_sigFuncResult = sig::signal<void(t_real_mod h, t_real_mod k, t_real_mod l,
 		t_real_mod E, t_real_mod S)>;
 	protected: std::shared_ptr<t_sigFuncResult> m_psigFuncResult;
 	public: void AddFuncResultSlot(const t_sigFuncResult::slot_type& slot)
@@ -130,6 +131,8 @@ public:
 	{ m_vecScanOrigin = tl::make_vec({h,k,l,E}); }
 	void SetScanDir(t_real_mod h, t_real_mod k, t_real_mod l, t_real_mod E)
 	{ m_vecScanDir = tl::make_vec({h,k,l,E}); }
+	void SetPrincipalScanAxisMinMax(t_real_mod dMin, t_real_mod dMax)
+	{ m_dPrincipalAxisMin = dMin; m_dPrincipalAxisMax = dMax; }
 
 	void AddModelFitParams(const std::string& strName, t_real_mod dInitValue=0., t_real_mod dErr=0.)
 	{
@@ -143,8 +146,7 @@ public:
 	void SetMinuitParams(const minuit::MnUserParameterState& state)
 	{ SetMinuitParams(state.Parameters()); }
 
-	bool Save(const char *pcFile, t_real_mod dXMin, t_real_mod dXMax,
-		std::size_t iPts=256, std::size_t iSkipBegin=0, std::size_t iSkipEnd=0) const;
+	bool Save(const char *pcFile, std::size_t iPts=256, std::size_t iSkipBegin=0, std::size_t iSkipEnd=0) const;
 
 	SqwBase* GetSqwBase() { return m_pSqw.get(); }
 };
