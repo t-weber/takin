@@ -351,6 +351,8 @@ void ScanViewerDlg::FileSelected()
 	comboX->setCurrentIndex(iIdxX);
 	comboY->setCurrentIndex(iIdxY);
 
+	spinSkip->setValue(m_pInstr->NumPolChannels());
+
 	m_bDoUpdate = 1;
 
 	ShowProps();
