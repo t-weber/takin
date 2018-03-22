@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>791</width>
-    <height>581</height>
+    <width>840</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -220,6 +220,116 @@
                 </property>
                 <property name="text">
                  <string>Sloped Peaks</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabPol">
+          <attribute name="title">
+           <string>Polarisation</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_15">
+           <property name="margin">
+            <number>2</number>
+           </property>
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="groupBox_4">
+             <property name="title">
+              <string>(Pseudo-) Device Names</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_13">
+              <property name="margin">
+               <number>4</number>
+              </property>
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Polarisation Vectors:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="editPolVec1">
+                <property name="toolTip">
+                 <string>Initial.</string>
+                </property>
+                <property name="text">
+                 <string>p1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLineEdit" name="editPolVec2">
+                <property name="toolTip">
+                 <string>Final.</string>
+                </property>
+                <property name="text">
+                 <string>p2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Dipole Currents:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="editPolCur1">
+                <property name="toolTip">
+                 <string>Initial.</string>
+                </property>
+                <property name="text">
+                 <string>i1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLineEdit" name="editPolCur2">
+                <property name="toolTip">
+                 <string>Final.</string>
+                </property>
+                <property name="text">
+                 <string>i2</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QGroupBox" name="groupBox_5">
+             <property name="title">
+              <string>Polarisation Matrix Elements</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_14">
+              <property name="margin">
+               <number>4</number>
+              </property>
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QTextEdit" name="editPolMat">
+                <property name="tabChangesFocus">
+                 <bool>true</bool>
+                </property>
+                <property name="undoRedoEnabled">
+                 <bool>false</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -868,6 +978,11 @@
   <tabstop>spinSkip</tabstop>
   <tabstop>editPath</tabstop>
   <tabstop>btnBrowse</tabstop>
+  <tabstop>editPolVec1</tabstop>
+  <tabstop>editPolVec2</tabstop>
+  <tabstop>editPolCur1</tabstop>
+  <tabstop>editPolCur2</tabstop>
+  <tabstop>editPolMat</tabstop>
   <tabstop>editTitle</tabstop>
   <tabstop>editUser</tabstop>
   <tabstop>editKfix</tabstop>

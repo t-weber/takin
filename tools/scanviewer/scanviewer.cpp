@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <set>
+#include <unordered_set>
 #include <string>
 #include <algorithm>
 #include <iterator>
@@ -105,6 +106,8 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(listFiles, &QListWidget::itemSelectionChanged, pThis, &ScanViewerDlg::FileSelected);
 	QObject::connect(editSearch, &QLineEdit::textEdited, pThis, &ScanViewerDlg::SearchProps);
 	QObject::connect(btnBrowse, &QToolButton::clicked, pThis, &ScanViewerDlg::SelectDir);
+	for(QLineEdit* pEdit : {editPolVec1, editPolVec2, editPolCur1, editPolCur2})
+		QObject::connect(pEdit, &QLineEdit::textEdited, pThis, &ScanViewerDlg::CalcPol);
 #ifndef NO_FIT
 	QObject::connect(btnParam, &QToolButton::clicked, pThis, &ScanViewerDlg::ShowFitParams);
 	QObject::connect(btnGauss, &QToolButton::clicked, pThis, &ScanViewerDlg::FitGauss);
@@ -126,6 +129,8 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(editSearch, SIGNAL(textEdited(const QString&)),
 		this, SLOT(SearchProps(const QString&)));
 	QObject::connect(btnBrowse, SIGNAL(clicked(bool)), this, SLOT(SelectDir()));
+	for(QLineEdit* pEdit : {editPolVec1, editPolVec2, editPolCur1, editPolCur2})
+		QObject::connect(pEdit, SIGNAL(textEdited(const QString&)), this, SLOT(CalcPol()));
 #ifndef NO_FIT
 	QObject::connect(btnParam, SIGNAL(clicked(bool)), this, SLOT(ShowFitParams()));
 	QObject::connect(btnGauss, SIGNAL(clicked(bool)), this, SLOT(FitGauss()));
@@ -149,6 +154,15 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 
 	QString strDir = m_settings.value("last_dir", tl::wstr_to_str(fs::current_path().native()).c_str()).toString();
 	editPath->setText(strDir);
+
+	if(m_settings.contains("pol/vec1"))
+		editPolVec1->setText(m_settings.value("pol/vec1").toString());
+	if(m_settings.contains("pol/vec2"))
+		editPolVec2->setText(m_settings.value("pol/vec2").toString());
+	if(m_settings.contains("pol/cur1"))
+		editPolCur1->setText(m_settings.value("pol/cur1").toString());
+	if(m_settings.contains("pol/cur2"))
+		editPolCur2->setText(m_settings.value("pol/cur2").toString());
 
 	m_bDoUpdate = 1;
 	ChangedPath();
@@ -203,7 +217,13 @@ void ScanViewerDlg::SetAbout()
 
 void ScanViewerDlg::closeEvent(QCloseEvent* pEvt)
 {
+	// save settings
+	m_settings.setValue("pol/vec1", editPolVec1->text());
+	m_settings.setValue("pol/vec2", editPolVec2->text());
+	m_settings.setValue("pol/cur1", editPolCur1->text());
+	m_settings.setValue("pol/cur2", editPolCur2->text());
 	m_settings.setValue("geo", saveGeometry());
+
 	QDialog::closeEvent(pEvt);
 }
 
@@ -248,6 +268,7 @@ void ScanViewerDlg::ClearPlot()
 	m_plotwrap->GetPlot()->replot();
 }
 
+
 /**
  * new scan directory selected
  */
@@ -271,6 +292,7 @@ void ScanViewerDlg::SelectDir()
 void ScanViewerDlg::XAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::YAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::StartOrSkipChanged(int) { PlotScan(); }
+
 
 /**
  * new file selected
@@ -351,12 +373,175 @@ void ScanViewerDlg::FileSelected()
 	comboX->setCurrentIndex(iIdxX);
 	comboY->setCurrentIndex(iIdxY);
 
+	CalcPol();
 	spinSkip->setValue(m_pInstr->NumPolChannels());
 
 	m_bDoUpdate = 1;
 
 	ShowProps();
 	PlotScan();
+}
+
+
+/**
+ * polarisation device named changed
+ */
+void ScanViewerDlg::CalcPol()
+{
+	editPolMat->clear();
+	if(!m_pInstr)
+		return;
+
+	const std::string strPolVec1 = editPolVec1->text().toStdString();
+	const std::string strPolVec2 = editPolVec2->text().toStdString();
+	const std::string strPolCur1 = editPolCur1->text().toStdString();
+	const std::string strPolCur2 = editPolCur2->text().toStdString();
+
+	m_pInstr->SetPolNames(strPolVec1.c_str(), strPolVec2.c_str(),
+		strPolCur1.c_str(), strPolCur2.c_str());
+	m_pInstr->ParsePolData();
+
+	const std::vector<std::array<t_real, 6>>& vecPolStates = m_pInstr->GetPolStates();
+	const std::size_t iNumPolStates = vecPolStates.size();
+	if(iNumPolStates == 0)
+		return;
+
+
+	// get the SF state to a given NSF state
+	auto find_spinflip_state_idx = [&vecPolStates, iNumPolStates]
+		(const std::array<t_real, 6>& state) -> std::size_t
+	{
+		t_real dPix1 = state[0], dPiy1 = state[1], dPiz1 = state[2];
+		t_real dPfx1 = state[3], dPfy1 = state[4], dPfz1 = state[5];
+
+		for(std::size_t iPol=0; iPol<iNumPolStates; ++iPol)
+		{
+			t_real dPix2 = vecPolStates[iPol][0];
+			t_real dPiy2 = vecPolStates[iPol][1];
+			t_real dPiz2 = vecPolStates[iPol][2];
+			t_real dPfx2 = vecPolStates[iPol][3];
+			t_real dPfy2 = vecPolStates[iPol][4];
+			t_real dPfz2 = vecPolStates[iPol][5];
+
+			if(tl::float_equal(dPix1, dPix2, g_dEps) &&
+				tl::float_equal(dPiy1, dPiy2, g_dEps) &&
+				tl::float_equal(dPiz1, dPiz2, g_dEps) &&
+				tl::float_equal(dPfx1, -dPfx2, g_dEps) &&
+				tl::float_equal(dPfy1, -dPfy2, g_dEps) &&
+				tl::float_equal(dPfz1, -dPfz2, g_dEps))
+			{
+				return iPol;
+			}
+		}
+
+		// none found
+		return iNumPolStates;
+	};
+
+
+
+	std::vector<bool> vecHasSFPartner;
+	// indices to spin-flipped states
+	std::vector<std::size_t> vecSFIdx;
+
+	for(std::size_t iPol=0; iPol<iNumPolStates; ++iPol)
+	{
+		const std::array<t_real, 6>& state = vecPolStates[iPol];
+		std::size_t iIdx = find_spinflip_state_idx(state);
+
+		vecHasSFPartner.push_back(iIdx < iNumPolStates);
+		vecSFIdx.push_back(iIdx);
+	}
+
+
+	const std::vector<t_real>& vecCnts = m_pInstr->GetCol(m_pInstr->GetCountVar().c_str());
+
+
+	// raw counts per polarisation channel
+	std::ostringstream ostrCnts;
+	ostrCnts.precision(g_iPrec);
+	ostrCnts << "<p>";
+
+	// iterate over scan points
+	for(std::size_t iPt=0; iPt<vecCnts.size();)
+	{
+		ostrCnts << "<p><b>Scan Point " << (iPt/iNumPolStates+1) << "</b>";
+		ostrCnts << "<table border=\"1\" cellpadding=\"0\">";
+		ostrCnts << "<tr><th>Initial Polarisation</th>";
+		ostrCnts << "<th>Final Polarisation</th>";
+		ostrCnts << "<th>Counts</th></tr>";
+
+		// iterate over polarisation states
+		for(std::size_t iPol=0; iPol<iNumPolStates; ++iPol, ++iPt)
+		{
+			t_real dPix = vecPolStates[iPol][0];
+			t_real dPiy = vecPolStates[iPol][1];
+			t_real dPiz = vecPolStates[iPol][2];
+
+			t_real dPfx = vecPolStates[iPol][3];
+			t_real dPfy = vecPolStates[iPol][4];
+			t_real dPfz = vecPolStates[iPol][5];
+
+			ostrCnts << "<tr>" << "<td>[" << dPix << " " << dPiy << " " << dPiz << "]</td>"
+				<< "<td>[" << dPfx << " " << dPfy << " " << dPfz << "]</td>"
+				<< "<td><b>" << unsigned(vecCnts[iPt]) << "</b></td></tr>";
+		}
+		ostrCnts << "</table></p>";
+	}
+	ostrCnts << "</p>";
+
+
+	// polarisation matrix elements
+	std::ostringstream ostrPol;
+	ostrPol.precision(g_iPrec);
+	ostrPol << "<p>";
+
+	// iterate over scan points
+	for(std::size_t iPt=0; iPt<vecCnts.size()/iNumPolStates; ++iPt)
+	{
+		ostrPol << "<p><b>Scan Point " << (iPt+1) << "</b>";
+		ostrPol << "<table border=\"1\" cellpadding=\"0\">";
+		ostrPol << "<tr><th>Index 1</th>";
+		ostrPol << "<th>Index 2</th>";
+		ostrPol << "<th>Polarisation</th></tr>";
+
+		// iterate over all polarisation states which have a SF partner
+		std::unordered_set<std::size_t> setPolAlreadySeen;
+		for(std::size_t iPol=0; iPol<iNumPolStates; ++iPol)
+		{
+			if(!vecHasSFPartner[iPol]) continue;
+			if(setPolAlreadySeen.find(iPol) != setPolAlreadySeen.end())
+				continue;
+
+			const std::size_t iSF = vecSFIdx[iPol];
+			const std::array<t_real, 6>& state = vecPolStates[iPol];
+			//const std::array<t_real, 6>& stateSF = vecPolStates[iSF];
+
+			setPolAlreadySeen.insert(iPol);
+			setPolAlreadySeen.insert(iSF);
+
+			const t_real dCntsNSF = vecCnts[iPt*iNumPolStates + iPol];
+			const t_real dCntsSF = vecCnts[iPt*iNumPolStates + iSF];
+
+			bool bInvalid = tl::float_equal(dCntsNSF+dCntsSF, t_real(0), g_dEps);
+			t_real dPolElem = 0.;
+			if(!bInvalid)
+				dPolElem = std::abs((dCntsNSF-dCntsSF) / (dCntsNSF+dCntsSF));
+
+
+			ostrPol << "<tr>" << "<td>[" << state[0] << " " << state[1] << " " << state[2] << "]</td>"
+				<< "<td>[" << state[3] << " " << state[4] << " " << state[5] << "]</td>"
+				<< "<td><b>" << (bInvalid ? "--- ": tl::var_to_str(dPolElem, g_iPrec))
+				<< "</b></td></tr>";
+		}
+		ostrPol << "</table></p>";
+	}
+	ostrPol << "</p>";
+
+
+	std::string strHtml = "<html><body>" + ostrPol.str() + "<br><hr><br>"
+		+ ostrCnts.str() + "</body></html>";
+	editPolMat->setHtml(QString::fromUtf8(strHtml.c_str()));
 }
 
 

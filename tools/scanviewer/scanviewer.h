@@ -92,6 +92,7 @@ protected slots:
 	void FitLine();
 	void FitSine();
 
+	void CalcPol();
 	//void openExternally();
 };
 
