@@ -439,6 +439,14 @@ void ScanViewerDlg::CalcPol()
 	};
 
 
+	auto propagate_err = [](t_real x, t_real y, t_real dx, t_real dy) -> t_real
+	{
+		// d((x-y)/(x+y)) = dx * 2*y/(x+y)^2 - dy * 2*x/(x+y)^2
+		return std::sqrt(dx*2.*y/((x+y)*(x+y))*dx*2.*y/((x+y)*(x+y))
+			+ dy*2.*x/((x+y)*(x+y))*dy*2.*x/((x+y)*(x+y)));
+	};
+
+
 
 	std::vector<bool> vecHasSFPartner;
 	// indices to spin-flipped states
@@ -503,7 +511,8 @@ void ScanViewerDlg::CalcPol()
 		ostrPol << "<table border=\"1\" cellpadding=\"0\">";
 		ostrPol << "<tr><th>Index 1</th>";
 		ostrPol << "<th>Index 2</th>";
-		ostrPol << "<th>Polarisation</th></tr>";
+		ostrPol << "<th>Polarisation</th>";
+		ostrPol << "<th>Error</th></tr>";
 
 		// iterate over all polarisation states which have a SF partner
 		std::unordered_set<std::size_t> setPolAlreadySeen;
@@ -522,17 +531,26 @@ void ScanViewerDlg::CalcPol()
 
 			const t_real dCntsNSF = vecCnts[iPt*iNumPolStates + iPol];
 			const t_real dCntsSF = vecCnts[iPt*iNumPolStates + iSF];
+			t_real dNSFErr = std::sqrt(dCntsNSF);
+			t_real dSFErr = std::sqrt(dCntsSF);
+			if(tl::float_equal(dCntsNSF, t_real(0), g_dEps))
+				dNSFErr = 1.;
+			if(tl::float_equal(dCntsSF, t_real(0), g_dEps))
+				dSFErr = 1.;
 
 			bool bInvalid = tl::float_equal(dCntsNSF+dCntsSF, t_real(0), g_dEps);
-			t_real dPolElem = 0.;
+			t_real dPolElem = 0., dPolErr = 1.;
 			if(!bInvalid)
+			{
 				dPolElem = std::abs((dCntsNSF-dCntsSF) / (dCntsNSF+dCntsSF));
-
+				dPolErr = propagate_err(dCntsNSF, dCntsSF, dNSFErr, dSFErr);
+			}
 
 			ostrPol << "<tr>" << "<td>[" << state[0] << " " << state[1] << " " << state[2] << "]</td>"
 				<< "<td>[" << state[3] << " " << state[4] << " " << state[5] << "]</td>"
-				<< "<td><b>" << (bInvalid ? "--- ": tl::var_to_str(dPolElem, g_iPrec))
-				<< "</b></td></tr>";
+				<< "<td><b>" << (bInvalid ? "--- ": tl::var_to_str(dPolElem, g_iPrec)) << "</b></td>"
+				<< "<td><b>" << (bInvalid ? "--- ": tl::var_to_str(dPolErr, g_iPrec)) << "</b></td>"
+				<< "</tr>";
 		}
 		ostrPol << "</table></p>";
 	}

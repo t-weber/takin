@@ -100,8 +100,8 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 
 	std::function<t_real_sc(t_real_sc)> funcErr = [](t_real_sc d) -> t_real_sc
 	{
-		//if(tl::float_equal<t_real_sc>(d, 0.))	// error 0 causes problems with minuit
-		//	return d/100.;
+		if(tl::float_equal<t_real_sc>(d, 0.))
+			return t_real_sc(1);
 		return std::sqrt(d);
 	};
 	scan.vecCtsErr = tl::apply_fkt(scan.vecCts, funcErr);
