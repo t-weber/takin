@@ -20,16 +20,14 @@
 #include <vector>
 #include <utility>
 
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-namespace ublas = boost::numeric::ublas;
-
+#include "tlibs/math/quat.h"
 #include "tlibs/math/geo.h"
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/linalg2.h"
-#include "tlibs/math/quat.h"
 #include "tlibs/math/math.h"
 #include "defs.h"
+
+namespace ublas = boost::numeric::ublas;
 
 
 template<class t_real = t_real_reso>

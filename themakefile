@@ -104,6 +104,10 @@ endif
 
 DEFINES = -DNO_JPEG -DNO_TIFF
 
+# hack to prevent the math forward definitions
+# in /usr/include/boost/math_fwd.hpp 
+#DEFINES += -DBOOST_MATH_FWD_HPP
+
 
 LIB_MIN = -lMinuit2
 
@@ -190,7 +194,12 @@ ifeq ($(QT_VER), 5)	# qt 5
 			-I/usr/include/qt5/QtCore \
 			-I/usr/include/qt5/QtWidgets \
 			-I/usr/include/qt5/QtGui \
-			-I/usr/include/qt5/QtOpenGL
+			-I/usr/include/qt5/QtOpenGL \
+			-I/usr/include/qt \
+			-I/usr/include/qt/QtCore \
+			-I/usr/include/qt/QtWidgets \
+			-I/usr/include/qt/QtGui \
+			-I/usr/include/qt/QtOpenGL
 
 	QT_LIB =-L${MYLIB}/qt5 \
 			-L${MYLIB}/qt5/lib \
@@ -267,9 +276,11 @@ ifeq ($(QWT_VER), 6)
 				-I/usr/local/opt/qwt/lib/qwt.framework/Versions/6/Headers \
 				-I/opt/local/libexec/qt5/include/qwt \
 				-I/usr/include/qt5/qwt \
-				-I/usr/include/qwt-qt5
+				-I/usr/include/qwt-qt5 \
+				-I/usr/include/qwt
 		ifeq ($(USE_FRAMEWORKS), 0)
 			QWT_LIB = -lqwt-qt5
+			#QWT_LIB = -lqwt
 		else
 			QWT_LIB = -F/usr/local/opt/qwt/lib -framework qwt
 		endif

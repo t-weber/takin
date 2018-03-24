@@ -27,6 +27,7 @@
 #include "tlibs/math/stat.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
+#include "tlibs/file/file.h"
 #include "tlibs/log/log.h"
 #include "libs/version.h"
 
@@ -404,7 +405,10 @@ void ScanViewerDlg::CalcPol()
 	const std::vector<std::array<t_real, 6>>& vecPolStates = m_pInstr->GetPolStates();
 	const std::size_t iNumPolStates = vecPolStates.size();
 	if(iNumPolStates == 0)
+	{
+		editPolMat->setHtml("<html><body><font size=\"5\" color=\"#ff0000\">No polarisation data.</font></body></html>");
 		return;
+	}
 
 
 	// get the SF state to a given NSF state
@@ -447,6 +451,42 @@ void ScanViewerDlg::CalcPol()
 	};
 
 
+	// convert polarisation vector to string representation
+	auto polvec_str = [](t_real x, t_real y, t_real z) -> std::string
+	{
+		std::ostringstream ostr;
+		ostr.precision(g_iPrec);
+
+		if(tl::float_equal<t_real>(x, 1., g_dEps) &&
+			tl::float_equal<t_real>(y, 0., g_dEps) &&
+			tl::float_equal<t_real>(z, 0., g_dEps))
+			ostr << "x";
+		else if(tl::float_equal<t_real>(x, -1., g_dEps) &&
+			tl::float_equal<t_real>(y, 0., g_dEps) &&
+			tl::float_equal<t_real>(z, 0., g_dEps))
+			ostr << "-x";
+		else if(tl::float_equal<t_real>(x, 0., g_dEps) &&
+			tl::float_equal<t_real>(y, 1., g_dEps) &&
+			tl::float_equal<t_real>(z, 0., g_dEps))
+			ostr << "y";
+		else if(tl::float_equal<t_real>(x, 0., g_dEps) &&
+			tl::float_equal<t_real>(y, -1., g_dEps) &&
+			tl::float_equal<t_real>(z, 0., g_dEps))
+			ostr << "-y";
+		else if(tl::float_equal<t_real>(x, 0., g_dEps) &&
+			tl::float_equal<t_real>(y, 0., g_dEps) &&
+			tl::float_equal<t_real>(z, 1., g_dEps))
+			ostr << "z";
+		else if(tl::float_equal<t_real>(x, 0., g_dEps) &&
+			tl::float_equal<t_real>(y, 0., g_dEps) &&
+			tl::float_equal<t_real>(z, -1., g_dEps))
+			ostr << "-z";
+		else
+			ostr << "[" << x << " " << y << " " << z << "]";
+
+		return ostr.str();
+	};
+
 
 	std::vector<bool> vecHasSFPartner;
 	// indices to spin-flipped states
@@ -468,16 +508,17 @@ void ScanViewerDlg::CalcPol()
 	// raw counts per polarisation channel
 	std::ostringstream ostrCnts;
 	ostrCnts.precision(g_iPrec);
-	ostrCnts << "<p>";
+	ostrCnts << "<p><h2>Counts in Polarisation Channels</h2>";
 
 	// iterate over scan points
 	for(std::size_t iPt=0; iPt<vecCnts.size();)
 	{
 		ostrCnts << "<p><b>Scan Point " << (iPt/iNumPolStates+1) << "</b>";
 		ostrCnts << "<table border=\"1\" cellpadding=\"0\">";
-		ostrCnts << "<tr><th>Initial Polarisation</th>";
-		ostrCnts << "<th>Final Polarisation</th>";
-		ostrCnts << "<th>Counts</th></tr>";
+		ostrCnts << "<tr><th>Init. Pol. Vec.</th>";
+		ostrCnts << "<th>Fin. Pol. Vec.</th>";
+		ostrCnts << "<th>Counts</th>";
+		ostrCnts << "<th>Error</th></tr>";
 
 		// iterate over polarisation states
 		for(std::size_t iPol=0; iPol<iNumPolStates; ++iPol, ++iPt)
@@ -490,9 +531,14 @@ void ScanViewerDlg::CalcPol()
 			t_real dPfy = vecPolStates[iPol][4];
 			t_real dPfz = vecPolStates[iPol][5];
 
-			ostrCnts << "<tr>" << "<td>[" << dPix << " " << dPiy << " " << dPiz << "]</td>"
-				<< "<td>[" << dPfx << " " << dPfy << " " << dPfz << "]</td>"
-				<< "<td><b>" << unsigned(vecCnts[iPt]) << "</b></td></tr>";
+			std::size_t iCnts = std::size_t(vecCnts[iPt]);
+			t_real dErr = (iCnts==0 ? 1 : std::sqrt(vecCnts[iPt]));
+
+			ostrCnts << "<tr><td>" << polvec_str(dPix, dPiy, dPiz) << "</td>"
+				<< "<td>" << polvec_str(dPfx, dPfy, dPfz) << "</td>"
+				<< "<td><b>" << iCnts << "</b></td>"
+				<< "<td><b>" << dErr << "</b></td>"
+				<< "</tr>";
 		}
 		ostrCnts << "</table></p>";
 	}
@@ -502,7 +548,8 @@ void ScanViewerDlg::CalcPol()
 	// polarisation matrix elements
 	std::ostringstream ostrPol;
 	ostrPol.precision(g_iPrec);
-	ostrPol << "<p>";
+	ostrPol << "<p><h2>Polarisation Matrix Elements</h2>";
+	bool bHasAnyData = false;
 
 	// iterate over scan points
 	for(std::size_t iPt=0; iPt<vecCnts.size()/iNumPolStates; ++iPt)
@@ -546,16 +593,21 @@ void ScanViewerDlg::CalcPol()
 				dPolErr = propagate_err(dCntsNSF, dCntsSF, dNSFErr, dSFErr);
 			}
 
-			ostrPol << "<tr>" << "<td>[" << state[0] << " " << state[1] << " " << state[2] << "]</td>"
-				<< "<td>[" << state[3] << " " << state[4] << " " << state[5] << "]</td>"
+			// polarisation matrix elements, e.g. <[100] | P | [010]> = <x|P|y>
+			ostrPol << "<tr><td>" << polvec_str(state[0], state[1], state[2]) << "</td>"
+				<< "<td>" << polvec_str(state[3], state[4], state[5]) << "</td>"
 				<< "<td><b>" << (bInvalid ? "--- ": tl::var_to_str(dPolElem, g_iPrec)) << "</b></td>"
 				<< "<td><b>" << (bInvalid ? "--- ": tl::var_to_str(dPolErr, g_iPrec)) << "</b></td>"
 				<< "</tr>";
+
+			bHasAnyData = true;
 		}
 		ostrPol << "</table></p>";
 	}
 	ostrPol << "</p>";
 
+	if(!bHasAnyData)
+		ostrPol << "<font size=\"5\" color=\"#ff0000\">Insufficient Data</font>";
 
 	std::string strHtml = "<html><body>" + ostrPol.str() + "<br><hr><br>"
 		+ ostrCnts.str() + "</body></html>";
@@ -588,6 +640,9 @@ void ScanViewerDlg::PlotScan()
 
 	m_vecX = m_pInstr->GetCol(m_strX.c_str());
 	m_vecY = m_pInstr->GetCol(m_strY.c_str());
+
+	bool bYIsACountVar = (m_strY == m_pInstr->GetCountVar() || m_strY == m_pInstr->GetMonVar());
+	m_plotwrap->GetCurve(1)->SetShowErrors(bYIsACountVar);
 
 
 	// remove points from start
@@ -1135,12 +1190,19 @@ void ScanViewerDlg::UpdateFileList()
 		std::copy_if(dir_begin, dir_end, std::insert_iterator<decltype(lst)>(lst, lst.end()),
 			[this](const fs::path& p) -> bool
 			{
+				// ignore non-existing files and directories
+				if(!tl::file_exists(p.string().c_str()))
+					return false;
+
 				std::string strExt = tl::wstr_to_str(p.extension().native());
 				if(strExt == ".bz2" || strExt == ".gz" || strExt == ".z")
 					strExt = "." + tl::wstr_to_str(tl::get_fileext2(p.filename().native()));
 
+				// allow everything if no extensions are defined
 				if(this->m_vecExts.size() == 0)
 					return true;
+
+				// see if extension is in list
 				return std::find(this->m_vecExts.begin(), this->m_vecExts.end(),
 					strExt) != this->m_vecExts.end();
 			});
