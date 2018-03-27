@@ -36,7 +36,7 @@ class DispDlg : public QDialog, Ui::DispDlg
 		bool m_bDontCalc = 1;
 
 		xtl::CrystalSystem m_crystalsys = xtl::CrystalSystem::CRYS_NOT_SET;
-		const xtl::SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups;
+		const xtl::SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups = nullptr;
 
 		AtomsDlg *m_pAtomsDlg = nullptr;
 		std::vector<xtl::AtomPos<t_real_glob>> m_vecAtoms;
@@ -74,6 +74,8 @@ class DispDlg : public QDialog, Ui::DispDlg
 
 		void Save(std::map<std::string, std::string>& mapConf, const std::string& strXmlRoot);
 		void Load(tl::Prop<std::string>& xml, const std::string& strXmlRoot);
+
+		void ClearPlots();
 };
 
 #endif

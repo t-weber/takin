@@ -61,7 +61,7 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 		QSettings *m_pSettings = 0;
 
 		xtl::CrystalSystem m_crystalsys = xtl::CrystalSystem::CRYS_NOT_SET;
-		const xtl::SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups;
+		const xtl::SpaceGroups<t_real_glob>::t_mapSpaceGroups* m_pmapSpaceGroups = nullptr;
 
 		AtomsDlg *m_pAtomsDlg = nullptr;
 		std::vector<xtl::AtomPos<t_real_glob>> m_vecAtoms;
@@ -75,6 +75,7 @@ class PowderDlg : public QDialog, Ui::PowderDlg
 
 	protected:
 		void PlotPowderLines(const std::vector<const PowderLine*>& vecLines);
+		void ClearPlots();
 
 	protected slots:
 		void CalcPeaks();

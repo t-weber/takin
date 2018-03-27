@@ -374,6 +374,7 @@ int main(int argc, char** argv)
 
 		return iRet;
 	}
+	//catch(const std::bad_alloc& err) { tl::log_crit(err.what()); }
 	catch(const std::system_error& err) { sys_err(err); }
 	catch(const boost::system::system_error& err) { sys_err(err); }
 	catch(const std::exception& ex)

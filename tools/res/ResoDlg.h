@@ -19,6 +19,7 @@
 #include <string>
 
 #include "ui/ui_reso.h"
+#include "ellipse.h"
 #include "cn.h"
 #include "pop.h"
 #include "eck.h"
@@ -29,7 +30,6 @@
 #ifndef NO_3D
 	#include "libs/plotgl.h"
 #endif
-#include "ellipse.h"
 #include "dialogs/RecipParamDlg.h"
 #include "dialogs/RealParamDlg.h"
 #include "dialogs/EllipseDlg.h"

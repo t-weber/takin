@@ -50,7 +50,7 @@ namespace fs = boost::filesystem;
 ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	: QDialog(pParent, Qt::WindowTitleHint|Qt::WindowCloseButtonHint|Qt::WindowMinMaxButtonsHint),
 		m_settings("tobis_stuff", "scanviewer"),
-		m_vecExts({	".dat", ".DAT", ".scn", ".SCN", ".ng0", ".NG0", ".log", ".LOG"/*, ""*/ }),
+		m_vecExts({	".dat", ".DAT", ".scn", ".SCN", ".ng0", ".NG0", ".log", ".LOG", "" }),
 		m_pFitParamDlg(new FitParamDlg(this, &m_settings))
 {
 	this->setupUi(this);
@@ -375,7 +375,10 @@ void ScanViewerDlg::FileSelected()
 	comboY->setCurrentIndex(iIdxY);
 
 	CalcPol();
-	spinSkip->setValue(m_pInstr->NumPolChannels());
+
+	int iNumPol = static_cast<int>(m_pInstr->NumPolChannels()) - 1;
+	if(iNumPol < 0) iNumPol = 0;
+	spinSkip->setValue(iNumPol);
 
 	m_bDoUpdate = 1;
 
@@ -607,7 +610,7 @@ void ScanViewerDlg::CalcPol()
 	ostrPol << "</p>";
 
 	if(!bHasAnyData)
-		ostrPol << "<font size=\"5\" color=\"#ff0000\">Insufficient Data</font>";
+		ostrPol << "<font size=\"5\" color=\"#ff0000\">Insufficient Data.</font>";
 
 	std::string strHtml = "<html><body>" + ostrPol.str() + "<br><hr><br>"
 		+ ostrCnts.str() + "</body></html>";

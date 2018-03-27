@@ -24,6 +24,7 @@ enum class AtInfo : int
 	SPIN_Z = 6
 };
 
+
 AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableSpin)
 	: QDialog(pParent), m_pSettings(pSettings), m_bEnableSpin(bEnableSpin)
 {
@@ -62,7 +63,9 @@ AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableSpin)
 		restoreGeometry(m_pSettings->value("atoms/geo").toByteArray());
 }
 
-AtomsDlg::~AtomsDlg() {}
+
+AtomsDlg::~AtomsDlg()
+{}
 
 
 void AtomsDlg::RemoveAtom()
@@ -90,6 +93,7 @@ void AtomsDlg::RemoveAtom()
 
 	tableAtoms->setSortingEnabled(bSort);
 }
+
 
 void AtomsDlg::AddAtom()
 {
@@ -136,6 +140,7 @@ void AtomsDlg::SetAtoms(const std::vector<xtl::AtomPos<t_real>>& vecAtoms)
 	tableAtoms->setSortingEnabled(bSort);
 }
 
+
 void AtomsDlg::SendApplyAtoms()
 {
 	std::vector<xtl::AtomPos<t_real>> vecAtoms;
@@ -165,6 +170,7 @@ void AtomsDlg::SendApplyAtoms()
 	emit ApplyAtoms(vecAtoms);
 }
 
+
 void AtomsDlg::ButtonBoxClicked(QAbstractButton* pBtn)
 {
 	if(buttonBox->buttonRole(pBtn) == QDialogButtonBox::ApplyRole ||
@@ -185,6 +191,7 @@ void AtomsDlg::ButtonBoxClicked(QAbstractButton* pBtn)
 		QDialog::accept();
 	}
 }
+
 
 void AtomsDlg::closeEvent(QCloseEvent* pEvt)
 {

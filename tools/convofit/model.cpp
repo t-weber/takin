@@ -54,7 +54,7 @@ bool SqwFuncModel::SetTASPos(t_real dPrincipalX, TASReso& reso) const
 	const t_real xscale = (t_real(dPrincipalX) - t_real(m_dPrincipalAxisMin)) / xrange;
 
 	const ublas::vector<t_real> vecScanPos = m_vecScanOrigin + xscale*m_vecScanDir;
-	//tl::log_debug("Scan pos: ", vecScanPos, "(origin: ", m_vecScanOrigin, ", dir: ", m_vecScanDir, ").");
+	//tl::log_debug("Scan pos: ", vecScanPos, "(origin: ", m_vecScanOrigin, ", dir: ", m_vecScanDir, "), run param: ", dPrincipalX);
 
 	if(!reso.SetHKLE(vecScanPos[0], vecScanPos[1], vecScanPos[2], vecScanPos[3]))
 	{
