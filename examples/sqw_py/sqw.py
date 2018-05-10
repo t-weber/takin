@@ -79,7 +79,7 @@ g_T = 300.			# temperature
 
 g_bose_cut = 0.02	# cutoff energy for Bose factor
 
-g_disp = 0			# which dispersion?
+g_disp = 0			# which dispersion (0: ferro./quadr., 1: antiferro./linear)?
 
 
 #
