@@ -120,6 +120,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(comboX, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::XAxisSelected);
 	QObject::connect(comboY, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::YAxisSelected);
 	QObject::connect(spinStart, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
+	QObject::connect(spinStop, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(spinSkip, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(tableProps, &QTableWidget::currentItemChanged, pThis, &ScanViewerDlg::PropSelected);
 	QObject::connect(comboExport, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::GenerateExternal);
@@ -145,6 +146,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(comboY, SIGNAL(currentIndexChanged(const QString&)),
 		this, SLOT(YAxisSelected(const QString&)));
 	QObject::connect(spinStart, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
+	QObject::connect(spinStop, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(spinSkip, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(tableProps, SIGNAL(currentItemChanged(QTableWidgetItem*, QTableWidgetItem*)),
 		this, SLOT(PropSelected(QTableWidgetItem*, QTableWidgetItem*)));
@@ -264,6 +266,7 @@ void ScanViewerDlg::ClearPlot()
 	comboY->clear();
 	textRoot->clear();
 	spinStart->setValue(0);
+	spinStop->setValue(0);
 	spinSkip->setValue(0);
 
 	m_plotwrap->GetPlot()->replot();
@@ -637,6 +640,7 @@ void ScanViewerDlg::PlotScan()
 	m_strX = comboX->itemData(comboX->currentIndex(), Qt::UserRole).toString().toStdString();
 	m_strY = comboY->itemData(comboY->currentIndex(), Qt::UserRole).toString().toStdString();
 	const int iStartIdx = spinStart->value();
+	const int iEndSkip = spinStop->value();
 	const int iSkipRows = spinSkip->value();
 	const std::string strTitle = m_pInstr->GetTitle();
 	m_strCmd = m_pInstr->GetScanCommand();
@@ -660,6 +664,20 @@ void ScanViewerDlg::PlotScan()
 			m_vecY.clear();
 		else
 			m_vecY.erase(m_vecY.begin(), m_vecY.begin()+iStartIdx);
+	}
+
+	// remove points from end
+	if(iEndSkip != 0)
+	{
+		if(std::size_t(iEndSkip) >= m_vecX.size())
+			m_vecX.clear();
+		else
+			m_vecX.erase(m_vecX.end()-iEndSkip, m_vecX.end());
+
+		if(std::size_t(iEndSkip) >= m_vecY.size())
+			m_vecY.clear();
+		else
+			m_vecY.erase(m_vecY.end()-iEndSkip, m_vecY.end());
 	}
 
 	// interleave rows
