@@ -409,11 +409,9 @@ bool TazDlg::Save()
 
 	// edit boxes
 	std::vector<const std::vector<QLineEdit*>*> vecEdits
-			= {&m_vecEdits_real, &m_vecEdits_recip,
-				&m_vecEdits_plane, &m_vecEdits_monoana};
+		= {&m_vecEdits_real, &m_vecEdits_recip, &m_vecEdits_plane, &m_vecEdits_monoana};
 	std::vector<const std::vector<std::string>*> vecEditNames
-			= {&m_vecEditNames_real, &m_vecEditNames_recip,
-				&m_vecEditNames_plane, &m_vecEditNames_monoana};
+		= {&m_vecEditNames_real, &m_vecEditNames_recip, &m_vecEditNames_plane, &m_vecEditNames_monoana};
 	unsigned int iIdxEdit = 0;
 	for(const std::vector<QLineEdit*>* pVec : vecEdits)
 	{
@@ -559,6 +557,7 @@ bool TazDlg::Save()
 	if(m_pReso) m_pReso->Save(mapConf, strXmlRoot);
 	if(m_pConvoDlg) m_pConvoDlg->Save(mapConf, strXmlRoot);
 	if(m_pGotoDlg) m_pGotoDlg->Save(mapConf, strXmlRoot);
+	//if(m_pPowderDlg) m_pPowderDlg->Save(mapConf, strXmlRoot);
 
 
 	tl::Prop<std::string> xml;

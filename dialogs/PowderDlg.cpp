@@ -61,6 +61,7 @@ PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 
 	// -------------------------------------------------------------------------
 	// plot stuff
+	// neutron
 	m_plotwrapN.reset(new QwtPlotWrapper(plotN));
 	m_plotwrapN->GetCurve(0)->setTitle("Neutron Powder Pattern");
 	m_plotwrapN->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Angle");
@@ -69,12 +70,21 @@ PowderDlg::PowderDlg(QWidget* pParent, QSettings* pSett)
 		connect(m_plotwrapN->GetPicker(), SIGNAL(moved(const QPointF&)),
 			this, SLOT(cursorMoved(const QPointF&)));
 
+	// x-rax
 	m_plotwrapX.reset(new QwtPlotWrapper(plotX));
 	m_plotwrapX->GetCurve(0)->setTitle("X-Ray Powder Pattern");
 	m_plotwrapX->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Scattering Angle");
 	m_plotwrapX->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Intensity");
 	if(m_plotwrapX->HasTrackerSignal())
 		connect(m_plotwrapX->GetPicker(), SIGNAL(moved(const QPointF&)),
+			this, SLOT(cursorMoved(const QPointF&)));
+
+	// angles vs ki
+	m_plotwrapAnglesKi.reset(new QwtPlotWrapper(plotLines, POWDER_MAX_CURVES));
+	m_plotwrapAnglesKi->GetPlot()->setAxisTitle(QwtPlot::xBottom, "Incident Wavenumber ki");
+	m_plotwrapAnglesKi->GetPlot()->setAxisTitle(QwtPlot::yLeft, "Scattering Angle");
+	if(m_plotwrapAnglesKi->HasTrackerSignal())
+		connect(m_plotwrapAnglesKi->GetPicker(), SIGNAL(moved(const QPointF&)),
 			this, SLOT(cursorMoved(const QPointF&)));
 	// -------------------------------------------------------------------------
 
@@ -145,7 +155,6 @@ PowderDlg::~PowderDlg()
 
 void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 {
-
 	using t_iter = typename std::vector<const PowderLine*>::const_iterator;
 	std::pair<t_iter, t_iter> pairMinMax =
 		boost::minmax_element(vecLines.begin(), vecLines.end(),
@@ -172,15 +181,19 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 	m_vecTTx.clear();
 	m_vecInt.clear();
 	m_vecIntx.clear();
+	m_vecKis.clear();
+	m_vecAngles.clear();
 
 	m_vecTT.reserve(GFX_NUM_POINTS);
 	m_vecTTx.reserve(GFX_NUM_POINTS);
 	m_vecInt.reserve(GFX_NUM_POINTS);
 	m_vecIntx.reserve(GFX_NUM_POINTS);
 
-	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
+	// --------------------------------------------------------------------
+	// neutron and x-ray plots
+	for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
-		t_real dTT = (dMinTT + (dMaxTT - dMinTT)/t_real(GFX_NUM_POINTS)*t_real(iPt));
+		const t_real dTT = (dMinTT + (dMaxTT - dMinTT)/t_real(GFX_NUM_POINTS)*t_real(iPt));
 
 		t_real dInt = 0., dIntX = 0.;
 		for(const PowderLine *pLine : vecLines)
@@ -207,6 +220,56 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 		set_qwt_data<t_real>()(*m_plotwrapN, m_vecTT, m_vecInt);
 	if(m_plotwrapX)
 		set_qwt_data<t_real>()(*m_plotwrapX, m_vecTTx, m_vecIntx);
+	// --------------------------------------------------------------------
+
+
+
+	// --------------------------------------------------------------------
+	// angles vs ki plot
+	const t_real dMinKi = 0.1;
+	const t_real dMaxKi = tl::lam2k(spinLam->value()*angs)*angs + 0.1;
+
+	for(const PowderLine *pLine : vecLines)
+	{
+		std::vector<t_real> vecAngles, vecKis;
+		vecAngles.reserve(GFX_NUM_POINTS);
+
+		const t_real dLineQ = pLine->dQ;
+		for(std::size_t iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
+		{
+			const t_real dCurKi = (dMinKi + (dMaxKi - dMinKi)/t_real(GFX_NUM_POINTS)*t_real(iPt));
+
+			t_real dLineAngle = 0;
+			try
+			{
+				dLineAngle = tl::bragg_recip_twotheta(dLineQ/angs, tl::k2lam(dCurKi/angs),
+					t_real(1.)) /  tl::get_one_radian<t_real>();
+				if(tl::is_nan_or_inf<t_real>(dLineAngle))
+					continue;
+			}
+			catch(const std::exception&)
+			{
+				continue;
+			}
+
+			vecKis.push_back(dCurKi);
+			vecAngles.push_back(tl::r2d(dLineAngle));
+		}
+
+		m_vecKis.emplace_back(std::move(vecKis));
+		m_vecAngles.emplace_back(std::move(vecAngles));
+	}
+
+	if(m_plotwrapAnglesKi)
+	{
+		for(std::size_t iPlot=0; iPlot<std::min<std::size_t>(POWDER_MAX_CURVES, m_vecAngles.size()); ++iPlot)
+			set_qwt_data<t_real>()(*m_plotwrapAnglesKi, m_vecKis[iPlot], m_vecAngles[iPlot], iPlot, false);
+
+		// TODO: container_cast if real types mismatch
+		set_zoomer_base(m_plotwrapAnglesKi->GetZoomer(), m_vecKis, m_vecAngles);
+		m_plotwrapAnglesKi->GetPlot()->replot();
+	}
+	// --------------------------------------------------------------------
 }
 
 
@@ -218,6 +281,11 @@ void PowderDlg::ClearPlots()
 		set_qwt_data<t_real>()(*m_plotwrapN, vecZero, vecZero);
 	if(m_plotwrapX)
 		set_qwt_data<t_real>()(*m_plotwrapX, vecZero, vecZero);
+	if(m_plotwrapAnglesKi)
+	{
+		for(std::size_t iPlot=0; iPlot<POWDER_MAX_CURVES; ++iPlot)
+			set_qwt_data<t_real>()(*m_plotwrapAnglesKi, vecZero, vecZero, iPlot, false);
+	}
 }
 
 

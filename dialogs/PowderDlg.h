@@ -29,6 +29,9 @@
 #include "RecipParamDlg.h"
 
 
+#define POWDER_MAX_CURVES 64
+
+
 struct PowderLine
 {
 	int h, k, l;
@@ -50,11 +53,18 @@ struct PowderLine
 class PowderDlg : public QDialog, Ui::PowderDlg
 { Q_OBJECT
 	protected:
+		// neutron powder lines
 		std::vector<t_real_glob> m_vecTT, m_vecInt;
-		std::vector<t_real_glob> m_vecTTx, m_vecIntx;
-
 		std::unique_ptr<QwtPlotWrapper> m_plotwrapN;
+
+		// x-ray powder lines
+		std::vector<t_real_glob> m_vecTTx, m_vecIntx;
 		std::unique_ptr<QwtPlotWrapper> m_plotwrapX;
+
+		// powder angles vs ki plot
+		std::vector<std::vector<t_real_glob>> m_vecKis;
+		std::vector<std::vector<t_real_glob>> m_vecAngles;
+		std::unique_ptr<QwtPlotWrapper> m_plotwrapAnglesKi;
 
 	protected:
 		bool m_bDontCalc = 1;

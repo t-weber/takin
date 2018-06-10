@@ -106,7 +106,7 @@ DEFINES = -DNO_JPEG -DNO_TIFF
 
 # hack to prevent the math forward definitions
 # in /usr/include/boost/math_fwd.hpp 
-#DEFINES += -DBOOST_MATH_FWD_HPP
+DEFINES += -DBOOST_MATH_FWD_HPP
 
 
 LIB_MIN = -lMinuit2
