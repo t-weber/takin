@@ -229,6 +229,10 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 	const t_real dMinKi = 0.1;
 	const t_real dMaxKi = tl::lam2k(spinLam->value()*angs)*angs + 0.1;
 
+	std::vector<t_real> vecCurveWidths;
+	t_real dMinCurveWidth = std::numeric_limits<t_real>::max();
+	t_real dMaxCurveWidth = -dMinCurveWidth;
+
 	for(const PowderLine *pLine : vecLines)
 	{
 		std::vector<t_real> vecAngles, vecKis;
@@ -243,7 +247,7 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 			try
 			{
 				dLineAngle = tl::bragg_recip_twotheta(dLineQ/angs, tl::k2lam(dCurKi/angs),
-					t_real(1.)) /  tl::get_one_radian<t_real>();
+					t_real(1.)) / tl::get_one_radian<t_real>();
 				if(tl::is_nan_or_inf<t_real>(dLineAngle))
 					continue;
 			}
@@ -256,14 +260,38 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 			vecAngles.push_back(tl::r2d(dLineAngle));
 		}
 
+		t_real dCurveWidth = std::abs(pLine->iMult * pLine->dFn);
+
 		m_vecKis.emplace_back(std::move(vecKis));
 		m_vecAngles.emplace_back(std::move(vecAngles));
+
+		dMinCurveWidth = std::min(dMinCurveWidth, dCurveWidth);
+		dMaxCurveWidth = std::max(dMaxCurveWidth, dCurveWidth);
+		vecCurveWidths.push_back(dCurveWidth);
 	}
 
 	if(m_plotwrapAnglesKi)
 	{
 		for(std::size_t iPlot=0; iPlot<std::min<std::size_t>(POWDER_MAX_CURVES, m_vecAngles.size()); ++iPlot)
+		{
 			set_qwt_data<t_real>()(*m_plotwrapAnglesKi, m_vecKis[iPlot], m_vecAngles[iPlot], iPlot, false);
+
+			t_real dCurveWidth = vecCurveWidths[iPlot];
+			if(tl::float_equal(dMaxCurveWidth, dMinCurveWidth))
+			{	// no range available, just use curve width 1
+				dCurveWidth = 1.;
+			}
+			else
+			{	// scale curve width between 0.4 and 4
+				dCurveWidth = (dCurveWidth - dMinCurveWidth) / (dMaxCurveWidth - dMinCurveWidth);
+				dCurveWidth = 0.4 + dCurveWidth*(4. - 0.4);
+			}
+
+			QPen penCurve;
+			penCurve.setColor(QColor(0, 0, 0x99));
+			penCurve.setWidth(dCurveWidth);
+			m_plotwrapAnglesKi->GetCurve(iPlot)->setPen(penCurve);
+		}
 
 		// TODO: container_cast if real types mismatch
 		set_zoomer_base(m_plotwrapAnglesKi->GetZoomer(), m_vecKis, m_vecAngles);
@@ -913,12 +941,22 @@ void PowderDlg::cursorMoved(const QPointF& pt)
 {
 	const t_real dX = pt.x();
 	const t_real dY = pt.y();
-
 	const std::wstring strTh = tl::get_spec_char_utf16("theta");
+
 	std::wostringstream ostr;
 	ostr.precision(g_iPrecGfx);
-	ostr << L"2" << strTh << L" = " << dX << L", ";
-	ostr << L"I = " << dY;
+
+	// angles vs ki plot
+	if(tabWidget->currentIndex() == 1)
+	{
+		ostr << L"ki = " << dX << ", ";
+		ostr << L"2" << strTh << L" = " << dY;
+	}
+	else
+	{
+		ostr << L"2" << strTh << L" = " << dX << L", ";
+		ostr << L"I = " << dY;
+	}
 
 	labelStatus->setText(QString::fromWCharArray(ostr.str().c_str()));
 }
