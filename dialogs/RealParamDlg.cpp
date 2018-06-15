@@ -150,11 +150,43 @@ void RealParamDlg::CrystalChanged(const xtl::LatticeCommon<t_real>& lattcomm)
 
 	// crystal infos
 	{
+		const t_real amu = tl::get_amu<t_real>() / tl::get_one_kg<t_real>();
+		const t_real dNumUC = 0.01e10*0.01e10*0.01e10 / lattcomm.dVol;
+		t_real dMass = t_real(0);
+		bool bAllElemsFound = 0;
+
+		std::shared_ptr<const xtl::PeriodicSystem<t_real>> lstel = xtl::PeriodicSystem<t_real>::GetInstance();
+		if(lstel)
+		{
+			bAllElemsFound = 1;
+			for(std::size_t iIdxUC : lattcomm.vecAllAtomTypes)
+			{
+				const std::string& strName = (*pAtoms)[iIdxUC].strAtomName;
+				const xtl::PeriodicElement<t_real> *pElem = lstel->Find(strName);
+
+				if(!pElem)
+				{
+					bAllElemsFound = 0;
+					break;
+				}
+
+				dMass += pElem->GetMass()*amu;
+			}
+		}
+
 		std::ostringstream ostr;
 		ostr.precision(g_iPrec);
 		ostr << "<html><body>\n";
 
-		ostr << "<p><b>Unit Cell Volume:</b> " << lattcomm.dVol << " A^3\n";
+		ostr << "<p><b>Properties:</b>\n<ul>\n";
+		ostr << "\t<li> Unit Cell Volume:</b> " << lattcomm.dVol << " A^3</li>\n";
+		ostr << "\t<li> Number of Unit Cells per cm^3:</b> " << dNumUC << "</li>\n";
+		if(bAllElemsFound)
+		{
+			ostr << "\t<li> Mass per Unit Cell:</b> " << dMass*t_real(1000) << " g</li>\n";
+			ostr << "\t<li> Density:</b> " << dNumUC*dMass*t_real(1000) << " g/cm^3</li>\n";
+		}
+		ostr << "</ul></p>\n";
 
 		ostr << "<p><b>Microscopic cross-sections:</b>\n<ul>\n";
 		ostr << "\t<li> Coherent: " << lattcomm.dsigCoh << " fm^2 </li>\n";
