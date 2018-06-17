@@ -59,6 +59,8 @@ protected:
 	void GenerateForPython();
 	void GenerateForHermelin();
 
+	int HasRecentPath(const QString& strPath);
+
 	virtual void closeEvent(QCloseEvent* pEvt) override;
 
 #ifndef NO_FIT

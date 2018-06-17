@@ -33,29 +33,6 @@
        <property name="spacing">
         <number>4</number>
        </property>
-       <item row="1" column="0">
-        <widget class="QLineEdit" name="editPath">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QToolButton" name="btnBrowse">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0" colspan="2">
         <widget class="QListWidget" name="listFiles">
          <property name="sizePolicy">
@@ -72,6 +49,32 @@
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" rowspan="2">
+        <widget class="QComboBox" name="comboPath">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="maxVisibleItems">
+          <number>16</number>
+         </property>
+         <property name="insertPolicy">
+          <enum>QComboBox::NoInsert</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" rowspan="2">
+        <widget class="QToolButton" name="btnBrowse">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>...</string>
          </property>
         </widget>
        </item>
@@ -994,6 +997,8 @@
  </customwidgets>
  <tabstops>
   <tabstop>listFiles</tabstop>
+  <tabstop>comboPath</tabstop>
+  <tabstop>btnBrowse</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>btnParam</tabstop>
   <tabstop>btnGauss</tabstop>
@@ -1008,8 +1013,6 @@
   <tabstop>spinStart</tabstop>
   <tabstop>spinStop</tabstop>
   <tabstop>spinSkip</tabstop>
-  <tabstop>editPath</tabstop>
-  <tabstop>btnBrowse</tabstop>
   <tabstop>editPolVec1</tabstop>
   <tabstop>editPolVec2</tabstop>
   <tabstop>editPolCur1</tabstop>

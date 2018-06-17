@@ -103,7 +103,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 
 #if QT_VER>=5
 	ScanViewerDlg *pThis = this;
-	QObject::connect(editPath, &QLineEdit::textEdited, pThis, &ScanViewerDlg::ChangedPath);
+	QObject::connect(comboPath, &QLineEdit::editTextChanged, pThis, &ScanViewerDlg::ChangedPath);
 	QObject::connect(listFiles, &QListWidget::itemSelectionChanged, pThis, &ScanViewerDlg::FileSelected);
 	QObject::connect(editSearch, &QLineEdit::textEdited, pThis, &ScanViewerDlg::SearchProps);
 	QObject::connect(btnBrowse, &QToolButton::clicked, pThis, &ScanViewerDlg::SelectDir);
@@ -125,7 +125,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(tableProps, &QTableWidget::currentItemChanged, pThis, &ScanViewerDlg::PropSelected);
 	QObject::connect(comboExport, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::GenerateExternal);
 #else
-	QObject::connect(editPath, SIGNAL(textEdited(const QString&)),
+	QObject::connect(comboPath, SIGNAL(editTextChanged(const QString&)),
 		this, SLOT(ChangedPath()));
 	QObject::connect(listFiles, SIGNAL(itemSelectionChanged()), this, SLOT(FileSelected()));
 	QObject::connect(editSearch, SIGNAL(textEdited(const QString&)),
@@ -155,8 +155,36 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	//QObject::connect(btnOpenExt, SIGNAL(clicked()), this, SLOT(openExternally()));
 #endif
 
+
+	// fill recent paths combobox
+	QStringList lstDirs = m_settings.value("recent_dirs").toStringList();
+	for(const QString& strDir : lstDirs)
+	{
+		fs::path dir(strDir.toStdString());
+		if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
+			dir /= std::string("")+fs::path::preferred_separator;
+
+		if(HasRecentPath(strDir) < 0)
+			comboPath->addItem(tl::wstr_to_str(dir.native()).c_str());
+	}
+
+	// last selected dir
 	QString strDir = m_settings.value("last_dir", tl::wstr_to_str(fs::current_path().native()).c_str()).toString();
-	editPath->setText(strDir);
+
+	int idx = HasRecentPath(strDir);
+	if(idx < 0)
+	{
+		fs::path dir(strDir.toStdString());
+		if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
+			dir /= std::string("")+fs::path::preferred_separator;
+
+		comboPath->addItem(tl::wstr_to_str(dir.native()).c_str());
+		idx = comboPath->findText(strDir);
+	}
+
+	comboPath->setCurrentIndex(idx);
+	//comboPath->setEditText(strDir);
+
 
 	if(m_settings.contains("pol/vec1"))
 		editPolVec1->setText(m_settings.value("pol/vec1").toString());
@@ -226,6 +254,12 @@ void ScanViewerDlg::closeEvent(QCloseEvent* pEvt)
 	m_settings.setValue("pol/cur1", editPolCur1->text());
 	m_settings.setValue("pol/cur2", editPolCur2->text());
 	m_settings.setValue("geo", saveGeometry());
+	m_settings.setValue("last_dir", QString(m_strCurDir.c_str()));
+
+	QStringList lstDirs;
+	for(int iDir=0; iDir<comboPath->count(); ++iDir)
+		lstDirs << comboPath->itemText(iDir);
+	m_settings.setValue("recent_dirs", lstDirs);
 
 	QDialog::closeEvent(pEvt);
 }
@@ -274,6 +308,30 @@ void ScanViewerDlg::ClearPlot()
 
 
 /**
+ * check if given path is already in the "recent paths" list
+ */
+int ScanViewerDlg::HasRecentPath(const QString& strPath)
+{
+	fs::path dir(strPath.toStdString());
+	if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
+		dir /= std::string("")+fs::path::preferred_separator;
+
+	for(int iDir=0; iDir<comboPath->count(); ++iDir)
+	{
+		QString strOtherPath = comboPath->itemText(iDir);
+		fs::path dirOther(strOtherPath.toStdString());
+		if(*tl::wstr_to_str(dirOther.native()).rbegin() != fs::path::preferred_separator)
+			dirOther /= std::string("")+fs::path::preferred_separator;
+
+		if(dir == dirOther)
+			return iDir;
+	}
+
+	return -1;
+}
+
+
+/**
  * new scan directory selected
  */
 void ScanViewerDlg::SelectDir()
@@ -287,7 +345,18 @@ void ScanViewerDlg::SelectDir()
 		strCurDir, QFileDialog::ShowDirsOnly | fileopt);
 	if(strDir != "")
 	{
-		editPath->setText(strDir);
+		int idx = HasRecentPath(strDir);
+		if(idx < 0)
+		{
+			fs::path dir(strDir.toStdString());
+			if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
+				dir /= std::string("")+fs::path::preferred_separator;
+
+			comboPath->addItem(tl::wstr_to_str(dir.native()).c_str());
+			idx = comboPath->findText(tl::wstr_to_str(dir.native()).c_str());
+		}
+		comboPath->setCurrentIndex(idx);
+		//comboPath->setEditText(strDir);
 		ChangedPath();
 	}
 }
@@ -1150,7 +1219,7 @@ void ScanViewerDlg::ChangedPath()
 	ClearPlot();
 	tableProps->setRowCount(0);
 
-	std::string strPath = editPath->text().toStdString();
+	std::string strPath = comboPath->currentText().toStdString();
 	fs::path dir(strPath);
 	if(fs::exists(dir) && fs::is_directory(dir))
 	{
@@ -1165,8 +1234,6 @@ void ScanViewerDlg::ChangedPath()
 		m_pWatcher->addPath(m_strCurDir.c_str());
 		QObject::connect(m_pWatcher.get(), SIGNAL(directoryChanged(const QString&)),
 			this, SLOT(DirWasModified(const QString&)));
-
-		m_settings.setValue("last_dir", QString(m_strCurDir.c_str()));
 	}
 }
 
