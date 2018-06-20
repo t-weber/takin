@@ -103,7 +103,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 
 #if QT_VER>=5
 	ScanViewerDlg *pThis = this;
-	QObject::connect(comboPath, &QLineEdit::editTextChanged, pThis, &ScanViewerDlg::ChangedPath);
+	QObject::connect(comboPath, &QComboBox::editTextChanged, pThis, &ScanViewerDlg::ChangedPath);
 	QObject::connect(listFiles, &QListWidget::itemSelectionChanged, pThis, &ScanViewerDlg::FileSelected);
 	QObject::connect(editSearch, &QLineEdit::textEdited, pThis, &ScanViewerDlg::SearchProps);
 	QObject::connect(btnBrowse, &QToolButton::clicked, pThis, &ScanViewerDlg::SelectDir);
