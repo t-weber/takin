@@ -7,7 +7,8 @@
  * @desc This is a reimplementation in C++ of the file rc_popma.m of the
  *		rescal5 package by Zinkin, McMorrow, Tennant, Farhi, and Wildes:
  *		http://www.ill.eu/en/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab/
- * @desc see: [pop75] M. Popovici, Acta Cryst. A 31, 507 (1975)
+ * @desc see: - [pop75] M. Popovici, Acta Cryst. A 31, 507 (1975),
+ *            - [mit84] P. W. Mitchell, R. A. Cowley and S. A. Higgins, Acta Cryst. Sec A, 40(2), 152-160 (1984)
  */
 
 #include "pop.h"
@@ -283,42 +284,44 @@ ResoResults calc_pop(const PopParams& pop)
 
 
 	// [pop75], equ. 20
-	t_mat M0 = S + tl::transform(F, T, 1);
-	t_mat M0i;
-	if(!tl::inverse(M0, M0i))
+	// [T] = 1/cm, [F] = 1/rad^2, [pop75], equ. 15
+	t_mat K = S + tl::transform(F, T, 1);
+	t_mat Ki;
+	if(!tl::inverse(K, Ki))
 	{
 		res.bOk = false;
-		res.strErr = "Matrix M0 cannot be inverted.";
+		res.strErr = "Matrix K cannot be inverted.";
 		return res;
 	}
 
-	t_mat M1 = tl::transform_inv(M0i, D, 1);
-	t_mat M1i;
-	if(!tl::inverse(M1, M1i))
+	// [pop75], equ. 17
+	t_mat Hi = tl::transform_inv(Ki, D, 1);
+	t_mat H;
+	if(!tl::inverse(Hi, H))
 	{
 		res.bOk = false;
-		res.strErr = "Matrix M1 cannot be inverted.";
+		res.strErr = "Matrix H^(-1) cannot be inverted.";
 		return res;
 	}
 
-	t_mat M2 = M1i + G;
-	t_mat M2i;
-	if(!tl::inverse(M2, M2i))
+	t_mat H_G = H + G;
+	t_mat H_Gi;
+	if(!tl::inverse(H_G, H_Gi))
 	{
 		res.bOk = false;
-		res.strErr = "Matrix M2 cannot be inverted.";
+		res.strErr = "Matrix H+G cannot be inverted.";
 		return res;
 	}
 
-	t_mat BA = ublas::prod(B,A);
+	t_mat BA = ublas::prod(B, A);
 	t_mat ABt = ublas::prod(ublas::trans(A), ublas::trans(B));
-	t_mat M2iABt = ublas::prod(M2i, ABt);
-	t_mat MI = ublas::prod(BA, M2iABt);
+	t_mat H_GiABt = ublas::prod(H_Gi, ABt);
+	t_mat cov = ublas::prod(BA, H_GiABt);
 
-	MI(1,1) += pop.Q*pop.Q*angs*angs * pop.sample_mosaic*pop.sample_mosaic /rads/rads;
-	MI(2,2) += pop.Q*pop.Q*angs*angs * sample_mosaic_spread*sample_mosaic_spread /rads/rads;
+	cov(1,1) += pop.Q*pop.Q*angs*angs * pop.sample_mosaic*pop.sample_mosaic /rads/rads;
+	cov(2,2) += pop.Q*pop.Q*angs*angs * sample_mosaic_spread*sample_mosaic_spread /rads/rads;
 
-	if(!tl::inverse(MI, res.reso))
+	if(!tl::inverse(cov, res.reso))
 	{
 		res.bOk = false;
 		res.strErr = "Covariance matrix cannot be inverted.";
@@ -354,29 +357,30 @@ ResoResults calc_pop(const PopParams& pop)
 		if(!tl::inverse(DSiDt, DSiDti))
 		{
 			res.bOk = false;
-			res.strErr = "Resolution volume cannot be calculated.";
+			res.strErr = "R0 factor cannot be calculated.";
 			return res;
 		}
 		DSiDti += G;
-		t_real dP0 = dmono_refl*dana_effic *
-			t_real((2.*pi)*(2.*pi)*(2.*pi)*(2.*pi)) /
-			std::sqrt(tl::determinant(DSiDti));
-		dP0 *= dxsec;
-
-		// [T] = 1/cm, [F] = 1/rad^2, [pop75], equ. 15
-		t_mat K = S + tl::transform(F, T, 1);
 
 		t_real dDetS = tl::determinant(S);
 		t_real dDetF = tl::determinant(F);
 		t_real dDetK = tl::determinant(K);
+		t_real dDetDSiDti = tl::determinant(DSiDti);
 
-		// [pop75], equ. 16
-		res.dR0 = dP0 / (t_real(8.*pi*8.*pi) * units::sin(thetam)*units::sin(thetaa));
-		res.dR0 *= std::sqrt(dDetS*dDetF/dDetK);
+		// [pop75], equs. 13a & 16
+		res.dR0 = dmono_refl*dana_effic * t_real((2.*pi)*(2.*pi)*(2.*pi)*(2.*pi));
+		res.dR0 *= std::sqrt(dDetS*dDetF/(dDetK * dDetDSiDti));
+		res.dR0 /= t_real(8.*pi*8.*pi) * units::sin(thetam)*units::sin(thetaa);
+		res.dR0 *= dxsec;
 
-		// rest of the prefactors, equ. 1 in [pop75]
-		//res.dR0 *= std::sqrt(tl::determinant(res.reso)) / (2.*pi*2.*pi);
-		//res.dR0 *= res.dResVol;		// TODO: check
+		// rest of the prefactors, equ. 1 in [pop75], together with the mono and and ana reflectivities
+		// (defining the resolution volume) these give the same correction as in [mit84] equ. A.57
+		/*if(pop.flags & CALC_RESVOL)
+		{
+			//res.dR0 *= std::sqrt(std::abs(tl::determinant(res.reso))) / (2.*pi*2.*pi);
+			// except for the (unimportant) prefactors this is the same as dividing by the resolution volume
+			res.dR0 /= res.dResVol * pi * t_real(3.);
+		}*/
 	}
 
 	// Bragg widths

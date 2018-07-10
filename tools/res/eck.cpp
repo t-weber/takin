@@ -438,8 +438,14 @@ ResoResults calc_eck(const EckParams& eck)
 
 	// prefactor and volume
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
-	res.dR0 = Z*std::exp(-W) /** res.dResVol*/;
+	res.dR0 = Z * std::exp(-W) /*/ res.dResVol*/;
 	res.dR0 *= dxsec;
+	// missing prefactor, equ. 1 in [pop75] and equ. A.57 in [mit84]
+	/*if(eck.flags & CALC_RESVOL)
+	{
+		//res.dR0 *= std::sqrt(std::abs(tl::determinant(res.reso))) / (2.*pi*2.*pi);
+		res.dR0 /= res.dResVol * pi * t_real(3.);
+	}*/
 
 	// Bragg widths
 	const std::vector<t_real> vecFwhms = calc_bragg_fwhms(res.reso);

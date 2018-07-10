@@ -101,10 +101,10 @@ tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x_principal) const
 	for(int i=0; i<4; ++i)
 		dhklE_mean[i] /= t_real(m_iNumNeutrons);
 
-	if(reso.GetResoParams().flags & CALC_RESVOL)
-		dS *= reso.GetResoResults().dResVol;
 	if(reso.GetResoParams().flags & CALC_R0)
 		dS *= reso.GetResoResults().dR0;
+	if(reso.GetResoParams().flags & CALC_RESVOL)
+		dS /= reso.GetResoResults().dResVol * tl::get_pi<t_real>() * t_real(3.);
 
 	if(m_psigFuncResult)
 	{

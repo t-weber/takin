@@ -131,8 +131,8 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	m_vecPosEditBoxes = {editE, editQ, editKi, editKf};
 	m_vecPosEditNames = {"reso/E", "reso/Q", "reso/ki", "reso/kf"};
 
-	m_vecCheckBoxes = {checkUseR0, checkUseKi3, checkUseKf3, checkUseKfKi};
-	m_vecCheckNames = {"reso/use_R0", "reso/use_ki3", "reso/use_kf3", "reso/use_kfki"};
+	m_vecCheckBoxes = {checkUseR0, checkUseResVol, checkUseKi3, checkUseKf3, checkUseKfKi};
+	m_vecCheckNames = {"reso/use_R0", "reso/use_resvol", "reso/use_ki3", "reso/use_kf3", "reso/use_kfki"};
 
 
 	m_vecRadioPlus = {radioMonoScatterPlus, radioAnaScatterPlus,
@@ -339,6 +339,10 @@ void ResoDlg::Calc()
 			cn.flags |= CALC_R0;
 		else
 			cn.flags &= ~CALC_R0;
+		if(checkUseResVol->isChecked())
+			cn.flags |= CALC_RESVOL;
+		else
+			cn.flags &= ~CALC_RESVOL;
 		if(checkUseKi3->isChecked())
 			cn.flags |= CALC_KI3;
 		else

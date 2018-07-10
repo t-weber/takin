@@ -270,10 +270,10 @@ void ConvoDlg::Start1D()
 					for(int i=0; i<4; ++i)
 						dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
 
-					if(localreso.GetResoParams().flags & CALC_RESVOL)
-						dS *= localreso.GetResoResults().dResVol;
 					if(localreso.GetResoParams().flags & CALC_R0)
 						dS *= localreso.GetResoResults().dR0;
+					if(localreso.GetResoParams().flags & CALC_RESVOL)
+						dS /= localreso.GetResoResults().dResVol * tl::get_pi<t_real>() * t_real(3.);
 				}
 				return std::pair<bool, t_real>(true, dS);
 			});
@@ -725,10 +725,10 @@ void ConvoDlg::Start2D()
 					for(int i=0; i<4; ++i)
 						dhklE_mean[i] /= t_real(iNumNeutrons*iNumSampleSteps);
 
-					if(localreso.GetResoParams().flags & CALC_RESVOL)
-						dS *= localreso.GetResoResults().dResVol;
 					if(localreso.GetResoParams().flags & CALC_R0)
 						dS *= localreso.GetResoResults().dR0;
+					if(localreso.GetResoParams().flags & CALC_RESVOL)
+						dS /= localreso.GetResoResults().dResVol * tl::get_pi<t_real>() * t_real(3.);
 				}
 				return std::pair<bool, t_real>(true, dS);
 			});
