@@ -395,7 +395,7 @@ void TofLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 		if(!pLines_arrow[i] || !pPoints_arrow[i])
 			continue;
 
-		t_real dAng = tl::d2r(pLines_arrow[i]->angle() - 90.);
+		t_real dAng = tl::d2r<t_real>(pLines_arrow[i]->angle() - 90.);
 		t_real dC = std::cos(dAng);
 		t_real dS = std::sin(dAng);
 

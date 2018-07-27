@@ -959,21 +959,21 @@ void TazDlg::keyPressEvent(QKeyEvent *pEvt)
 {
 	// x rotation
 	if(pEvt->key() == Qt::Key_8)
-		RotatePlane(0, tl::d2r(-5.));
+		RotatePlane(0, tl::d2r<t_real>(-5.));
 	else if(pEvt->key() == Qt::Key_2)
-		RotatePlane(0, tl::d2r(5.));
+		RotatePlane(0, tl::d2r<t_real>(5.));
 
 	// y rotation
 	else if(pEvt->key() == Qt::Key_4)
-		RotatePlane(1, tl::d2r(-5.));
+		RotatePlane(1, tl::d2r<t_real>(-5.));
 	else if(pEvt->key() == Qt::Key_6)
-		RotatePlane(1, tl::d2r(5.));
+		RotatePlane(1, tl::d2r<t_real>(5.));
 
 	// z rotation
 	else if(pEvt->key() == Qt::Key_9)
-		RotatePlane(2, tl::d2r(-5.));
+		RotatePlane(2, tl::d2r<t_real>(-5.));
 	else if(pEvt->key() == Qt::Key_7)
-		RotatePlane(2, tl::d2r(5.));
+		RotatePlane(2, tl::d2r<t_real>(5.));
 
 	QMainWindow::keyPressEvent(pEvt);
 }

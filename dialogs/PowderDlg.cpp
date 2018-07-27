@@ -169,8 +169,8 @@ void PowderDlg::PlotPowderLines(const std::vector<const PowderLine*>& vecLines)
 		dMinTT = (*pairMinMax.first)->dAngle;
 		dMaxTT = (*pairMinMax.second)->dAngle;
 
-		dMinTT -= tl::d2r(10.);
-		dMaxTT += tl::d2r(10.);
+		dMinTT -= tl::d2r<t_real>(10.);
+		dMaxTT += tl::d2r<t_real>(10.);
 		if(dMinTT < 0.) dMinTT = 0.;
 	}
 

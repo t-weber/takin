@@ -519,7 +519,7 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 	for(std::size_t i=0; i<vecDrawAngles.size(); ++i)
 	{
 		// arrow heads
-		t_real dAng = tl::d2r(vecLinesArrow[i]->angle() + 90.);
+		t_real dAng = tl::d2r<t_real>(vecLinesArrow[i]->angle() + 90.);
 		t_real dC = std::cos(dAng);
 		t_real dS = std::sin(dAng);
 
