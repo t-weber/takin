@@ -49,6 +49,7 @@ ScanMonDlg::ScanMonDlg(QWidget* pParent, QSettings *pSett)
 	m_plotwrap->GetCurve(1)->setPen(penPoints);
 	m_plotwrap->GetCurve(1)->setStyle(QwtPlotCurve::CurveStyle::Dots);
 	m_plotwrap->GetCurve(1)->setTitle("Scan Points");
+	m_plotwrap->GetCurve(1)->SetShowErrors(true);
 	// ------------------------------------------------------------------------
 
 	progress->setRange(0, 1000);

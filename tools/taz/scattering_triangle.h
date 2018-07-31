@@ -118,7 +118,7 @@ class ScatteringTriangle : public QGraphicsItem
 		int m_iMaxPeaks = 7;
 
 		tl::Lattice<t_real_glob> m_lattice, m_recip;
-		ublas::matrix<t_real_glob> m_matPlane, m_matPlane_inv;
+		ublas::matrix<t_real_glob> m_matPlane, m_matPlaneRlu, m_matPlane_inv;
 		std::vector<RecipPeak*> m_vecPeaks;
 
 		std::vector<t_powderline> m_vecPowderLines;
@@ -147,7 +147,7 @@ class ScatteringTriangle : public QGraphicsItem
 		void SetReady(bool bReady) { m_bReady = bReady; }
 		void nodeMoved(const ScatteringTriangleNode* pNode=0);
 
-		const ublas::matrix<t_real_glob>& GetPlane() const { return m_matPlane; }
+		const ublas::matrix<t_real_glob>& GetPlane(bool bRlu=0) const { return bRlu?m_matPlaneRlu:m_matPlane; }
 
 		bool IsReady() const { return m_bReady; }
 		t_real_glob GetTheta(bool bPosSense) const;

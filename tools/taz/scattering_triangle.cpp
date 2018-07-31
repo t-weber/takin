@@ -883,6 +883,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 	m_lattice = recipcommon.lattice;
 	m_recip = recipcommon.recip;
 	m_matPlane = recipcommon.matPlane;
+	m_matPlaneRlu = recipcommon.matPlaneRLU;
 	m_matPlane_inv = recipcommon.matPlane_inv;
 
 	tl::Powder<int, t_real_glob> powder;
@@ -1542,7 +1543,7 @@ void ScatteringTriangleScene::emitAllParams()
 	t_vec vecG = vecQ - vecq;
 	t_vec vecGrlu = vecQrlu - vecqrlu;
 
-	const t_mat& matPlane = m_pTri->GetPlane();
+	const t_mat& matPlane = m_pTri->GetPlane(true);
 	t_vec vec0 = tl::get_column(matPlane, 0);
 	t_vec vec1 = tl::get_column(matPlane, 1);
 	t_vec vecUp = tl::get_column(matPlane, 2);
