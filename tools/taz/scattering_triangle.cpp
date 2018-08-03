@@ -1,7 +1,7 @@
 /**
  * Reciprocal Lattice
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 2014 - 2017
+ * @date 2014 - 2018
  * @license GPLv2
  */
 
@@ -196,6 +196,12 @@ void ScatteringTriangle::SetqVisible(bool bVisible)
 	this->update();
 }
 
+void ScatteringTriangle::SetCoordAxesVisible(bool bVisible)
+{
+	m_bCoordAxesVisible = bVisible;
+	this->update();
+}
+
 void ScatteringTriangle::SetBZVisible(bool bVisible)
 {
 	m_bShowBZ = bVisible;
@@ -284,11 +290,31 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 
 
 
+	// orientation vectors
+	QPointF ptOrient[2];
+
+	for(int iOrient=0; iOrient<2; ++iOrient)
+	{
+		// vecOrient_rlu is normalised
+		t_vec vecOrient_rlu = tl::get_column(m_matPlaneRlu, iOrient);
+		t_vec vecOrient_lab = m_recip.GetPos(vecOrient_rlu[0], vecOrient_rlu[1], vecOrient_rlu[2]);
+
+		t_real dDistOrient = 0.;
+		t_vec vecDroppedOrient = m_plane.GetDroppedPerp(vecOrient_lab, &dDistOrient);
+		//bool bOrient0InPlane = tl::float_equal<t_real>(dDistOrient[iOrient], 0., m_dPlaneDistTolerance);
+
+		t_vec vecCoordOrient = ublas::prod(m_matPlane_inv, vecDroppedOrient);
+
+		ptOrient[iOrient] = QPointF(vecCoordOrient[0], -vecCoordOrient[1]);
+		ptOrient[iOrient] *= m_dScaleFactor*m_dZoom * 0.75;
+	}
+
+
+
 	QPointF ptKiQ = mapFromItem(m_pNodeKiQ.get(), 0, 0) * m_dZoom;
 	QPointF ptKfQ = mapFromItem(m_pNodeKfQ.get(), 0, 0) * m_dZoom;
 	QPointF ptKiKf = mapFromItem(m_pNodeKiKf.get(), 0, 0) * m_dZoom;
 	QPointF ptGq = mapFromItem(m_pNodeGq.get(), 0, 0) * m_dZoom;
-
 
 
 	// Powder lines
@@ -335,21 +361,13 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 	}
 
 
-
-	QPointF ptQMid = ptKiQ + (ptKfQ - ptKiQ)/2.;
-	QPointF ptKiMid = ptKiQ + (ptKiKf - ptKiQ)/2.;
-	QPointF ptKfMid = ptKfQ + (ptKiKf - ptKfQ)/2.;
-	QPointF ptqMid = ptKfQ + (ptGq - ptKfQ)/2.;
-	QPointF ptGMid = ptKiQ + (ptGq - ptKiQ)/2.;
-
-	QPointF ptMid = ptKiQ + (ptKfQ - ptKiQ)/2.;
-	ptMid = ptMid + (ptKiKf - ptMid)/2.;
-
 	QLineF lineQ(ptKiQ, ptKfQ);
 	QLineF lineKi(ptKiQ, ptKiKf);
 	QLineF lineKf(ptKiKf, ptKfQ);
 	QLineF lineG(ptKiQ, ptGq);
 	QLineF lineq(ptKfQ, ptGq);
+	QLineF lineOrient0(ptOrient[0], ptKiQ);
+	QLineF lineOrient1(ptOrient[1], ptKiQ);
 
 	QPen penRed(Qt::red);
 	penRed.setWidthF(g_dFontSize*0.1);
@@ -357,9 +375,19 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 	penBlack.setWidthF(g_dFontSize*0.1);
 	QPen penGreen(Qt::darkGreen);
 	penGreen.setWidthF(g_dFontSize*0.1);
+	QPen penLight(QColor(0xaa, 0xaa, 0xaa));
+	penLight.setWidthF(g_dFontSize*0.1);
+
+	if(m_bCoordAxesVisible)
+	{
+		pPainter->setPen(penLight);
+		pPainter->drawLine(lineOrient0);
+		pPainter->drawLine(lineOrient1);
+	}
 
 	pPainter->setPen(penRed);
 	pPainter->drawLine(lineQ);
+
 	pPainter->setPen(penBlack);
 	pPainter->drawLine(lineKi);
 	pPainter->drawLine(lineKf);
@@ -494,9 +522,33 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 
 	std::vector<bool> vecDrawAngles = {1,1,1};
 	std::vector<QColor> vecColor {Qt::black, Qt::black, Qt::red};
+	std::vector<QColor> vecColArc {Qt::blue, Qt::blue, Qt::blue};
+	std::vector<t_real> vecArcScale {1, 1, 1};
 
 	QLineF lineG2(ptGq, ptKiQ);
 	QLineF lineq2(ptGq, ptKfQ);
+
+	if(m_bCoordAxesVisible)
+	{
+		// angle between Q and orient0
+		vecLines1.push_back(&lineOrient0);
+		vecLines2.push_back(&lineQ);
+		vecPoints.push_back(&ptKiQ);
+		vecColArc.push_back(penLight.color());
+		vecArcScale.push_back(0.75);
+
+		vecLinesArrow.push_back(&lineOrient0);
+		vecLinesArrow.push_back(&lineOrient1);
+
+		vecPointsArrow.push_back(&ptOrient[0]);
+		vecPointsArrow.push_back(&ptOrient[1]);
+
+		vecDrawAngles.push_back(1);
+		vecDrawAngles.push_back(0);
+
+		vecColor.push_back(penLight.color());
+		vecColor.push_back(penLight.color());
+	}
 
 	if(m_bqVisible)
 	{
@@ -509,8 +561,8 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 		vecDrawAngles.push_back(0);
 		vecDrawAngles.push_back(0);
 
-		vecColor.push_back(Qt::darkGreen);
-		vecColor.push_back(Qt::darkGreen);
+		vecColor.push_back(penGreen.color());
+		vecColor.push_back(penGreen.color());
 	}
 
 
@@ -541,14 +593,15 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 		if(vecDrawAngles[i])
 		{
 			// angle arcs
-			t_real dArcSize = (vecLines1[i]->length() + vecLines2[i]->length()) / 2. / 3.;
+			t_real dArcSize = vecArcScale[i] *
+				(vecLines1[i]->length() + vecLines2[i]->length()) / 2. / 3.;
 			t_real dBeginArcAngle = vecLines1[i]->angle() + 180.;
 			t_real dArcAngle = vecLines1[i]->angleTo(*vecLines2[i]) - 180.;
 
-			QPen penBlue(Qt::blue);
-			penBlue.setWidthF(g_dFontSize*0.1);
+			QPen penArc(vecColArc[i]);
+			penArc.setWidthF(g_dFontSize*0.1);
 
-			pPainter->setPen(penBlue);
+			pPainter->setPen(penArc);
 			pPainter->drawArc(QRectF(vecPoints[i]->x()-dArcSize/2., vecPoints[i]->y()-dArcSize/2., 
 				dArcSize, dArcSize), dBeginArcAngle*16., dArcAngle*16.);
 
@@ -558,7 +611,7 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 
 
 			t_real dTotalAngle = -dBeginArcAngle-dArcAngle*0.5 + 180.;
-			t_real dTransScale = 50. * m_dZoom;
+			t_real dTransScale = 50. * m_dZoom * vecArcScale[i];
 			pPainter->save();
 				pPainter->translate(*vecPoints[i]);
 				pPainter->rotate(dTotalAngle);
@@ -882,6 +935,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 
 	m_lattice = recipcommon.lattice;
 	m_recip = recipcommon.recip;
+	m_plane = recipcommon.plane;
 	m_matPlane = recipcommon.matPlane;
 	m_matPlaneRlu = recipcommon.matPlaneRLU;
 	m_matPlane_inv = recipcommon.matPlane_inv;
@@ -977,7 +1031,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 				}
 
 				t_real dDist = 0.;
-				t_vec vecDropped = recipcommon.plane.GetDroppedPerp(vecPeak, &dDist);
+				t_vec vecDropped = m_plane.GetDroppedPerp(vecPeak, &dDist);
 				bool bInPlane = tl::float_equal<t_real>(dDist, 0., m_dPlaneDistTolerance);
 
 				// --------------------------------------------------------------------
@@ -1103,7 +1157,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 			// ----------------------------------------------------------------
 			// calculate intersection with scattering plane
 			tl::Plane<t_real> planeBZ3 = tl::Plane<t_real>(m_bz3.GetCentralReflex(),
-				recipcommon.plane.GetNorm());
+				m_plane.GetNorm());
 
 			std::tie(std::ignore, m_vecBZ3VertsUnproj) = m_bz3.GetIntersection(planeBZ3);
 

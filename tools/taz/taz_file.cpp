@@ -245,6 +245,10 @@ bool TazDlg::Load(const char* pcFile)
 		if(bOk)
 			m_pSmallq->setChecked(bSmallqEnabled!=0);
 
+		int bCoordAxesEnabled = xml.Query<int>((strXmlRoot + "recip/enable_axes").c_str(), 0, &bOk);
+		if(bOk)
+			m_pCoordAxes->setChecked(bCoordAxesEnabled!=0);
+
 		int bSmallqSnapped = xml.Query<int>((strXmlRoot + "recip/snap_q").c_str(), 1, &bOk);
 		if(bOk)
 			m_pSnapSmallq->setChecked(bSmallqSnapped!=0);
@@ -479,6 +483,9 @@ bool TazDlg::Save()
 
 	bool bSmallqEnabled = m_pSmallq->isChecked();
 	mapConf[strXmlRoot + "recip/enable_q"] = (bSmallqEnabled ? "1" : "0");
+
+	bool bCoordAxesEnabled = m_pCoordAxes->isChecked();
+	mapConf[strXmlRoot + "recip/enable_axes"] = (bCoordAxesEnabled ? "1" : "0");
 
 	bool bSmallqSnapped = m_sceneRecip.getSnapq();
 	mapConf[strXmlRoot + "recip/snap_q"] = (bSmallqSnapped ? "1" : "0");

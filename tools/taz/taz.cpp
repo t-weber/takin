@@ -54,6 +54,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 {
 	//log_debug("In ", __func__, ".");
 	const bool bSmallqVisible = 0;
+	const bool bCoordAxesVisible = 1;
 	const bool bBZVisible = 1;
 	const bool bWSVisible = 1;
 
@@ -361,6 +362,11 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	QAction *pRecipParams = new QAction("Information...", this);
 	m_pMenuViewRecip->addAction(pRecipParams);
 	m_pMenuViewRecip->addSeparator();
+
+	m_pCoordAxes = new QAction("Show Coordinate Axes", this);
+	m_pCoordAxes->setCheckable(1);
+	m_pCoordAxes->setChecked(bCoordAxesVisible);
+	m_pMenuViewRecip->addAction(m_pCoordAxes);
 
 	m_pSmallq = new QAction("Show Reduced Scattering Vector q", this);
 	m_pSmallq->setIcon(load_icon("res/icons/q.svg"));
@@ -694,6 +700,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	QObject::connect(pExit, SIGNAL(triggered()), this, SLOT(close()));
 
 	QObject::connect(m_pSmallq, SIGNAL(toggled(bool)), this, SLOT(EnableSmallq(bool)));
+	QObject::connect(m_pCoordAxes, SIGNAL(toggled(bool)), this, SLOT(EnableCoordAxes(bool)));
 	QObject::connect(m_pBZ, SIGNAL(toggled(bool)), this, SLOT(EnableBZ(bool)));
 	QObject::connect(m_pWS, SIGNAL(toggled(bool)), this, SLOT(EnableWS(bool)));
 
@@ -878,6 +885,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 
 
 	m_sceneRecip.GetTriangle()->SetqVisible(bSmallqVisible);
+	m_sceneRecip.GetTriangle()->SetCoordAxesVisible(bCoordAxesVisible);
 	m_sceneRecip.GetTriangle()->SetBZVisible(bBZVisible);
 	m_sceneRecip.GetTriangle()->SetEwaldSphereVisible(EWALD_KF);
 	m_sceneRealLattice.GetLattice()->SetWSVisible(bWSVisible);
@@ -1335,6 +1343,11 @@ void TazDlg::Show3DBZ() {}
 void TazDlg::EnableSmallq(bool bEnable)
 {
 	m_sceneRecip.GetTriangle()->SetqVisible(bEnable);
+}
+
+void TazDlg::EnableCoordAxes(bool bEnable)
+{
+	m_sceneRecip.GetTriangle()->SetCoordAxesVisible(bEnable);
 }
 
 void TazDlg::EnableBZ(bool bEnable)

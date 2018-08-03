@@ -81,6 +81,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		bool m_bUpdateRecipEdits = 1;
 
 		QAction *m_pSmallq = nullptr, *m_pSnapSmallq = nullptr;
+		QAction *m_pCoordAxes = nullptr;
 		QAction *m_pGoto = nullptr;
 		QAction *m_pBZ = nullptr, *m_pWS = nullptr;
 		QAction *m_pEwaldSphereNone = nullptr,
@@ -230,6 +231,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void UpdateMonoSense();
 		void UpdateAnaSense();
 		void EnableSmallq(bool bEnable);
+		void EnableCoordAxes(bool bEnable);
 		void EnableBZ(bool bEnable);
 		void EnableWS(bool bEnable);
 		void EnableRealQDir(bool bEnable);

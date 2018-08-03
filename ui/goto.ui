@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>367</height>
+    <height>347</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -251,7 +251,7 @@
              <string>Fixed k_i</string>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -259,6 +259,9 @@
            <widget class="QRadioButton" name="radioFixedKf">
             <property name="text">
              <string>Fixed k_f</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

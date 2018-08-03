@@ -1,7 +1,7 @@
 /**
  * Scattering Triangle
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 2014 - 2016
+ * @date 2014 - 2018
  * @license GPLv2
  */
 
@@ -119,6 +119,7 @@ class ScatteringTriangle : public QGraphicsItem
 
 		tl::Lattice<t_real_glob> m_lattice, m_recip;
 		ublas::matrix<t_real_glob> m_matPlane, m_matPlaneRlu, m_matPlane_inv;
+		tl::Plane<t_real_glob> m_plane;
 		std::vector<RecipPeak*> m_vecPeaks;
 
 		std::vector<t_powderline> m_vecPowderLines;
@@ -132,6 +133,7 @@ class ScatteringTriangle : public QGraphicsItem
 		std::vector<ublas::vector<t_real_glob>> m_vecBZ3SymmPts;
 
 		bool m_bqVisible = 0;
+		bool m_bCoordAxesVisible = 1;
 		bool m_bShowEwaldSphere = 1;
 		bool m_bEwaldAroundKi = 0;
 
@@ -181,6 +183,7 @@ class ScatteringTriangle : public QGraphicsItem
 		t_real_glob GetZoom() const { return m_dZoom; }
 
 		void SetqVisible(bool bVisible);
+		void SetCoordAxesVisible(bool bVisible);
 		void SetBZVisible(bool bVisible);
 		void SetEwaldSphereVisible(EwaldSphere iEw);
 
