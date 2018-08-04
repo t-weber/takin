@@ -423,7 +423,6 @@ void GotoDlg::ButtonBoxClicked(QAbstractButton* pBtn)
 	{
 		if(m_pSettings)
 		{
-std::cout << "xxx" << std::endl;
 			m_pSettings->setValue("goto_pos/geo", saveGeometry());
 			m_pSettings->setValue("goto_pos/ki_fix", radioFixedKi->isChecked());
 		}
