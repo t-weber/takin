@@ -159,10 +159,20 @@ void TazDlg::CalcPeaks()
 		t_real dY2 = editScatY2->text().toDouble();
 		ublas::vector<t_real> vecPlaneYRLU = tl::make_vec({dY0, dY1, dY2});
 
+		// display up vector
+		ublas::matrix<t_real> matGCov = recip_unrot.GetMetricCov();
+		ublas::vector<t_real> vecPlaneZRLU = 
+			tl::cross_prod_contra(matGCov, vecPlaneXRLU, vecPlaneYRLU, false);
+		vecPlaneZRLU /= tl::veclen(vecPlaneZRLU);
+		tl::set_eps_0(vecPlaneZRLU, g_dEpsGfx);
+
+		editScatZ0->setText(tl::var_to_str(vecPlaneZRLU[0], g_iPrecGfx).c_str());
+		editScatZ1->setText(tl::var_to_str(vecPlaneZRLU[1], g_iPrecGfx).c_str());
+		editScatZ2->setText(tl::var_to_str(vecPlaneZRLU[2], g_iPrecGfx).c_str());
 		//----------------------------------------------------------------------
 		// show integer up vector
-		unsigned int iMaxDec = 4;	// TODO: determine max. # of entered decimals
-		ublas::vector<int> ivecUp = tl::cross_3(
+		/*unsigned int iMaxDec = 4;	// TODO: determine max. # of entered decimals
+		ublas::vector<int> ivecUp = tl::cross_3(	// TODO: needs covariant cross product
 			tl::make_vec<ublas::vector<int>>({int(dX0*std::pow(10, iMaxDec)),
 				int(dX1*std::pow(10, iMaxDec)),
 				int(dX2*std::pow(10, iMaxDec))}),
@@ -172,8 +182,9 @@ void TazDlg::CalcPeaks()
 		ivecUp = tl::get_gcd_vec(ivecUp);
 		editScatZ0->setText(tl::var_to_str(ivecUp[0], g_iPrec).c_str());
 		editScatZ1->setText(tl::var_to_str(ivecUp[1], g_iPrec).c_str());
-		editScatZ2->setText(tl::var_to_str(ivecUp[2], g_iPrec).c_str());
+		editScatZ2->setText(tl::var_to_str(ivecUp[2], g_iPrec).c_str());*/
 		//----------------------------------------------------------------------
+
 
 		ublas::vector<t_real> vecX0 = ublas::zero_vector<t_real>(3);
 		tl::Plane<t_real> planeRLU(vecX0, vecPlaneXRLU, vecPlaneYRLU);
@@ -187,7 +198,6 @@ void TazDlg::CalcPeaks()
 
 		//----------------------------------------------------------------------
 		// view plane for real lattice
-		// scattering plane
 		t_real dX0R = editRealX0->text().toDouble();
 		t_real dX1R = editRealX1->text().toDouble();
 		t_real dX2R = editRealX2->text().toDouble();
@@ -198,10 +208,21 @@ void TazDlg::CalcPeaks()
 		t_real dY2R = editRealY2->text().toDouble();
 		ublas::vector<t_real> vecPlaneYR = tl::make_vec({dY0R, dY1R, dY2R});
 
+		// display up vector
+		ublas::matrix<t_real> matGCovR = lattice.GetMetricCov();
+		ublas::vector<t_real> vecPlaneZR = 
+			tl::cross_prod_contra(matGCovR, vecPlaneXR, vecPlaneYR, false);
+		vecPlaneZR /= tl::veclen(vecPlaneZR);
+		tl::set_eps_0(vecPlaneZR, g_dEpsGfx);
+
+		editRealZ0->setText(tl::var_to_str(vecPlaneZR[0], g_iPrecGfx).c_str());
+		editRealZ1->setText(tl::var_to_str(vecPlaneZR[1], g_iPrecGfx).c_str());
+		editRealZ2->setText(tl::var_to_str(vecPlaneZR[2], g_iPrecGfx).c_str());
+
 		//----------------------------------------------------------------------
 		// show integer up vector
-		unsigned int iMaxDecR = 4;	// TODO: determine max. # of entered decimals
-		ublas::vector<int> ivecUpR = tl::cross_3(
+		/*unsigned int iMaxDecR = 4;	// TODO: determine max. # of entered decimals
+		ublas::vector<int> ivecUpR = tl::cross_3(	// TODO: needs covariant cross product
 			tl::make_vec<ublas::vector<int>>({int(dX0R*std::pow(10, iMaxDecR)),
 				int(dX1R*std::pow(10, iMaxDecR)),
 				int(dX2R*std::pow(10, iMaxDecR))}),
@@ -211,7 +232,7 @@ void TazDlg::CalcPeaks()
 		ivecUpR = tl::get_gcd_vec(ivecUpR);
 		editRealZ0->setText(tl::var_to_str(ivecUpR[0], g_iPrec).c_str());
 		editRealZ1->setText(tl::var_to_str(ivecUpR[1], g_iPrec).c_str());
-		editRealZ2->setText(tl::var_to_str(ivecUpR[2], g_iPrec).c_str());
+		editRealZ2->setText(tl::var_to_str(ivecUpR[2], g_iPrec).c_str());*/
 		//----------------------------------------------------------------------
 
 		ublas::vector<t_real> vecX0R = ublas::zero_vector<t_real>(3);
