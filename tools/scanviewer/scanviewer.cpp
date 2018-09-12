@@ -119,6 +119,8 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 #endif
 	QObject::connect(comboX, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::XAxisSelected);
 	QObject::connect(comboY, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::YAxisSelected);
+	QObject::connect(comboMon, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::MonAxisSelected);
+	QObject::connect(checkNorm, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), pThis, &ScanViewerDlg::NormaliseStateChanged);
 	QObject::connect(spinStart, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(spinStop, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(spinSkip, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
@@ -145,6 +147,9 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 		this, SLOT(XAxisSelected(const QString&)));
 	QObject::connect(comboY, SIGNAL(currentIndexChanged(const QString&)),
 		this, SLOT(YAxisSelected(const QString&)));
+	QObject::connect(comboMon, SIGNAL(currentIndexChanged(const QString&)),
+		this, SLOT(MonAxisSelected(const QString&)));
+	QObject::connect(checkNorm, SIGNAL(stateChanged(int)), this, SLOT(NormaliseStateChanged(int)));
 	QObject::connect(spinStart, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(spinStop, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(spinSkip, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
@@ -275,6 +280,7 @@ void ScanViewerDlg::ClearPlot()
 
 	m_vecX.clear();
 	m_vecY.clear();
+	m_vecYErr.clear();
 	m_vecFitX.clear();
 	m_vecFitY.clear();
 
@@ -298,6 +304,7 @@ void ScanViewerDlg::ClearPlot()
 
 	comboX->clear();
 	comboY->clear();
+	comboMon->clear();
 	textRoot->clear();
 	spinStart->setValue(0);
 	spinStop->setValue(0);
@@ -364,6 +371,8 @@ void ScanViewerDlg::SelectDir()
 
 void ScanViewerDlg::XAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::YAxisSelected(const QString& strLab) { PlotScan(); }
+void ScanViewerDlg::MonAxisSelected(const QString& strLab) { PlotScan(); }
+void ScanViewerDlg::NormaliseStateChanged(int iState) { PlotScan(); }
 void ScanViewerDlg::StartOrSkipChanged(int) { PlotScan(); }
 
 
@@ -406,13 +415,13 @@ void ScanViewerDlg::FileSelected()
 
 	std::vector<std::string> vecScanVars = m_pInstr->GetScannedVars();
 	std::string strCntVar = m_pInstr->GetCountVar();
-	//std::string strMonVar = m_pInstr->GetMonVar();
+	std::string strMonVar = m_pInstr->GetMonVar();
 	//tl::log_info("Count var: ", strCntVar, ", mon var: ", strMonVar);
 
 	const std::wstring strPM = tl::get_spec_char_utf16("pm");
 
 	m_bDoUpdate = 0;
-	int iIdxX=-1, iIdxY=-1, iCurIdx=0;
+	int iIdxX=-1, iIdxY=-1, iIdxMon=-1, iCurIdx=0;
 	const tl::FileInstrBase<t_real>::t_vecColNames& vecColNames = m_pInstr->GetColNames();
 	for(const tl::FileInstrBase<t_real>::t_vecColNames::value_type& strCol : vecColNames)
 	{
@@ -434,17 +443,21 @@ void ScanViewerDlg::FileSelected()
 
 		comboX->addItem(QString::fromWCharArray(_strCol.c_str()), QString(strCol.c_str()));
 		comboY->addItem(QString::fromWCharArray(_strCol.c_str()), QString(strCol.c_str()));
+		comboMon->addItem(QString::fromWCharArray(_strCol.c_str()), QString(strCol.c_str()));
 
-		if(vecScanVars.size() && vecScanVars[0]==strCol)
+		if(vecScanVars.size() && vecScanVars[0] == strCol)
 			iIdxX = iCurIdx;
-		if(strCntVar==strCol)
+		if(strCntVar == strCol)
 			iIdxY = iCurIdx;
+		if(strMonVar == strCol)
+			iIdxMon = iCurIdx;
 
 		++iCurIdx;
 	}
 
 	comboX->setCurrentIndex(iIdxX);
 	comboY->setCurrentIndex(iIdxY);
+	comboMon->setCurrentIndex(iIdxMon);
 
 	CalcPol();
 
@@ -708,6 +721,8 @@ void ScanViewerDlg::PlotScan()
 
 	m_strX = comboX->itemData(comboX->currentIndex(), Qt::UserRole).toString().toStdString();
 	m_strY = comboY->itemData(comboY->currentIndex(), Qt::UserRole).toString().toStdString();
+	m_strMon = comboMon->itemData(comboMon->currentIndex(), Qt::UserRole).toString().toStdString();
+
 	const int iStartIdx = spinStart->value();
 	const int iEndSkip = spinStop->value();
 	const int iSkipRows = spinSkip->value();
@@ -716,6 +731,7 @@ void ScanViewerDlg::PlotScan()
 
 	m_vecX = m_pInstr->GetCol(m_strX.c_str());
 	m_vecY = m_pInstr->GetCol(m_strY.c_str());
+	std::vector<t_real> vecMon = m_pInstr->GetCol(m_strMon.c_str());
 
 	bool bYIsACountVar = (m_strY == m_pInstr->GetCountVar() || m_strY == m_pInstr->GetMonVar());
 	m_plotwrap->GetCurve(1)->SetShowErrors(bYIsACountVar);
@@ -730,9 +746,15 @@ void ScanViewerDlg::PlotScan()
 			m_vecX.erase(m_vecX.begin(), m_vecX.begin()+iStartIdx);
 
 		if(std::size_t(iStartIdx) >= m_vecY.size())
+		{
 			m_vecY.clear();
+			vecMon.clear();
+		}
 		else
+		{
 			m_vecY.erase(m_vecY.begin(), m_vecY.begin()+iStartIdx);
+			vecMon.erase(vecMon.begin(), vecMon.begin()+iStartIdx);
+		}
 	}
 
 	// remove points from end
@@ -744,26 +766,60 @@ void ScanViewerDlg::PlotScan()
 			m_vecX.erase(m_vecX.end()-iEndSkip, m_vecX.end());
 
 		if(std::size_t(iEndSkip) >= m_vecY.size())
+		{
 			m_vecY.clear();
+			vecMon.clear();
+		}
 		else
+		{
 			m_vecY.erase(m_vecY.end()-iEndSkip, m_vecY.end());
+			vecMon.erase(vecMon.end()-iEndSkip, vecMon.end());
+		}
 	}
 
 	// interleave rows
 	if(iSkipRows != 0)
 	{
-		decltype(m_vecX) vecXNew, vecYNew;
+		decltype(m_vecX) vecXNew, vecYNew, vecMonNew;
 
 		for(std::size_t iRow=0; iRow<std::min(m_vecX.size(), m_vecY.size()); ++iRow)
 		{
 			vecXNew.push_back(m_vecX[iRow]);
 			vecYNew.push_back(m_vecY[iRow]);
+			vecMonNew.push_back(vecMon[iRow]);
 
 			iRow += iSkipRows;
 		}
 
 		m_vecX = std::move(vecXNew);
 		m_vecY = std::move(vecYNew);
+		vecMon = std::move(vecMonNew);
+	}
+
+
+	// errors
+	m_vecYErr.clear();
+	m_vecYErr.reserve(m_vecY.size());
+	for(std::size_t iY=0; iY<m_vecY.size(); ++iY)
+	{
+		// normalise to monitor?
+		if(checkNorm->isChecked())
+		{
+			t_real y = m_vecY[iY];
+			t_real m = vecMon[iY];
+			t_real dy = tl::float_equal(y, 0., g_dEps) ? 1. : std::sqrt(y);
+			t_real dm = tl::float_equal(m, 0., g_dEps) ? 1. : std::sqrt(m);
+
+			// y_new = y/m
+			// dy_new = 1/m dy - y/m^2 dm
+			m_vecY[iY] = y/m;
+			m_vecYErr.push_back(std::sqrt(std::pow(dy/m, 2.) + std::pow(dm*y/(m*m), 2.)));
+		}
+		else
+		{
+			t_real err = tl::float_equal(m_vecY[iY], 0., g_dEps) ? 1. : std::sqrt(m_vecY[iY]);
+			m_vecYErr.push_back(err);
+		}
 	}
 
 
@@ -810,7 +866,7 @@ void ScanViewerDlg::PlotScan()
 		set_qwt_data<t_real>()(*m_plotwrap, m_vecFitX, m_vecFitY, 0, 0);
 	else
 		set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 0, 0);
-	set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 1, 1);
+	set_qwt_data<t_real>()(*m_plotwrap, m_vecX, m_vecY, 1, 1, &m_vecYErr);
 
 	GenerateExternal(comboExport->currentIndex());
 }
@@ -858,22 +914,22 @@ set grid
 set xrange [%%MINX%%:%%MAXX%%]
 set yrange [%%MINY%%:%%MAXY%%]
 
-plot "-" using ($1):($2):(sqrt($2)) pointtype 7 with yerrorbars title "Data"
+plot "-" using ($1):($2):($3) pointtype 7 with yerrorbars title "Data"
 %%POINTS%%
 end)RAWSTR";
 
 
-	std::vector<t_real> vecYErr = m_vecY;
+	/*std::vector<t_real> vecYErr = m_vecY;
 	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
 	{
 		if(tl::float_equal(d, t_real(0.), g_dEps))
 			d = 1.;
 		d = std::sqrt(d);
-	});
+	});*/
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
-	t_real dMaxErrY = *std::max_element(vecYErr.begin(), vecYErr.end());
+	t_real dMaxErrY = *std::max_element(m_vecYErr.begin(), m_vecYErr.end());
 
 	std::ostringstream ostrPoints;
 	ostrPoints.precision(g_iPrec);
@@ -882,7 +938,8 @@ end)RAWSTR";
 	{
 		ostrPoints
 			<< std::left << std::setw(g_iPrec*2) << m_vecX[i] << " "
-			<< std::left << std::setw(g_iPrec*2) << m_vecY[i] << "\n";
+			<< std::left << std::setw(g_iPrec*2) << m_vecY[i] << " "
+			<< std::left << std::setw(g_iPrec*2) << m_vecYErr[i] << "\n";
 	}
 
 	tl::find_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
@@ -953,17 +1010,17 @@ plt.plot(x_fine, y_fit)
 plt.show())RAWSTR";
 
 
-	std::vector<t_real> vecYErr = m_vecY;
+	/*std::vector<t_real> vecYErr = m_vecY;
 	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
 	{
 		if(tl::float_equal(d, t_real(0.), g_dEps))
 			d = 1.;
 		d = std::sqrt(d);
-	});
+	});*/
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
-	t_real dMaxErrY = *std::max_element(vecYErr.begin(), vecYErr.end());
+	t_real dMaxErrY = *std::max_element(m_vecYErr.begin(), m_vecYErr.end());
 
 	std::ostringstream ostrX, ostrY, ostrYErr;
 	ostrX.precision(g_iPrec);
@@ -974,7 +1031,7 @@ plt.show())RAWSTR";
 	{
 		ostrX << m_vecX[i] << ", ";
 		ostrY << m_vecY[i] << ", ";
-		ostrYErr << vecYErr[i] << ", ";
+		ostrYErr << m_vecYErr[i] << ", ";
 	}
 
 	tl::find_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
@@ -1089,17 +1146,17 @@ R"RAWSTR(void scan_plot()
 })RAWSTR";
 
 
-	std::vector<t_real> vecYErr = m_vecY;
+	/*std::vector<t_real> vecYErr = m_vecY;
 	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
 	{
 		if(tl::float_equal(d, t_real(0.), g_dEps))
 			d = 1.;
 		d = std::sqrt(d);
-	});
+	});*/
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
-	t_real dMaxErrY = *std::max_element(vecYErr.begin(), vecYErr.end());
+	t_real dMaxErrY = *std::max_element(m_vecYErr.begin(), m_vecYErr.end());
 
 	std::ostringstream ostrX, ostrY, ostrYErr;
 	ostrX.precision(g_iPrec);
@@ -1110,7 +1167,7 @@ R"RAWSTR(void scan_plot()
 	{
 		ostrX << m_vecX[i] << ", ";
 		ostrY << m_vecY[i] << ", ";
-		ostrYErr << vecYErr[i] << ", ";
+		ostrYErr << m_vecYErr[i] << ", ";
 	}
 
 	tl::find_and_replace<std::string>(strRootSrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
@@ -1327,15 +1384,6 @@ bool ScanViewerDlg::Fit(t_func&& func,
 
 	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
 		return false;
-
-	std::vector<t_real> m_vecYErr;
-	m_vecYErr.reserve(m_vecY.size());
-	for(t_real d : m_vecY)
-	{
-		if(tl::float_equal(d, t_real(0.), g_dEps))
-			d = 1.;
-		m_vecYErr.push_back(std::sqrt(d));
-	}
 
 	bool bOk = 0;
 	try

@@ -35,10 +35,10 @@ protected:
 
 	bool m_bDoUpdate = 0;
 	tl::FileInstrBase<t_real_glob> *m_pInstr = nullptr;
-	std::vector<t_real_glob> m_vecX, m_vecY;
+	std::vector<t_real_glob> m_vecX, m_vecY, m_vecYErr;
 	std::vector<t_real_glob> m_vecFitX, m_vecFitY;
 	std::unique_ptr<QwtPlotWrapper> m_plotwrap;
-	std::string m_strX, m_strY, m_strCmd;
+	std::string m_strX, m_strY, m_strMon, m_strCmd;
 
 	FitParamDlg *m_pFitParamDlg = nullptr;
 
@@ -85,6 +85,8 @@ protected slots:
 
 	void XAxisSelected(const QString&);
 	void YAxisSelected(const QString&);
+	void MonAxisSelected(const QString&);
+	void NormaliseStateChanged(int iState);
 	void StartOrSkipChanged(int);
 
 	void ShowFitParams();
