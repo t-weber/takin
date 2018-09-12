@@ -12,7 +12,7 @@ OS_BIN="$BIN_DIR"	# set accordingly
 
 TOOL=install_name_tool
 STRIP=strip
-QT_VER="5.11.0"
+QT_VER="5.11.1"
 
 
 declare -a filestochange=(

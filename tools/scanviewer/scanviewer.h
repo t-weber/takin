@@ -1,7 +1,7 @@
 /**
  * Scan viewer
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date mar-2015
+ * @date mar-2015 - 2018
  * @license GPLv2
  */
 

@@ -1,7 +1,7 @@
 /**
  * Scan viewer
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 2015-2016
+ * @date 2015-2018
  * @license GPLv2
  */
 
@@ -798,12 +798,19 @@ void ScanViewerDlg::PlotScan()
 
 
 	// errors
+	bool bNormalise = checkNorm->isChecked();
+	if(vecMon.size() < m_vecY.size())
+	{
+		bNormalise = 0;
+		tl::log_err("Counter and monitor data count mismatch.");
+	}
+
 	m_vecYErr.clear();
 	m_vecYErr.reserve(m_vecY.size());
 	for(std::size_t iY=0; iY<m_vecY.size(); ++iY)
 	{
 		// normalise to monitor?
-		if(checkNorm->isChecked())
+		if(bNormalise)
 		{
 			t_real y = m_vecY[iY];
 			t_real m = vecMon[iY];
@@ -854,8 +861,14 @@ void ScanViewerDlg::PlotScan()
 	editTimestamp->setText(m_pInstr->GetTimestamp().c_str());
 
 
+	QString strY = m_strY.c_str();
+	if(bNormalise)
+	{
+		strY += " / ";
+		strY += m_strMon.c_str();
+	}
 	plot->setAxisTitle(QwtPlot::xBottom, m_strX.c_str());
-	plot->setAxisTitle(QwtPlot::yLeft, m_strY.c_str());
+	plot->setAxisTitle(QwtPlot::yLeft, strY);
 	plot->setTitle(m_strCmd.c_str());
 
 
@@ -918,14 +931,6 @@ plot "-" using ($1):($2):($3) pointtype 7 with yerrorbars title "Data"
 %%POINTS%%
 end)RAWSTR";
 
-
-	/*std::vector<t_real> vecYErr = m_vecY;
-	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
-	{
-		if(tl::float_equal(d, t_real(0.), g_dEps))
-			d = 1.;
-		d = std::sqrt(d);
-	});*/
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
@@ -1009,14 +1014,6 @@ plt.errorbar(x,y,yerr, fmt="o")
 plt.plot(x_fine, y_fit)
 plt.show())RAWSTR";
 
-
-	/*std::vector<t_real> vecYErr = m_vecY;
-	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
-	{
-		if(tl::float_equal(d, t_real(0.), g_dEps))
-			d = 1.;
-		d = std::sqrt(d);
-	});*/
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
@@ -1145,14 +1142,6 @@ R"RAWSTR(void scan_plot()
 	pGraph->Draw("P");
 })RAWSTR";
 
-
-	/*std::vector<t_real> vecYErr = m_vecY;
-	std::for_each(vecYErr.begin(), vecYErr.end(), [](t_real& d)
-	{
-		if(tl::float_equal(d, t_real(0.), g_dEps))
-			d = 1.;
-		d = std::sqrt(d);
-	});*/
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
 	auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());

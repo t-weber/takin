@@ -748,6 +748,10 @@ void TazDlg::ShowResoEllipses3D()
 {
 	InitReso();
 
+#ifdef REINIT_3D_DLGS
+	if(m_pEllipseDlg3D) { delete m_pEllipseDlg3D; m_pEllipseDlg3D = nullptr; }
+#endif
+
 	if(!m_pEllipseDlg3D)
 	{
 		m_pEllipseDlg3D = new EllipseDlg3D(this, &m_settings);

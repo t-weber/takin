@@ -28,6 +28,7 @@ USE_LAPACK = 0
 
 # compile the ogl code?
 USE_3D = 1
+REINIT_3D_HACK = 0
 
 # compile the network code?
 USE_NET = 1
@@ -125,6 +126,10 @@ ifeq ($(USE_3D), 1)
 	DEFINES += -DUSE_3D -DUSE_MULTI_TEXTURES
 else
 	DEFINES += -DNO_3D
+endif
+
+ifeq ($(REINIT_3D_HACK), 1)
+	DEFINES += -DREINIT_3D_DLGS
 endif
 
 ifeq ($(USE_NET), 1)
