@@ -135,6 +135,7 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	m_plotwrap->GetCurve(2)->setPen(penScanPoints);
 	m_plotwrap->GetCurve(2)->setStyle(QwtPlotCurve::CurveStyle::Dots);
 	m_plotwrap->GetCurve(2)->setTitle("S(Q,E)");
+	m_plotwrap->GetCurve(2)->SetShowErrors(true);
 
 	// dispersion branches
 	for(int iCurve=CONVO_DISP_CURVE_START; iCurve<CONVO_MAX_CURVES; ++iCurve)
