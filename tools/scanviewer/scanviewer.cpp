@@ -486,8 +486,7 @@ void ScanViewerDlg::CalcPol()
 	const std::string strPolCur1 = editPolCur1->text().toStdString();
 	const std::string strPolCur2 = editPolCur2->text().toStdString();
 
-	m_pInstr->SetPolNames(strPolVec1.c_str(), strPolVec2.c_str(),
-		strPolCur1.c_str(), strPolCur2.c_str());
+	m_pInstr->SetPolNames(strPolVec1.c_str(), strPolVec2.c_str(), strPolCur1.c_str(), strPolCur2.c_str());
 	m_pInstr->ParsePolData();
 
 	const std::vector<std::array<t_real, 6>>& vecPolStates = m_pInstr->GetPolStates();
@@ -590,6 +589,11 @@ void ScanViewerDlg::CalcPol()
 	}
 
 
+	const std::vector<std::string> vecScanVars = m_pInstr->GetScannedVars();
+	std::string strX;
+	if(vecScanVars.size())
+		strX = vecScanVars[0];
+	const std::vector<t_real>& vecX = m_pInstr->GetCol(strX.c_str());
 	const std::vector<t_real>& vecCnts = m_pInstr->GetCol(m_pInstr->GetCountVar().c_str());
 
 
@@ -601,7 +605,10 @@ void ScanViewerDlg::CalcPol()
 	// iterate over scan points
 	for(std::size_t iPt=0; iPt<vecCnts.size();)
 	{
-		ostrCnts << "<p><b>Scan Point " << (iPt/iNumPolStates+1) << "</b>";
+		ostrCnts << "<p><b>Scan Point " << (iPt/iNumPolStates+1);
+		if(strX != "" && iPt < vecX.size())
+			ostrCnts << " (" << strX << " = " << vecX[iPt + 0] << ")";
+		ostrCnts << "</b>";
 		ostrCnts << "<table border=\"1\" cellpadding=\"0\">";
 		ostrCnts << "<tr><th>Init. Pol. Vec.</th>";
 		ostrCnts << "<th>Fin. Pol. Vec.</th>";
@@ -642,7 +649,10 @@ void ScanViewerDlg::CalcPol()
 	// iterate over scan points
 	for(std::size_t iPt=0; iPt<vecCnts.size()/iNumPolStates; ++iPt)
 	{
-		ostrPol << "<p><b>Scan Point " << (iPt+1) << "</b>";
+		ostrPol << "<p><b>Scan Point " << (iPt+1);
+		if(strX != "" && iPt*iNumPolStates < vecX.size())
+			ostrPol << " (" << strX << " = " << vecX[iPt*iNumPolStates + 0] << ")";
+		ostrPol << "</b>";
 		ostrPol << "<table border=\"1\" cellpadding=\"0\">";
 		ostrPol << "<tr><th>Index 1</th>";
 		ostrPol << "<th>Index 2</th>";
