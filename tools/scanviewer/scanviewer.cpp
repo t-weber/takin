@@ -29,6 +29,7 @@
 #include "tlibs/string/spec_char.h"
 #include "tlibs/file/file.h"
 #include "tlibs/log/log.h"
+#include "tlibs/helper/misc.h"
 #include "libs/version.h"
 
 #ifndef NO_FIT
@@ -115,12 +116,14 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(btnLorentz, &QToolButton::clicked, pThis, &ScanViewerDlg::FitLorentz);
 	QObject::connect(btnVoigt, &QToolButton::clicked, pThis, &ScanViewerDlg::FitVoigt);
 	QObject::connect(btnLine, &QToolButton::clicked, pThis, &ScanViewerDlg::FitLine);
+	QObject::connect(btnParabola, &QToolButton::clicked, pThis, &ScanViewerDlg::FitParabola);
 	QObject::connect(btnSine, &QToolButton::clicked, pThis, &ScanViewerDlg::FitSine);
 #endif
 	QObject::connect(comboX, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::XAxisSelected);
 	QObject::connect(comboY, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::YAxisSelected);
 	QObject::connect(comboMon, static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), pThis, &ScanViewerDlg::MonAxisSelected);
 	QObject::connect(checkNorm, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), pThis, &ScanViewerDlg::NormaliseStateChanged);
+	//QObject::connect(checkLog, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), pThis, &ScanViewerDlg::LogStateChanged);
 	QObject::connect(spinStart, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(spinStop, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
 	QObject::connect(spinSkip, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), pThis, &ScanViewerDlg::StartOrSkipChanged);
@@ -141,6 +144,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(btnLorentz, SIGNAL(clicked(bool)), this, SLOT(FitLorentz()));
 	QObject::connect(btnVoigt, SIGNAL(clicked(bool)), this, SLOT(FitVoigt()));
 	QObject::connect(btnLine, SIGNAL(clicked(bool)), this, SLOT(FitLine()));
+	QObject::connect(btnParabola, SIGNAL(clicked(bool)), this, SLOT(FitParabola()));
 	QObject::connect(btnSine, SIGNAL(clicked(bool)), this, SLOT(FitSine()));
 #endif
 	QObject::connect(comboX, SIGNAL(currentIndexChanged(const QString&)),
@@ -150,6 +154,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	QObject::connect(comboMon, SIGNAL(currentIndexChanged(const QString&)),
 		this, SLOT(MonAxisSelected(const QString&)));
 	QObject::connect(checkNorm, SIGNAL(stateChanged(int)), this, SLOT(NormaliseStateChanged(int)));
+	//QObject::connect(checkLog, SIGNAL(stateChanged(int)), this, SLOT(LogStateChanged(int)));
 	QObject::connect(spinStart, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(spinStop, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
 	QObject::connect(spinSkip, SIGNAL(valueChanged(int)), this, SLOT(StartOrSkipChanged(int)));
@@ -209,6 +214,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	btnLorentz->setEnabled(false);
 	btnVoigt->setEnabled(false);
 	btnLine->setEnabled(false);
+	btnParabola->setEnabled(false);
 	btnSine->setEnabled(false);
 #endif
 
@@ -373,6 +379,7 @@ void ScanViewerDlg::XAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::YAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::MonAxisSelected(const QString& strLab) { PlotScan(); }
 void ScanViewerDlg::NormaliseStateChanged(int iState) { PlotScan(); }
+//void ScanViewerDlg::LogStateChanged(int iState) { PlotScan(); }
 void ScanViewerDlg::StartOrSkipChanged(int) { PlotScan(); }
 
 
@@ -729,6 +736,9 @@ void ScanViewerDlg::PlotScan()
 	if(m_pInstr==nullptr || !m_bDoUpdate)
 		return;
 
+	bool bNormalise = checkNorm->isChecked();
+	//const bool bLog = checkLog->isChecked();
+
 	m_strX = comboX->itemData(comboX->currentIndex(), Qt::UserRole).toString().toStdString();
 	m_strY = comboY->itemData(comboY->currentIndex(), Qt::UserRole).toString().toStdString();
 	m_strMon = comboMon->itemData(comboMon->currentIndex(), Qt::UserRole).toString().toStdString();
@@ -808,7 +818,6 @@ void ScanViewerDlg::PlotScan()
 
 
 	// errors
-	bool bNormalise = checkNorm->isChecked();
 	if(vecMon.size() < m_vecY.size())
 	{
 		bNormalise = 0;
@@ -1378,6 +1387,8 @@ bool ScanViewerDlg::Fit(t_func&& func,
 	std::vector<t_real>& vecErrs,
 	const std::vector<bool>& vecFixed)
 {
+	bool bUseSwarm = m_settings.value("use_swarm", false).toBool();
+
 	m_vecFitX.clear();
 	m_vecFitY.clear();
 
@@ -1391,7 +1402,7 @@ bool ScanViewerDlg::Fit(t_func&& func,
 			_vecVals = tl::container_cast<t_real_min, t_real, std::vector>()(vecVals),
 			_vecErrs = tl::container_cast<t_real_min, t_real, std::vector>()(vecErrs);
 
-		if(checkSwarm->isChecked())
+		if(bUseSwarm)
 		{
 			bOk = tl::swarmfit<t_real, iFuncArgs>
 				(func, m_vecX, m_vecY, m_vecYErr, vecParamNames, vecVals, vecErrs);
@@ -1482,6 +1493,84 @@ void ScanViewerDlg::FitLine()
 
 	m_pFitParamDlg->SetSlope(vecVals[0]);	m_pFitParamDlg->SetSlopeErr(vecErrs[0]);
 	m_pFitParamDlg->SetOffs(vecVals[1]);	m_pFitParamDlg->SetOffsErr(vecErrs[1]);
+}
+
+
+/**
+ * parabola: y = amp*(x-x0)^2 + offs
+ */
+void ScanViewerDlg::FitParabola()
+{
+	if(std::min(m_vecX.size(), m_vecY.size()) == 0)
+		return;
+
+	const bool bUseSlope = checkSloped->isChecked();
+
+	auto func = tl::parabola_model<t_real>;
+	auto funcSloped = tl::parabola_model_slope<t_real>;
+	constexpr std::size_t iFuncArgs = 4;
+	constexpr std::size_t iFuncArgsSloped = iFuncArgs+1;
+
+	t_real_glob dAmp = m_pFitParamDlg->GetAmp(),	dAmpErr = m_pFitParamDlg->GetAmpErr();
+	t_real_glob dX0 = m_pFitParamDlg->GetX0(),	dX0Err = m_pFitParamDlg->GetX0Err();
+	t_real_glob dOffs = m_pFitParamDlg->GetOffs(),	dOffsErr = m_pFitParamDlg->GetOffsErr();
+	t_real_glob dSlope = m_pFitParamDlg->GetSlope(),dSlopeErr = m_pFitParamDlg->GetSlopeErr();
+
+	bool bAmpFixed = m_pFitParamDlg->GetAmpFixed();
+	bool bX0Fixed = m_pFitParamDlg->GetX0Fixed();
+	bool bOffsFixed = m_pFitParamDlg->GetOffsFixed();
+	bool bSlopeFixed = m_pFitParamDlg->GetSlopeFixed();
+
+	// automatic parameter determination
+	if(!m_pFitParamDlg->WantParams())
+	{
+		auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
+		auto minmaxY = std::minmax_element(m_vecY.begin(), m_vecY.end());
+
+		dX0 = m_vecX[minmaxY.second - m_vecY.begin()];
+		dAmp = std::abs(*minmaxY.second-*minmaxY.first);
+		dOffs = *minmaxY.first;
+
+		dX0Err = dX0 * 0.1;
+		dAmpErr = dAmp * 0.1;
+		dOffsErr = dOffs * 0.1;
+
+		bAmpFixed = bX0Fixed = bOffsFixed = 0;
+	}
+
+	std::vector<std::string> vecParamNames = { "x0", "amp", "offs" };
+	std::vector<t_real> vecVals = { dX0, dAmp, dOffs };
+	std::vector<t_real> vecErrs = { dX0Err, dAmpErr, dOffsErr };
+	std::vector<bool> vecFixed = { bX0Fixed, bAmpFixed, bOffsFixed };
+
+	if(bUseSlope)
+	{
+		vecParamNames.push_back("slope");
+		vecVals.push_back(dSlope);
+		vecErrs.push_back(dSlopeErr);
+		vecFixed.push_back(bSlopeFixed);
+	}
+
+	bool bOk = false;
+	if(bUseSlope)
+		bOk = Fit<iFuncArgsSloped>(funcSloped, vecParamNames, vecVals, vecErrs, vecFixed);
+	else
+		bOk = Fit<iFuncArgs>(func, vecParamNames, vecVals, vecErrs, vecFixed);
+	if(!bOk)
+		return;
+
+	for(t_real &d : vecErrs) d = std::abs(d);
+	vecVals[1] = std::abs(vecVals[1]);
+
+	m_pFitParamDlg->SetX0(vecVals[0]);	m_pFitParamDlg->SetX0Err(vecErrs[0]);
+	m_pFitParamDlg->SetAmp(vecVals[1]);	m_pFitParamDlg->SetAmpErr(vecErrs[1]);
+	m_pFitParamDlg->SetOffs(vecVals[2]);	m_pFitParamDlg->SetOffsErr(vecErrs[2]);
+
+	if(bUseSlope)
+	{
+		m_pFitParamDlg->SetSlope(vecVals[3]);
+		m_pFitParamDlg->SetSlopeErr(vecErrs[3]);
+	}
 }
 
 

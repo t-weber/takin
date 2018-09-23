@@ -87,6 +87,7 @@ protected slots:
 	void YAxisSelected(const QString&);
 	void MonAxisSelected(const QString&);
 	void NormaliseStateChanged(int iState);
+	//void LogStateChanged(int iState);
 	void StartOrSkipChanged(int);
 
 	void ShowFitParams();
@@ -94,6 +95,7 @@ protected slots:
 	void FitLorentz();
 	void FitVoigt();
 	void FitLine();
+	void FitParabola();
 	void FitSine();
 
 	void CalcPol();

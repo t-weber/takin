@@ -150,6 +150,9 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fits:&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;y = amp * exp{ -1/2 * [(x-x&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:sub;&quot;&gt;mean&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;)/sigma)]&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2 &lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;} + offs &lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;[ &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;+ (x-x&lt;/span&gt;&lt;span style=&quot; font-style:italic; vertical-align:sub;&quot;&gt;mean&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;) * slope ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Fit Gaussian</string>
                 </property>
@@ -157,6 +160,9 @@
               </item>
               <item row="0" column="2">
                <widget class="QPushButton" name="btnLorentz">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fits:&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;y = amp*hwhm&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt; / [ (x-x&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:sub;&quot;&gt;mean&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt; + hwhm&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt; ] + offs&lt;/span&gt;&lt;br/&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;[ + (x-x&lt;/span&gt;&lt;span style=&quot; font-style:italic; vertical-align:sub;&quot;&gt;mean&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;)*slope ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Fit Lorentzian</string>
                 </property>
@@ -171,35 +177,41 @@
               </item>
               <item row="1" column="1">
                <widget class="QPushButton" name="btnLine">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fits:&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;y = slope*x + offs&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Fit Line</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="2">
-               <widget class="QPushButton" name="btnSine">
-                <property name="text">
-                 <string>Fit Sine</string>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="0">
-               <widget class="QCheckBox" name="checkSwarm">
-                <property name="toolTip">
-                 <string>Uses a swarming algorithm as pre-fitter.</string>
-                </property>
-                <property name="text">
-                 <string>Swarm Pre-Fitter</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
                <widget class="QCheckBox" name="checkSloped">
                 <property name="toolTip">
                  <string>Adds a sloping background to the Gaussian, Lorentzian and Voigtian peaks.</string>
                 </property>
                 <property name="text">
                  <string>Sloped Peaks</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="btnSine">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fits:&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;y = amp * sin(freq*x + phase) + offs&lt;/span&gt;&lt;br/&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;[ + slope*x ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Fit Sine</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="btnParabola">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fits:&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;y = amp*(x-x&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:sub;&quot;&gt;mean&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt; + offs&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;[ + (x-x&lt;/span&gt;&lt;span style=&quot; font-style:italic; vertical-align:sub;&quot;&gt;mean&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;)*slope ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Fit Parabola</string>
                 </property>
                </widget>
               </item>
@@ -889,19 +901,6 @@
          </widget>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Axes:</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
         <widget class="QComboBox" name="comboX">
          <property name="sizePolicy">
@@ -1008,6 +1007,16 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Axes:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -1025,15 +1034,6 @@
   <tabstop>listFiles</tabstop>
   <tabstop>comboPath</tabstop>
   <tabstop>btnBrowse</tabstop>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>btnParam</tabstop>
-  <tabstop>btnGauss</tabstop>
-  <tabstop>btnLorentz</tabstop>
-  <tabstop>btnVoigt</tabstop>
-  <tabstop>btnLine</tabstop>
-  <tabstop>btnSine</tabstop>
-  <tabstop>checkSwarm</tabstop>
-  <tabstop>checkSloped</tabstop>
   <tabstop>comboX</tabstop>
   <tabstop>comboY</tabstop>
   <tabstop>comboMon</tabstop>
@@ -1041,6 +1041,15 @@
   <tabstop>spinStart</tabstop>
   <tabstop>spinStop</tabstop>
   <tabstop>spinSkip</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>btnParam</tabstop>
+  <tabstop>checkSloped</tabstop>
+  <tabstop>btnGauss</tabstop>
+  <tabstop>btnLorentz</tabstop>
+  <tabstop>btnVoigt</tabstop>
+  <tabstop>btnLine</tabstop>
+  <tabstop>btnParabola</tabstop>
+  <tabstop>btnSine</tabstop>
   <tabstop>editPolVec1</tabstop>
   <tabstop>editPolVec2</tabstop>
   <tabstop>editPolCur1</tabstop>
