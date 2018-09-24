@@ -429,6 +429,7 @@ void ScanViewerDlg::FileSelected()
 
 	m_bDoUpdate = 0;
 	int iIdxX=-1, iIdxY=-1, iIdxMon=-1, iCurIdx=0;
+	int iAlternateX = -1;
 	const tl::FileInstrBase<t_real>::t_vecColNames& vecColNames = m_pInstr->GetColNames();
 	for(const tl::FileInstrBase<t_real>::t_vecColNames::value_type& strCol : vecColNames)
 	{
@@ -452,16 +453,23 @@ void ScanViewerDlg::FileSelected()
 		comboY->addItem(QString::fromWCharArray(_strCol.c_str()), QString(strCol.c_str()));
 		comboMon->addItem(QString::fromWCharArray(_strCol.c_str()), QString(strCol.c_str()));
 
-		if(vecScanVars.size() && vecScanVars[0] == strCol)
+		std::string strFirstScanVar = tl::str_to_lower(vecScanVars[0]);
+		std::string strColLower = tl::str_to_lower(strCol);
+
+		if(vecScanVars.size() && strFirstScanVar == strColLower)
 			iIdxX = iCurIdx;
-		if(strCntVar == strCol)
+		if(vecScanVars.size() && strFirstScanVar.substr(0, strCol.length()) == strColLower)
+			iIdxX = iCurIdx;
+		if(tl::str_to_lower(strCntVar) == strColLower)
 			iIdxY = iCurIdx;
-		if(strMonVar == strCol)
+		if(tl::str_to_lower(strMonVar) == strColLower)
 			iIdxMon = iCurIdx;
 
 		++iCurIdx;
 	}
 
+	if(iIdxX < 0 && iAlternateX >= 0)
+		iIdxX = iAlternateX;
 	comboX->setCurrentIndex(iIdxX);
 	comboY->setCurrentIndex(iIdxY);
 	comboMon->setCurrentIndex(iIdxMon);
