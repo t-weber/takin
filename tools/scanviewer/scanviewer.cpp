@@ -702,7 +702,7 @@ void ScanViewerDlg::CalcPol()
 			t_real dPolElem = 0., dPolErr = 1.;
 			if(!bInvalid)
 			{
-				dPolElem = std::abs((dCntsNSF-dCntsSF) / (dCntsNSF+dCntsSF));
+				dPolElem = /*std::abs*/((dCntsSF-dCntsNSF) / (dCntsSF+dCntsNSF));
 				dPolErr = propagate_err(dCntsNSF, dCntsSF, dNSFErr, dSFErr);
 			}
 
@@ -944,19 +944,119 @@ void ScanViewerDlg::GenerateForGnuplot()
 	const std::string& strLabelY = m_strY;
 
 	std::string strPySrc =
-R"RAWSTR(set term wxt
+R"RAWSTR(# --------------------------------------------------------------------------------
+# choose an output terminal
+set term wxt
+#set term pdf color enhanced font "Helvetica, 14" size 4,3.5
+#set output "plot.pdf"
+# --------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------
+# parameters
+maxx = %%MAXX%%
+minx = %%MINX%%
+maxy = %%MAXY%%
+miny = %%MINY%%
+rangex = maxx - minx
+rangey = maxy - miny
+
+rangex_tics = rangex / 5.
+rangey_tics = rangey / 5.
+# --------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------
+# functions for fitting
+gauss(x, a, s, x0, y0) = a*exp(-0.5 * ((x-x0)/s)**2.) + y0
+gauss2(x, a1,s1,x01, a2,s2,x02, y0) = \
+	gauss(x, a1,s1,x01, 0) + \
+	gauss(x, a2,s2,x02, 0) + \
+	y0
+gauss3(x, a1,s1,x01, a2,s2,x02, a3,s3,x03, y0) = \
+	gauss(x, a1,s1,x01, 0) + \
+	gauss(x, a2,s2,x02, 0) + \
+	gauss(x, a3,s3,x03, 0) + \
+	y0
+
+lorentz(x, a, h, x0, y0) = a*h**2. / ((x-x0)**2. + h**2.) + y0
+lorentz2(x, a1,h1,x01, a2,h2,x02, y0) = \
+	lorentz(x, a1,h1,x01, 0) + \
+	lorentz(x, a2,h2,x02, 0) + \
+	y0
+lorentz3(x, a1,h1,x01, a2,h2,x02, a3,h3,x03, y0) = \
+	lorentz(x, a1,h1,x01, 0) + \
+	lorentz(x, a2,h2,x02, 0) + \
+	lorentz(x, a3,h3,x03, 0) + \
+	y0
+
+parabola(x, a, x0, y0) = a * (x-x0)**2. + y0
+line(x, m, y0) = m*x + y0
+sine(x, a, f, p, y0) = a*sin(f*x + p) + y0
+# --------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------
+# fitting
+
+# initial guesses for gauss and others ...
+a1 = rangey
+s1 = rangex*0.5		# sigma
+x01 = minx + rangex*0.5
+y0 = miny
+
+# ... and for line
+m1 = rangey / rangex
+
+# ... and for sine
+f1 = 1.		# frequency
+p1 = 0.		# phase
+
+# ... and for lorentz
+h1 = rangex*0.5		# HWHM
+
+# actual fitting
+#fit line(x, m1,y0) "-" using ($1):($2):($3) yerrors via m1,y0
+#fit parabola(x, a1,x01, y0) "-" using ($1):($2):($3) yerrors via a1,x01,y0
+#fit sine(x, a1,f1,p1, y0) "-" using ($1):($2):($3) yerrors via a1,h1,x01,y0
+#fit lorentz(x, a1,h1,x01, y0) "-" using ($1):($2):($3) yerrors via a1,h1,x01,y0
+fit gauss(x, a1,s1,x01, y0) "-" using ($1):($2):($3) yerrors via a1,s1,x01,y0
+%%POINTS%%
+end
+# --------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------
+# plotting
+line1_col = "#000000"
+points1_col = "#000000"
 
 set xlabel "%%LABELX%%"
 set ylabel "%%LABELY%%"
 set title "%%TITLE%%"
 set grid
 
-set xrange [%%MINX%%:%%MAXX%%]
-set yrange [%%MINY%%:%%MAXY%%]
+set xrange [minx : maxx]
+set yrange [miny : maxy]
 
-plot "-" using ($1):($2):($3) pointtype 7 with yerrorbars title "Data"
+#set xtics rangex_tics
+#set ytics rangey_tics
+#set mxtics 2
+#set mytics 2
+
+# use these functions with the plot command below
+#	line(x,m1,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
+#	parabola(x,a1,x01,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
+#	sine(x,a1,f1,p1,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
+#	lorentz(x,a1,h1,x01,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
+
+plot \
+	gauss(x,a1,s1,x01,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
+	"-" using ($1):($2):($3) pointtype 7 pointsize 1 linecolor rgb points1_col with yerrorbars title "Data"
 %%POINTS%%
-end)RAWSTR";
+end
+# --------------------------------------------------------------------------------
+)RAWSTR";
 
 
 	auto minmaxX = std::minmax_element(m_vecX.begin(), m_vecX.end());
@@ -974,14 +1074,14 @@ end)RAWSTR";
 			<< std::left << std::setw(g_iPrec*2) << m_vecYErr[i] << "\n";
 	}
 
-	tl::find_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%MAXX%%", tl::var_to_str(*minmaxX.second, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%MINY%%", tl::var_to_str(*minmaxY.first-dMaxErrY, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%MAXY%%", tl::var_to_str(*minmaxY.second+dMaxErrY, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%TITLE%%", strTitle);
-	tl::find_and_replace<std::string>(strPySrc, "%%LABELX%%", strLabelX);
-	tl::find_and_replace<std::string>(strPySrc, "%%LABELY%%", strLabelY);
-	tl::find_and_replace<std::string>(strPySrc, "%%POINTS%%", ostrPoints.str());
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MAXX%%", tl::var_to_str(*minmaxX.second, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MINY%%", tl::var_to_str(*minmaxY.first-dMaxErrY, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MAXY%%", tl::var_to_str(*minmaxY.second+dMaxErrY, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%TITLE%%", strTitle);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELX%%", strLabelX);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELY%%", strLabelY);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%POINTS%%", ostrPoints.str());
 
 	textRoot->setText(strPySrc.c_str());
 }
