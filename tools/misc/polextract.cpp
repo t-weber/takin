@@ -4,7 +4,7 @@
  * @date 30-sep-18
  * @license GPLv2
  *
- * g++ -std=c++11 -I../.. -o polextract polextract.cpp ../../tlibs/file/loadinstr.cpp ../../tlibs/string/eval.cpp ../../tlibs/log/log.cpp -lboost_iostreams -lboost_system
+ * g++ -std=c++11 -I../.. -o polextract polextract.cpp ../../tlibs/file/loadinstr.cpp ../../tlibs/string/eval.cpp ../../tlibs/log/log.cpp -lboost_iostreams -lboost_system -lboost_program_options
  */
 
 #include "tlibs/file/loadinstr.h"
@@ -13,6 +13,9 @@
 #include <tuple>
 #include <vector>
 #include <unordered_set>
+
+#include <boost/program_options.hpp>
+namespace opts = boost::program_options;
 
 using t_real = double;
 using t_vec = std::vector<t_real>;
@@ -136,19 +139,6 @@ void calcpol(const std::string& strFileId, const tl::FileInstrBase<t_real>* pIns
 	ostr.precision(g_iPrec);
 	bool bHasAnyData = false;
 
-	ostr << "# "
-		 << std::setw(g_iPrec*2-2) << std::right << "file" << " "	// file name
-		 << std::setw(g_iPrec) << std::right << "point" << " "			// scan pos
-		 << std::setw(g_iPrec*2) << std::right << "h" << " "		// h
-		 << std::setw(g_iPrec*2) << std::right << "k" << " "		// k
-		 << std::setw(g_iPrec*2) << std::right << "l" << " "		// l
-		 << std::setw(g_iPrec*2) << std::right << "E" << " "		// E
-		 << std::setw(g_iPrec) << std::right << "init." << " "
-		 << std::setw(g_iPrec) << std::right << "fin." << " "
-		 << std::setw(g_iPrec*2) << std::right << "pol" << " "
-		 << std::setw(g_iPrec*2) << std::right << "pol_err" << " "
-		 << "\n";
-
 	// iterate over scan points
 	for(std::size_t iPt=0; iPt<vecCnts.size()/iNumPolStates; ++iPt)
 	{
@@ -209,10 +199,87 @@ void calcpol(const std::string& strFileId, const tl::FileInstrBase<t_real>* pIns
 
 int main(int argc, char** argv)
 {
-	auto pInstr = std::unique_ptr<tl::FileInstrBase<t_real>>(tl::FileInstrBase<t_real>::LoadInstr("/home/tw/tmp/poltst/tst.dat"));
-	pInstr->SetPolNames("p1", "p2", "i0", "i1");
-	pInstr->ParsePolData();
-	calcpol("0123", pInstr.get(), std::cout);
+	std::vector<std::string> vecDats;
+	std::string strPolVec1 = "p1", strPolVec2 = "p2";
+	std::string strPolCur1 = "i1", strPolCur2 = "i2";
+	std::string strOutFile;
 
+	opts::options_description args("polextract options");
+	args.add(boost::shared_ptr<opts::option_description>(
+		new opts::option_description("data-file",
+		opts::value<decltype(vecDats)>(&vecDats),
+		"name of scan data file")));
+	args.add(boost::shared_ptr<opts::option_description>(
+		new opts::option_description("out-file",
+		opts::value<decltype(strOutFile)>(&strOutFile),
+		"name of output data file, using standard output if none given")));
+	args.add(boost::shared_ptr<opts::option_description>(
+		new opts::option_description("polvec1",
+		opts::value<decltype(strPolVec1)>(&strPolVec1),
+		"name of first polarisation vector")));
+	args.add(boost::shared_ptr<opts::option_description>(
+		new opts::option_description("polvec2",
+		opts::value<decltype(strPolVec2)>(&strPolVec2),
+		"name of second polarisation vector")));
+	args.add(boost::shared_ptr<opts::option_description>(
+		new opts::option_description("polcur1",
+		opts::value<decltype(strPolCur1)>(&strPolCur1),
+		"name of first flipping current")));
+	args.add(boost::shared_ptr<opts::option_description>(
+		new opts::option_description("polcur2",
+		opts::value<decltype(strPolCur2)>(&strPolCur2),
+		"name of second flipping current")));
+
+	opts::positional_options_description args_pos;
+	args_pos.add("data-file", -1);
+
+	opts::basic_command_line_parser<char> clparser(argc, argv);
+	clparser.options(args);
+	clparser.positional(args_pos);
+	opts::basic_parsed_options<char> parsedopts = clparser.run();
+
+	opts::variables_map opts_map;
+	opts::store(parsedopts, opts_map);
+	opts::notify(opts_map);
+
+	if(argc <= 1)
+	{
+		std::cerr << args << std::endl;
+		return -1;
+	}
+
+
+	std::ostream *postr = nullptr;
+	if(strOutFile != "")
+		postr = new std::ofstream(strOutFile);
+	else
+		postr = &std::cout;
+	std::ostream& ostr = *postr;
+
+	// data columns header
+	ostr << "# "
+		<< std::setw(g_iPrec*2-2) << std::right << "file" << " "	// file name
+		<< std::setw(g_iPrec) << std::right << "point" << " "			// scan pos
+		<< std::setw(g_iPrec*2) << std::right << "h" << " "		// h
+		<< std::setw(g_iPrec*2) << std::right << "k" << " "		// k
+		<< std::setw(g_iPrec*2) << std::right << "l" << " "		// l
+		<< std::setw(g_iPrec*2) << std::right << "E" << " "		// E
+		<< std::setw(g_iPrec) << std::right << "init." << " "
+		<< std::setw(g_iPrec) << std::right << "fin." << " "
+		<< std::setw(g_iPrec*2) << std::right << "pol" << " "
+		<< std::setw(g_iPrec*2) << std::right << "pol_err" << " "
+		<< "\n";
+
+	for(const std::string &strFile : vecDats)
+	{
+		auto pInstr = std::unique_ptr<tl::FileInstrBase<t_real>>(tl::FileInstrBase<t_real>::LoadInstr(strFile.c_str()));
+		pInstr->SetPolNames(strPolVec1.c_str(), strPolVec2.c_str(), strPolCur1.c_str(), strPolCur2.c_str());
+		pInstr->ParsePolData();
+		calcpol(tl::get_file_nodir(strFile), pInstr.get(), ostr);
+	}
+
+
+	if(strOutFile != "")
+		delete postr;
 	return 0;
 }
