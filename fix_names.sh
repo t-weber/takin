@@ -12,7 +12,7 @@ OS_BIN="$BIN_DIR"	# set accordingly
 
 TOOL=install_name_tool
 STRIP=strip
-QT_VER="5.11.1"
+QT_VER="5.11.2"
 
 
 declare -a filestochange=(
@@ -46,6 +46,7 @@ declare -a filestochange=(
 	"${PRG}/Contents/${OS_BIN}/convofit"
 	"${PRG}/Contents/${OS_BIN}/convoseries"
 	"${PRG}/Contents/${OS_BIN}/sfact"
+	"${PRG}/Contents/${OS_BIN}/polextract"
 )
 
 declare -a changefrom=(

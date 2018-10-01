@@ -106,6 +106,12 @@ bool TazDlg::LoadFile(const QString& strFile)
 
 bool TazDlg::Load(const char* pcFile)
 {
+	if(!tl::file_exists(pcFile))
+	{
+		tl::log_err("File \"", pcFile, "\" does not exist.");
+		return 0;
+	}
+
 	m_bReady = 0;
 	BOOST_SCOPE_EXIT(&m_bReady, &m_sceneReal, &m_sceneRecip)
 	{

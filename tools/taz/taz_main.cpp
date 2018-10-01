@@ -33,6 +33,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QSplashScreen>
+#include <QStyleFactory>
 
 
 namespace chr = std::chrono;
@@ -217,6 +218,21 @@ int main(int argc, char** argv)
 		app->setApplicationName("Takin");
 		app->setApplicationVersion(TAKIN_VER);
 
+		QSettings settings("tobis_stuff", "takin");
+
+
+		// set user-selected GUI style
+		if(settings.contains("main/gui_style_value"))
+		{
+			QString strStyle = settings.value("main/gui_style_value", "").toString();
+			QStyle *pStyle = QStyleFactory::create(strStyle);
+			if(pStyle)
+				QApplication::setStyle(pStyle);
+			else
+				tl::log_err("Style \"", strStyle.toStdString(), "\" was not found.");
+		}
+
+
 		std::string strHome = QDir::homePath().toStdString() + "/.takin";
 		std::string strApp = app->applicationDirPath().toStdString();
 		tl::log_info("Program path: ", strApp);
@@ -333,8 +349,6 @@ int main(int argc, char** argv)
 
 
 		{
-			QSettings settings("tobis_stuff", "takin");
-
 #ifdef IS_EXPERIMENTAL_BUILD
 			int iPrevDaysSinceEpoch = 0;
 			if(settings.contains("debug/last_warned"))

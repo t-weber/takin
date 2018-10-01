@@ -533,6 +533,8 @@ OBJ_GENTAB = obj/gentab.o obj/crystalsys_noqt.o obj/log.o \
 OBJ_SFACT = obj/sfact.o obj/spacegroup.o obj/crystalsys_noqt.o obj/globals.o \
 	obj/formfact.o obj/log.o obj/debug.o obj/rand.o
 
+OBJ_POLEXTRACT = obj/polextract.o obj/loadinstr.o obj/log.o obj/debug.o
+
 
 ifeq ($(USE_CLP), 1)
 	OBJ_GENTAB += obj/spacegroup_clp.o
@@ -561,7 +563,7 @@ OBJ_TAZ += obj/SgListDlg.o obj/spacegroup.o
 BASE_PROGS = takin convofit convoseries
 SETUP_PROGS = gentab
 AUX_PROGS = montereso monteconvo xmonteconvo posextract \
-	scanviewer sglist sfact reso
+	scanviewer sglist sfact reso polextract
 
 ALL_PROGS = ${BASE_PROGS}
 ifeq ($(BUILD_SETUP_PROGS), 1)
@@ -621,17 +623,17 @@ scanviewer: ${OBJ_SCANVIEWER}
 	${STRIP} scanviewer
 
 sglist: ${OBJ_SGLIST}
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sglist $+ \
-		${STD_LIBS} ${QT_LIB} ${BASIC_LIBS}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sglist $+ ${STD_LIBS} ${QT_LIB} ${BASIC_LIBS}
 	${STRIP} sglist
 
 gentab: ${OBJ_GENTAB}
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/gentab $+ \
-		${BASIC_LIBS} ${CLP_LIBS} ${STD_LIBS}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/gentab $+ ${BASIC_LIBS} ${CLP_LIBS} ${STD_LIBS}
 
 sfact: ${OBJ_SFACT}
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sfact $+ \
-		${BASIC_LIBS} ${STD_LIBS}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/sfact $+ ${BASIC_LIBS} ${STD_LIBS}
+
+polextract: ${OBJ_POLEXTRACT}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/polextract $+ ${BASIC_LIBS} -lboost_program_options ${STD_LIBS}
 
 doc: doc/takin.qhcp doc/takin.qhp doc/*.html
 	qcollectiongenerator doc/takin.qhcp -o doc/takin.qhc
@@ -858,6 +860,9 @@ obj/SgListDlg.o: tools/sglist/SgListDlg.cpp tools/sglist/SgListDlg.h
 obj/crystalsys_noqt.o: libs/spacegroups/crystalsys.cpp libs/spacegroups/crystalsys.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/sfact.o: tools/sggen/sfact.cpp
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
+
+obj/polextract.o: tools/misc/polextract.cpp
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 
 obj/AboutDlg.o: dialogs/AboutDlg.cpp dialogs/AboutDlg.h

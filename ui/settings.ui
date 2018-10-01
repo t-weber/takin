@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>483</width>
-    <height>469</height>
+    <height>528</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -381,11 +381,11 @@
           </item>
           <item row="4" column="0" colspan="2">
            <widget class="QCheckBox" name="checkIgnoreXtalRestrictions">
-            <property name="text">
-             <string>Ignore Crystal Restrictions</string>
-            </property>
             <property name="toolTip">
              <string>Always allow setting of lattice constants and angles, disregarding the space group. WARNING: Only used for testing!</string>
+            </property>
+            <property name="text">
+             <string>Ignore Crystal Restrictions</string>
             </property>
            </widget>
           </item>
@@ -500,14 +500,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="checkNativeDlg">
-            <property name="text">
-             <string>Prefer Native UI</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
+          <item row="4" column="0" colspan="2">
            <spacer name="verticalSpacer_5">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -519,6 +512,23 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QCheckBox" name="checkNativeDlg">
+            <property name="text">
+             <string>Prefer Native GUI</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboGUI"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_47">
+            <property name="text">
+             <string>GUI Style:</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1364,6 +1374,7 @@
   <tabstop>checkIgnoreXtalRestrictions</tabstop>
   <tabstop>checkNativeDlg</tabstop>
   <tabstop>checkPreview</tabstop>
+  <tabstop>comboGUI</tabstop>
   <tabstop>spinNetPoll</tabstop>
   <tabstop>editGenFont</tabstop>
   <tabstop>btnGenFont</tabstop>

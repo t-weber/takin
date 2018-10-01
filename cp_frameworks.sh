@@ -38,8 +38,6 @@ declare -a SRC_LIBS=(
 	"/usr/local/opt/libpng/lib/libpng16.16.dylib"
 	"/usr/local/opt/libjpeg/lib/libjpeg.9.dylib"
 	"/usr/local/opt/libtiff/lib/libtiff.5.dylib"
-#	"/usr/local/lib/libz.1.dylib"
-#	"/usr/local/lib/libbz2.1.0.dylib"
 )
 
 
@@ -59,6 +57,8 @@ mkdir -pv "${DST_PLUGIN_DIR}/printsupport"
 mkdir -pv "${DST_PLUGIN_DIR}/imageformats"
 mkdir -pv "${DST_PLUGIN_DIR}/iconengines"
 mkdir -pv "${DST_PLUGIN_DIR}/platforms"
+mkdir -pv "${DST_PLUGIN_DIR}/platformthemes"
+mkdir -pv "${DST_PLUGIN_DIR}/styles"
 mkdir -pv "${PRG}/Contents/${OS_BIN}"
 
 
@@ -82,6 +82,7 @@ cp -v bin/takin "${PRG}/Contents/${OS_BIN}/"
 cp -v bin/convofit "${PRG}/Contents/${OS_BIN}/"
 cp -v bin/convoseries "${PRG}/Contents/${OS_BIN}/"
 cp -v bin/sfact "${PRG}/Contents/${OS_BIN}/"
+cp -v bin/polextract "${PRG}/Contents/${OS_BIN}/"
 
 
 # attribs

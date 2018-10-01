@@ -229,11 +229,11 @@ int main(int argc, char** argv)
 		args.add(boost::shared_ptr<opts::option_description>(
 			new opts::option_description("data-file",
 			opts::value<decltype(vecDats)>(&vecDats),
-			"name of scan data file(s)")));
+			"scan data file(s)")));
 		args.add(boost::shared_ptr<opts::option_description>(
 			new opts::option_description("out-file",
 			opts::value<decltype(strOutFile)>(&strOutFile),
-			"name of output data file, using standard output if none given")));
+			"output data file, using standard output if none given")));
 		args.add(boost::shared_ptr<opts::option_description>(
 			new opts::option_description("add-col",
 			opts::value<decltype(vecCols)>(&vecCols),

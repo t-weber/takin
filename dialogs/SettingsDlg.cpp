@@ -17,6 +17,8 @@
 
 #include <QFileDialog>
 #include <QFontDialog>
+#include <QStyleFactory>
+
 #include <iostream>
 #include <limits>
 #include <thread>
@@ -34,6 +36,10 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 	g_fontGen.setStyleHint(QFont::SansSerif);
 	g_fontGfx.setStyleHint(QFont::SansSerif, QFont::PreferAntialias);
 	setFont(g_fontGen);
+
+	// get possible GUI styles
+	for(const QString& strStyle : QStyleFactory::keys())
+		comboGUI->addItem(strStyle);
 
 #if QT_VER >= 5
 	connect(buttonBox, &QDialogButtonBox::clicked, this, &SettingsDlg::ButtonBoxClicked);
@@ -139,6 +145,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 	{
 		t_tupCombo("main/sfact_sq", 0, comboSFact),
 		t_tupCombo("main/calc_3d_bz", 0, comboBZ),
+		t_tupCombo("main/gui_style", 0, comboGUI),
 	};
 
 	spinPrecGen->setMaximum(std::numeric_limits<t_real>::max_digits10);
@@ -288,7 +295,9 @@ void SettingsDlg::SaveSettings()
 		const std::string& strKey = std::get<0>(tup);
 		QComboBox* pCombo = std::get<2>(tup);
 
+		// save both combo-box index and value
 		m_pSettings->setValue(strKey.c_str(), pCombo->currentIndex());
+		m_pSettings->setValue((strKey+"_value").c_str(), pCombo->currentText());
 	}
 
 	SetGlobals();
@@ -342,6 +351,14 @@ void SettingsDlg::SetGlobals() const
 		if(font.fromString(strGenFont))
 			g_fontGen = font;
 	}
+
+	// GUI style
+	QString strStyle = comboGUI->currentText();
+	QStyle *pStyle = QStyleFactory::create(strStyle);
+	if(pStyle)
+		QApplication::setStyle(pStyle);
+	else
+		tl::log_err("Style \"", strStyle.toStdString(), "\" was not found.");
 
 	emit SettingsChanged();
 }
