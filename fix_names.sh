@@ -15,6 +15,7 @@ STRIP=strip
 QT_VER="5.11.2"
 
 
+# files whose linkage is to be changed
 declare -a filestochange=(
 	"${PRG}/Contents/Frameworks/QtCore.framework/Versions/5/QtCore"
 	"${PRG}/Contents/Frameworks/QtWidgets.framework/Versions/5/QtWidgets"
@@ -22,6 +23,7 @@ declare -a filestochange=(
 	"${PRG}/Contents/Frameworks/QtConcurrent.framework/Versions/5/QtConcurrent"
 	"${PRG}/Contents/Frameworks/QtOpenGL.framework/Versions/5/QtOpenGL"
 	"${PRG}/Contents/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport"
+	"${PRG}/Contents/Frameworks/QtDBus.framework/Versions/5/QtDBus"
 	"${PRG}/Contents/Frameworks/QtSvg.framework/Versions/5/QtSvg"
 	"${PRG}/Contents/Frameworks/QtXml.framework/Versions/5/QtXml"
 	"${PRG}/Contents/Frameworks/QtXmlPatterns.framework/Versions/5/QtXmlPatterns"
@@ -30,7 +32,9 @@ declare -a filestochange=(
 	"${PRG}/Contents/PlugIns/imageformats/libqicns.dylib"
 	"${PRG}/Contents/PlugIns/imageformats/libqjpeg.dylib"
 	"${PRG}/Contents/PlugIns/iconengines/libqsvgicon.dylib"
+	"${PRG}/Contents/PlugIns/styles/libqmacstyle.dylib"
 	"${PRG}/Contents/PlugIns/platforms/libqcocoa.dylib"
+	"${PRG}/Contents/PlugIns/platforms/libqminimal.dylib"
 	"${PRG}/Contents/Frameworks/qwt.framework/Versions/6/qwt"
 	"${PRG}/Contents/Frameworks/libfreetype.6.dylib"
 	"${PRG}/Contents/Frameworks/libpng16.16.dylib"
@@ -38,7 +42,7 @@ declare -a filestochange=(
 	"${PRG}/Contents/Frameworks/libtiff.5.dylib"
 	"${PRG}/Contents/Frameworks/libboost_iostreams.dylib"
 	"${PRG}/Contents/Frameworks/libboost_filesystem.dylib"
-	"${PRG}/Contents/Frameworks/libboost_python.dylib"
+	"${PRG}/Contents/Frameworks/libboost_python27.dylib"
 	"${PRG}/Contents/Frameworks/libboost_regex.dylib"
 	"${PRG}/Contents/Frameworks/libboost_system.dylib"
 	"${PRG}/Contents/Frameworks/libboost_program_options.dylib"
@@ -49,6 +53,8 @@ declare -a filestochange=(
 	"${PRG}/Contents/${OS_BIN}/polextract"
 )
 
+
+# original symbols
 declare -a changefrom=(
 	"/usr/local/Cellar/qt/${QT_VER}/lib/QtCore.framework/Versions/5/QtCore"
 	"/usr/local/Cellar/qt5/${QT_VER}/lib/QtCore.framework/Versions/5/QtCore"
@@ -86,6 +92,10 @@ declare -a changefrom=(
 	"/usr/local/Cellar/qt5/${QT_VER}/lib/QtPrintSupport.framework/Versions/5/QtPrintSupport"
 	"/usr/local/opt/qt/lib/QtPrintSupport.framework/Versions/5/QtPrintSupport"
 	"/usr/local/opt/qt5/lib/QtPrintSupport.framework/Versions/5/QtPrintSupport"
+	"/usr/local/Cellar/qt/${QT_VER}/lib/QtDBus.framework/Versions/5/QtDBus"
+	"/usr/local/Cellar/qt5/${QT_VER}/lib/QtDBus.framework/Versions/5/QtDBus"
+	"/usr/local/opt/qt/lib/QtDBus.framework/Versions/5/QtDBus"
+	"/usr/local/opt/qt5/lib/QtDBus.framework/Versions/5/QtDBus"
 	"/usr/local/opt/qwt/lib/qwt.framework/Versions/6/qwt"
 	"/usr/local/opt/minuit2/lib/libMinuit2.0.dylib"
 	"/usr/local/opt/boost/lib/libboost_system.dylib"
@@ -93,17 +103,16 @@ declare -a changefrom=(
 	"/usr/local/opt/boost/lib/libboost_iostreams.dylib"
 	"/usr/local/opt/boost/lib/libboost_regex.dylib"
 	"/usr/local/opt/boost/lib/libboost_program_options.dylib"
-	"/usr/local/opt/boost-python/lib/libboost_python.dylib"
+	"/usr/local/opt/boost-python/lib/libboost_python27.dylib"
 	"/usr/local/opt/freetype/lib/libfreetype.6.dylib"
 	"/usr/local/opt/libpng/lib/libpng16.16.dylib"
 	"/usr/local/opt/libjpeg/lib/libjpeg.9.dylib"
 	"/usr/local/opt/jpeg/lib/libjpeg.9.dylib"
 	"/usr/local/opt/libtiff/lib/libtiff.5.dylib"
-#	"/usr/local/lib/libz.1.dylib"
-#	"/usr/local/lib/libbz2.1.0.dylib"
 )
 
 
+# symbols to change into
 declare -a changeto=(
 	"@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore"
 	"@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore"
@@ -141,6 +150,10 @@ declare -a changeto=(
 	"@executable_path/../Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport"
 	"@executable_path/../Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport"
 	"@executable_path/../Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport"
+	"@executable_path/../Frameworks/QtDBus.framework/Versions/5/QtDBus"
+	"@executable_path/../Frameworks/QtDBus.framework/Versions/5/QtDBus"
+	"@executable_path/../Frameworks/QtDBus.framework/Versions/5/QtDBus"
+	"@executable_path/../Frameworks/QtDBus.framework/Versions/5/QtDBus"
 	"@executable_path/../Frameworks/qwt.framework/Versions/6/qwt"
 	"@executable_path/../Frameworks/libMinuit2.0.dylib"
 	"@executable_path/../Frameworks/libboost_system.dylib"
@@ -148,14 +161,12 @@ declare -a changeto=(
 	"@executable_path/../Frameworks/libboost_iostreams.dylib"
 	"@executable_path/../Frameworks/libboost_regex.dylib"
 	"@executable_path/../Frameworks/libboost_program_options.dylib"
-	"@executable_path/../Frameworks/libboost_python.dylib"
+	"@executable_path/../Frameworks/libboost_python27.dylib"
 	"@executable_path/../Frameworks/libfreetype.6.dylib"
 	"@executable_path/../Frameworks/libpng16.16.dylib"
 	"@executable_path/../Frameworks/libjpeg.9.dylib"
 	"@executable_path/../Frameworks/libjpeg.9.dylib"
 	"@executable_path/../Frameworks/libtiff.5.dylib"
-#	"@executable_path/../Frameworks/libz.1.dylib"
-#	"@executable_path/../Frameworks/libbz2.1.0.dylib"
 )
 
 
