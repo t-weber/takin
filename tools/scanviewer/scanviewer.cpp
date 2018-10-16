@@ -967,6 +967,14 @@ rangey_tics = rangey / 5.
 
 
 # --------------------------------------------------------------------------------
+# data points
+$datapoints << ENDPTS
+%%POINTS%%
+ENDPTS
+# --------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------
 # functions for fitting
 gauss(x, a, s, x0, y0) = a*exp(-0.5 * ((x-x0)/s)**2.) + y0
 gauss2(x, a1,s1,x01, a2,s2,x02, y0) = \
@@ -1020,9 +1028,7 @@ h1 = rangex*0.5		# HWHM
 #fit parabola(x, a1,x01, y0) "-" using ($1):($2):($3) yerrors via a1,x01,y0
 #fit sine(x, a1,f1,p1, y0) "-" using ($1):($2):($3) yerrors via a1,h1,x01,y0
 #fit lorentz(x, a1,h1,x01, y0) "-" using ($1):($2):($3) yerrors via a1,h1,x01,y0
-fit gauss(x, a1,s1,x01, y0) "-" using ($1):($2):($3) yerrors via a1,s1,x01,y0
-%%POINTS%%
-end
+fit gauss(x, a1,s1,x01, y0) "$datapoints" using ($1):($2):($3) yerrors via a1,s1,x01,y0
 # --------------------------------------------------------------------------------
 
 
@@ -1052,9 +1058,7 @@ set yrange [miny : maxy]
 
 plot \
 	gauss(x,a1,s1,x01,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
-	"-" using ($1):($2):($3) pointtype 7 pointsize 1 linecolor rgb points1_col with yerrorbars title "Data"
-%%POINTS%%
-end
+	"$datapoints" using ($1):($2):($3) pointtype 7 pointsize 1 linecolor rgb points1_col with yerrorbars title "Data"
 # --------------------------------------------------------------------------------
 )RAWSTR";
 
