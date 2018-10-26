@@ -396,7 +396,7 @@ void SettingsDlg::SelectGLFont()
 
 void SettingsDlg::SelectGfxFont()
 {
-	bool bOk;
+	bool bOk = 0;
 	QFont fontNew = QFontDialog::getFont(&bOk, g_fontGfx, this);
 	if(bOk)
 	{
@@ -410,7 +410,7 @@ void SettingsDlg::SelectGfxFont()
 
 void SettingsDlg::SelectGenFont()
 {
-	bool bOk;
+	bool bOk = 0;
 	QFont fontNew = QFontDialog::getFont(&bOk, g_fontGen, this);
 	if(bOk)
 	{

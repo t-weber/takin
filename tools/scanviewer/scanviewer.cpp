@@ -55,6 +55,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 		m_pFitParamDlg(new FitParamDlg(this, &m_settings))
 {
 	this->setupUi(this);
+	this->setFocusPolicy(Qt::StrongFocus);
 	SetAbout();
 
 	QFont font;
@@ -269,10 +270,31 @@ void ScanViewerDlg::closeEvent(QCloseEvent* pEvt)
 
 	QStringList lstDirs;
 	for(int iDir=0; iDir<comboPath->count(); ++iDir)
-		lstDirs << comboPath->itemText(iDir);
+	{
+		QString qstrPath = comboPath->itemText(iDir);
+
+		// clean up recent path list
+		fs::path dir(qstrPath.toStdString());
+		if(!fs::exists(dir) || !fs::is_directory(dir) || fs::is_empty(dir))
+			continue;
+
+		lstDirs << qstrPath;
+	}
 	m_settings.setValue("recent_dirs", lstDirs);
 
 	QDialog::closeEvent(pEvt);
+}
+
+
+void ScanViewerDlg::keyPressEvent(QKeyEvent* pEvt)
+{
+	if(pEvt->key() == Qt::Key_R)
+	{
+		tl::log_debug("Refreshing file list...");
+		ChangedPath();
+	}
+
+	QDialog::keyPressEvent(pEvt);
 }
 
 

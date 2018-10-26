@@ -11,6 +11,7 @@
 #include <QDialog>
 #include <QSettings>
 #include <QFileSystemWatcher>
+#include <QKeyEvent>
 #include <string>
 #include <vector>
 #include <memory>
@@ -62,6 +63,7 @@ protected:
 	int HasRecentPath(const QString& strPath);
 
 	virtual void closeEvent(QCloseEvent* pEvt) override;
+	virtual void keyPressEvent(QKeyEvent* pEvt) override;
 
 #ifndef NO_FIT
 	template<std::size_t iNumArgs, class t_func>
