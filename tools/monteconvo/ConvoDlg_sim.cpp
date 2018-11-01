@@ -36,6 +36,9 @@ void ConvoDlg::Start1D()
 	btnStartFit->setEnabled(false);
 	tabSettings->setEnabled(false);
 	m_pMenuBar->setEnabled(false);
+	if(m_pSqwParamDlg) m_pSqwParamDlg->setEnabled(false);
+	editScale->setEnabled(false);
+	editOffs->setEnabled(false);
 	btnStop->setEnabled(true);
 	tabWidget->setCurrentWidget(tabPlot);
 
@@ -52,6 +55,9 @@ void ConvoDlg::Start1D()
 			QMetaObject::invokeMethod(btnStop, "setEnabled", Q_ARG(bool, false));
 			QMetaObject::invokeMethod(tabSettings, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(m_pMenuBar, "setEnabled", Q_ARG(bool, true));
+			if(m_pSqwParamDlg) QMetaObject::invokeMethod(m_pSqwParamDlg, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editScale, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editOffs, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStartFit, "setEnabled", Q_ARG(bool, true));
 		};
@@ -455,6 +461,9 @@ void ConvoDlg::Start2D()
 	btnStartFit->setEnabled(false);
 	tabSettings->setEnabled(false);
 	m_pMenuBar->setEnabled(false);
+	if(m_pSqwParamDlg) m_pSqwParamDlg->setEnabled(false);
+	editScale->setEnabled(false);
+	editOffs->setEnabled(false);
 	btnStop->setEnabled(true);
 	tabWidget->setCurrentWidget(tabPlot2d);
 
@@ -470,6 +479,9 @@ void ConvoDlg::Start2D()
 			QMetaObject::invokeMethod(btnStop, "setEnabled", Q_ARG(bool, false));
 			QMetaObject::invokeMethod(tabSettings, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(m_pMenuBar, "setEnabled", Q_ARG(bool, true));
+			if(m_pSqwParamDlg) QMetaObject::invokeMethod(m_pSqwParamDlg, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editScale, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editOffs, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStartFit, "setEnabled", Q_ARG(bool, true));
 		};
@@ -828,6 +840,9 @@ void ConvoDlg::StartDisp()
 	btnStartFit->setEnabled(false);
 	tabSettings->setEnabled(false);
 	m_pMenuBar->setEnabled(false);
+	if(m_pSqwParamDlg) m_pSqwParamDlg->setEnabled(false);
+	editScale->setEnabled(false);
+	editOffs->setEnabled(false);
 	btnStop->setEnabled(true);
 	tabWidget->setCurrentWidget(tabPlot);
 
@@ -843,6 +858,9 @@ void ConvoDlg::StartDisp()
 			QMetaObject::invokeMethod(btnStop, "setEnabled", Q_ARG(bool, false));
 			QMetaObject::invokeMethod(tabSettings, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(m_pMenuBar, "setEnabled", Q_ARG(bool, true));
+			if(m_pSqwParamDlg) QMetaObject::invokeMethod(m_pSqwParamDlg, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editScale, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editOffs, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStartFit, "setEnabled", Q_ARG(bool, true));
 		};
