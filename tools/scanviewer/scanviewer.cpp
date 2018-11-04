@@ -966,7 +966,11 @@ void ScanViewerDlg::GenerateForGnuplot()
 	const std::string& strLabelY = m_strY;
 
 	std::string strPySrc =
-R"RAWSTR(# --------------------------------------------------------------------------------
+R"RAWSTR(#
+# Created with Takin version %%TAKIN_VER%%.
+#
+
+# --------------------------------------------------------------------------------
 # choose an output terminal
 set term wxt
 #set term pdf color enhanced font "Helvetica, 14" size 4,3.5
@@ -1108,6 +1112,7 @@ plot \
 	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELX%%", strLabelX);
 	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELY%%", strLabelY);
 	tl::find_all_and_replace<std::string>(strPySrc, "%%POINTS%%", ostrPoints.str());
+	tl::find_all_and_replace<std::string>(strPySrc, "%%TAKIN_VER%%", TAKIN_VER);
 
 	textRoot->setText(strPySrc.c_str());
 }
@@ -1123,7 +1128,11 @@ void ScanViewerDlg::GenerateForPython()
 	const std::string& strLabelY = m_strY;
 
 	std::string strPySrc =
-R"RAWSTR(import numpy as np
+R"RAWSTR(#
+# Created with Takin version %%TAKIN_VER%%.
+#
+
+import numpy as np
 
 x = np.array([ %%VECX%% ])
 y = np.array([ %%VECY%% ])
@@ -1194,6 +1203,7 @@ plt.show())RAWSTR";
 	tl::find_and_replace<std::string>(strPySrc, "%%VECX%%", ostrX.str());
 	tl::find_and_replace<std::string>(strPySrc, "%%VECY%%", ostrY.str());
 	tl::find_and_replace<std::string>(strPySrc, "%%VECYERR%%", ostrYErr.str());
+	tl::find_and_replace<std::string>(strPySrc, "%%TAKIN_VER%%", TAKIN_VER);
 
 	textRoot->setText(strPySrc.c_str());
 }
@@ -1206,6 +1216,10 @@ void ScanViewerDlg::GenerateForHermelin()
 {
     std::string strStoatSrc =
 R"RAWSTR(#!./hermelin -t
+
+#
+# Created with Takin version %%TAKIN_VER%%.
+#
 
 module_init()
 {
@@ -1254,6 +1268,7 @@ main(args)
 
 	const std::string strFile = m_strCurDir + m_strCurFile;
 	tl::find_and_replace<std::string>(strStoatSrc, "%%FILE%%", strFile);
+	tl::find_and_replace<std::string>(strStoatSrc, "%%TAKIN_VER%%", TAKIN_VER);
 
 	textRoot->setText(strStoatSrc.c_str());
 }
@@ -1269,7 +1284,11 @@ void ScanViewerDlg::GenerateForRoot()
 	const std::string& strLabelY = m_strY;
 
 	std::string strRootSrc =
-R"RAWSTR(void scan_plot()
+R"RAWSTR(/*
+ * Created with Takin version %%TAKIN_VER%%.
+ */
+
+void scan_plot()
 {
 	const Double_t vecX[] = { %%VECX%% };
 	const Double_t vecY[] = { %%VECY%% };
@@ -1322,6 +1341,7 @@ R"RAWSTR(void scan_plot()
 	tl::find_and_replace<std::string>(strRootSrc, "%%VECX%%", ostrX.str());
 	tl::find_and_replace<std::string>(strRootSrc, "%%VECY%%", ostrY.str());
 	tl::find_and_replace<std::string>(strRootSrc, "%%VECYERR%%", ostrYErr.str());
+	tl::find_and_replace<std::string>(strRootSrc, "%%TAKIN_VER%%", TAKIN_VER);
 
 	textRoot->setText(strRootSrc.c_str());
 }
