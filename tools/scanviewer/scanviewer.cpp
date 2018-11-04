@@ -972,7 +972,8 @@ R"RAWSTR(#
 
 # --------------------------------------------------------------------------------
 # choose an output terminal
-set term wxt
+#set term wxt
+set term qt
 #set term pdf color enhanced font "Helvetica, 14" size 4,3.5
 #set output "plot.pdf"
 # --------------------------------------------------------------------------------
@@ -1067,6 +1068,7 @@ set xlabel "%%LABELX%%"
 set ylabel "%%LABELY%%"
 set title "%%TITLE%%"
 set grid
+#set key top right Left width 0 samplen 3 spacing 1.2
 
 set xrange [minx : maxx]
 set yrange [miny : maxy]
@@ -1075,6 +1077,11 @@ set yrange [miny : maxy]
 #set ytics rangey_tics
 #set mxtics 2
 #set mytics 2
+
+# show fit results
+sig2fwhm = 2.*sqrt(2.*log(2.))
+fitres = sprintf("x0 = %.4g\nFWHM = %.4g", x01, sig2fwhm*s1)
+set label at graph 0.05, graph 0.95 fitres
 
 # use these functions with the plot command below
 #	line(x,m1,y0) with lines linewidth 2 linecolor rgb line1_col notitle, \
