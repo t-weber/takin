@@ -727,12 +727,12 @@
             <widget class="QComboBox" name="comboExport">
              <item>
               <property name="text">
-               <string>C++ / Root</string>
+               <string>Gnuplot</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Gnuplot</string>
+               <string>C++ / Root</string>
               </property>
              </item>
              <item>

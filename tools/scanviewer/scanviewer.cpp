@@ -30,6 +30,7 @@
 #include "tlibs/file/file.h"
 #include "tlibs/log/log.h"
 #include "tlibs/helper/misc.h"
+#include "tlibs/time/chrono.h"
 #include "libs/version.h"
 
 #ifndef NO_FIT
@@ -944,9 +945,9 @@ void ScanViewerDlg::GenerateExternal(int iLang)
 		return;
 
 	if(iLang == 0)
-		GenerateForRoot();
-	else if(iLang == 1)
 		GenerateForGnuplot();
+	else if(iLang == 1)
+		GenerateForRoot();
 	else if(iLang == 2)
 		GenerateForPython();
 	else if(iLang == 3)
@@ -966,8 +967,10 @@ void ScanViewerDlg::GenerateForGnuplot()
 	const std::string& strLabelY = m_strY;
 
 	std::string strPySrc =
-R"RAWSTR(#
-# Created with Takin version %%TAKIN_VER%%.
+R"RAWSTR(#!gnuplot --persist
+
+#
+# Created %%DATE%% with Takin version %%TAKIN_VER%%.
 #
 
 # --------------------------------------------------------------------------------
@@ -1120,6 +1123,8 @@ plot \
 	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELY%%", strLabelY);
 	tl::find_all_and_replace<std::string>(strPySrc, "%%POINTS%%", ostrPoints.str());
 	tl::find_all_and_replace<std::string>(strPySrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%DATE%%", tl::epoch_to_str<t_real>(tl::epoch<t_real>(),
+		"on %b %d, %Y at %H:%M:%S (%Z)"));
 
 	textRoot->setText(strPySrc.c_str());
 }
@@ -1136,7 +1141,7 @@ void ScanViewerDlg::GenerateForPython()
 
 	std::string strPySrc =
 R"RAWSTR(#
-# Created with Takin version %%TAKIN_VER%%.
+# Created %%DATE%% with Takin version %%TAKIN_VER%%.
 #
 
 import numpy as np
@@ -1200,17 +1205,19 @@ plt.show())RAWSTR";
 		ostrYErr << m_vecYErr[i] << ", ";
 	}
 
-	tl::find_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%MAXX%%", tl::var_to_str(*minmaxX.second, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%MINY%%", tl::var_to_str(*minmaxY.first-dMaxErrY, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%MAXY%%", tl::var_to_str(*minmaxY.second+dMaxErrY, g_iPrec));
-	tl::find_and_replace<std::string>(strPySrc, "%%TITLE%%", strTitle);
-	tl::find_and_replace<std::string>(strPySrc, "%%LABELX%%", strLabelX);
-	tl::find_and_replace<std::string>(strPySrc, "%%LABELY%%", strLabelY);
-	tl::find_and_replace<std::string>(strPySrc, "%%VECX%%", ostrX.str());
-	tl::find_and_replace<std::string>(strPySrc, "%%VECY%%", ostrY.str());
-	tl::find_and_replace<std::string>(strPySrc, "%%VECYERR%%", ostrYErr.str());
-	tl::find_and_replace<std::string>(strPySrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MAXX%%", tl::var_to_str(*minmaxX.second, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MINY%%", tl::var_to_str(*minmaxY.first-dMaxErrY, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%MAXY%%", tl::var_to_str(*minmaxY.second+dMaxErrY, g_iPrec));
+	tl::find_all_and_replace<std::string>(strPySrc, "%%TITLE%%", strTitle);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELX%%", strLabelX);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%LABELY%%", strLabelY);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%VECX%%", ostrX.str());
+	tl::find_all_and_replace<std::string>(strPySrc, "%%VECY%%", ostrY.str());
+	tl::find_all_and_replace<std::string>(strPySrc, "%%VECYERR%%", ostrYErr.str());
+	tl::find_all_and_replace<std::string>(strPySrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strPySrc, "%%DATE%%", tl::epoch_to_str<t_real>(tl::epoch<t_real>(),
+		"on %b %d, %Y at %H:%M:%S (%Z)"));
 
 	textRoot->setText(strPySrc.c_str());
 }
@@ -1225,7 +1232,7 @@ void ScanViewerDlg::GenerateForHermelin()
 R"RAWSTR(#!./hermelin -t
 
 #
-# Created with Takin version %%TAKIN_VER%%.
+# Created %%DATE%% with Takin version %%TAKIN_VER%%.
 #
 
 module_init()
@@ -1274,8 +1281,10 @@ main(args)
 })RAWSTR";
 
 	const std::string strFile = m_strCurDir + m_strCurFile;
-	tl::find_and_replace<std::string>(strStoatSrc, "%%FILE%%", strFile);
-	tl::find_and_replace<std::string>(strStoatSrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strStoatSrc, "%%FILE%%", strFile);
+	tl::find_all_and_replace<std::string>(strStoatSrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strStoatSrc, "%%DATE%%", tl::epoch_to_str<t_real>(tl::epoch<t_real>(),
+		"on %b %d, %Y at %H:%M:%S (%Z)"));
 
 	textRoot->setText(strStoatSrc.c_str());
 }
@@ -1292,7 +1301,7 @@ void ScanViewerDlg::GenerateForRoot()
 
 	std::string strRootSrc =
 R"RAWSTR(/*
- * Created with Takin version %%TAKIN_VER%%.
+ * Created %%DATE%% with Takin version %%TAKIN_VER%%.
  */
 
 void scan_plot()
@@ -1338,17 +1347,19 @@ void scan_plot()
 		ostrYErr << m_vecYErr[i] << ", ";
 	}
 
-	tl::find_and_replace<std::string>(strRootSrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
-	tl::find_and_replace<std::string>(strRootSrc, "%%MAXX%%", tl::var_to_str(*minmaxX.second, g_iPrec));
-	tl::find_and_replace<std::string>(strRootSrc, "%%MINY%%", tl::var_to_str(*minmaxY.first-dMaxErrY, g_iPrec));
-	tl::find_and_replace<std::string>(strRootSrc, "%%MAXY%%", tl::var_to_str(*minmaxY.second+dMaxErrY, g_iPrec));
-	tl::find_and_replace<std::string>(strRootSrc, "%%TITLE%%", strTitle);
-	tl::find_and_replace<std::string>(strRootSrc, "%%LABELX%%", strLabelX);
-	tl::find_and_replace<std::string>(strRootSrc, "%%LABELY%%", strLabelY);
-	tl::find_and_replace<std::string>(strRootSrc, "%%VECX%%", ostrX.str());
-	tl::find_and_replace<std::string>(strRootSrc, "%%VECY%%", ostrY.str());
-	tl::find_and_replace<std::string>(strRootSrc, "%%VECYERR%%", ostrYErr.str());
-	tl::find_and_replace<std::string>(strRootSrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%MINX%%", tl::var_to_str(*minmaxX.first, g_iPrec));
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%MAXX%%", tl::var_to_str(*minmaxX.second, g_iPrec));
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%MINY%%", tl::var_to_str(*minmaxY.first-dMaxErrY, g_iPrec));
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%MAXY%%", tl::var_to_str(*minmaxY.second+dMaxErrY, g_iPrec));
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%TITLE%%", strTitle);
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%LABELX%%", strLabelX);
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%LABELY%%", strLabelY);
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%VECX%%", ostrX.str());
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%VECY%%", ostrY.str());
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%VECYERR%%", ostrYErr.str());
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%TAKIN_VER%%", TAKIN_VER);
+	tl::find_all_and_replace<std::string>(strRootSrc, "%%DATE%%", tl::epoch_to_str<t_real>(tl::epoch<t_real>(),
+		"on %b %d, %Y at %H:%M:%S (%Z)"));
 
 	textRoot->setText(strRootSrc.c_str());
 }
