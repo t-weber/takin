@@ -862,15 +862,25 @@ void ScanViewerDlg::PlotScan()
 		// normalise to monitor?
 		if(bNormalise)
 		{
-			t_real y = m_vecY[iY];
-			t_real m = vecMon[iY];
-			t_real dy = tl::float_equal(y, 0., g_dEps) ? 1. : std::sqrt(y);
-			t_real dm = tl::float_equal(m, 0., g_dEps) ? 1. : std::sqrt(m);
+			if(tl::float_equal(vecMon[iY], 0., g_dEps))
+			{
+				tl::log_warn("Monitor counter is zero for point ", iY+1, ".");
 
-			// y_new = y/m
-			// dy_new = 1/m dy - y/m^2 dm
-			m_vecY[iY] = y/m;
-			m_vecYErr.push_back(std::sqrt(std::pow(dy/m, 2.) + std::pow(dm*y/(m*m), 2.)));
+				m_vecY[iY] = 0.;
+				m_vecYErr.push_back(1.);
+			}
+			else
+			{
+				t_real y = m_vecY[iY];
+				t_real m = vecMon[iY];
+				t_real dy = tl::float_equal(y, 0., g_dEps) ? 1. : std::sqrt(y);
+				t_real dm = std::sqrt(m);
+
+				// y_new = y/m
+				// dy_new = 1/m dy - y/m^2 dm
+				m_vecY[iY] = y/m;
+				m_vecYErr.push_back(std::sqrt(std::pow(dy/m, 2.) + std::pow(dm*y/(m*m), 2.)));
+			}
 		}
 		else
 		{
