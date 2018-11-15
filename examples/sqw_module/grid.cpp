@@ -121,7 +121,7 @@ std::tuple<std::vector<t_real>, std::vector<t_real>>
 		return std::make_tuple(std::vector<t_real>(), std::vector<t_real>());
 	}
 
-	const void *pMemIdx = fileIdx.map(idx_file_offs, sizeof(std::size_t));
+	const void *pMemIdx = fileIdx.map(idx_file_offs*sizeof(std::size_t), sizeof(std::size_t));
 	if(!pMemIdx)
 	{
 		tl::log_err("Index file \"", m_strIndexFile, "\" cannot be mapped.");
@@ -163,7 +163,8 @@ std::tuple<std::vector<t_real>, std::vector<t_real>>
 
 
 	// map actual (E, w) data
-	const t_real *pBranches = (t_real*)fileDat.map(dat_file_offs+sizeof(iNumBranches), iNumBranches*sizeof(t_real)*2);
+	const t_real *pBranches = (t_real*)fileDat.map(dat_file_offs+sizeof(iNumBranches),
+		iNumBranches*sizeof(t_real)*2);
 	if(!pMemDat)
 	{
 		tl::log_err("Data file \"", m_strDataFile, "\" cannot be mapped (2).");
