@@ -9,14 +9,17 @@
 #include "tlibs/string/string.h"
 #include "tlibs/math/math.h"
 #include "tlibs/file/file.h"
+#include "tlibs/time/chrono.h"
 
 #include "libs/globals.h"
 #include "libs/globals_qt.h"
 #include "libs/qt/recent.h"
+#include "libs/version.h"
 #include "tools/convofit/convofit_import.h"
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -260,7 +263,10 @@ void ConvoDlg::Save(std::map<std::string, std::string>& mapConf, const std::stri
 			comboSqw->itemData(comboSqw->currentIndex()).toString().toStdString();
 	}
 
-	//mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
+	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
+	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
+	mapConf[strXmlRoot + "meta/info"] = "Created with Takin/Monteconvo.";
+	mapConf[strXmlRoot + "meta/user"] = std::getenv("USER");
 }
 
 

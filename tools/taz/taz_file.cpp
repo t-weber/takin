@@ -12,6 +12,7 @@
 #include "libs/qt/recent.h"
 #include "dialogs/FilePreviewDlg.h"
 
+#include <cstdlib>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <boost/scope_exit.hpp>
@@ -564,6 +565,7 @@ bool TazDlg::Save()
 	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real>(tl::epoch<t_real>());
 	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
 	mapConf[strXmlRoot + "meta/info"] = "Created with Takin.";
+	mapConf[strXmlRoot + "meta/user"] = std::getenv("USER");
 
 
 	// dialogs

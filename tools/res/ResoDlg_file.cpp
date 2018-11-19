@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cstdlib>
 
 #include "tlibs/string/string.h"
 #include "tlibs/helper/flags.h"
@@ -16,6 +17,7 @@
 #include "tlibs/time/chrono.h"
 
 #include "libs/globals.h"
+#include "libs/version.h"
 #include "helper.h"
 
 #include <QFileDialog>
@@ -312,6 +314,9 @@ void ResoDlg::Save(std::map<std::string, std::string>& mapConf, const std::strin
 
 	mapConf[strXmlRoot + "meta/comment"] = textComment->toPlainText().toStdString();
 	mapConf[strXmlRoot + "meta/timestamp"] = tl::var_to_str<t_real_reso>(tl::epoch<t_real_reso>());
+	mapConf[strXmlRoot + "meta/version"] = TAKIN_VER;
+	mapConf[strXmlRoot + "meta/info"] = "Created with Takin/Reso.";
+	mapConf[strXmlRoot + "meta/user"] = std::getenv("USER");
 }
 
 

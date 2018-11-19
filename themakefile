@@ -425,8 +425,10 @@ endif
 ifeq ($(USE_PY), 1)
 #	ifeq ($(USE_FRAMEWORKS), 0)
 		PY_LIBS = -lboost_python${BOOST_SUFFIX}
-		#PY_LIBS = -lboost_python27${BOOST_SUFFIX}
+#		PY_LIBS = -lboost_python27${BOOST_SUFFIX}
 		PY_LIBS += -lpython2.7
+#		PY_LIBS = -lboost_python3${BOOST_SUFFIX}
+#		PY_LIBS += -lpython3
 #	else
 #		PY_LIBS = -lboost_python${BOOST_SUFFIX} -F /usr/local/opt/python/Frameworks -framework Python
 #	endif
