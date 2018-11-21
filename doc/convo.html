@@ -15,13 +15,17 @@
 
 	<p>(1) and (2): The crystal (together with a scattering plane) and the instrument parameter 
 	files are entered in the "Crystal File" and "Resolution File" edit fields, respectively.
-	These files are the same ones that are defined <a href="basics.html">in the Takin main window</a>
-	and <a href="reso.html">in the "Resolution Parameters" dialog</a>.</p>
+	These files are the ones that are defined <a href="basics.html">in the Takin main window</a>
+	and <a href="reso.html">in the "Resolution Parameters" dialog</a>.
+	Instead of manually defining a crystal and a scan direction, their parameters can be automatically
+	determined from a TAS data file, which can be optionally entered in the "Measurement" edit field.</p>
 
 	<p>(3): The S(q,w) model is a user-provided theoretical formula or algorithm for the physical
-	system to be measured. It can be either provided <a href="reso-sqw-py.html">as a Python script</a>
-	or <a href="reso-sqw-native.html">as a plugin</a>.
-	Several simple S(q,w) models are <a href="reso-sqw.html">included internally</a>.</p>
+	system to be measured. It can be either provided as a <a href="reso-sqw-py.html">Python</a>
+	or a <a href="reso-sqw-jl.html">Julia</a> script, or as a <a href="reso-sqw-native.html">native plugin</a>.
+	Several simple S(q,w) models are <a href="reso-sqw.html">included internally</a> for testing.
+	Each model provides variables which can be directly changed in the GUI via the "..." button next
+	to "Model Source". These variables are the same that are also exposed to the fitter.</p>
 
 	<p>(4): The actual scan path is defined in the "Scan Steps" group at the bottom of the dialog.
 	Here, the Q=(hkl) and E coordinates of the start end end position are entered along with the

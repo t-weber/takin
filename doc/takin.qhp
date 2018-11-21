@@ -7,6 +7,7 @@
 
 		<toc>
 			<section title="Takin" ref="takin.html" />
+			<section title="Set-up of Dependencies" ref="setup.html" />
 			<section title="Basic Usage" ref="basics.html" />
 			<section title="Resolution Calculation" ref="reso.html" />
 			<section title="Resolution Convolution" ref="convo.html" />
@@ -14,6 +15,7 @@
 
 			<section title="S(q,w) Models">
 				<section title="Python S(q,w) Models" ref="reso-sqw-py.html" />
+				<section title="Julia S(q,w) Models" ref="reso-sqw-jl.html" />
 				<section title="Native S(q,w) Models" ref="reso-sqw-native.html" />
 				<section title="Internal S(q,w) Models" ref="reso-sqw.html" />
 			</section>

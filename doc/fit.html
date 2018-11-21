@@ -13,6 +13,8 @@
 		<p>The fitter is called on the command-line by: "convofit my_fit.job"
 		The input job file "my_fit.job" in this example has the following structure:</p>
 
+		<p>Calling "convofit" without command-line arguments shows its global options.</p>
+
 		<code><pre>
 		; convofit sample job file
 
@@ -34,6 +36,16 @@
 		    ; monitor counter column in the scan file
 		    monitor_col     "mon2"
 
+		    ; normalise detector counts to monitor counts
+		    norm_to_monitor 1
+
+		    ; manually set scan variable
+			;scan_axis      "E"
+
+			; overrides
+			;temp_override   "25"
+			;field_override  "0.5"
+
 
 		    ; the instrument definition created by
 		    ; the Takin resolution parameter dialog
@@ -54,6 +66,9 @@
 
 		    ; fix some variables in the S(q,w) model
 		    sqw_set_params  "g_my_param = 12.3"
+
+			; flip the sense of the coordinate system
+		    flip_lhs_rhs    0
 		}
 
 
@@ -74,8 +89,16 @@
 		    ; show a plot at the end of the fit
 		    plot              1
 
-		    ; show plots during fitting (very useful for debugging)
+		    ; show live plots during fitting (very useful for debugging)
+		    ; gnuplot has to be installed for this to work
+		    ; (see "Set-up" section of this manual)
 		    plot_intermediate 1
+
+		    ; specify an available gnuplot terminal
+		    ; list all available terminals using: gnuplot -e "set term"
+		    ; typically use: "x11", "qt", or "wxt"
+		    ; if no plot window appears, this is set to the wrong value!
+		    plot_term         "x11 noraise"
 		}
 
 
@@ -98,6 +121,12 @@
 		{
 			; number of Monte-Carlo neutrons
 			neutrons    10000
+
+			; perform a secondary convolution of the sample shape (still beta)
+			sample_positions    1
+
+			; keep the same random seed for more stability
+			recycle_neutrons    1
 		}
 
 
@@ -132,7 +161,7 @@
 		    strategy      1         ; 0 (low), 1 (medium) or 2 (high)
 
 		    ; number of maximum function calls
-		    max_funccalls 100
+		    max_funccalls 500
 
 		    ; Minuit's targeted "estimated distance to minimum"
 		    tolerance     10.
