@@ -1,0 +1,66 @@
+<html>
+<head>
+    <title>Building from Source</title>
+</head>
+
+<body>
+	<h1>Building from Source</h1>
+	<p><b>Info:</b> This outlines the necessary steps for compiling Takin from source.
+	If you've already downloaded a binary package of Takin for your system, you can skip this section.</p>
+
+	<h2>Preparations before compilation</h2>
+
+	<p>Install (developer versions of) all required libraries either from your
+system's package manager or directly from the given links:
+	<a href="http://www.boost.org" target="_blank">Boost</a>,
+	<a href="http://www.qt.io" target="_blank">Qt 4 or 5</a>,
+	<a href="http://qwt.sourceforge.net" target="_blank">Qwt 6</a>,
+	<a href="http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/release/download.html" target="_blank">Minuit 2</a>,
+	<a href="http://www.ysbl.york.ac.uk/~cowtan/clipper/" target="_blank">Clipper</a>,
+	</p>
+
+	<p>For example, on *buntu systems, use the following commands:</p>
+	<code><pre>
+sudo su
+apt-get install cmake clang build-essential libboost-all-dev libclipper-dev libqt4-dev qt4-dev-tools libqwt-dev python-dev libfreetype6-dev wget
+wget http://www.cern.ch/mathlibs/sw/5_34_14/Minuit2/Minuit2-5.34.14.tar.gz
+tar -xzvf Minuit2-5.34.14.tar.gz
+cd Minuit2-5.34.14
+./configure --disable-openmp
+make && make install
+exit
+	</pre></code>
+
+
+	<p>Set up other external dependencies:</p>
+	<code><pre>
+cd &lt;takin source dir&gt;
+./setup_externals.sh
+	</pre></code>
+
+
+	<h2>Building Takin using CMake</h2>
+	<p>Takin has to be compiled with a fully C++11 compliant compiler, e.g. GCC version 4.8 or above or Clang.</p>
+	<p>Make using CMake:</p>
+	<code><pre>
+mkdir build
+cd build
+cmake ..
+make
+optional: make install (as root)
+	</pre></code>
+
+	<p>Run Takin with <code>takin</code> (if installed) or <code>./takin</code> (for local version).
+	In case tlibs is not found, use: <code>LD_LIBRARY_PATH=/usr/local/lib takin</code>.</p>
+
+
+	<h2>Alternatively building Takin directly</h2>
+	<ul>
+	<li>Open "themakefile" in your favourite editor.</li>
+	<li>Adapt the flags in the first few lines according to your system.</li>
+	<li>Build Takin using "./build.sh".</li>
+	<li>Run "./gentab" to create required tables.</li>
+	<li>Run Takin with "./takin".</li>
+	</ul>
+</body>
+</html>

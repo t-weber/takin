@@ -67,6 +67,8 @@ res/icons/*
 !doc/index_help.html
 !doc/toc.html
 !doc/takin.html
+!doc/build.html
+!doc/setup.html
 !doc/basics.html
 !doc/reso.html
 !doc/convo.html
@@ -74,6 +76,7 @@ res/icons/*
 !doc/reso-sqw.html
 !doc/reso-sqw-native.html
 !doc/reso-sqw-py.html
+!doc/reso-sqw-jl.html
 doc/devel/**
 !doc/devel/.dir
 !doc/.dir

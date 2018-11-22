@@ -7,6 +7,7 @@
 
 		<toc>
 			<section title="Takin" ref="takin.html" />
+			<section title="Building from Source" ref="build.html" />
 			<section title="Set-up of Dependencies" ref="setup.html" />
 			<section title="Basic Usage" ref="basics.html" />
 			<section title="Resolution Calculation" ref="reso.html" />
