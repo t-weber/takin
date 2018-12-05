@@ -1,7 +1,7 @@
 /**
  * factory and plugin interface for S(q,w) models
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 2016
+ * @date 2016 -- 2018
  * @license GPLv2
  */
 
@@ -46,7 +46,11 @@ static t_mapSqw g_mapSqw =
 	{ "kd", t_mapSqw::mapped_type {
 		[](const std::string& strCfgFile) -> std::shared_ptr<SqwBase>
 		{ return std::make_shared<SqwKdTree>(strCfgFile.c_str()); },
-		"Table" } },
+		"4D Nearest-Point Raster of the Form (h, k, l, E, S)" } },
+	{ "table_1d", t_mapSqw::mapped_type {
+		[](const std::string& strCfgFile) -> std::shared_ptr<SqwBase>
+		{ return std::make_shared<SqwTable1d>(strCfgFile.c_str()); },
+		"1D Nearest-Point Raster of the Form (q, E, S)" } },
 	{ "phonon", t_mapSqw::mapped_type {
 		[](const std::string& strCfgFile) -> std::shared_ptr<SqwBase>
 		{ return std::make_shared<SqwPhonon>(strCfgFile.c_str()); },

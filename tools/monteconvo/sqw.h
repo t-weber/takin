@@ -1,7 +1,7 @@
 /**
  * monte carlo convolution tool
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 2015, 2016
+ * @date 2015 -- 2018
  * @license GPLv2
  */
 
@@ -18,6 +18,7 @@
 
 #include "tlibs/math/math.h"
 #include "tlibs/math/kd.h"
+#include "tlibs/file/loaddat.h"
 #include "../res/defs.h"
 #include "sqwbase.h"
 
@@ -86,6 +87,44 @@ public:
 
 	virtual SqwBase* shallow_copy() const override;
 };
+
+
+// -----------------------------------------------------------------------------
+
+
+
+/**
+ * tabulated 1d model
+ */
+class SqwTable1d : public SqwBase
+{
+protected:
+	std::shared_ptr<tl::DatFile<t_real_reso>> m_dat;
+	std::shared_ptr<tl::Kd<t_real_reso>> m_kd;
+
+	t_real_reso m_G[3] = { 0., 0., 0. };
+
+	unsigned int m_qcol = 0;
+	unsigned int m_Ecol = 1;
+	unsigned int m_Scol = 2;
+
+protected:
+	void CreateKd();
+
+public:
+	SqwTable1d(const char* pcFile = nullptr);
+	virtual ~SqwTable1d() = default;
+
+	bool open(const char* pcFile);
+	virtual t_real_reso operator()(t_real_reso dh, t_real_reso dk, t_real_reso dl, t_real_reso dE) const override;
+
+	virtual std::vector<SqwBase::t_var> GetVars() const override;
+	virtual void SetVars(const std::vector<SqwBase::t_var>&) override;
+
+	virtual SqwBase* shallow_copy() const override;
+};
+
+
 
 
 // -----------------------------------------------------------------------------

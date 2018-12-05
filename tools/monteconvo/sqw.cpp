@@ -1,7 +1,7 @@
 /**
  * monte carlo convolution tool
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 2015, 2016
+ * @date 2015 -- 2018
  * @license GPLv2
  */
 
@@ -89,15 +89,18 @@ t_real SqwElast::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 	}
 }
 
+
 std::vector<SqwBase::t_var> SqwElast::GetVars() const
 {
 	std::vector<SqwBase::t_var> vecVars;
 	return vecVars;
 }
 
+
 void SqwElast::SetVars(const std::vector<SqwBase::t_var>&)
 {
 }
+
 
 SqwBase* SqwElast::shallow_copy() const
 {
@@ -109,7 +112,12 @@ SqwBase* SqwElast::shallow_copy() const
 	return pElast;
 }
 
+
+
+
 //------------------------------------------------------------------------------
+
+
 
 
 SqwKdTree::SqwKdTree(const char* pcFile)
@@ -117,6 +125,7 @@ SqwKdTree::SqwKdTree(const char* pcFile)
 	if(pcFile)
 		m_bOk = open(pcFile);
 }
+
 
 bool SqwKdTree::open(const char* pcFile)
 {
@@ -168,6 +177,7 @@ bool SqwKdTree::open(const char* pcFile)
 
 t_real SqwKdTree::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 {
+	// meV and rlu units will have equal scaling in the kd tree!
 	std::vector<t_real> vechklE = {dh, dk, dl, dE};
 	if(!m_kd->IsPointInGrid(vechklE))
 		return 0.;
@@ -184,6 +194,7 @@ t_real SqwKdTree::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 	return vec[4];
 }
 
+
 std::vector<SqwBase::t_var> SqwKdTree::GetVars() const
 {
 	std::vector<SqwBase::t_var> vecVars;
@@ -191,9 +202,11 @@ std::vector<SqwBase::t_var> SqwKdTree::GetVars() const
 	return vecVars;
 }
 
+
 void SqwKdTree::SetVars(const std::vector<SqwBase::t_var>&)
 {
 }
+
 
 SqwBase* SqwKdTree::shallow_copy() const
 {
@@ -207,13 +220,159 @@ SqwBase* SqwKdTree::shallow_copy() const
 }
 
 
+
+
+
 //------------------------------------------------------------------------------
+
+
+
+
+SqwTable1d::SqwTable1d(const char* pcFile)
+{
+	m_bOk = false;
+	if(pcFile)
+		m_bOk = open(pcFile);
+}
+
+
+bool SqwTable1d::open(const char* pcFile)
+{
+	tl::log_debug("Loading \"", pcFile, "\"", ".");
+	m_dat = std::make_shared<tl::DatFile<t_real>>(pcFile);
+	m_bOk = m_dat->IsOk();
+	CreateKd();
+	return m_bOk;
+}
+
+
+void SqwTable1d::CreateKd()
+{
+	if(!m_bOk)
+	{
+		tl::log_err("Data table not yet loaded.");
+		return;
+	}
+
+	m_kd = std::make_shared<tl::Kd<t_real>>();
+	std::list<std::vector<t_real>> lstPoints;
+
+	t_real minq = std::numeric_limits<t_real>::max();
+	t_real maxq = -std::numeric_limits<t_real>::max();
+	t_real minE = std::numeric_limits<t_real>::max();
+	t_real maxE = -std::numeric_limits<t_real>::max();
+
+	for(std::size_t iRow=0; iRow<m_dat->GetRowCount(); ++iRow)
+	{
+		t_real q = m_dat->GetColumn(m_qcol)[iRow];
+		t_real E = m_dat->GetColumn(m_Ecol)[iRow];
+		t_real S = m_dat->GetColumn(m_Scol)[iRow];
+
+		minq = std::min(minq, q);
+		maxq = std::max(maxq, q);
+		minE = std::min(minE, E);
+		maxE = std::max(maxE, E);
+
+		lstPoints.emplace_back(std::vector<t_real>{{ q, E, S }});
+	}
+
+	tl::log_info("Loaded ", m_dat->GetRowCount(), " S(q,w) points.");
+	tl::log_info("q range: ", minq, "..", maxq, ", E range: ", minE, "..", maxE, ".");
+
+	m_kd->Load(lstPoints, 2);
+	tl::log_info("Generated k-d tree.");
+}
+
+
+t_real SqwTable1d::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
+{
+	if(!m_bOk)
+		return 0.;
+
+	// get reduced q
+	dh -= m_G[0]; dk -= m_G[1]; dl -= m_G[2];
+	t_real dq = std::sqrt(dh*dh + dk*dk + dl*dl);
+
+	// meV and rlu units will have equal scaling in the kd tree!
+	std::vector<t_real> vecqE{{dq, dE}};
+
+	if(!m_kd->IsPointInGrid(vecqE))
+		return 0.;
+
+	std::vector<t_real> vec = m_kd->GetNearestNode(vecqE);
+	//tl::log_info("Queried node: ", vecqE[0], ", ", vecqE[1],
+	//	" -> nearest node: ", vec[0], ", ", vec[1], ", ", vec[2], ".");
+
+	return vec[2];
+}
+
+
+std::vector<SqwBase::t_var> SqwTable1d::GetVars() const
+{
+	std::ostringstream ostr;
+	ostr.precision(g_iPrec);
+	ostr << m_G[0] << " " << m_G[1] << " " << m_G[2];
+
+
+	std::vector<SqwBase::t_var> vecVars;
+
+	vecVars.push_back(SqwBase::t_var{"q_column", "uint", tl::var_to_str(m_qcol)});
+	vecVars.push_back(SqwBase::t_var{"E_column", "uint", tl::var_to_str(m_Ecol)});
+	vecVars.push_back(SqwBase::t_var{"S_column", "uint", tl::var_to_str(m_Scol)});
+	vecVars.push_back(SqwBase::t_var{"G", "vector", ostr.str()});
+
+	return vecVars;
+}
+
+
+void SqwTable1d::SetVars(const std::vector<SqwBase::t_var>& vecVars)
+{
+	if(vecVars.size() == 0)
+		return;
+
+	for(const SqwBase::t_var& var : vecVars)
+	{
+		const std::string& strVar = std::get<0>(var);
+		const std::string& strVal = std::get<2>(var);
+
+		if(strVar == "q_column") m_qcol = tl::str_to_var<decltype(m_qcol)>(strVal);
+		else if(strVar == "E_column") m_Ecol = tl::str_to_var<decltype(m_Ecol)>(strVal);
+		else if(strVar == "S_column") m_Scol = tl::str_to_var<decltype(m_Scol)>(strVal);
+		else if(strVar == "G")
+		{
+			std::istringstream istr(strVal);
+			istr >> m_G[0] >> m_G[1] >> m_G[2];
+		}
+	}
+
+	CreateKd();
+}
+
+
+SqwBase* SqwTable1d::shallow_copy() const
+{
+	SqwTable1d *pTab = new SqwTable1d();
+	*static_cast<SqwBase*>(pTab) = *static_cast<const SqwBase*>(this);
+
+	pTab->m_dat = m_dat;
+	pTab->m_kd = m_kd;
+
+	return pTab;
+}
+
+
+
+
+//------------------------------------------------------------------------------
+
+
 
 
 t_real SqwPhonon::phonon_disp(t_real dq, t_real da, t_real df)
 {
 	return std::abs(da*std::sin(dq*df));
 }
+
 
 void SqwPhonon::create()
 {
@@ -315,6 +474,7 @@ void SqwPhonon::create()
 	m_bOk = 1;
 }
 
+
 void SqwPhonon::destroy()
 {
 #ifdef USE_RTREE
@@ -323,6 +483,7 @@ void SqwPhonon::destroy()
 	m_kd->Unload();
 #endif
 }
+
 
 SqwPhonon::SqwPhonon(const ublas::vector<t_real>& vecBragg,
 	const ublas::vector<t_real>& vecTA1,
@@ -349,6 +510,7 @@ SqwPhonon::SqwPhonon(const ublas::vector<t_real>& vecBragg,
 {
 	create();
 }
+
 
 SqwPhonon::SqwPhonon(const char* pcFile)
 {
@@ -406,6 +568,7 @@ SqwPhonon::SqwPhonon(const char* pcFile)
 
 	create();
 }
+
 
 t_real SqwPhonon::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 {
@@ -469,6 +632,7 @@ t_real SqwPhonon::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 		+ dInc;
 }
 
+
 std::vector<SqwBase::t_var> SqwPhonon::GetVars() const
 {
 	std::vector<SqwBase::t_var> vecVars;
@@ -506,6 +670,7 @@ std::vector<SqwBase::t_var> SqwPhonon::GetVars() const
 
 	return vecVars;
 }
+
 
 void SqwPhonon::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 {
@@ -564,6 +729,7 @@ void SqwPhonon::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 		create();
 }
 
+
 SqwBase* SqwPhonon::shallow_copy() const
 {
 	SqwPhonon *pCpy = new SqwPhonon();
@@ -609,7 +775,9 @@ SqwBase* SqwPhonon::shallow_copy() const
 }
 
 
+
 //------------------------------------------------------------------------------
+
 
 
 // for model compatibility testing
@@ -620,6 +788,7 @@ t_real SqwPhononSingleBranch::phonon_disp(t_real dq, t_real da, t_real df)
 {
 	return std::abs(da*std::sin(dq*df));
 }
+
 
 SqwPhononSingleBranch::SqwPhononSingleBranch(const char* pcFile)
 {
@@ -660,6 +829,7 @@ SqwPhononSingleBranch::SqwPhononSingleBranch(const char* pcFile)
 	m_bOk = 1;
 }
 
+
 /**
  * dispersion E(Q)
  */
@@ -678,6 +848,7 @@ SqwPhononSingleBranch::disp(t_real dh, t_real dk, t_real dl) const
 		std::vector<t_real>({dWeight, dWeight}));
 }
 
+
 /**
  * dynamical structure factor S(Q,E)
  */
@@ -692,6 +863,7 @@ t_real SqwPhononSingleBranch::operator()(t_real dh, t_real dk, t_real dl, t_real
 
 	return std::abs(tl::DHO_model<t_real>(dE, m_dT, vecE0[0], m_dHWHM, m_dS0*vecW[0], 0.)) + dInc;
 }
+
 
 std::vector<SqwBase::t_var> SqwPhononSingleBranch::GetVars() const
 {
@@ -711,6 +883,7 @@ std::vector<SqwBase::t_var> SqwPhononSingleBranch::GetVars() const
 
 	return vecVars;
 }
+
 
 void SqwPhononSingleBranch::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 {
@@ -736,6 +909,7 @@ void SqwPhononSingleBranch::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 	}
 }
 
+
 SqwBase* SqwPhononSingleBranch::shallow_copy() const
 {
 	SqwPhononSingleBranch *pCpy = new SqwPhononSingleBranch();
@@ -756,7 +930,9 @@ SqwBase* SqwPhononSingleBranch::shallow_copy() const
 }
 
 
+
 //------------------------------------------------------------------------------
+
 
 
 t_real SqwMagnon::ferro_disp(t_real dq, t_real dD, t_real doffs)
@@ -764,10 +940,12 @@ t_real SqwMagnon::ferro_disp(t_real dq, t_real dD, t_real doffs)
 	return dq*dq * dD + doffs;
 }
 
+
 t_real SqwMagnon::antiferro_disp(t_real dq, t_real dD, t_real doffs)
 {
 	return std::abs(dq)*dD + doffs;
 }
+
 
 SqwMagnon::SqwMagnon(const char* pcFile)
 {
@@ -809,6 +987,7 @@ SqwMagnon::SqwMagnon(const char* pcFile)
 	m_bOk = 1;
 }
 
+
 /**
  * dispersion E(Q)
  */
@@ -837,6 +1016,7 @@ SqwMagnon::disp(t_real dh, t_real dk, t_real dl) const
 		std::vector<t_real>({dW, dW}));
 }
 
+
 /**
  * dynamical structure factor S(Q,E)
  */
@@ -860,6 +1040,7 @@ t_real SqwMagnon::operator()(t_real dh, t_real dk, t_real dl, t_real dE) const
 	return dS + dInc;
 }
 
+
 std::vector<SqwBase::t_var> SqwMagnon::GetVars() const
 {
 	std::vector<SqwBase::t_var> vecVars;
@@ -879,6 +1060,7 @@ std::vector<SqwBase::t_var> SqwMagnon::GetVars() const
 
 	return vecVars;
 }
+
 
 void SqwMagnon::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 {
@@ -904,6 +1086,7 @@ void SqwMagnon::SetVars(const std::vector<SqwBase::t_var>& vecVars)
 		else if(strVar == "T") m_dT = tl::str_to_var<decltype(m_dT)>(strVal);
 	}
 }
+
 
 SqwBase* SqwMagnon::shallow_copy() const
 {
