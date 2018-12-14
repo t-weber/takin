@@ -11,9 +11,11 @@
 #include "tlibs/math/linalg.h"
 #include "tlibs/math/linalg_ops.h"
 #include "tlibs/file/loadinstr.h"
-#include "libs/globals.h"
+#include "tlibs/time/chrono.h"
 #include "tlibs/log/log.h"
 #include "tlibs/version.h"
+#include "libs/globals.h"
+#include "libs/version.h"
 
 #include <vector>
 #include <iostream>
@@ -74,7 +76,12 @@ bool make_plot(std::ostream& ostr,
 
 	(*pOstr).precision(g_iPrec);
 	(*pOstr) << "#!/usr/bin/gnuplot -p\n";
-	(*pOstr) << "# Created with tlibs version " << TLIBS_VERSION << ".\n\n";
+	(*pOstr) << "#\n";
+	(*pOstr) << "# Created with Takin version " << TAKIN_VER
+		<< " and tlibs version " << TLIBS_VERSION << ".\n";
+	(*pOstr) << "# Date: " << tl::epoch_to_str<t_real>(tl::epoch<t_real>(),
+		"%b %d, %Y at %H:%M:%S (%Z).") << "\n";
+	(*pOstr) << "#\n\n";
 
 	(*pOstr) << "#set term pdf enhanced color font \"NimbusSanL-Regu,16\"\n";
 	(*pOstr) << "#set output \"" << "scanpos.pdf\"\n\n";
