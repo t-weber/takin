@@ -39,9 +39,10 @@ using t_real = t_real_reso;
 static void* init_convofit_plot(const std::string& strTerm)
 {
 	tl::GnuPlot<t_real> *pPlt = new tl::GnuPlot<t_real>();
-	pPlt->Init();
-	pPlt->SetTerminal(0, strTerm.c_str());
+	if(!pPlt->Init())
+		return nullptr;
 
+	pPlt->SetTerminal(0, strTerm.c_str());
 	return pPlt;
 }
 
@@ -286,7 +287,11 @@ bool Convofit::run_job(const std::string& _strJob)
 		boost::optional<void*> optPlt = m_sigInitPlotter(strTerm);
 		if(optPlt)
 			m_pPlt = *optPlt;
+
+		if(!m_pPlt)
+			tl::log_err("Could not initialise plotter. Is gnuplot (correctly) installed?");
 	}
+
 
 	if(g_strOutFileSuffix != "")
 		strLogOutFile += g_strOutFileSuffix;
