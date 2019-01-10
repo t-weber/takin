@@ -192,16 +192,24 @@ void TofLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 
 	QPen penOrig = pPainter->pen();
 
-	QPen penNew = penOrig;
-	penNew.setWidthF(g_dFontSize*0.1);
-	pPainter->setPen(penNew);
+	QPen penRed(Qt::red);
+	penRed.setWidthF(g_dFontSize*0.1);
+	QPen penBlack(qApp->palette().color(QPalette::WindowText));
+	penBlack.setWidthF(g_dFontSize*0.1);
+	QPen penBlue(qApp->palette().color(QPalette::Link));
+	penBlue.setWidthF(g_dFontSize*0.1);
+	QPen penGray(Qt::gray);
+	penGray.setWidthF(g_dFontSize*0.1);
+
+
+	pPainter->setPen(penBlack);
 
 	pPainter->drawLine(lineKi);
 	pPainter->drawLine(lineKf);
 
 
 	// draw detector bank
-	QPen penArc(Qt::gray);
+	QPen penArc(penGray.color());
 	penArc.setWidthF(1.5*g_dFontSize*0.1);
 	pPainter->setPen(penArc);
 
@@ -250,7 +258,7 @@ void TofLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	QPointF ptThP = vec_to_qpoint(vecSample + vecRotDir*m_dZoom);
 	QLineF lineRot = QLineF(ptThM, ptThP);
 
-	QPen pen(Qt::red);
+	QPen pen(penRed.color());
 	pen.setWidthF(1.5*g_dFontSize*0.1);
 	pPainter->setPen(pen);
 	pPainter->drawLine(lineRot);
@@ -306,10 +314,6 @@ void TofLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 		pptQ.reset(new QPointF(vec_to_qpoint(vecSample + vecQ)));
 		plineQ.reset(new QLineF(ptSample, *pptQ));
 
-
-		QPen penRed(Qt::red);
-		penRed.setWidthF(g_dFontSize*0.1);
-
 		pPainter->setPen(penRed);
 		pPainter->drawLine(*plineQ);
 		pPainter->save();
@@ -333,11 +337,7 @@ void TofLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	const t_real dAngles[] = {m_dTwoTheta, -m_dTheta};
 	const t_real dAngleOffs[] = {0., 180.};
 
-	QPen pen1(Qt::blue), pen2(Qt::red);
-	pen1.setWidthF(g_dFontSize*0.1);
-	pen2.setWidthF(g_dFontSize*0.1);
-	QPen* arcPens[] = {&pen1, &pen2};
-
+	QPen* arcPens[] = {&penBlue, &penRed};
 	const std::wstring& strDEG = tl::get_spec_char_utf16("deg");
 
 	for(std::size_t i=0; i<sizeof(pPoints)/sizeof(*pPoints); ++i)
@@ -389,7 +389,7 @@ void TofLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	// arrow heads
 	const QLineF* pLines_arrow[] = {&lineKi, &lineKf, plineQ.get()};
 	const QPointF* pPoints_arrow[] = {&ptSample, &ptDet, pptQ.get()};
-	QColor colArrowHead[] = {Qt::black, Qt::black, Qt::red};
+	QColor colArrowHead[] = {penBlack.color(), penBlack.color(), penRed.color()};
 	for(std::size_t i=0; i<sizeof(pLines_arrow)/sizeof(*pLines_arrow); ++i)
 	{
 		if(!pLines_arrow[i] || !pPoints_arrow[i])

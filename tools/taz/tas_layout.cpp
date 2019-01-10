@@ -292,9 +292,16 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 
 	QPen penOrig = pPainter->pen();
 
-	QPen penNew = penOrig;	
-	penNew.setWidthF(g_dFontSize*0.1);
-	pPainter->setPen(penNew);
+	QPen penRed(Qt::red);
+	penRed.setWidthF(g_dFontSize*0.1);
+	QPen penBlack(qApp->palette().color(QPalette::WindowText));
+	penBlack.setWidthF(g_dFontSize*0.1);
+	QPen penBlue(qApp->palette().color(QPalette::Link));
+	penBlue.setWidthF(g_dFontSize*0.1);
+	QPen penGray(Qt::gray);
+	penGray.setWidthF(g_dFontSize*0.1);
+
+	pPainter->setPen(penBlack);
 
 	pPainter->drawLine(lineSrcMono);
 	pPainter->drawLine(lineKi);
@@ -342,7 +349,7 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	t_real dThetas[] = {-m_dMonoTwoTheta/t_real(2.), -m_dAnaTwoTheta/t_real(2.), -m_dTheta};
 	std::vector<const t_vec*> vecPos = {&vecMono, &vecAna, &vecSample};
 	std::vector<const t_vec*> vecDirs = {&vecSrcMono, &vecSampleAna, &vecMonoSample};
-	QColor colThs[] = {Qt::gray, Qt::gray, Qt::red};
+	QColor colThs[] = {penGray.color(), penGray.color(), penRed.color()};
 	const char* pcComp[] = {"M", "A", "S"};
 	// ------------------------------------------------------------------------
 
@@ -533,10 +540,6 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 		pptQ.reset(new QPointF(vec_to_qpoint(vecSample + vecQ)));
 		plineQ.reset(new QLineF(ptSample, *pptQ));
 
-
-		QPen penRed(Qt::red);
-		penRed.setWidthF(g_dFontSize*0.1);
-
 		pPainter->setPen(penRed);
 		pPainter->drawLine(*plineQ);
 		pPainter->save();
@@ -562,12 +565,7 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	const t_real dAngles[] = {m_dMonoTwoTheta, m_dTwoTheta, m_dAnaTwoTheta, -m_dTheta};
 	const t_real dAngleOffs[] = {0., 0., 0., 180.};
 
-	QPen pen1(Qt::blue);
-	QPen pen2(Qt::red);
-	pen1.setWidthF(g_dFontSize*0.1);
-	pen2.setWidthF(g_dFontSize*0.1);
-	QPen* arcPens[] = {&pen1, &pen1, &pen1, &pen2};
-
+	QPen* arcPens[] = {&penBlue, &penBlue, &penBlue, &penRed};
 	const std::wstring& strDEG = tl::get_spec_char_utf16("deg");
 
 	for(std::size_t i=0; i<sizeof(pPoints)/sizeof(*pPoints); ++i)
@@ -621,7 +619,7 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	// arrow heads
 	const QLineF* pLines_arrow[] = {&lineKi, &lineKf, plineQ.get(), &lineSrcMono, &lineAnaDet};
 	const QPointF* pPoints_arrow[] = {&ptSample, &ptAna, pptQ.get(), &ptMono, &ptDet};
-	QColor colArrowHead[] = {Qt::black, Qt::black, Qt::red, Qt::gray, Qt::gray};
+	QColor colArrowHead[] = {penBlack.color(), penBlack.color(), penRed.color(), penGray.color(), penGray.color()};
 	for(std::size_t i=0; i<sizeof(pLines_arrow)/sizeof(*pLines_arrow); ++i)
 	{
 		if(!pLines_arrow[i] || !pPoints_arrow[i])
@@ -653,9 +651,7 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	// ------------------------------------------------------------------------
 	if(bBeamObstructed)
 	{
-		QPen pen(QColor(0xff,0x00,0x00));
-		pPainter->setPen(pen);
-
+		pPainter->setPen(penRed);
 		pPainter->drawText(QPointF(0.,0.), "Beam obstructed!");
 	}
 	// ------------------------------------------------------------------------

@@ -227,14 +227,26 @@ QPointF ScatteringTriangle::GetGfxMid() const
 
 void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsItem* pOpt, QWidget* pWid)
 {
+	QPen penOrg = pPainter->pen();
 	pPainter->setFont(g_fontGfx);
+
+	QPen penRed(Qt::red);
+	penRed.setWidthF(g_dFontSize*0.1);
+	QPen penBlack(qApp->palette().color(QPalette::WindowText));
+	penBlack.setWidthF(g_dFontSize*0.1);
+	QPen penGreen(Qt::darkGreen);
+	penGreen.setWidthF(g_dFontSize*0.1);
+	QPen penLight(QColor(0xaa, 0xaa, 0xaa));
+	penLight.setWidthF(g_dFontSize*0.1);
+	QPen penBlue(qApp->palette().color(QPalette::Link));
+	penBlue.setWidthF(g_dFontSize*0.1);
+	QPen penGray(Qt::darkGray);
+	penGray.setWidthF(g_dFontSize*0.1);
+
 
 	// Brillouin zone
 	if(m_bShowBZ && (m_bz.IsValid() || m_bz3.IsValid()))
 	{
-		QPen penOrg = pPainter->pen();
-		QPen penGray(Qt::darkGray);
-		penGray.setWidthF(g_dFontSize*0.1);
 		pPainter->setPen(penGray);
 
 		t_vec vecCentral2d;
@@ -317,10 +329,8 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 	QPointF ptGq = mapFromItem(m_pNodeGq.get(), 0, 0) * m_dZoom;
 
 
-	// Powder lines
+	// powder lines
 	{
-		QPen penOrg = pPainter->pen();
-
 		for(std::size_t iLine=0; iLine<m_vecPowderLines.size(); ++iLine)
 		{
 			const typename tl::Powder<int,t_real>::t_peak& powderpeak = m_vecPowderLines[iLine];
@@ -349,7 +359,7 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 			t_real drad = std::sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
 			drad *= m_dScaleFactor*m_dZoom;
 
-			QPen penLine(Qt::red);
+			QPen penLine(penRed.color());
 			penLine.setWidthF(dLineWidth);
 			pPainter->setPen(penLine);
 
@@ -369,14 +379,6 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 	QLineF lineOrient0(ptOrient[0], ptKiQ);
 	QLineF lineOrient1(ptOrient[1], ptKiQ);
 
-	QPen penRed(Qt::red);
-	penRed.setWidthF(g_dFontSize*0.1);
-	QPen penBlack(Qt::black);
-	penBlack.setWidthF(g_dFontSize*0.1);
-	QPen penGreen(Qt::darkGreen);
-	penGreen.setWidthF(g_dFontSize*0.1);
-	QPen penLight(QColor(0xaa, 0xaa, 0xaa));
-	penLight.setWidthF(g_dFontSize*0.1);
 
 	if(m_bCoordAxesVisible)
 	{
@@ -394,7 +396,6 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 
 	if(m_bqVisible)
 	{
-		QPen penOrg = pPainter->pen();
 		pPainter->setPen(penGreen);
 
 		pPainter->drawLine(lineG);
@@ -474,7 +475,6 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 
 	if(m_bqVisible)
 	{
-		QPen penOrg = pPainter->pen();
 		pPainter->setPen(penGreen);
 
 		pPainter->save();
@@ -521,8 +521,8 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 	std::vector<const QPointF*> vecPointsArrow = {&ptKiKf, &ptKiKf, &ptKfQ};
 
 	std::vector<bool> vecDrawAngles = {1,1,1};
-	std::vector<QColor> vecColor {Qt::black, Qt::black, Qt::red};
-	std::vector<QColor> vecColArc {Qt::blue, Qt::blue, Qt::blue};
+	std::vector<QColor> vecColor {penBlack.color(), penBlack.color(), penRed.color()};
+	std::vector<QColor> vecColArc {penBlue.color(), penBlue.color(), penBlue.color()};
 	std::vector<t_real> vecArcScale {1, 1, 1};
 
 	QLineF lineG2(ptGq, ptKiQ);
@@ -602,7 +602,7 @@ void ScatteringTriangle::paint(QPainter *pPainter, const QStyleOptionGraphicsIte
 			penArc.setWidthF(g_dFontSize*0.1);
 
 			pPainter->setPen(penArc);
-			pPainter->drawArc(QRectF(vecPoints[i]->x()-dArcSize/2., vecPoints[i]->y()-dArcSize/2., 
+			pPainter->drawArc(QRectF(vecPoints[i]->x()-dArcSize/2., vecPoints[i]->y()-dArcSize/2.,
 				dArcSize, dArcSize), dBeginArcAngle*16., dArcAngle*16.);
 
 			std::wostringstream ostrAngle;
@@ -1356,7 +1356,7 @@ get_nearest_elastic_kikf_pos(const QPointF& ptKiKf, const QPointF& ptKiQ, const 
 
 static std::tuple<bool, t_real, QPointF>
 get_nearest_node(const QPointF& pt,
-	const QGraphicsItem* pCurItem, const QList<QGraphicsItem*>& nodes, t_real dFactor, 
+	const QGraphicsItem* pCurItem, const QList<QGraphicsItem*>& nodes, t_real dFactor,
 	const std::vector<typename ScatteringTriangle::t_powderline>* pPowderLines=nullptr,
 	const tl::Lattice<t_real>* pRecip=nullptr)
 {
@@ -1903,7 +1903,7 @@ void ScatteringTriangleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *pEvt)
 				QList<QGraphicsItem*> nodes = items();
 				std::tuple<bool, t_real, QPointF> tupNearest =
 					get_nearest_node(pEvt->scenePos(), pCurItem, nodes,
-						m_pTri->GetScaleFactor(), &m_pTri->GetPowder(), 
+						m_pTri->GetScaleFactor(), &m_pTri->GetPowder(),
 						&m_pTri->GetRecipLattice());
 
 				if(std::get<0>(tupNearest))
