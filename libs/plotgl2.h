@@ -1,92 +1,18 @@
 /**
- * gl plotter
+ * gl plotter without threading
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 19-may-2013
+ * @date 2013 -- 2019
  * @license GPLv2
  */
 
-#ifndef __TAKIN_PLOT_GL__
-#define __TAKIN_PLOT_GL__
+#ifndef __TAKIN_PLOT_GL_2__
+#define __TAKIN_PLOT_GL_2__
 
-#if QT_VER>=5
-       	#include <QtWidgets>
-#endif
-#include <QGLWidget>
-#include <QMouseEvent>
-#include <QThread>
-#include <QMutex>
-#include <QSettings>
-
-#include <vector>
-#include <atomic>
-
-#include "tlibs/gfx/gl.h"
-#include "tlibs/gfx/gl_font.h"
-#include "libs/globals.h"
-#include "libs/globals_qt.h"
-
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-namespace ublas = boost::numeric::ublas;
-
-#include <boost/signals2.hpp>
-namespace sig = boost::signals2;
+#include "plotgl.h"
+#include <QTimer>
 
 
-using t_qglwidget = QGLWidget;
-
-
-/**
- * types of plottable objects
- */
-enum PlotTypeGl
-{
-	PLOT_INVALID,
-
-	PLOT_SPHERE,
-	PLOT_ELLIPSOID,
-
-	PLOT_POLY,
-	PLOT_LINES,
-};
-
-
-/**
- * plottable object
- */
-struct PlotObjGl
-{
-	PlotTypeGl plttype = PLOT_INVALID;
-
-	ublas::vector<t_real_glob> vecPos;
-	ublas::vector<t_real_glob> vecScale;
-	std::vector<t_real_glob> vecRotMat;
-
-	std::vector<t_real_glob> vecColor;
-	t_real_glob dLineWidth = 2.;
-
-	std::vector<ublas::vector<t_real_glob>> vecVertices;
-	ublas::vector<t_real_glob> vecNorm;
-
-	bool bSelected = 0;
-	bool bUseLOD = 1;
-	bool bCull = 1;
-
-	bool bAnimated = 0;
-	t_real_glob dScaleMult = 1.;
-
-	std::string strLabel;
-};
-
-
-struct PlotGlSize
-{
-	int iW = 800, iH = 600;
-	bool bDoResize = true;
-};
-
-
-class PlotGl : public t_qglwidget, QThread
+class PlotGl2 : public t_qglwidget, public QTimer
 {
 protected:
 	QSettings *m_pSettings = nullptr;
@@ -95,7 +21,7 @@ protected:
 
 	static constexpr t_real_glob m_dFOV = 45./180.*M_PI;
 	tl::t_mat4_gen<t_real_glob> m_matProj, m_matView;
-	bool m_bPerspective = 1; // perspective or orthogonal projection?
+	bool m_bPerspective = 1;	// perspective or orthogonal projection?
 	ublas::vector<t_real_glob> m_vecCam;
 	bool m_bDoZTest = 0;
 	bool m_bDrawPolys = 1;
@@ -116,11 +42,14 @@ protected:
 	t_real_glob m_dXMinMaxOffs, m_dYMinMaxOffs, m_dZMinMaxOffs;
 	bool m_bDrawMinMax = 1;
 
+	t_real_glob m_dTime = 0.;
 
 protected:
 	virtual bool event(QEvent*) override;
 	virtual void resizeEvent(QResizeEvent*) override;
 	virtual void paintEvent(QPaintEvent*) override;
+
+	virtual void timerEvent(QTimerEvent *pEvt) override;
 
 	void SetColor(t_real_glob r, t_real_glob g, t_real_glob b, t_real_glob a=1.);
 	void SetColor(std::size_t iIdx);
@@ -152,15 +81,12 @@ protected:
 
 
 	// ------------------------------------------------------------------------
-	// render thread
-	bool m_bRenderThreadActive = 1;
-
-	void initializeGLThread();
-	void freeGLThread();
-	void resizeGLThread(int w, int h);
-	void paintGLThread();
-	void tickThread(t_real_glob dTime);
-	virtual void run() override;
+	// rendering
+	virtual void initializeGL() override;
+	void freeGL();
+	virtual void resizeGL(int w, int h) override;
+	virtual void paintGL() override;
+	void tick(t_real_glob dTime);
 
 	t_real_glob GetCamObjDist(const PlotObjGl& obj) const;
 	std::vector<std::size_t> GetObjSortOrder() const;
@@ -168,8 +94,8 @@ protected:
 	// ------------------------------------------------------------------------
 
 public:
-	PlotGl(QWidget* pParent, QSettings *pSettings=nullptr, t_real_glob dMouseScale=25.);
-	virtual ~PlotGl();
+	PlotGl2(QWidget* pParent, QSettings *pSettings=nullptr, t_real_glob dMouseScale=25.);
+	virtual ~PlotGl2();
 
 	void clear();
 	void TogglePerspective();

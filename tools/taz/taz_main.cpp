@@ -35,7 +35,6 @@
 #include <QSplashScreen>
 #include <QStyleFactory>
 
-
 namespace chr = std::chrono;
 namespace asio = boost::asio;
 namespace sys = boost::system;
@@ -52,9 +51,9 @@ namespace sys = boost::system;
 #endif
 
 
-#ifdef Q_WS_X11
-	extern "C" int XInitThreads();
-#endif
+//#ifdef Q_WS_X11
+//	extern "C" int XInitThreads();
+//#endif
 // ----------------------------------------------------------------------------
 
 
@@ -197,7 +196,8 @@ int main(int argc, char** argv)
 
 
 		#if defined Q_WS_X11 && !defined NO_3D
-			XInitThreads();
+			//XInitThreads();
+			QCoreApplication::setAttribute(Qt::AA_X11InitThreads, true);
 			QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
 		#endif
 

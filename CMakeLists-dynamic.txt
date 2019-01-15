@@ -116,7 +116,7 @@ if(OPENGL_FOUND AND FREETYPE_FOUND)
 	add_definitions(-DUSE_3D)
 
 	set(SRCS_3D
-		libs/plotgl.cpp tools/taz/recip3d.cpp
+		libs/plotgl.cpp libs/plotgl2.cpp tools/taz/recip3d.cpp
 		tools/taz/real3d.cpp tools/taz/bz3d.cpp dialogs/EllipseDlg3D.cpp
 	)
 	set(LIBS_3D

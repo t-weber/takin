@@ -29,6 +29,7 @@ USE_LAPACK = 0
 # compile the ogl code?
 USE_3D = 1
 REINIT_3D_HACK = 0
+ALWAYS_USE_3D_THREADS = 0
 
 # compile the network code?
 USE_NET = 1
@@ -128,6 +129,10 @@ else
 	DEFINES += -DNO_3D
 endif
 
+ifeq ($(ALWAYS_USE_3D_THREADS), 1)
+	DEFINES += -DUSE_THREADED_GL
+endif
+
 ifeq ($(REINIT_3D_HACK), 1)
 	DEFINES += -DREINIT_3D_DLGS
 endif
@@ -170,6 +175,10 @@ ifeq ($(USE_PLUGINS), 1)
 	DEFINES += -DUSE_PLUGINS
 else
 	DEFINES += -DNO_PLUGINS
+endif
+
+ifeq ($(USE_FRAMEWORKS), 1)
+	DEFINES += -DUSING_FRAMEWORKS
 endif
 
 DEFINES += -DQWT_VER=$(QWT_VER)
@@ -545,7 +554,7 @@ ifeq ($(USE_CLP), 1)
 endif
 
 ifeq ($(USE_3D), 1)
-	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/recip3d.o obj/real3d.o obj/bz3d.o obj/EllipseDlg3D.o
+	OBJ_TAZ += obj/gl.o obj/plotgl.o obj/plotgl2.o obj/recip3d.o obj/real3d.o obj/bz3d.o obj/EllipseDlg3D.o
 endif
 
 ifeq ($(USE_NET), 1)
@@ -756,6 +765,8 @@ obj/formfact.o: libs/formfactors/formfact.cpp libs/formfactors/formfact.h
 obj/rand.o: tlibs/math/rand.cpp tlibs/math/rand.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/plotgl.o: libs/plotgl.cpp libs/plotgl.h
+	${CC} ${FLAGS} -c -o $@ $<
+obj/plotgl2.o: libs/plotgl2.cpp libs/plotgl2.h
 	${CC} ${FLAGS} -c -o $@ $<
 obj/gl.o: tlibs/gfx/gl.cpp tlibs/gfx/gl.h
 	${CC} ${FLAGS} -c -o $@ $<

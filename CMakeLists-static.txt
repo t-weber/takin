@@ -49,6 +49,7 @@ find_package(PythonLibs 2.7)
 
 if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
 	list(APPEND BOOST_COMPS python)
+#	list(APPEND BOOST_COMPS python27)
 endif()
 
 
@@ -71,6 +72,7 @@ if(USE_GENTAB)
 	find_package(Clipper REQUIRED)
 endif()
 
+set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL)
 find_package(Freetype)
 find_package(X11)
@@ -167,7 +169,7 @@ if(OPENGL_FOUND AND FREETYPE_FOUND)
 	add_definitions(-DUSE_3D)
 
 	set(SRCS_3D
-		libs/plotgl.cpp tools/taz/recip3d.cpp
+		libs/plotgl.cpp libs/plotgl2.cpp tools/taz/recip3d.cpp
 		tools/taz/real3d.cpp tools/taz/bz3d.cpp dialogs/EllipseDlg3D.cpp
 
 		tlibs/gfx/gl.cpp

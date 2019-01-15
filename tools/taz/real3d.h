@@ -14,10 +14,17 @@
 #include <memory>
 
 #include "libs/plotgl.h"
+#include "libs/plotgl2.h"
 #include "tlibs/math/linalg.h"
 #include "libs/spacegroups/latticehelper.h"
 #include "tlibs/phys/bz.h"
 #include "libs/globals.h"
+
+#ifdef USE_THREADED_GL
+	using t_PlotGl = PlotGl;
+#else
+	using t_PlotGl = PlotGl2;
+#endif
 
 
 class Real3DDlg : public QDialog
@@ -25,7 +32,7 @@ class Real3DDlg : public QDialog
 protected:
 	QSettings *m_pSettings = nullptr;
 	QStatusBar *m_pStatus = nullptr;
-	std::unique_ptr<PlotGl> m_pPlot;
+	std::unique_ptr<t_PlotGl> m_pPlot;
 
 public:
 	Real3DDlg(QWidget* pParent, QSettings* = 0);
