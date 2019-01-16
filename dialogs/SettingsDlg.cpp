@@ -123,6 +123,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 	m_vecChecks =
 	{
 		t_tupCheck("main/dlg_previews", 1, checkPreview),
+		t_tupCheck("main/threaded_gl", 0, checkThreadedGL),
 		t_tupCheck("main/native_dialogs", 0, checkNativeDlg),
 		t_tupCheck("net/flip_orient2", 1, checkFlipOrient2),
 		t_tupCheck("net/sth_stt_corr", 0, checkSthSttCorr),
@@ -309,7 +310,9 @@ void SettingsDlg::SetGlobals() const
 	// precisions
 	g_iPrec = spinPrecGen->value();
 	g_iPrecGfx = spinPrecGfx->value();
+
 	g_iMaxThreads = spinThreads->value();
+	g_bThreadedGL = checkThreadedGL->isChecked();
 
 	g_dEps = std::pow(10., -t_real(g_iPrec));
 	g_dEpsGfx = std::pow(10., -t_real(g_iPrecGfx));

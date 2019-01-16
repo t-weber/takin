@@ -23,19 +23,12 @@
 #include "dialogs/RecipParamDlg.h"
 
 
-#ifdef USE_THREADED_GL
-	using t_PlotGl = PlotGl;
-#else
-	using t_PlotGl = PlotGl2;
-#endif
-
-
 class BZ3DDlg : public QDialog
 {Q_OBJECT
 protected:
 	QSettings *m_pSettings = nullptr;
 	QStatusBar *m_pStatus = nullptr;
-	std::unique_ptr<t_PlotGl> m_pPlot;
+	std::unique_ptr<PlotGl_iface> m_pPlot;
 
 	boost::optional<std::size_t> m_iqIdx;
 	ublas::vector<t_real_glob> m_vecq, m_vecq_rlu;

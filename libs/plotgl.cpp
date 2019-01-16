@@ -1,7 +1,7 @@
 /**
  * gl plotter
  * @author Tobias Weber <tobias.weber@tum.de>
- * @date 19-may-2013
+ * @date 19-may-2013 -- jan-2019
  * @license GPLv2
  */
 
@@ -51,22 +51,33 @@ static inline void sleep_nano(long ns)
 }
 
 
-// ----------------------------------------------------------------------------
-
-
-PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings, t_real dMouseScale)
-	: t_qglwidget(pParent), m_pSettings(pSettings),
-		m_bEnabled(true), m_mutex(QMutex::Recursive), m_mutex_resize(QMutex::Recursive),
-		m_matProj(tl::unit_m<t_mat4>(4)), m_matView(tl::unit_m<t_mat4>(4))
+QGLFormat get_gl_format(QGLFormat form)
 {
-	QGLFormat form = /*QGLFormat::defaultFormat()*/ format();
+	form.setProfile(QGLFormat::CoreProfile);
 	//form.setVersion(2,1);
 	form.setVersion(1,5);
 	//form.setDirectRendering(0);
 	form.setDoubleBuffer(1);
 	//form.setOverlay(0);
 	//form.setSampleBuffers(1);
-	setFormat(form);
+
+	return form;
+}
+
+// ----------------------------------------------------------------------------
+
+
+PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings, t_real dMouseScale) :
+#ifdef USING_FRAMEWORKS
+	PlotGl_iface(pParent),	// leads to averse reactions when setting the format
+#else
+	PlotGl_iface(get_gl_format(QGLFormat::defaultFormat()), pParent),
+#endif
+	m_pSettings(pSettings),
+	m_bEnabled(true), m_mutex(QMutex::Recursive), m_mutex_resize(QMutex::Recursive),
+	m_matProj(tl::unit_m<t_mat4>(4)), m_matView(tl::unit_m<t_mat4>(4))
+{
+	//setFormat(get_gl_format(format()));
 
 	m_dMouseRot[0] = m_dMouseRot[1] = 0.;
 	m_dMouseScale = dMouseScale;
@@ -81,6 +92,7 @@ PlotGl::PlotGl(QWidget* pParent, QSettings *pSettings, t_real dMouseScale)
 
 	start();		// render thread
 }
+
 
 PlotGl::~PlotGl()
 {
@@ -558,12 +570,13 @@ void PlotGl::run()
 	QGLFormat form = format();
 	static std::atomic<std::size_t> iThread(0);
 	std::size_t iThisThread = ++iThread;
-	tl::log_debug("GL thread ", iThisThread, " started using version ",
+	std::string strDB = form.doubleBuffer() ? "double-buffered" : "single-buffered";
+	tl::log_debug("Render thread ", iThisThread, " started using ", strDB, " GL version ",
 		form.majorVersion(), ".", form.minorVersion(), ".");
 
 #ifdef USING_FRAMEWORKS
 	if(::CGLEnable(::CGLGetCurrentContext(), ::kCGLCEMPEngine) != ::kCGLNoError)
-		tl::log_err("Cannot correctly enable threaded GL mode. This may result in errors and crashes.");
+		tl::log_err("Cannot correctly enable threaded GL mode. This may result in errors or crash the program.");
 #endif
 
 	//tl::log_debug("run, thread ID: ", QThread::currentThreadId());
@@ -920,7 +933,7 @@ void PlotGl::updateViewMatrix()
 }
 
 
-void PlotGl::AddHoverSlot(const typename t_sigHover::slot_type& conn)
+void PlotGl::AddHoverSlot(const typename PlotGl_iface::t_sigHover::slot_type& conn)
 {
 	m_sigHover.connect(conn);
 }

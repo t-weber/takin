@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>483</width>
-    <height>528</height>
+    <width>509</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -500,7 +500,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
+          <item row="5" column="0" colspan="2">
            <spacer name="verticalSpacer_5">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -520,13 +520,23 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QComboBox" name="comboGUI"/>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_47">
             <property name="text">
              <string>GUI Style:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QCheckBox" name="checkThreadedGL">
+            <property name="toolTip">
+             <string>Careful: This is not supported on all systems and may lead to strange results and crashes!</string>
+            </property>
+            <property name="text">
+             <string>Use Threaded GL</string>
             </property>
            </widget>
           </item>
@@ -1374,6 +1384,7 @@
   <tabstop>checkIgnoreXtalRestrictions</tabstop>
   <tabstop>checkNativeDlg</tabstop>
   <tabstop>checkPreview</tabstop>
+  <tabstop>checkThreadedGL</tabstop>
   <tabstop>comboGUI</tabstop>
   <tabstop>spinNetPoll</tabstop>
   <tabstop>editGenFont</tabstop>

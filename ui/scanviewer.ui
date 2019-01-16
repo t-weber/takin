@@ -86,7 +86,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget">
+     <widget class="QWidget" name="layoutWidget_2">
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="spacing">
         <number>4</number>

@@ -24,19 +24,13 @@
 
 #include "dialogs/RecipParamDlg.h"
 
-#ifdef USE_THREADED_GL
-	using t_PlotGl = PlotGl;
-#else
-	using t_PlotGl = PlotGl2;
-#endif
-
 
 class Recip3DDlg : public QDialog
 {Q_OBJECT
 protected:
 	QSettings* m_pSettings = nullptr;
 	QStatusBar *m_pStatus = nullptr;
-	t_PlotGl* m_pPlot = nullptr;
+	PlotGl_iface* m_pPlot = nullptr;
 	t_real_glob m_dMaxPeaks = 4.;
 	t_real_glob m_dPlaneDistTolerance = 0.01;
 

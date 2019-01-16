@@ -34,6 +34,7 @@ extern bool g_bHasScatlens;
 extern bool g_bHasSpaceGroups;
 extern bool g_bShowFsq;
 extern bool g_b3dBZ;
+extern bool g_bThreadedGL;
 
 extern t_real_glob g_dFontSize;
 

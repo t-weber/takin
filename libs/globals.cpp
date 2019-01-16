@@ -28,6 +28,7 @@ bool g_bHasSpaceGroups = 0;
 bool g_bShowFsq = 1;
 bool g_b3dBZ = 1;
 bool g_bUseGlobalPaths = 1;
+bool g_bThreadedGL = 0;
 
 std::size_t GFX_NUM_POINTS = 512;
 std::size_t g_iMaxNN = 4;

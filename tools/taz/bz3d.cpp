@@ -17,10 +17,11 @@ using t_vec = ublas::vector<t_real>;
 using t_mat = ublas::matrix<t_real>;
 
 
+
 BZ3DDlg::BZ3DDlg(QWidget* pParent, QSettings *pSettings)
 	: QDialog(pParent, Qt::Tool), m_pSettings(pSettings),
 	m_pStatus(new QStatusBar(this)),
-	m_pPlot(new t_PlotGl(this, pSettings, 0.25))
+	m_pPlot(make_gl_plotter(g_bThreadedGL, this, pSettings, 0.25))
 {
 	m_pPlot->SetEnabled(0);
 

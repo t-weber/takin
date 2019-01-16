@@ -16,6 +16,7 @@
 
 #include "EllipseDlg.h"
 #include "libs/plotgl.h"
+#include "libs/plotgl2.h"
 #include "tlibs/math/linalg.h"
 #include "tools/res/ellipse.h"
 #include "tools/res/defs.h"
@@ -24,7 +25,7 @@
 class EllipseDlg3D : public QDialog
 {Q_OBJECT
 	protected:
-		std::vector<PlotGl*> m_pPlots;
+		std::vector<PlotGl_iface*> m_pPlots;
 		std::vector<Ellipsoid3d<t_real_reso>> m_elliProj;
 		std::vector<Ellipsoid3d<t_real_reso>> m_elliSlice;
 
