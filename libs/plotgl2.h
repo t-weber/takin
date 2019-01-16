@@ -16,8 +16,8 @@ class PlotGl2 : public t_qglwidget, public QTimer
 {
 protected:
 	QSettings *m_pSettings = nullptr;
-	std::atomic<bool> m_bEnabled;
-	mutable QMutex m_mutex, m_mutex_resize;
+	/*std::atomic<bool>*/ bool m_bEnabled;
+	//mutable QMutex m_mutex, m_mutex_resize;
 
 	static constexpr t_real_glob m_dFOV = 45./180.*M_PI;
 	tl::t_mat4_gen<t_real_glob> m_matProj, m_matView;

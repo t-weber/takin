@@ -41,7 +41,7 @@ using t_vec3 = tl::t_vec3_gen<t_real>;
 
 PlotGl2::PlotGl2(QWidget* pParent, QSettings *pSettings, t_real dMouseScale)
 	: t_qglwidget(pParent), m_pSettings(pSettings),
-		m_bEnabled(true), m_mutex(QMutex::Recursive), m_mutex_resize(QMutex::Recursive),
+		m_bEnabled(true), /*m_mutex(QMutex::Recursive), m_mutex_resize(QMutex::Recursive),*/
 		m_matProj(tl::unit_m<t_mat4>(4)), m_matView(tl::unit_m<t_mat4>(4))
 {
 	QGLFormat form = /*QGLFormat::defaultFormat()*/ format();
@@ -76,7 +76,7 @@ PlotGl2::~PlotGl2()
 
 void PlotGl2::SetEnabled(bool b)
 {
-	m_bEnabled.store(b);
+	m_bEnabled = b;
 }
 
 void PlotGl2::SetColor(t_real r, t_real g, t_real b, t_real a)
@@ -315,7 +315,7 @@ void PlotGl2::tick(t_real dTime)
 
 
 	{	// look for objects with animation
-		std::lock_guard<QMutex> _lck(m_mutex);
+		//std::lock_guard<QMutex> _lck(m_mutex);
 		for(PlotObjGl& obj : m_vecObjs)
 		{
 			if(!obj.bAnimated) continue;
@@ -339,13 +339,12 @@ void PlotGl2::paintGL()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	bool bEnabled = m_bEnabled.load();
-	if(!bEnabled) return;
+	if(!m_bEnabled) return;
 
 	glMatrixMode(GL_MODELVIEW);
 	t_real glmat[16];
 	{
-		std::lock_guard<QMutex> _lck(m_mutex);
+		//std::lock_guard<QMutex> _lck(m_mutex);
 		tl::to_gl_array(m_matView, glmat);
 	}
 	tl::gl_traits<t_real>::LoadMatrix(glmat);
@@ -393,7 +392,7 @@ void PlotGl2::paintGL()
 	glPopMatrix();
 
 
-	std::unique_lock<QMutex> _lck(m_mutex);
+	//std::unique_lock<QMutex> _lck(m_mutex);
 
 	// draw objects
 	for(std::size_t iObjIdx : GetObjSortOrder())
@@ -511,7 +510,7 @@ void PlotGl2::paintGL()
 		}
 		glPopMatrix();
 	}
-	_lck.unlock();
+	//_lck.unlock();
 
 
 	// draw axis labels
@@ -562,7 +561,7 @@ void PlotGl2::resizeEvent(QResizeEvent *pEvt)
 {
 	if(!pEvt) return;
 
-	std::lock_guard<QMutex> _lck(m_mutex_resize);
+	//std::lock_guard<QMutex> _lck(m_mutex_resize);
 	m_size.iW = pEvt->size().width();
 	m_size.iH = pEvt->size().height();
 	m_size.bDoResize = true;
@@ -575,13 +574,13 @@ void PlotGl2::resizeEvent(QResizeEvent *pEvt)
 
 void PlotGl2::clear()
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 	m_vecObjs.clear();
 }
 
 void PlotGl2::SetObjectColor(std::size_t iObjIdx, const std::vector<t_real>& vecCol)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(m_vecObjs.size() <= iObjIdx)
 		return;
@@ -590,7 +589,7 @@ void PlotGl2::SetObjectColor(std::size_t iObjIdx, const std::vector<t_real>& vec
 
 void PlotGl2::SetObjectLabel(std::size_t iObjIdx, const std::string& strLab)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(m_vecObjs.size() <= iObjIdx)
 		return;
@@ -599,7 +598,7 @@ void PlotGl2::SetObjectLabel(std::size_t iObjIdx, const std::string& strLab)
 
 void PlotGl2::SetObjectUseLOD(std::size_t iObjIdx, bool bLOD)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(m_vecObjs.size() <= iObjIdx)
 		return;
@@ -608,7 +607,7 @@ void PlotGl2::SetObjectUseLOD(std::size_t iObjIdx, bool bLOD)
 
 void PlotGl2::SetObjectCull(std::size_t iObjIdx, bool bCull)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(m_vecObjs.size() <= iObjIdx)
 		return;
@@ -617,7 +616,7 @@ void PlotGl2::SetObjectCull(std::size_t iObjIdx, bool bCull)
 
 void PlotGl2::SetObjectAnimation(std::size_t iObjIdx, bool bAnim)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(m_vecObjs.size() <= iObjIdx)
 		return;
@@ -637,7 +636,7 @@ void PlotGl2::PlotSphere(const ublas::vector<t_real>& vecPos,
 		iObjIdx = 0;
 	}
 
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(iObjIdx >= int(m_vecObjs.size()))
 		m_vecObjs.resize(iObjIdx+1);
@@ -659,7 +658,7 @@ void PlotGl2::PlotEllipsoid(const ublas::vector<t_real>& widths,
 		iObjIdx = 0;
 	}
 
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(iObjIdx >= int(m_vecObjs.size()))
 		m_vecObjs.resize(iObjIdx+1);
@@ -688,7 +687,7 @@ void PlotGl2::PlotPoly(const std::vector<ublas::vector<t_real>>& vecVertices,
 		iObjIdx = 0;
 	}
 
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(iObjIdx >= int(m_vecObjs.size()))
 		m_vecObjs.resize(iObjIdx+1);
@@ -709,7 +708,7 @@ void PlotGl2::PlotLines(const std::vector<ublas::vector<t_real>>& vecVertices,
 		iObjIdx = 0;
 	}
 
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	if(iObjIdx >= int(m_vecObjs.size()))
 		m_vecObjs.resize(iObjIdx+1);
@@ -784,7 +783,7 @@ void PlotGl2::mouseMoveEvent(QMouseEvent *pEvt)
 	t_real dMouseY = -(2.*pEvt->POS_F().y()/t_real(m_size.iH) - 1.);
 
 	bool bHasSelected = 0;
-	if(m_bEnabled.load())
+	if(m_bEnabled)
 	{
 		mouseSelectObj(dMouseX, dMouseY);
 
@@ -820,7 +819,7 @@ void PlotGl2::wheelEvent(QWheelEvent* pEvt)
 
 void PlotGl2::TogglePerspective()
 {
-	std::lock_guard<QMutex> _lck(m_mutex_resize);
+	//std::lock_guard<QMutex> _lck(m_mutex_resize);
 
 	m_bPerspective = !m_bPerspective;
 	m_size.bDoResize = 1;
@@ -852,7 +851,8 @@ void PlotGl2::updateViewMatrix()
 		{  0, 0, 0,  1}});
 
 	{
-		std::lock_guard<QMutex> _lck(m_mutex);
+		//std::lock_guard<QMutex> _lck(m_mutex);
+
 		m_matView = ublas::prod(matTrans, matRot1);
 		m_matView = ublas::prod(m_matView, matRot0);
 		m_matView = ublas::prod(m_matView, matScale);
@@ -868,7 +868,7 @@ void PlotGl2::AddHoverSlot(const typename t_sigHover::slot_type& conn)
 
 void PlotGl2::mouseSelectObj(t_real dX, t_real dY)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 	tl::Line<t_real> ray = tl::screen_ray(dX, dY, m_matProj, m_matView);
 
 	for(PlotObjGl& obj : m_vecObjs)
@@ -921,7 +921,7 @@ void PlotGl2::mouseSelectObj(t_real dX, t_real dY)
 
 void PlotGl2::SetLabels(const char* pcLabX, const char* pcLabY, const char* pcLabZ)
 {
-	std::lock_guard<QMutex> _lck(m_mutex);
+	//std::lock_guard<QMutex> _lck(m_mutex);
 
 	m_strLabels[0] = pcLabX;
 	m_strLabels[1] = pcLabY;
