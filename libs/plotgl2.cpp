@@ -35,6 +35,8 @@ using t_vec3 = tl::t_vec3_gen<t_real>;
 #endif
 
 
+static const int g_iTimerInterval = int(t_real(1e3) / t_real(RENDER_FPS));
+
 // ----------------------------------------------------------------------------
 
 
@@ -70,6 +72,12 @@ PlotGl2::~PlotGl2()
 void PlotGl2::SetEnabled(bool b)
 {
 	m_bEnabled = b;
+
+	// stop updating if widget is disabled
+	if(b)
+		QTimer::start(g_iTimerInterval);
+	else
+		QTimer::stop();
 }
 
 void PlotGl2::SetColor(t_real r, t_real g, t_real b, t_real a)
@@ -171,7 +179,7 @@ void PlotGl2::initializeGL()
 	if(g_iFontGLSize <= 0) g_iFontGLSize = DEF_FONT_SIZE;
 	m_pFont = new tl::GlFontMap<t_real>(g_strFontGL.c_str(), g_iFontGLSize);
 
-	QTimer::start(int(t_real(1e3) / t_real(RENDER_FPS)));
+	QTimer::start(g_iTimerInterval);
 
 #if QT_VER>=5
 	QWidget::
