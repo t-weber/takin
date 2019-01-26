@@ -46,10 +46,13 @@ endif()
 
 find_package(PythonInterp 2.7)
 find_package(PythonLibs 2.7)
+#find_package(PythonInterp 3.7)
+#find_package(PythonLibs 3.7)
 
 if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
 	list(APPEND BOOST_COMPS python)
 #	list(APPEND BOOST_COMPS python27)
+#	list(APPEND BOOST_COMPS python37)
 endif()
 
 

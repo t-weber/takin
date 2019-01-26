@@ -23,6 +23,14 @@ NATIVE_OPTS = 1
 QT_VER = 4
 QWT_VER = 6
 
+# which Py version to use for scripting
+PY_INC_VER = 2.7
+#PY_INC_VER = 3.7
+
+PY_LIB_VER = ${PY_INC_VER}
+PY_BOOSTLIB_VER = $(subst .,,${PY_LIB_VER})
+#$(info Py boost lib: ${PY_BOOSTLIB_VER})
+
 # use Lapack instead of internal linalg routines?
 USE_LAPACK = 0
 
@@ -338,8 +346,8 @@ INC =	-I${MYINC} \
 	-I/usr/local/opt/freetype/include/freetype2 \
 	-I/usr/include/freetype2 \
 	-I/usr/include/lapacke \
-	-I/usr/local/opt/python/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-	-I/usr/include/python2.7 -idirafter /usr/include/root \
+	-I/usr/local/opt/python/Frameworks/Python.framework/Versions/${PY_INC_VER}/include/python${PY_INC_VER} \
+	-I/usr/include/python${PY_INC_VER} -idirafter /usr/include/root \
 	-I/usr/include -I/usr/include/GL
 
 LIB_DIRS =	-L${MYLIB} \
@@ -428,11 +436,9 @@ endif
 
 ifeq ($(USE_PY), 1)
 #	ifeq ($(USE_FRAMEWORKS), 0)
-		PY_LIBS = -lboost_python${BOOST_SUFFIX}
-#		PY_LIBS = -lboost_python27${BOOST_SUFFIX}
-		PY_LIBS += -lpython2.7
-#		PY_LIBS = -lboost_python3${BOOST_SUFFIX}
-#		PY_LIBS += -lpython3
+#		PY_LIBS = -lboost_python${BOOST_SUFFIX}
+		PY_LIBS = -lboost_python${PY_BOOSTLIB_VER}${BOOST_SUFFIX}
+		PY_LIBS += -lpython${PY_LIB_VER}
 #	else
 #		PY_LIBS = -lboost_python${BOOST_SUFFIX} -F /usr/local/opt/python/Frameworks -framework Python
 #	endif

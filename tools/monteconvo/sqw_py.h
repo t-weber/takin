@@ -12,7 +12,12 @@
 #include <mutex>
 #include <memory>
 #include <string>
+
+#define slots_bck slots
+#undef slots
+// get "slots" out of the way as it is a qt keyword...
 #include <boost/python.hpp>
+#define slots slots_bck
 namespace py = boost::python;
 
 
