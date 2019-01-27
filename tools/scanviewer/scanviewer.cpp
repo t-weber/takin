@@ -39,6 +39,12 @@
 	using tl::t_real_min;
 #endif
 
+#ifdef USE_WIDE_STR
+	#define T_STR std::wstring
+#else
+	#define T_STR std::string
+#endif
+
 
 using t_real = t_real_glob;
 namespace fs = boost::filesystem;
@@ -174,7 +180,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	{
 		fs::path dir(strDir.toStdString());
 		if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
-			dir /= std::string("")+fs::path::preferred_separator;
+			dir /= T_STR{} + fs::path::preferred_separator;
 
 		if(HasRecentPath(strDir) < 0)
 			comboPath->addItem(tl::wstr_to_str(dir.native()).c_str());
@@ -188,7 +194,7 @@ ScanViewerDlg::ScanViewerDlg(QWidget* pParent)
 	{
 		fs::path dir(strDir.toStdString());
 		if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
-			dir /= std::string("")+fs::path::preferred_separator;
+			dir /= T_STR{} + fs::path::preferred_separator;
 
 		comboPath->addItem(tl::wstr_to_str(dir.native()).c_str());
 		idx = comboPath->findText(strDir);
@@ -350,14 +356,14 @@ int ScanViewerDlg::HasRecentPath(const QString& strPath)
 {
 	fs::path dir(strPath.toStdString());
 	if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
-		dir /= std::string("")+fs::path::preferred_separator;
+		dir /= T_STR{} + fs::path::preferred_separator;
 
 	for(int iDir=0; iDir<comboPath->count(); ++iDir)
 	{
 		QString strOtherPath = comboPath->itemText(iDir);
 		fs::path dirOther(strOtherPath.toStdString());
 		if(*tl::wstr_to_str(dirOther.native()).rbegin() != fs::path::preferred_separator)
-			dirOther /= std::string("")+fs::path::preferred_separator;
+			dirOther /= T_STR{} + fs::path::preferred_separator;
 
 		if(dir == dirOther)
 			return iDir;
@@ -386,7 +392,7 @@ void ScanViewerDlg::SelectDir()
 		{
 			fs::path dir(strDir.toStdString());
 			if(*tl::wstr_to_str(dir.native()).rbegin() != fs::path::preferred_separator)
-				dir /= std::string("")+fs::path::preferred_separator;
+				dir /= T_STR{} + fs::path::preferred_separator;
 
 			comboPath->addItem(tl::wstr_to_str(dir.native()).c_str());
 			idx = comboPath->findText(tl::wstr_to_str(dir.native()).c_str());

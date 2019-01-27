@@ -107,6 +107,7 @@ if(NOT BUILD_FOR_MINGW)
 else()
 	add_definitions(-DNO_HELP_ASSISTANT)
 	add_definitions(-DNO_TERM_CMDS)
+	add_definitions(-DUSE_WIDE_STR)
 endif()
 
 # hack to prevent math_fwd.h inclusion
