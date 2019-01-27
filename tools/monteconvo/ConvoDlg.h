@@ -85,6 +85,7 @@ protected:
 
 	ResoFocus GetFocus() const;
 
+	std::tuple<bool, int, std::string, std::vector<std::vector<t_real_reso>>> GetScanAxis(bool bIncludeE=true);
 	void ClearPlot1D();
 	void Start1D();
 	void Start2D();

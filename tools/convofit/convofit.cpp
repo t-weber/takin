@@ -621,7 +621,7 @@ bool Convofit::run_job(const std::string& _strJob)
 		t_real dErr = vecFitErrors[iParam];
 
 		// not a S(q,w) model parameter
-		if(strParam=="scale" || strParam=="offs")
+		if(strParam=="scale" || strParam=="slope" || strParam=="offs")
 			continue;
 
 		mod.AddModelFitParams(strParam, dVal, dErr);

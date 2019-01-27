@@ -153,14 +153,15 @@ std::string convert_monteconvo(
 
 	// parameters
 	t_real dScale = propMC.Query<t_real>("taz/monteconvo/S_scale", t_real(1));
+	t_real dSlope = propMC.Query<t_real>("taz/monteconvo/S_slope", t_real(0));
 	t_real dOffs = propMC.Query<t_real>("taz/monteconvo/S_offs", t_real(0));
 
-	mapJob["fit_parameters/params"] = "scale offs ";
-	mapJob["fit_parameters/fixed"] = "1 1 ";
+	mapJob["fit_parameters/params"] = "scale slope offs ";
+	mapJob["fit_parameters/fixed"] = "1 1 1 ";
 	mapJob["fit_parameters/values"] =
-		tl::var_to_str(dScale) + " " + tl::var_to_str(dOffs) + " ";
+		tl::var_to_str(dScale) + " " + tl::var_to_str(dSlope) + " " + tl::var_to_str(dOffs) + " ";
 	mapJob["fit_parameters/errors"] =
-		tl::var_to_str(dScale*0.1) + " " + tl::var_to_str(dOffs*0.1) + " ";
+		tl::var_to_str(dScale*0.1) + " " + tl::var_to_str(dSlope*0.1) + " " + tl::var_to_str(dOffs*0.1) + " ";
 
 	std::vector<std::string> vecParams = propMC.GetChildNodes("taz/monteconvo/sqw_params/");
 	for(const std::string& strParam : vecParams)

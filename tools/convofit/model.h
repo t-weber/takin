@@ -45,8 +45,8 @@ protected:
 	ublas::vector<t_real_mod> m_vecScanDir;		// hklE
 	t_real_mod m_dPrincipalAxisMin, m_dPrincipalAxisMax;
 
-	t_real_mod m_dScale = 1., m_dOffs = 0.;
-	t_real_mod m_dScaleErr = 0.1, m_dOffsErr = 0.;
+	t_real_mod m_dScale=1., m_dSlope=0., m_dOffs=0.;
+	t_real_mod m_dScaleErr=0.1, m_dSlopeErr=0., m_dOffsErr=0.;
 
 	std::vector<std::string> m_vecModelParamNames;
 	std::vector<t_real_mod> m_vecModelParams;

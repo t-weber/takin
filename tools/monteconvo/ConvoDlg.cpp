@@ -60,11 +60,11 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 	"convofit/strategy", "convofit/max_calls"
 	};
 
-	m_vecEditBoxes = { editCrys, editRes, editSqw, editScan, editScale, editOffs,
+	m_vecEditBoxes = { editCrys, editRes, editSqw, editScan, editScale, editSlope, editOffs,
 		editCounter, editMonitor, editTemp, editField
 	};
 	m_vecEditNames = { "monteconvo/crys", "monteconvo/instr", "monteconvo/sqw_conf",
-		"monteconvo/scanfile", "monteconvo/S_scale", "monteconvo/S_offs",
+		"monteconvo/scanfile", "monteconvo/S_scale", "monteconvo/S_slope", "monteconvo/S_offs",
 		"convofit/counter", "convofit/monitor",
 		"convofit/temp_override", "convofit/field_override"
 	};
@@ -336,6 +336,7 @@ ConvoDlg::ConvoDlg(QWidget* pParent, QSettings* pSett)
 		this, SLOT(scanFileChanged(const QString&)));
 
 	QObject::connect(editScale, SIGNAL(textChanged(const QString&)), this, SLOT(scaleChanged()));
+	QObject::connect(editSlope, SIGNAL(textChanged(const QString&)), this, SLOT(scaleChanged()));
 	QObject::connect(editOffs, SIGNAL(textChanged(const QString&)), this, SLOT(scaleChanged()));
 
 	QObject::connect(btnStart, SIGNAL(clicked()), this, SLOT(Start()));
@@ -643,12 +644,31 @@ void ConvoDlg::scanFileChanged(const QString& qstrFile)
 
 void ConvoDlg::scaleChanged()
 {
+	// get scan x axis
+	bool bScanAxisFound = 0;
+	int iScanAxisIdx = 0;
+	std::string strScanVar = "";
+	std::vector<std::vector<t_real>> vecAxes;
+	std::tie(bScanAxisFound, iScanAxisIdx, strScanVar, vecAxes) = GetScanAxis(true);
+	if(!bScanAxisFound)
+	{
+		tl::log_err("No scan variable found.");
+		return;
+	}
+
+
 	t_real dScale = tl::str_to_var<t_real>(editScale->text().toStdString());
+	t_real dSlope = tl::str_to_var<t_real>(editSlope->text().toStdString());
 	t_real dOffs = tl::str_to_var<t_real>(editOffs->text().toStdString());
 
 	m_vecScaledS.resize(m_vecS.size());
 	for(std::size_t i=0; i<m_vecS.size(); ++i)
-		m_vecScaledS[i] = dScale*m_vecS[i] + dOffs;
+	{
+		const t_real dXVal = vecAxes[iScanAxisIdx][i];
+		m_vecScaledS[i] = dScale*(m_vecS[i] + dSlope*dXVal) + dOffs;
+		if(m_vecScaledS[i] < 0.)
+			m_vecScaledS[i] = 0.;
+	}
 
 	set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 0, false);
 	set_qwt_data<t_real_reso>()(*m_plotwrap, m_vecQ, m_vecScaledS, 1, false);

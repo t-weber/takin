@@ -106,12 +106,14 @@ tl::t_real_min SqwFuncModel::operator()(tl::t_real_min x_principal) const
 	if(reso.GetResoParams().flags & CALC_RESVOL)
 		dS /= reso.GetResoResults().dResVol * tl::get_pi<t_real>() * t_real(3.);
 
+
+	t_real dYVal = m_dScale*(dS + m_dSlope*x_principal) + m_dOffs;
+	if(dYVal < 0.)
+		dYVal = 0.;
+
 	if(m_psigFuncResult)
-	{
-		(*m_psigFuncResult)(vecScanPos[0], vecScanPos[1], vecScanPos[2], vecScanPos[3],
-			dS*m_dScale + m_dOffs);
-	}
-	return tl::t_real_min(dS*m_dScale + m_dOffs);
+		(*m_psigFuncResult)(vecScanPos[0], vecScanPos[1], vecScanPos[2], vecScanPos[3], dYVal);
+	return tl::t_real_min(dYVal);
 }
 
 
@@ -127,8 +129,10 @@ SqwFuncModel* SqwFuncModel::copy() const
 	pMod->m_iNumNeutrons = this->m_iNumNeutrons;
 	pMod->m_bUseThreads = this->m_bUseThreads;
 	pMod->m_dScale = this->m_dScale;
+	pMod->m_dSlope = this->m_dSlope;
 	pMod->m_dOffs = this->m_dOffs;
 	pMod->m_dScaleErr = this->m_dScaleErr;
+	pMod->m_dSlopeErr = this->m_dSlopeErr;
 	pMod->m_dOffsErr = this->m_dOffsErr;
 	pMod->m_vecModelParamNames = this->m_vecModelParamNames;
 	pMod->m_vecModelParams = this->m_vecModelParams;
@@ -183,7 +187,7 @@ bool SqwFuncModel::SetParams(const std::vector<tl::t_real_min>& vecParams)
 {
 	// --------------------------------------------------------------------
 	// prints changed model parameters
-	std::vector<t_real> vecOldParams = {m_dScale, m_dOffs};
+	std::vector<t_real> vecOldParams = {m_dScale, m_dSlope, m_dOffs};
 	vecOldParams.insert(vecOldParams.end(), m_vecModelParams.begin(), m_vecModelParams.end());
 	std::vector<std::string> vecParamNames = GetParamNames();
 	if(vecOldParams.size()==vecParams.size() && vecParamNames.size()==vecParams.size())
@@ -214,10 +218,17 @@ bool SqwFuncModel::SetParams(const std::vector<tl::t_real_min>& vecParams)
 	}
 	// --------------------------------------------------------------------
 
-	m_dScale = t_real(vecParams[0]);
-	m_dOffs = t_real(vecParams[1]);
+	if(vecParams.size() < 3)
+	{
+		tl::log_err("Invalid size of model parameters. Has to have at least three parameters: scale, slope, offset.");
+		return false;
+	}
 
-	for(std::size_t iParam=2; iParam<vecParams.size(); ++iParam)
+	m_dScale = t_real(vecParams[0]);
+	m_dSlope = t_real(vecParams[1]);
+	m_dOffs = t_real(vecParams[2]);
+
+	for(std::size_t iParam=3; iParam<vecParams.size(); ++iParam)
 		m_vecModelParams[iParam-2] = t_real(vecParams[iParam]);
 
 	//tl::log_debug("Params:");
@@ -231,10 +242,17 @@ bool SqwFuncModel::SetParams(const std::vector<tl::t_real_min>& vecParams)
 
 bool SqwFuncModel::SetErrs(const std::vector<tl::t_real_min>& vecErrs)
 {
-	m_dScaleErr = t_real(vecErrs[0]);
-	m_dOffsErr = t_real(vecErrs[1]);
+	if(vecErrs.size() < 3)
+	{
+		tl::log_err("Invalid size of model parameter errors. Has to have at least three parameters: scale, slope, offset.");
+		return false;
+	}
 
-	for(std::size_t iParam=2; iParam<vecErrs.size(); ++iParam)
+	m_dScaleErr = t_real(vecErrs[0]);
+	m_dSlopeErr = t_real(vecErrs[1]);
+	m_dOffsErr = t_real(vecErrs[2]);
+
+	for(std::size_t iParam=3; iParam<vecErrs.size(); ++iParam)
 		m_vecModelErrs[iParam-2] = t_real(vecErrs[iParam]);
 
 	//SetModelParams();
@@ -244,7 +262,7 @@ bool SqwFuncModel::SetErrs(const std::vector<tl::t_real_min>& vecErrs)
 
 std::vector<std::string> SqwFuncModel::GetParamNames() const
 {
-	std::vector<std::string> vecNames = {"scale", "offs"};
+	std::vector<std::string> vecNames = {"scale", "slope", "offs"};
 
 	for(const std::string& str : m_vecModelParamNames)
 		vecNames.push_back(str);
@@ -255,7 +273,7 @@ std::vector<std::string> SqwFuncModel::GetParamNames() const
 
 std::vector<tl::t_real_min> SqwFuncModel::GetParamValues() const
 {
-	std::vector<tl::t_real_min> vecVals = {m_dScale, m_dOffs};
+	std::vector<tl::t_real_min> vecVals = {m_dScale, m_dSlope, m_dOffs};
 
 	for(t_real d : m_vecModelParams)
 		vecVals.push_back(tl::t_real_min(d));
@@ -266,7 +284,7 @@ std::vector<tl::t_real_min> SqwFuncModel::GetParamValues() const
 
 std::vector<tl::t_real_min> SqwFuncModel::GetParamErrors() const
 {
-	std::vector<tl::t_real_min> vecErrs = {m_dScaleErr, m_dOffsErr};
+	std::vector<tl::t_real_min> vecErrs = {m_dScaleErr, m_dSlopeErr, m_dOffsErr};
 
 	for(t_real d : m_vecModelErrs)
 		vecErrs.push_back(tl::t_real_min(d));
@@ -302,6 +320,7 @@ minuit::MnUserParameters SqwFuncModel::GetMinuitParams() const
 	minuit::MnUserParameters params;
 
 	params.Add("scale", m_dScale, m_dScaleErr);
+	params.Add("slope", m_dSlope, m_dSlopeErr);
 	params.Add("offs", m_dOffs, m_dOffsErr);
 
 	for(std::size_t iParam=0; iParam<m_vecModelParamNames.size(); ++iParam)

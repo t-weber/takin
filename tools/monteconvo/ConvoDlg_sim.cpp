@@ -18,6 +18,60 @@ static constexpr const t_real g_dEpsRlu = 1e-3;
 
 
 /**
+ * determine the x axis of the scan
+ */
+std::tuple<bool, int, std::string, std::vector<std::vector<t_real>>> ConvoDlg::GetScanAxis(bool bIncludeE)
+{
+	const unsigned int iNumSteps = spinStepCnt->value();
+
+	std::vector<t_real> vecH = tl::linspace<t_real,t_real>(
+		spinStartH->value(), spinStopH->value(), iNumSteps);
+	std::vector<t_real> vecK = tl::linspace<t_real,t_real>(
+		spinStartK->value(), spinStopK->value(), iNumSteps);
+	std::vector<t_real> vecL = tl::linspace<t_real,t_real>(
+		spinStartL->value(), spinStopL->value(), iNumSteps);
+	std::vector<t_real> vecE = tl::linspace<t_real,t_real>(
+		spinStartE->value(), spinStopE->value(), iNumSteps);
+
+	std::vector<std::vector<t_real>> vecScanAxes{{ std::move(vecH), std::move(vecK), std::move(vecL) }};
+	if(bIncludeE)
+		vecScanAxes.emplace_back(std::move(vecE));
+
+	const int iScanAxis = comboAxis->currentIndex();
+	int iScanAxisIdx = 0;
+
+	std::string strScanVar = "";
+	// either scan axis is directly selected OR (automatic is set AND the start/stop values are different)
+	if(iScanAxis==1 || (iScanAxis==0 && !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu)))
+	{
+		strScanVar = "h (rlu)";
+		iScanAxisIdx = 0;
+	}
+	else if(iScanAxis==2 || (iScanAxis==0 && !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu)))
+	{
+		strScanVar = "k (rlu)";
+		iScanAxisIdx = 1;
+	}
+	else if(iScanAxis==3 || (iScanAxis==0 && !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu)))
+	{
+		strScanVar = "l (rlu)";
+		iScanAxisIdx = 2;
+	}
+	else if(bIncludeE && (iScanAxis==4 || (iScanAxis==0 && !tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu))))
+	{
+		strScanVar = "E (meV)";
+		iScanAxisIdx = 3;
+	}
+	else
+	{
+		return std::make_tuple(false, iScanAxisIdx, strScanVar, vecScanAxes);
+	}
+
+	return std::make_tuple(true, iScanAxisIdx, strScanVar, vecScanAxes);
+}
+
+
+/**
  * create 1d convolution
  */
 void ConvoDlg::Start1D()
@@ -27,6 +81,7 @@ void ConvoDlg::Start1D()
 
 	bool bUseScan = m_bUseScan && checkScan->isChecked();
 	t_real dScale = tl::str_to_var<t_real>(editScale->text().toStdString());
+	t_real dSlope = tl::str_to_var<t_real>(editSlope->text().toStdString());
 	t_real dOffs = tl::str_to_var<t_real>(editOffs->text().toStdString());
 
 	bool bLiveResults = m_pLiveResults->isChecked();
@@ -38,6 +93,7 @@ void ConvoDlg::Start1D()
 	m_pMenuBar->setEnabled(false);
 	if(m_pSqwParamDlg) m_pSqwParamDlg->setEnabled(false);
 	editScale->setEnabled(false);
+	editSlope->setEnabled(false);
 	editOffs->setEnabled(false);
 	btnStop->setEnabled(true);
 	tabWidget->setCurrentWidget(tabPlot);
@@ -48,7 +104,7 @@ void ConvoDlg::Start1D()
 		: Qt::ConnectionType::BlockingQueuedConnection;
 
 	std::function<void()> fkt = [this, connty, bForceDeferred, bUseScan,
-	dScale, dOffs, bLiveResults, bLivePlots]
+	dScale, dSlope, dOffs, bLiveResults, bLivePlots]
 	{
 		std::function<void()> fktEnableButtons = [this]
 		{
@@ -57,6 +113,7 @@ void ConvoDlg::Start1D()
 			QMetaObject::invokeMethod(m_pMenuBar, "setEnabled", Q_ARG(bool, true));
 			if(m_pSqwParamDlg) QMetaObject::invokeMethod(m_pSqwParamDlg, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(editScale, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editSlope, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(editOffs, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStartFit, "setEnabled", Q_ARG(bool, true));
@@ -67,53 +124,27 @@ void ConvoDlg::Start1D()
 
 		const unsigned int iNumNeutrons = spinNeutrons->value();
 		const unsigned int iNumSampleSteps = spinSampleSteps->value();
-
 		const unsigned int iNumSteps = spinStepCnt->value();
-		std::vector<t_real> vecH = tl::linspace<t_real,t_real>(
-			spinStartH->value(), spinStopH->value(), iNumSteps);
-		std::vector<t_real> vecK = tl::linspace<t_real,t_real>(
-			spinStartK->value(), spinStopK->value(), iNumSteps);
-		std::vector<t_real> vecL = tl::linspace<t_real,t_real>(
-			spinStartL->value(), spinStopL->value(), iNumSteps);
-		std::vector<t_real> vecE = tl::linspace<t_real,t_real>(
-			spinStartE->value(), spinStopE->value(), iNumSteps);
 
-		const int iScanAxis = comboAxis->currentIndex();
+		bool bScanAxisFound = 0;
 		int iScanAxisIdx = 0;
-
 		std::string strScanVar = "";
-		std::vector<t_real> *pVecScanX = nullptr;
-		// either scan axis is directly selected OR (automatic is set AND the start/stop values are different)
-		if(iScanAxis==1 || (iScanAxis==0 && !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecH;
-			strScanVar = "h (rlu)";
-			iScanAxisIdx = 0;
-		}
-		else if(iScanAxis==2 || (iScanAxis==0 && !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecK;
-			strScanVar = "k (rlu)";
-			iScanAxisIdx = 1;
-		}
-		else if(iScanAxis==3 || (iScanAxis==0 && !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecL;
-			strScanVar = "l (rlu)";
-			iScanAxisIdx = 2;
-		}
-		else if(iScanAxis==4 || (iScanAxis==0 && !tl::float_equal(spinStartE->value(), spinStopE->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecE;
-			strScanVar = "E (meV)";
-			iScanAxisIdx = 3;
-		}
-		else
+		std::vector<std::vector<t_real>> vecAxes;
+		std::tie(bScanAxisFound, iScanAxisIdx, strScanVar, vecAxes) = GetScanAxis(true);
+		if(!bScanAxisFound)
 		{
 			//QMessageBox::critical(this, "Error", "No scan variable found.");
+			tl::log_err("No scan variable found.");
 			fktEnableButtons();
 			return;
 		}
+
+		const std::vector<t_real> *pVecScanX = &vecAxes[iScanAxisIdx];
+		const std::vector<t_real>& vecH = vecAxes[0];
+		const std::vector<t_real>& vecK = vecAxes[1];
+		const std::vector<t_real>& vecL = vecAxes[2];
+		const std::vector<t_real>& vecE = vecAxes[3];
+
 
 		QMetaObject::invokeMethod(m_plotwrap.get(), "setAxisTitle",
 			Q_ARG(int, QwtPlot::yLeft),
@@ -316,9 +347,14 @@ void ConvoDlg::Start1D()
 				<< std::left << std::setw(g_iPrec*2) << vecE[iStep] << " "
 				<< std::left << std::setw(g_iPrec*2) << dS << "\n";
 
-			m_vecQ.push_back((*pVecScanX)[iStep]);
+			const t_real dXVal = (*pVecScanX)[iStep];
+			t_real dYVal = dScale*(dS + dSlope*dXVal) + dOffs;
+			if(dYVal < 0.)
+				dYVal = 0.;
+
+			m_vecQ.push_back(dXVal);
 			m_vecS.push_back(dS);
-	 		m_vecScaledS.push_back(dS*dScale + dOffs);
+			m_vecScaledS.push_back(dYVal);
 
 			static const std::vector<t_real> vecNull;
 			bool bIsLastStep = (iStep == lstFuts.size()-1);
@@ -463,6 +499,7 @@ void ConvoDlg::Start2D()
 	m_pMenuBar->setEnabled(false);
 	if(m_pSqwParamDlg) m_pSqwParamDlg->setEnabled(false);
 	editScale->setEnabled(false);
+	editSlope->setEnabled(false);
 	editOffs->setEnabled(false);
 	btnStop->setEnabled(true);
 	tabWidget->setCurrentWidget(tabPlot2d);
@@ -481,6 +518,7 @@ void ConvoDlg::Start2D()
 			QMetaObject::invokeMethod(m_pMenuBar, "setEnabled", Q_ARG(bool, true));
 			if(m_pSqwParamDlg) QMetaObject::invokeMethod(m_pSqwParamDlg, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(editScale, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editSlope, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(editOffs, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStartFit, "setEnabled", Q_ARG(bool, true));
@@ -842,6 +880,7 @@ void ConvoDlg::StartDisp()
 	m_pMenuBar->setEnabled(false);
 	if(m_pSqwParamDlg) m_pSqwParamDlg->setEnabled(false);
 	editScale->setEnabled(false);
+	editSlope->setEnabled(false);
 	editOffs->setEnabled(false);
 	btnStop->setEnabled(true);
 	tabWidget->setCurrentWidget(tabPlot);
@@ -860,6 +899,7 @@ void ConvoDlg::StartDisp()
 			QMetaObject::invokeMethod(m_pMenuBar, "setEnabled", Q_ARG(bool, true));
 			if(m_pSqwParamDlg) QMetaObject::invokeMethod(m_pSqwParamDlg, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(editScale, "setEnabled", Q_ARG(bool, true));
+			QMetaObject::invokeMethod(editSlope, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(editOffs, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStart, "setEnabled", Q_ARG(bool, true));
 			QMetaObject::invokeMethod(btnStartFit, "setEnabled", Q_ARG(bool, true));
@@ -869,37 +909,26 @@ void ConvoDlg::StartDisp()
 		watch.start();
 
 		const unsigned int iNumSteps = spinStepCnt->value();
-		std::vector<t_real> vecH = tl::linspace<t_real,t_real>(
-			spinStartH->value(), spinStopH->value(), iNumSteps);
-		std::vector<t_real> vecK = tl::linspace<t_real,t_real>(
-			spinStartK->value(), spinStopK->value(), iNumSteps);
-		std::vector<t_real> vecL = tl::linspace<t_real,t_real>(
-			spinStartL->value(), spinStopL->value(), iNumSteps);
 
-		const int iScanAxis = comboAxis->currentIndex();
+
+		bool bScanAxisFound = 0;
+		int iScanAxisIdx = 0;
 		std::string strScanVar = "";
-		std::vector<t_real> *pVecScanX = nullptr;
-		if(iScanAxis==1 || (iScanAxis==0 && !tl::float_equal(spinStartH->value(), spinStopH->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecH;
-			strScanVar = "h (rlu)";
-		}
-		else if(iScanAxis==2 || (iScanAxis==0 && !tl::float_equal(spinStartK->value(), spinStopK->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecK;
-			strScanVar = "k (rlu)";
-		}
-		else if(iScanAxis==3 || (iScanAxis==0 && !tl::float_equal(spinStartL->value(), spinStopL->value(), g_dEpsRlu)))
-		{
-			pVecScanX = &vecL;
-			strScanVar = "l (rlu)";
-		}
-		else
+		std::vector<std::vector<t_real>> vecAxes;
+		std::tie(bScanAxisFound, iScanAxisIdx, strScanVar, vecAxes) = GetScanAxis(false);
+		if(!bScanAxisFound)
 		{
 			//QMessageBox::critical(this, "Error", "No scan variable found.");
+			tl::log_err("No scan variable found.");
 			fktEnableButtons();
 			return;
 		}
+
+		const std::vector<t_real> *pVecScanX = &vecAxes[iScanAxisIdx];
+		const std::vector<t_real>& vecH = vecAxes[0];
+		const std::vector<t_real>& vecK = vecAxes[1];
+		const std::vector<t_real>& vecL = vecAxes[2];
+
 
 		QMetaObject::invokeMethod(m_plotwrap.get(), "setAxisTitle",
 			Q_ARG(int, QwtPlot::yLeft),
