@@ -92,6 +92,7 @@ Convofit::~Convofit()
 
 // ----------------------------------------------------------------------------
 // global command line overrides
+bool g_bVerbose = 0;
 bool g_bSkipFit = 0;
 bool g_bUseValuesFromModel = 0;
 unsigned int g_iNumNeutrons = 0;
@@ -419,7 +420,7 @@ bool Convofit::run_job(const std::string& _strJob)
 		if(vecvecScFiles.size() > 1)
 			tl::log_info("Loading scan group ", iSc, ".");
 		if(!load_file(vecvecScFiles[iSc], sc, bNormToMon, filter,
-			bFlipCoords, bUseFirstAndLastScanPt, iScanAxis))
+			bFlipCoords, bUseFirstAndLastScanPt, iScanAxis, g_bVerbose))
 		{
 			tl::log_err("Cannot load scan files of group ", iSc, ".");
 			continue;
@@ -518,7 +519,8 @@ bool Convofit::run_job(const std::string& _strJob)
 	mod.AddFuncResultSlot(
 	[this, &pltMeas, &vecModTmpX, &vecModTmpY, bPlotIntermediate](t_real h, t_real k, t_real l, t_real E, t_real S)
 	{
-		tl::log_info("Q = (", h, ", ", k, ", ", l, ") rlu, E = ", E, " meV -> S = ", S);
+		if(g_bVerbose)
+			tl::log_info("Q = (", h, ", ", k, ", ", l, ") rlu, E = ", E, " meV -> S = ", S);
 
 		if(bPlotIntermediate)
 		{

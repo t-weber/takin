@@ -35,12 +35,26 @@ PowderFitDlg::PowderFitDlg(QWidget* pParent, QSettings *pSett)
 
 		if(m_pSettings->contains("powderfit/geo"))
 			restoreGeometry(m_pSettings->value("powderfit/geo").toByteArray());
+
+		// load recent values
+		if(m_pSettings->contains("powderfit/d"))
+			editD->setText(m_pSettings->value("powderfit/d").toString());
+		if(m_pSettings->contains("powderfit/ki"))
+			editKi->setText(m_pSettings->value("powderfit/ki").toString());
+		if(m_pSettings->contains("powderfit/Gs"))
+			editGs->setText(m_pSettings->value("powderfit/Gs").toString());
+		if(m_pSettings->contains("powderfit/tt"))
+			editAngles->setText(m_pSettings->value("powderfit/tt").toString());
+		if(m_pSettings->contains("powderfit/dtt"))
+			editAngleErrs->setText(m_pSettings->value("powderfit/dtt").toString());
 	}
 
 	QObject::connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(ButtonBoxClicked(QAbstractButton*)));
 
 	for(QLineEdit* pEdit : {editD, editKi, editGs, editAngles, editAngleErrs})
 		QObject::connect(pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(Calc()));
+
+	Calc();
 }
 
 
@@ -184,22 +198,41 @@ void PowderFitDlg::Calc()
 
 void PowderFitDlg::Plot()
 {
-	if(!m_pPlotProc)
-		m_pPlotProc.reset(new tl::PipeProc<char>("gnuplot -p 2>/dev/null 1>/dev/null", 1));
+	QString strErr = "Gnuplot cannot be invoked.";
 
-	if(!m_pPlotProc || !m_pPlotProc->IsReady())
+	try
 	{
-		QMessageBox::critical(this, "Error", "Gnuplot cannot be invoked.");
-		return;
-	}
+		if(!m_pPlotProc)
+			m_pPlotProc.reset(new tl::PipeProc<char>("gnuplot -p 2>/dev/null 1>/dev/null", 1));
 
-	(*m_pPlotProc) << editScript->toPlainText().toStdString();
-	m_pPlotProc->flush();
+		if(!m_pPlotProc || !m_pPlotProc->IsReady())
+		{
+			QMessageBox::critical(this, "Error", strErr);
+			return;
+		}
+
+		(*m_pPlotProc) << editScript->toPlainText().toStdString();
+		m_pPlotProc->flush();
+	}
+	catch(const std::exception& ex)
+	{
+		QMessageBox::critical(this, "Critical Error", strErr + " Error: " + ex.what() + ".");
+	}
 }
 
 
 void PowderFitDlg::accept()
-{}
+{
+	// save recent values
+	if(m_pSettings)
+	{
+		m_pSettings->setValue("powderfit/d", editD->text());
+		m_pSettings->setValue("powderfit/ki", editKi->text());
+		m_pSettings->setValue("powderfit/Gs", editGs->text());
+		m_pSettings->setValue("powderfit/tt", editAngles->text());
+		m_pSettings->setValue("powderfit/dtt", editAngleErrs->text());
+	}
+}
 
 
 void PowderFitDlg::ButtonBoxClicked(QAbstractButton* pBtn)

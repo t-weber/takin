@@ -43,6 +43,7 @@ static inline void set_model_params_from_scan(SqwFuncModel& mod, const Scan& sc)
 
 // --------------------------------------------------------------------
 // global command-line overrides
+extern bool g_bVerbose;
 extern bool g_bSkipFit;
 extern bool g_bUseValuesFromModel;
 extern unsigned int g_iNumNeutrons;

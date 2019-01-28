@@ -229,7 +229,7 @@ bool SqwFuncModel::SetParams(const std::vector<tl::t_real_min>& vecParams)
 	m_dOffs = t_real(vecParams[2]);
 
 	for(std::size_t iParam=3; iParam<vecParams.size(); ++iParam)
-		m_vecModelParams[iParam-2] = t_real(vecParams[iParam]);
+		m_vecModelParams[iParam-3] = t_real(vecParams[iParam]);
 
 	//tl::log_debug("Params:");
 	//for(t_real d : vecParams)
@@ -253,7 +253,7 @@ bool SqwFuncModel::SetErrs(const std::vector<tl::t_real_min>& vecErrs)
 	m_dOffsErr = t_real(vecErrs[2]);
 
 	for(std::size_t iParam=3; iParam<vecErrs.size(); ++iParam)
-		m_vecModelErrs[iParam-2] = t_real(vecErrs[iParam]);
+		m_vecModelErrs[iParam-3] = t_real(vecErrs[iParam]);
 
 	//SetModelParams();
 	return true;

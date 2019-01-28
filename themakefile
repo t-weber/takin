@@ -346,7 +346,7 @@ INC =	-I${MYINC} \
 	-I/usr/local/opt/freetype/include/freetype2 \
 	-I/usr/include/freetype2 \
 	-I/usr/include/lapacke \
-	-I/usr/local/opt/python/Frameworks/Python.framework/Versions/${PY_INC_VER}/include/python${PY_INC_VER} \
+	-I/usr/local/opt/python/Frameworks/Python.framework/Versions/${PY_INC_VER}/Headers/ \
 	-I/usr/include/python${PY_INC_VER} -idirafter /usr/include/root \
 	-I/usr/include -I/usr/include/GL
 
@@ -435,13 +435,19 @@ else
 endif
 
 ifeq ($(USE_PY), 1)
-#	ifeq ($(USE_FRAMEWORKS), 0)
-#		PY_LIBS = -lboost_python${BOOST_SUFFIX}
-		PY_LIBS = -lboost_python${PY_BOOSTLIB_VER}${BOOST_SUFFIX}
+	PY_LIBS = -lboost_python${PY_BOOSTLIB_VER}${BOOST_SUFFIX}
+	#PY_LIBS = -lboost_python${BOOST_SUFFIX}
+
+	ifeq ($(USE_FRAMEWORKS), 0)
 		PY_LIBS += -lpython${PY_LIB_VER}
-#	else
-#		PY_LIBS = -lboost_python${BOOST_SUFFIX} -F /usr/local/opt/python/Frameworks -framework Python
-#	endif
+	else
+		ifeq ($(PY_INC_VER), 2.7)
+			PY_LIBS += -F /usr/local/opt/python/Frameworks -framework Python
+		else
+			PY_LIBS += -L/usr/local/opt/python/Frameworks/Python.framework/Versions/${PY_INC_VER}/lib -lpython${PY_LIB_VER}
+		endif
+	endif
+
 	PY_OBJS = obj/sqw_py.o 
 else
 	PY_LIBS =

@@ -63,7 +63,7 @@ bool save_file(const char* pcFile, const Scan& sc)
  */
 bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormToMon,
 	const Filter& filter, bool bFlipCoords, bool bUseFirstAndLastPoints,
-	unsigned iScanAxis)
+	unsigned iScanAxis, bool bVerbose)
 {
 	if(!vecFiles.size()) return 0;
 	tl::log_info("Loading \"", vecFiles[0], "\".");
@@ -208,12 +208,15 @@ bool load_file(const std::vector<std::string>& vecFiles, Scan& scan, bool bNormT
 		if(pt.l < ptMin.l) ptMin.l = pt.l;
 		if(pt.E < ptMin.E) ptMin.E = pt.E;
 
-		tl::log_info("Point ", iPt+1, ": ", "h=", pt.h, ", k=", pt.k, ", l=", pt.l,
-			", ki=", t_real_sc(pt.ki * tl::get_one_angstrom<t_real_sc>()),
-			", kf=", t_real_sc(pt.kf * tl::get_one_angstrom<t_real_sc>()),
-			", E=", t_real_sc(pt.E / tl::get_one_meV<t_real_sc>())/*, ", Q=", pt.Q*tl::angstrom*/,
-			", Cts=", scan.vecCts[iPt]/*, "+-", scan.vecCtsErr[iPt]*/,
-			", Mon=", scan.vecMon[iPt]/*, "+-", scan.vecMonErr[iPt]*/, ".");
+		if(bVerbose)
+		{
+			tl::log_info("Point ", iPt+1, ": ", "h=", pt.h, ", k=", pt.k, ", l=", pt.l,
+				", ki=", t_real_sc(pt.ki * tl::get_one_angstrom<t_real_sc>()),
+				", kf=", t_real_sc(pt.kf * tl::get_one_angstrom<t_real_sc>()),
+				", E=", t_real_sc(pt.E / tl::get_one_meV<t_real_sc>())/*, ", Q=", pt.Q*tl::angstrom*/,
+				", Cts=", scan.vecCts[iPt]/*, "+-", scan.vecCtsErr[iPt]*/,
+				", Mon=", scan.vecMon[iPt]/*, "+-", scan.vecMonErr[iPt]*/, ".");
+		}
 
 		scan.vecPoints.emplace_back(std::move(pt));
 	}

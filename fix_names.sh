@@ -43,6 +43,7 @@ declare -a filestochange=(
 	"${PRG}/Contents/Frameworks/libboost_iostreams.dylib"
 	"${PRG}/Contents/Frameworks/libboost_filesystem.dylib"
 	"${PRG}/Contents/Frameworks/libboost_python27.dylib"
+	"${PRG}/Contents/Frameworks/libboost_python37.dylib"
 	"${PRG}/Contents/Frameworks/libboost_regex.dylib"
 	"${PRG}/Contents/Frameworks/libboost_system.dylib"
 	"${PRG}/Contents/Frameworks/libboost_program_options.dylib"
@@ -104,11 +105,14 @@ declare -a changefrom=(
 	"/usr/local/opt/boost/lib/libboost_regex.dylib"
 	"/usr/local/opt/boost/lib/libboost_program_options.dylib"
 	"/usr/local/opt/boost-python/lib/libboost_python27.dylib"
+	"/usr/local/opt/boost-python3/lib/libboost_python37.dylib"
 	"/usr/local/opt/freetype/lib/libfreetype.6.dylib"
 	"/usr/local/opt/libpng/lib/libpng16.16.dylib"
 	"/usr/local/opt/libjpeg/lib/libjpeg.9.dylib"
 	"/usr/local/opt/jpeg/lib/libjpeg.9.dylib"
 	"/usr/local/opt/libtiff/lib/libtiff.5.dylib"
+	"/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7/Python"
+	"/usr/local/opt/python3/Frameworks/Python.framework/Versions/3.7/Python"
 )
 
 
@@ -162,11 +166,14 @@ declare -a changeto=(
 	"@executable_path/../Frameworks/libboost_regex.dylib"
 	"@executable_path/../Frameworks/libboost_program_options.dylib"
 	"@executable_path/../Frameworks/libboost_python27.dylib"
+	"@executable_path/../Frameworks/libboost_python37.dylib"
 	"@executable_path/../Frameworks/libfreetype.6.dylib"
 	"@executable_path/../Frameworks/libpng16.16.dylib"
 	"@executable_path/../Frameworks/libjpeg.9.dylib"
 	"@executable_path/../Frameworks/libjpeg.9.dylib"
 	"@executable_path/../Frameworks/libtiff.5.dylib"
+	"@executable_path/../Frameworks/Python"
+	"@executable_path/../Frameworks/Python"
 )
 
 

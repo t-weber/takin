@@ -40,11 +40,11 @@
 		    norm_to_monitor 1
 
 		    ; manually set scan variable
-			;scan_axis      "E"
+		    ;scan_axis      "E"
 
-			; overrides
-			;temp_override   "25"
-			;field_override  "0.5"
+		    ; overrides
+		    ;temp_override   "25"
+		    ;field_override  "0.5"
 
 
 		    ; the instrument definition created by
@@ -171,30 +171,33 @@
 
 
 		; which S(q,w) model parameters should be fitted?
-		; don't remove "scale" and "offs"!
+		; don't remove "scale", "slope" or "offs"!
 		fit_parameters
 		{
-		    ; the fit parameters: "scale" and "offs" are internal variables,
+		    ; the fit parameters: "scale", "slope" and "offs" are internal variables,
 		    ; "g_linewidth" is a parameter in the S(q,w) model. In this example,
 		    ; it is a global name in the "my_sqw.py" script.
 		    params  "scale " \
+		            "slope " \
 		            "offs " \
 		            "g_linewidth "
 
 		    ; initial values of the three parameters
 		    values  "1e9 " \
+		            "0 " \
 		            "1e-6 " \
 		            "0.02 "
 
 			; errors of the three parameters
 		    errors  "0.5e9 " \
+		            "0 " \
 		            "0.5e-6 " \
 		            "0.01 "
 
 		    ; which parameters should be fitted?
-		    ; here, the third parameter, i.e. g_linewidth, is the only
+		    ; here, the fourth parameter, i.e. g_linewidth, is the only
 		    ; fit parameter
-		    fixed   "1 1 0 "
+		    fixed   "1 1 1 0 "
 		}
 		</pre></code>
 

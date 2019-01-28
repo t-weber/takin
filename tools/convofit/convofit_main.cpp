@@ -94,6 +94,10 @@ int main(int argc, char** argv)
 			opts::value<decltype(vecJobs)>(&vecJobs),
 			"convolution fitting job file")));
 		args.add(boost::shared_ptr<opts::option_description>(
+			new opts::option_description("verbose",
+			opts::bool_switch(&g_bVerbose),
+			"verbose logging")));
+		args.add(boost::shared_ptr<opts::option_description>(
 			new opts::option_description("neutrons",
 			opts::value<decltype(g_iNumNeutrons)>(&g_iNumNeutrons),
 			"neutron count")));
