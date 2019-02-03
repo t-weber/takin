@@ -220,11 +220,12 @@ void PlotGl2::SetPerspective(int w, int h)
 
 void PlotGl2::resizeGL(int w, int h)
 {
-	m_size.iW = w;
-	m_size.iH = h;
-
 	if(w <= 0) w = 1;
 	if(h <= 0) h = 1;
+
+	m_size.iW = w;
+	m_size.iH = h;
+	m_size.dDPIScale = 1.; //TODO: based on QT_SCALE_FACTOR env variable
 
 	glViewport(0, 0, w, h);
 	SetPerspective(w, h);
@@ -740,8 +741,9 @@ void PlotGl2::mouseMoveEvent(QMouseEvent *pEvt)
 		updateViewMatrix();
 
 
-	t_real dMouseX = 2.*pEvt->POS_F().x()/t_real(m_size.iW) - 1.;
-	t_real dMouseY = -(2.*pEvt->POS_F().y()/t_real(m_size.iH) - 1.);
+	// scale coordinates to [-1 .. 1] range
+	t_real dMouseX = 2.*pEvt->POS_F().x()*m_size.dDPIScale/t_real(m_size.iW) - 1.;
+	t_real dMouseY = -(2.*pEvt->POS_F().y()*m_size.dDPIScale/t_real(m_size.iH) - 1.);
 
 	bool bHasSelected = 0;
 	if(m_bEnabled)

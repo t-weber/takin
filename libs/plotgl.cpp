@@ -637,9 +637,15 @@ void PlotGl::resizeEvent(QResizeEvent *pEvt)
 	//tl::log_debug("resizeEvent");
 	if(!pEvt) return;
 
+	int w = pEvt->size().width();
+	int h = pEvt->size().height();
+	if(w <= 0) w = 1;
+	if(h <= 0) h = 1;
+
 	std::lock_guard<QMutex> _lck(m_mutex_resize);
-	m_size.iW = pEvt->size().width();
-	m_size.iH = pEvt->size().height();
+	m_size.iW = w;
+	m_size.iH = h;
+	m_size.dDPIScale = 1.; // TODO: based on QT_SCALE_FACTOR env variable
 	m_size.bDoResize = true;
 }
 

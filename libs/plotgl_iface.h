@@ -76,6 +76,7 @@ struct PlotObjGl
 struct PlotGlSize
 {
 	int iW = 800, iH = 600;
+	t_real_glob dDPIScale = 1.;
 	bool bDoResize = true;
 };
 
