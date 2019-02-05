@@ -225,7 +225,12 @@ void PlotGl2::resizeGL(int w, int h)
 
 	m_size.iW = w;
 	m_size.iH = h;
-	m_size.dDPIScale = 1.; //TODO: based on QT_SCALE_FACTOR env variable
+
+#if QT_VER>=5
+	m_size.dDPIScale = devicePixelRatioF();
+#else
+	m_size.dDPIScale = 1.;
+#endif
 
 	glViewport(0, 0, w, h);
 	SetPerspective(w, h);

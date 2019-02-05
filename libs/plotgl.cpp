@@ -645,7 +645,13 @@ void PlotGl::resizeEvent(QResizeEvent *pEvt)
 	std::lock_guard<QMutex> _lck(m_mutex_resize);
 	m_size.iW = w;
 	m_size.iH = h;
-	m_size.dDPIScale = 1.; // TODO: based on QT_SCALE_FACTOR env variable
+
+#if QT_VER>=5
+	m_size.dDPIScale = devicePixelRatioF();
+#else
+	m_size.dDPIScale = 1.;
+#endif
+
 	m_size.bDoResize = true;
 }
 
