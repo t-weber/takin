@@ -32,9 +32,10 @@ using t_real = t_real_reso;
  * this function tries to be a 1:1 C++ reimplementation of the Perl function
  * 'read_mcstas_res' of the McStas 'mcresplot' program
  */
-Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
-	const vector<t_real>& Q_avg, const std::vector<t_real>* pp_vec)
+Resolution calc_res(const std::vector<vector<t_real>>& Q_vec, const std::vector<t_real>* pp_vec)
 {
+	vector<t_real> Q_avg = pp_vec ? tl::mean_value(*pp_vec, Q_vec) : tl::mean_value(Q_vec);
+
 	vector<t_real> Q_dir = tl::make_vec({Q_avg[0], Q_avg[1], Q_avg[2]});
 	Q_dir = Q_dir / norm_2(Q_dir);
 	vector<t_real> Q_perp = tl::make_vec({-Q_dir[1], Q_dir[0], Q_dir[2]});
@@ -61,10 +62,18 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 	reso.res.resize(4,4,0);
 	reso.cov.resize(4,4,0);
 
-	std::tie(reso.cov, std::ignore) = tl::covariance(Q_vec, pp_vec);
-	reso.cov = tl::transform<matrix<t_real>>(reso.cov, trafo, true);
+	/*for(std::size_t iElem=0; iElem<Q_vec.size(); ++iElem)
+	{
+		std::cout << "Q = (" << Q_vec[iElem][0] << ", " << Q_vec[iElem][1] << ", " << Q_vec[iElem][0] << "), "
+			<< "p = " << (*pp_vec)[iElem] << std::endl;
+	}*/
 
+	std::tie(reso.cov, std::ignore) = tl::covariance(Q_vec, pp_vec);
+	tl::log_info("Covariance matrix (untransformed): ", reso.cov);
+
+	reso.cov = tl::transform<matrix<t_real>>(reso.cov, trafo, true);
 	tl::log_info("Covariance matrix: ", reso.cov);
+
 	if(!(reso.bHasRes = tl::inverse(reso.cov, reso.res)))
 		tl::log_err("Covariance matrix could not be inverted!");
 
@@ -89,7 +98,7 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 		std::copy(reso.Q_avg.begin(), reso.Q_avg.end(),
 			std::ostream_iterator<t_real>(ostrElli, ", "));
 
-		reso.vecQ = std::move(Q_vec);
+		reso.vecQ = Q_vec;
 
 		tl::log_info(ostrVals.str());
 		tl::log_info(ostrIncVals.str());
@@ -99,19 +108,6 @@ Resolution calc_res(std::vector<vector<t_real>>&& Q_vec,
 	return reso;
 }
 
-
-Resolution calc_res(std::vector<vector<t_real>>&& vecQ)
-{
-	vector<t_real> Q_avg = tl::make_vec<vector<t_real>>({0., 0., 0., 0.});
-
-	for(const vector<t_real>& vec : vecQ)
-		Q_avg += vec;
-
-	Q_avg /= t_real(vecQ.size());
-	tl::log_info("Average Q vector: ", Q_avg);
-
-	return calc_res(std::forward<std::vector<vector<t_real>>&&>(vecQ), Q_avg);
-}
 
 
 /*
@@ -165,7 +161,7 @@ Resolution calc_res(const std::vector<ublas::vector<t_real>>& vecKi,
 	Q_avg /= p_sum;
 	tl::log_info("Average Q vector: ", Q_avg);
 
-	return calc_res(std::move(Q_vec), Q_avg, &p_vec);
+	return calc_res(Q_vec, &p_vec);
 }
 
 

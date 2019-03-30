@@ -42,11 +42,8 @@ struct Resolution
 
 std::tuple<t_real_reso, t_real_reso> get_vanadium_fwhms(const Resolution& reso);
 
-Resolution calc_res(std::vector<ublas::vector<t_real_reso>>&& Q_vec,
-	const ublas::vector<t_real_reso>& Q_avg,
-	const std::vector<t_real_reso>* pp_vec = 0);
-
-Resolution calc_res(std::vector<ublas::vector<t_real_reso>>&&);
+Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& Q_vec,
+	const std::vector<t_real_reso>* pp_vec = nullptr);
 
 Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& vecKi,
 	const std::vector<ublas::vector<t_real_reso>>& vecKf,

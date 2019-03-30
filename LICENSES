@@ -75,7 +75,9 @@ License, Qt4: GNU LGPL version 2.1 (see below)
 
 (License, Qt5: GNU LGPL version 3
 Warning: After Qt 5.6, the /general/ Qt license options changed!
-Check remaining GPL2 compatibility of /individual/ Qt modules before linking!)
+Check remaining GPLv2 compatibility of /individual/ Qt modules here:
+https://doc.qt.io/qt-5/qtmodules.html
+before linking to them!)
 --------------------------------------------------------------------------------
 
 

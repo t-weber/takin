@@ -190,9 +190,9 @@ static bool load_mc_list(const char* pcFile, Resolution& res)
 			dKf[0] = -dKf[0];
 			dPos[0] = -dPos[0];
 
-			vecKi.push_back(tl::make_vec<vector<t_real>>({dKi[0], dKi[1], dKi[2]}));
-			vecKf.push_back(tl::make_vec<vector<t_real>>({dKf[0], dKf[1], dKf[2]}));
-			vecPos.push_back(tl::make_vec<vector<t_real>>({dPos[0], dPos[1], dPos[2]}));
+			vecKi.emplace_back(tl::make_vec<vector<t_real>>({dKi[0], dKi[1], dKi[2]}));
+			vecKf.emplace_back(tl::make_vec<vector<t_real>>({dKf[0], dKf[1], dKf[2]}));
+			vecPos.emplace_back(tl::make_vec<vector<t_real>>({dPos[0], dPos[1], dPos[2]}));
 
 			vecPi.push_back(dPi);
 			vecPf.push_back(dPf);
