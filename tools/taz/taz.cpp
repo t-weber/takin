@@ -324,11 +324,11 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 
 	pMenuFile->addSeparator();
 
-	QAction *pImport = new QAction("Import...", this);
+	QAction *pImport = new QAction("Import Data File...", this);
 	pImport->setIcon(load_icon("res/icons/drive-harddisk.svg"));
 	pMenuFile->addAction(pImport);
 
-	m_pMenuRecentImport = new QMenu("Recently Imported", this);
+	m_pMenuRecentImport = new QMenu("Recently Imported Data Files", this);
 	RecentFiles recentimport(&m_settings, "main/recent_import");
 	m_pMapperRecentImport = new QSignalMapper(m_pMenuRecentImport);
 	QObject::connect(m_pMapperRecentImport, SIGNAL(mapped(const QString&)),
