@@ -228,6 +228,9 @@ void DispDlg::Calc()
 		for(std::size_t iIdxSC : vecIdxSC)
 			vecNamesSC.push_back(m_vecAtoms[vecIdxUC[iIdxSC]].strAtomName);
 
+		// clean epsilons
+		for(t_vec& vec : vecAtomsSC)
+			tl::set_eps_0(vec, g_dEps);
 
 		// neighbours
 		std::vector<std::vector<std::size_t>> vecIdxNN =
