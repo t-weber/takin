@@ -169,7 +169,11 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 #else
 	ostrFeat << "<b>Enabled</b>";
 #endif
-	ostrFeat << " support for Python scripting.";
+	ostrFeat << " support for Python scripting";
+#if defined USE_PY && defined PY_VER
+	ostrFeat << " (version " << PY_VER << ")";
+#endif
+	ostrFeat << ".";
 	ostrFeat << "</li>";
 
 	ostrFeat << "<li>";
@@ -179,6 +183,15 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	ostrFeat << "<b>Enabled</b>";
 #endif
 	ostrFeat << " support for Julia scripting.";
+	ostrFeat << "</li>";
+
+	ostrFeat << "<li>";
+#if defined NO_CIF || !defined USE_CIF
+	ostrFeat << "<font color=\"#ff0000\"><b>Disabled</b></font>";
+#else
+	ostrFeat << "<b>Enabled</b>";
+#endif
+	ostrFeat << " support for CIF importing.";
 	ostrFeat << "</li>";
 
 	ostrFeat << "<li>";

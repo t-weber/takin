@@ -626,7 +626,7 @@ bool TazDlg::SaveAs()
 
 
 //--------------------------------------------------------------------------------
-// importing
+// data file importing
 
 #include "tlibs/file/loadinstr.h"
 
@@ -777,6 +777,129 @@ bool TazDlg::Import(const char* pcFile)
 
 	return true;
 }
+
+//--------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------
+// CIF importing
+
+#ifdef USE_CIF
+
+bool TazDlg::ImportCIF()
+{
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(!m_settings.value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	const bool bShowPreview = m_settings.value("main/dlg_previews", true).toBool();
+	QString strDirLast = m_settings.value("main/last_import_cif_dir", ".").toString();
+
+	std::unique_ptr<QFileDialog> pdlg;
+	if(bShowPreview)
+		pdlg.reset(new FilePreviewDlg(this, "Import CIF...", &m_settings));
+	else
+		pdlg.reset(new QFileDialog(this, "Import CIF..."));
+
+	pdlg->setOptions(fileopt);
+	pdlg->setDirectory(strDirLast);
+	pdlg->setFileMode(QFileDialog::ExistingFile);
+	pdlg->setViewMode(QFileDialog::Detail);
+#if !defined NO_IOSTR
+	QString strFilter = "CIFs (*.cif *.CIF *.cif.gz *.CIF.GZ *.cif.bz2 *.CIF.BZ2);;All files (*.*)";
+#else
+	QString strFilter = "CIFs (*.cif *.CIF);;All files (*.*)";
+#endif
+	pdlg->setNameFilter(strFilter);
+	if(!pdlg->exec())
+		return false;
+	if(!pdlg->selectedFiles().size())
+		return false;
+
+	QString strFile = pdlg->selectedFiles()[0];
+	if(strFile == "")
+		return false;
+
+	return ImportCIF(strFile.toStdString().c_str());
+}
+
+bool TazDlg::ImportCIFFile(const QString& strFile)
+{
+	return ImportCIF(strFile.toStdString().c_str());
+}
+
+bool TazDlg::ImportCIF(const char* pcFile)
+{
+	Disconnect();
+
+	std::string strFile1 = pcFile;
+	std::string strDir = tl::get_dir(strFile1);
+
+	try
+	{
+		// TODO
+		t_real a = 5;
+		t_real b = 5;
+		t_real c = 5;
+		t_real alpha = M_PI/2;
+		t_real beta = M_PI/2;
+		t_real gamma = M_PI/2;
+		std::string strSpaceGroup = "P1";
+		tl::trim(strSpaceGroup);
+		std::string strDescr = "";
+
+		editA->setText(tl::var_to_str(a).c_str());
+		editB->setText(tl::var_to_str(b).c_str());
+		editC->setText(tl::var_to_str(c).c_str());
+
+		editAlpha ->setText(tl::var_to_str(tl::r2d(alpha)).c_str());
+		editBeta->setText(tl::var_to_str(tl::r2d(beta)).c_str());
+		editGamma->setText(tl::var_to_str(tl::r2d(gamma)).c_str());
+
+		// spacegroup
+		editSpaceGroupsFilter->clear();
+		RepopulateSpaceGroups();
+
+		int iSGIdx = find_sg_from_combo(comboSpaceGroups, strSpaceGroup);
+		if(iSGIdx >= 0)
+			comboSpaceGroups->setCurrentIndex(iSGIdx);
+		else
+			comboSpaceGroups->setCurrentIndex(0);
+
+		// descr
+		editDescr->setText(strDescr.c_str());
+	}
+	catch(const std::exception& ex)
+	{
+		tl::log_err(ex.what());
+		return false;
+	}
+
+
+	m_settings.setValue("main/last_import_cif_dir", QString(strDir.c_str()));
+	m_strCurFile = /*strFile1*/ "";		// prevents overwriting imported file on saving
+	setWindowTitle((s_strTitle + " - " + strFile1).c_str());
+
+	RecentFiles recent(&m_settings, "main/recent_import_cif");
+	recent.AddFile(strFile1.c_str());
+	recent.SaveList();
+	recent.FillMenu(m_pMenuRecentImportCIF, m_pMapperRecentImportCIF);
+
+	CalcPeaks();
+	return true;
+}
+
+#else
+
+bool TazDlg::ImportCIF() { return false; }
+bool TazDlg::ImportCIFFile(const QString&) { return false; }
+bool TazDlg::ImportCIF(const char*) { return false; }
+
+#endif
+
+//--------------------------------------------------------------------------------
+
 
 void TazDlg::ShowScanViewer()
 {

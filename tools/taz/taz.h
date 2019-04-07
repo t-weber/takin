@@ -123,8 +123,10 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		QSignalMapper *m_pMapperRecent = nullptr;
 		QSignalMapper *m_pMapperRecentImport = nullptr;
+		QSignalMapper *m_pMapperRecentImportCIF = nullptr;
 		QMenu *m_pMenuRecent = nullptr;
 		QMenu *m_pMenuRecentImport = nullptr;
+		QMenu *m_pMenuRecentImportCIF = nullptr;
 
 		// reciprocal lattice
 		xtl::LatticeCommon<t_real_glob> m_latticecommon;
@@ -214,6 +216,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		bool Load(const char* pcFile);
 		bool Import(const char* pcFile);
+		bool ImportCIF(const char* pcFile);
 
 	protected:
 		void ExportSceneSVG(QGraphicsScene& scene);
@@ -251,6 +254,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		bool SaveAs();
 		bool Load();
 		bool Import();
+		bool ImportCIF();
 
 		void ShowScanViewer();
 		void ShowScanPos();
@@ -258,6 +262,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 
 		bool LoadFile(const QString& strFile);
 		bool ImportFile(const QString& strFile);
+		bool ImportCIFFile(const QString& strFile);
 
 		void ExportReal();
 		void ExportTof();

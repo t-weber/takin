@@ -50,6 +50,9 @@ USE_GIL = 1
 USE_PY = 1
 USE_JL = 0
 
+# enable CIF support
+USE_CIF = 0
+
 # enable the plugin interface?
 USE_PLUGINS = 1
 
@@ -168,6 +171,12 @@ else
 	DEFINES += -DNO_JL
 endif
 
+ifeq ($(USE_CIF), 1)
+	DEFINES += -DUSE_CIF
+else
+	DEFINES += -DNO_CIF
+endif
+
 ifeq ($(USE_GIL), 1)
 	DEFINES += -DUSE_GIL
 else
@@ -186,6 +195,7 @@ endif
 
 DEFINES += -DQWT_VER=$(QWT_VER)
 DEFINES += -DQT_VER=$(QT_VER)
+DEFINES += -DPY_VER=$(PY_INC_VER)
 
 
 # -----------------------------------------------------------------------------
