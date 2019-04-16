@@ -1,5 +1,5 @@
 /**
- * Component Calculations (formerly only TOF-specific)
+ * Component calculations (formerly only TOF-specific)
  * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2017
  * @license GPLv2
@@ -41,7 +41,8 @@ TOFDlg::TOFDlg(QWidget* pParent, QSettings *pSett)
 	m_vecEditNames = { "tof_calc/chopper_l", "tof_calc/chopper_r",
 		"tof_calc/chopper_om", "tof_calc/chopper_t",
 		"tof_calc/div_l", "tof_calc/div_w", "tof_calc/div_ang",
-		"tof_calc/sel_lam", "tof_calc/sel_th", "tof_calc/sel_l", "tof_calc/sel_om"
+		"tof_calc/sel_lam", "tof_calc/sel_th", "tof_calc/sel_l", "tof_calc/sel_om",
+		"tof_foc_l1", "tof_foc_l2", "tof_foc_tt"
 	};
 	m_vecCheckNames = { "tof_calc/counter_rot" };
 
@@ -51,7 +52,8 @@ TOFDlg::TOFDlg(QWidget* pParent, QSettings *pSett)
 	};
 	m_vecEditBoxes = { editChopperL, editChopperR, editChopperOm, editChopperT, 
 		editDivL, editDivW, editDivAng,
-		editSelLam, editSelTh, editSelL, editSelOm
+		editSelLam, editSelTh, editSelL, editSelOm,
+		editFocL1, editFocL2, editFocTT
 	};
 	m_vecCheckBoxes = { checkChopperCounterRot };
 
@@ -121,6 +123,16 @@ TOFDlg::TOFDlg(QWidget* pParent, QSettings *pSett)
 
 	EnableSelEdits();
 	CalcSel();
+
+
+	// -------------------------------------------------------------------------
+	// focus
+	std::vector<QLineEdit*> editsFoc = { editFocL1, editFocL2, editFocTT };
+
+	for(QLineEdit* pEdit : editsFoc)
+		QObject::connect(pEdit, SIGNAL(textEdited(const QString&)), this, SLOT(CalcFoc()));
+
+	CalcFoc();
 }
 
 
@@ -300,6 +312,32 @@ void TOFDlg::CalcSel()
 		strSelOm = tl::var_to_str(t_real(om*sec), g_iPrec);
 		editSelOm->setText(strSelOm.c_str());
 	}
+}
+// -----------------------------------------------------------------------------
+
+
+
+// -----------------------------------------------------------------------------
+// foc
+
+void TOFDlg::CalcFoc()
+{
+	std::string strL1 = editFocL1->text().toStdString();
+	std::string strL2 = editFocL2->text().toStdString();
+	std::string strTT = editFocTT->text().toStdString();
+
+	tl::t_length_si<t_real> L1 = tl::str_to_var_parse<t_real>(strL1) * meter;
+	tl::t_length_si<t_real> L2 = tl::str_to_var_parse<t_real>(strL2) * meter;
+	tl::t_angle_si<t_real> tt = tl::str_to_var_parse<t_real>(strTT) * deg;
+
+	tl::t_length_si<t_real> curvv = tl::foc_curv(L1, L2, tt, true);
+	tl::t_length_si<t_real> curvh = tl::foc_curv(L1, L2, tt, false);
+
+	std::string strCurvV = tl::var_to_str(t_real(curvv/meter), g_iPrec);
+	std::string strCurvH = tl::var_to_str(t_real(curvh/meter), g_iPrec);
+
+	editFocCurvV->setText(strCurvV.c_str());
+	editFocCurvH->setText(strCurvH.c_str());
 }
 // -----------------------------------------------------------------------------
 

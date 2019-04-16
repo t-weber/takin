@@ -1,5 +1,5 @@
 /**
- * Component Calculations (formerly only TOF-specific)
+ * Component calculations (formerly only TOF-specific)
  * @author Tobias Weber <tobias.weber@tum.de>
  * @date feb-2017
  * @license GPLv2
@@ -51,6 +51,8 @@ class TOFDlg : public QDialog, Ui::TofCalcDlg
 
 		void CalcSel();
 		void EnableSelEdits();
+
+		void CalcFoc();
 };
 
 
