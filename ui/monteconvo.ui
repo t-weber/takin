@@ -119,7 +119,12 @@
             </property>
             <item>
              <property name="text">
-              <string>None</string>
+              <string>Unchanged</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat</string>
              </property>
             </item>
             <item>
@@ -201,7 +206,12 @@
             </property>
             <item>
              <property name="text">
-              <string>None</string>
+              <string>Unchanged</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat</string>
              </property>
             </item>
             <item>

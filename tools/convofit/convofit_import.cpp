@@ -132,17 +132,19 @@ std::string convert_monteconvo(
 	std::string strFocAnaH, strFocAnaV;
 	switch(propMC.Query<int>("taz/monteconvo/mono_foc"))
 	{
-		case 0: strFocMonoH = "0"; strFocMonoV = "0"; break;
-		case 1: strFocMonoH = "1"; strFocMonoV = "0"; break;
-		case 2: strFocMonoH = "0"; strFocMonoV = "1"; break;
-		case 3: strFocMonoH = "1"; strFocMonoV = "1"; break;
+		case 0: strFocMonoH = "-1"; strFocMonoV = "-1"; break;	// unchanged
+		case 1: strFocMonoH = "0"; strFocMonoV = "0"; break;	// flat
+		case 2: strFocMonoH = "1"; strFocMonoV = "0"; break;	// horizontal
+		case 3: strFocMonoH = "0"; strFocMonoV = "1"; break;	// vertical
+		case 4: strFocMonoH = "1"; strFocMonoV = "1"; break;	// both
 	}
 	switch(propMC.Query<int>("taz/monteconvo/ana_foc"))
 	{
-		case 0: strFocAnaH = "0"; strFocAnaV = "0"; break;
-		case 1: strFocAnaH = "1"; strFocAnaV = "0"; break;
-		case 2: strFocAnaH = "0"; strFocAnaV = "1"; break;
-		case 3: strFocAnaH = "1"; strFocAnaV = "1"; break;
+		case 0: strFocAnaH = "-1"; strFocAnaV = "-1"; break;	// unchanged
+		case 1: strFocAnaH = "0"; strFocAnaV = "0"; break;		// flat
+		case 2: strFocAnaH = "1"; strFocAnaV = "0"; break;		// horizontal
+		case 3: strFocAnaH = "0"; strFocAnaV = "1"; break;		// vertical
+		case 4: strFocAnaH = "1"; strFocAnaV = "1"; break;		// both
 	}
 
 	mapJob["resolution/focus_mono_v"] = strFocMonoV;

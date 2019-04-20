@@ -18,13 +18,15 @@
 
 enum class ResoFocus : unsigned
 {
-	FOC_NONE = 0,
+	FOC_UNCHANGED = 0,
 
+	FOC_MONO_FLAT = (1<<0),
 	FOC_MONO_H = (1<<1),
 	FOC_MONO_V = (1<<2),
 
-	FOC_ANA_H = (1<<3),
-	FOC_ANA_V = (1<<4)
+	FOC_ANA_FLAT = (1<<3),
+	FOC_ANA_H = (1<<4),
+	FOC_ANA_V = (1<<5),
 };
 
 
@@ -32,7 +34,7 @@ class TASReso
 {
 protected:
 	ResoAlgo m_algo = ResoAlgo::CN;
-	ResoFocus m_foc = ResoFocus::FOC_NONE;
+	ResoFocus m_foc = ResoFocus::FOC_UNCHANGED;
 
 	McNeutronOpts<ublas::matrix<t_real_reso>> m_opts;
 	EckParams m_reso;

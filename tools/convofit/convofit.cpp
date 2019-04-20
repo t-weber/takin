@@ -254,10 +254,12 @@ bool Convofit::run_job(const std::string& _strJob)
 		iNumNeutrons = g_iNumNeutrons;
 
 	std::string strResAlgo = prop.Query<std::string>("resolution/algorithm", "pop");
-	bool bResFocMonoV = prop.Query<bool>("resolution/focus_mono_v", 0);
-	bool bResFocMonoH = prop.Query<bool>("resolution/focus_mono_h", 0);
-	bool bResFocAnaV = prop.Query<bool>("resolution/focus_ana_v", 0);
-	bool bResFocAnaH = prop.Query<bool>("resolution/focus_ana_h", 0);
+
+	// -1: unchanged (use curvature value from reso file), 0: flat, 1: optimal
+	int iResFocMonoV = prop.Query<int>("resolution/focus_mono_v", -1);
+	int iResFocMonoH = prop.Query<int>("resolution/focus_mono_h", -1);
+	int iResFocAnaV = prop.Query<int>("resolution/focus_ana_v", -1);
+	int iResFocAnaH = prop.Query<int>("resolution/focus_ana_h", -1);
 
 	std::string strMinimiser = prop.Query<std::string>("fitter/minimiser");
 	int iStrat = prop.Query<int>("fitter/strategy", 0);
@@ -474,15 +476,19 @@ bool Convofit::run_job(const std::string& _strJob)
 			return 0;
 		}
 
-		if(bResFocMonoV || bResFocMonoH || bResFocAnaV || bResFocAnaH)
 		{
-			unsigned iFoc = 0;
-			if(bResFocMonoV) iFoc |= unsigned(ResoFocus::FOC_MONO_V);
-			if(bResFocMonoH) iFoc |= unsigned(ResoFocus::FOC_MONO_H);
-			if(bResFocAnaV) iFoc |= unsigned(ResoFocus::FOC_ANA_V);
-			if(bResFocAnaH) iFoc |= unsigned(ResoFocus::FOC_ANA_H);
+			// TODO: distinguish between flat_v and flat_h
+			unsigned ifocMode = unsigned(ResoFocus::FOC_UNCHANGED);
 
-			reso.SetOptimalFocus(ResoFocus(iFoc));
+			if(iResFocMonoH == 0 && iResFocMonoV == 0) ifocMode |= unsigned(ResoFocus::FOC_MONO_FLAT);		// flat
+			if(iResFocMonoH == 1) ifocMode |= unsigned(ResoFocus::FOC_MONO_H);		// horizontal
+			if(iResFocMonoV == 1) ifocMode |= unsigned(ResoFocus::FOC_MONO_V);		// vertical
+
+			if(iResFocAnaH == 0 && iResFocAnaV == 0) ifocMode |= unsigned(ResoFocus::FOC_ANA_FLAT);			// flat
+			if(iResFocAnaH == 1) ifocMode |= unsigned(ResoFocus::FOC_ANA_H);	// horizontal
+			if(iResFocAnaV == 1) ifocMode |= unsigned(ResoFocus::FOC_ANA_V);	// vertical
+
+			reso.SetOptimalFocus(ResoFocus(ifocMode));
 		}
 
 		reso.SetRandomSamplePos(iNumSample);

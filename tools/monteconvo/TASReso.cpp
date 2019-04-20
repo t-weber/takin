@@ -386,23 +386,21 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 	//m_reso.angle_kf_Q = units::abs(m_reso.angle_kf_Q);
 
 
-	if(m_foc == ResoFocus::FOC_NONE)
+	if(m_foc != ResoFocus::FOC_UNCHANGED)
 	{
-		m_reso.bMonoIsCurvedH = m_reso.bMonoIsCurvedV = 0;
-		m_reso.bAnaIsCurvedH = m_reso.bAnaIsCurvedV = 0;
+		if((unsigned(m_foc) & unsigned(ResoFocus::FOC_MONO_FLAT)) != 0)		// flat mono
+			m_reso.bMonoIsCurvedH = m_reso.bMonoIsCurvedV = 0;
+		if((unsigned(m_foc) & unsigned(ResoFocus::FOC_MONO_H)) != 0)		// optimally curved mono (h)
+			m_reso.bMonoIsCurvedH = m_reso.bMonoIsOptimallyCurvedH = 1;
+		if((unsigned(m_foc) & unsigned(ResoFocus::FOC_MONO_V)) != 0)		// optimally curved mono (v)
+			m_reso.bMonoIsCurvedV = m_reso.bMonoIsOptimallyCurvedV = 1;
 
-		//tl::log_info("No focus.");
-	}
-	else
-	{
-		m_reso.bMonoIsCurvedH = m_reso.bMonoIsOptimallyCurvedH =
-			(unsigned(m_foc) & unsigned(ResoFocus::FOC_MONO_H));
-		m_reso.bMonoIsCurvedV = m_reso.bMonoIsOptimallyCurvedV =
-			(unsigned(m_foc) & unsigned(ResoFocus::FOC_MONO_V));
-		m_reso.bAnaIsCurvedH = m_reso.bAnaIsOptimallyCurvedH =
-			(unsigned(m_foc) & unsigned(ResoFocus::FOC_ANA_H));
-		m_reso.bAnaIsCurvedV = m_reso.bAnaIsOptimallyCurvedV =
-			(unsigned(m_foc) & unsigned(ResoFocus::FOC_ANA_V));
+		if((unsigned(m_foc) & unsigned(ResoFocus::FOC_ANA_FLAT)) != 0)		// flat ana
+			m_reso.bAnaIsCurvedH = m_reso.bAnaIsCurvedV = 0;
+		if((unsigned(m_foc) & unsigned(ResoFocus::FOC_ANA_H)) != 0)			// optimally curved ana (h)
+			m_reso.bAnaIsCurvedH = m_reso.bAnaIsOptimallyCurvedH = 1;
+		if((unsigned(m_foc) & unsigned(ResoFocus::FOC_ANA_V)) != 0)			// optimally curved ana (v)
+			m_reso.bAnaIsCurvedV = m_reso.bAnaIsOptimallyCurvedV = 1;
 
 		//tl::log_info("Mono focus (h,v): ", m_reso.bMonoIsOptimallyCurvedH, ", ", m_reso.bMonoIsOptimallyCurvedV);
 		//tl::log_info("Ana focus (h,v): ", m_reso.bAnaIsOptimallyCurvedH, ", ", m_reso.bAnaIsOptimallyCurvedV);
