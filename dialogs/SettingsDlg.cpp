@@ -8,6 +8,7 @@
 #include "SettingsDlg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/log/log.h"
+#include "tlibs/file/file.h"
 #ifndef NO_3D
 	#include "tlibs/gfx/gl.h"
 #endif
@@ -46,11 +47,15 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 	connect(btnGLFont, &QAbstractButton::clicked, this, &SettingsDlg::SelectGLFont);
 	connect(btnGfxFont, &QAbstractButton::clicked, this, &SettingsDlg::SelectGfxFont);
 	connect(btnGenFont, &QAbstractButton::clicked, this, &SettingsDlg::SelectGenFont);
+	connect(btnCif, &QAbstractButton::clicked, this, &SettingsDlg::SelectCifTool);
+	connect(btnGpl, &QAbstractButton::clicked, this, &SettingsDlg::SelectGplTool);
 #else
 	connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(ButtonBoxClicked(QAbstractButton*)));
 	connect(btnGLFont, SIGNAL(clicked()), this, SLOT(SelectGLFont()));
 	connect(btnGfxFont, SIGNAL(clicked()), this, SLOT(SelectGfxFont()));
 	connect(btnGenFont, SIGNAL(clicked()), this, SLOT(SelectGenFont()));
+	connect(btnCif, SIGNAL(clicked()), this, SLOT(SelectCifTool()));
+	connect(btnGpl, SIGNAL(clicked()), this, SLOT(SelectGplTool()));
 #endif
 
 	m_vecEdits =
@@ -78,7 +83,6 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupEdit("net/timer", "nicos/timer/value", editCurTime),
 		t_tupEdit("net/preset", "nicos/timer/preselection", editPreset),
 		t_tupEdit("net/counter", "nicos/ctr1/value", editCounter),
-
 
 		// sics devices
 		t_tupEdit("net/lattice_a_6", "AS", edit6_AS),
@@ -117,7 +121,11 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		// misc
 		t_tupEdit("gl/font", "", editGLFont),
 		t_tupEdit("main/font_gfx", g_fontGfx.toString().toStdString().c_str(), editGfxFont),
-		t_tupEdit("main/font_gen", g_fontGen.toString().toStdString().c_str(), editGenFont)
+		t_tupEdit("main/font_gen", g_fontGen.toString().toStdString().c_str(), editGenFont),
+	
+		// external tools
+		t_tupEdit("tools/cif2xml", "cif2xml", editCif),
+		t_tupEdit("tools/gpl", "gnuplot", editGpl)
 	};
 
 	m_vecChecks =
@@ -263,6 +271,7 @@ void SettingsDlg::LoadSettings()
 	SetGlobals();
 }
 
+
 void SettingsDlg::SaveSettings()
 {
 	if(!m_pSettings) return;
@@ -305,6 +314,27 @@ void SettingsDlg::SaveSettings()
 }
 
 
+static inline std::string find_program_binary(const std::string& strExe)
+{
+	// if the given binary file exists, directly use it
+	if(tl::file_exists(strExe.c_str()))
+	{
+		tl::log_info("Found external tool: \"", strExe, "\".");
+		return strExe;
+	}
+
+	// try prefixing it with the application path
+	std::string strPath = g_strApp + "/" + strExe;
+	if(tl::file_exists(strPath.c_str()))
+	{
+		tl::log_info("Found external tool in program path: \"", strPath, "\".");
+		return strPath;
+	}
+
+	return strExe;
+}
+
+
 void SettingsDlg::SetGlobals() const
 {
 	// precisions
@@ -340,9 +370,7 @@ void SettingsDlg::SetGlobals() const
 	}
 
 	if(editGLFont->text().length() != 0)
-	{
 		g_strFontGL = editGLFont->text().toStdString();
-	}
 
 	if(spinGLFont->value() > 0)
 		g_iFontGLSize = spinGLFont->value();
@@ -354,6 +382,15 @@ void SettingsDlg::SetGlobals() const
 		if(font.fromString(strGenFont))
 			g_fontGen = font;
 	}
+
+
+	// external tools
+	if(editCif->text().length() != 0)
+		g_strCifTool = find_program_binary(editCif->text().toStdString());
+
+	if(editGpl->text().length() != 0)
+		g_strGplTool = find_program_binary(editGpl->text().toStdString());
+
 
 	// GUI style
 	QString strStyle = comboGUI->currentText();
@@ -390,12 +427,13 @@ void SettingsDlg::SelectGLFont()
 
 	QString strFile = QFileDialog::getOpenFileName(this,
 		"Open Font File...", strPath.c_str(),
-		"Font files (*.ttf *.TTF)", nullptr, fileopt);
+		"Font Files (*.ttf *.TTF)", nullptr, fileopt);
 	if(strFile == "")
 		return;
 
 	editGLFont->setText(strFile);
 }
+
 
 void SettingsDlg::SelectGfxFont()
 {
@@ -411,6 +449,7 @@ void SettingsDlg::SelectGfxFont()
 	}
 }
 
+
 void SettingsDlg::SelectGenFont()
 {
 	bool bOk = 0;
@@ -423,10 +462,43 @@ void SettingsDlg::SelectGenFont()
 }
 
 
+void SettingsDlg::SelectCifTool()
+{
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(m_pSettings && !m_pSettings->value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	QString strFile = QFileDialog::getOpenFileName(this,
+		"Select Cif2Xml Tool...", "",
+		"Executable Files (* *.exe *.EXE)", nullptr, fileopt);
+	if(strFile == "")
+		return;
+
+	editCif->setText(strFile);
+}
+
+
+void SettingsDlg::SelectGplTool()
+{
+	QFileDialog::Option fileopt = QFileDialog::Option(0);
+	if(m_pSettings && !m_pSettings->value("main/native_dialogs", 1).toBool())
+		fileopt = QFileDialog::DontUseNativeDialog;
+
+	QString strFile = QFileDialog::getOpenFileName(this,
+		"Select Gnuplot Tool...", "",
+		"Executable Files (* *.exe *.EXE)", nullptr, fileopt);
+	if(strFile == "")
+		return;
+
+	editGpl->setText(strFile);
+}
+
+
 void SettingsDlg::showEvent(QShowEvent *pEvt)
 {
 	QDialog::showEvent(pEvt);
 }
+
 
 void SettingsDlg::ButtonBoxClicked(QAbstractButton *pBtn)
 {
@@ -453,5 +525,6 @@ void SettingsDlg::ButtonBoxClicked(QAbstractButton *pBtn)
 		QDialog::accept();
 	}
 }
+
 
 #include "SettingsDlg.moc"

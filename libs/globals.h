@@ -36,6 +36,12 @@ extern bool g_bShowFsq;
 extern bool g_b3dBZ;
 extern bool g_bThreadedGL;
 
+extern std::string g_strApp;	// application dir
+extern std::string g_strHome;	// home dir
+
+extern std::string g_strCifTool;
+extern std::string g_strGplTool;
+
 extern t_real_glob g_dFontSize;
 
 extern void add_resource_path(const std::string& strPath, bool bToBack=1);

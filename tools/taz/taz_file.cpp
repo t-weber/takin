@@ -8,6 +8,7 @@
 #include "taz.h"
 #include "tlibs/string/string.h"
 #include "tlibs/time/chrono.h"
+#include "libs/globals.h"
 #include "libs/version.h"
 #include "libs/qt/recent.h"
 #include "dialogs/FilePreviewDlg.h"
@@ -84,6 +85,7 @@ void TazDlg::New()
 	VarsChanged(crys, triag);
 }
 
+
 bool TazDlg::Load()
 {
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
@@ -100,10 +102,12 @@ bool TazDlg::Load()
 	return Load(strFile.toStdString().c_str());
 }
 
+
 bool TazDlg::LoadFile(const QString& strFile)
 {
 	return Load(strFile.toStdString().c_str());
 }
+
 
 bool TazDlg::Load(const char* pcFile)
 {
@@ -166,7 +170,7 @@ bool TazDlg::Load(const char* pcFile)
 
 		for(std::size_t iEditBox=0; iEditBox<pVec->size(); ++iEditBox)
 		{
-			std::string str = xml.Query<std::string>((strXmlRoot+(*pvecName)[iEditBox]).c_str(), "0", &bOk);
+			std::string str = xml.Query<std::string>(strXmlRoot+(*pvecName)[iEditBox], "0", &bOk);
 			tl::trim(str);
 			if(bOk)
 				(*pVec)[iEditBox]->setText(str.c_str());
@@ -175,13 +179,13 @@ bool TazDlg::Load(const char* pcFile)
 		++iIdxEdit;
 	}
 
-	std::string strDescr = xml.Query<std::string>((strXmlRoot+"sample/descr").c_str(), "", &bOk);
+	std::string strDescr = xml.Query<std::string>(strXmlRoot+"sample/descr", "", &bOk);
 	if(bOk)
 		editDescr->setText(strDescr.c_str());
 
 	/*// spin boxes
 	for(unsigned int iSpinBox=0; iSpinBox<m_vecSpinBoxesSample.size(); ++iSpinBox)
-		t_real dVal = xml.Query<t_real>((strXmlRoot+m_vecSpinBoxNamesSample[iSpinBox]).c_str(), 0., &bOk);
+		t_real dVal = xml.Query<t_real>(strXmlRoot+m_vecSpinBoxNamesSample[iSpinBox], 0., &bOk);
 		if(bOk)
 			m_vecSpinBoxesSample[iSpinBox]->setValue(dVal);
 	}*/
@@ -190,16 +194,16 @@ bool TazDlg::Load(const char* pcFile)
 	// check boxes
 	for(unsigned int iCheckBox=0; iCheckBox<m_vecCheckBoxesSenses.size(); ++iCheckBox)
 	{
-		int iVal = xml.Query<int>((strXmlRoot+m_vecCheckBoxNamesSenses[iCheckBox]).c_str(), 0, &bOk);
+		int iVal = xml.Query<int>(strXmlRoot+m_vecCheckBoxNamesSenses[iCheckBox], 0, &bOk);
 		if(bOk)
 			m_vecCheckBoxesSenses[iCheckBox]->setChecked(iVal != 0);
 	}
 
 
 	// TAS Layout
-	if(xml.Exists((strXmlRoot + "real").c_str()))
+	if(xml.Exists(strXmlRoot + "real"))
 	{
-		t_real dRealScale = xml.Query<t_real>((strXmlRoot + "real/pixels_per_cm").c_str(), 0., &bOk);
+		t_real dRealScale = xml.Query<t_real>(strXmlRoot + "real/pixels_per_cm", 0., &bOk);
 		if(bOk)
 			m_sceneReal.GetTasLayout()->SetScaleFactor(dRealScale);
 
@@ -209,27 +213,27 @@ bool TazDlg::Load(const char* pcFile)
 			std::string strNode = m_sceneReal.GetTasLayout()->GetNodeNames()[iNodeReal];
 
 			bool bOkX=0, bOkY=0;
-			t_real dValX = xml.Query<t_real>((strXmlRoot + "real/" + strNode + "_x").c_str(), 0., &bOkX);
-			t_real dValY = xml.Query<t_real>((strXmlRoot + "real/" + strNode + "_y").c_str(), 0., &bOkY);
+			t_real dValX = xml.Query<t_real>(strXmlRoot + "real/" + strNode + "_x", 0., &bOkX);
+			t_real dValY = xml.Query<t_real>(strXmlRoot + "real/" + strNode + "_y", 0., &bOkY);
 
 			pNode->setPos(dValX, dValY);
 			++iNodeReal;
 		}
 
-		int bWSEnabled = xml.Query<int>((strXmlRoot + "real/enable_ws").c_str(), 0, &bOk);
+		int bWSEnabled = xml.Query<int>(strXmlRoot + "real/enable_ws", 0, &bOk);
 		if(bOk)
 			m_pWS->setChecked(bWSEnabled!=0);
 
-		int bRealQEnabled = xml.Query<int>((strXmlRoot + "real/enable_realQDir").c_str(), 0, &bOk);
+		int bRealQEnabled = xml.Query<int>(strXmlRoot + "real/enable_realQDir", 0, &bOk);
 		if(bOk)
 			m_pShowRealQDir->setChecked(bRealQEnabled!=0);
 	}
 
 
 	// scattering triangle
-	if(xml.Exists((strXmlRoot + "recip").c_str()))
+	if(xml.Exists(strXmlRoot + "recip"))
 	{
-		t_real dRecipScale = xml.Query<t_real>((strXmlRoot + "recip/pixels_per_A-1").c_str(), 0., &bOk);
+		t_real dRecipScale = xml.Query<t_real>(strXmlRoot + "recip/pixels_per_A-1", 0., &bOk);
 		if(bOk)
 			m_sceneRecip.GetTriangle()->SetScaleFactor(dRecipScale);
 
@@ -239,8 +243,8 @@ bool TazDlg::Load(const char* pcFile)
 			std::string strNode = m_sceneRecip.GetTriangle()->GetNodeNames()[iNodeRecip];
 
 			bool bOkX=0, bOkY=0;
-			t_real dValX = xml.Query<t_real>((strXmlRoot + "recip/" + strNode + "_x").c_str(), 0., &bOkX);
-			t_real dValY = xml.Query<t_real>((strXmlRoot + "recip/" + strNode + "_y").c_str(), 0., &bOkY);
+			t_real dValX = xml.Query<t_real>(strXmlRoot + "recip/" + strNode + "_x", 0., &bOkX);
+			t_real dValY = xml.Query<t_real>(strXmlRoot + "recip/" + strNode + "_y", 0., &bOkY);
 
 			pNode->setPos(dValX, dValY);
 			++iNodeRecip;
@@ -248,23 +252,23 @@ bool TazDlg::Load(const char* pcFile)
 
 
 
-		int bSmallqEnabled = xml.Query<int>((strXmlRoot + "recip/enable_q").c_str(), 0, &bOk);
+		int bSmallqEnabled = xml.Query<int>(strXmlRoot + "recip/enable_q", 0, &bOk);
 		if(bOk)
 			m_pSmallq->setChecked(bSmallqEnabled!=0);
 
-		int bCoordAxesEnabled = xml.Query<int>((strXmlRoot + "recip/enable_axes").c_str(), 0, &bOk);
+		int bCoordAxesEnabled = xml.Query<int>(strXmlRoot + "recip/enable_axes", 0, &bOk);
 		if(bOk)
 			m_pCoordAxes->setChecked(bCoordAxesEnabled!=0);
 
-		int bSmallqSnapped = xml.Query<int>((strXmlRoot + "recip/snap_q").c_str(), 1, &bOk);
+		int bSmallqSnapped = xml.Query<int>(strXmlRoot + "recip/snap_q", 1, &bOk);
 		if(bOk)
 			m_pSnapSmallq->setChecked(bSmallqSnapped!=0);
 
-		int bBZEnabled = xml.Query<int>((strXmlRoot + "recip/enable_bz").c_str(), 0, &bOk);
+		int bBZEnabled = xml.Query<int>(strXmlRoot + "recip/enable_bz", 0, &bOk);
 		if(bOk)
 			m_pBZ->setChecked(bBZEnabled!=0);
 
-		int iEwald = xml.Query<int>((strXmlRoot + "recip/ewald_sphere").c_str(), 0, &bOk);
+		int iEwald = xml.Query<int>(strXmlRoot + "recip/ewald_sphere", 0, &bOk);
 		if(bOk)
 		{
 			if(iEwald == EWALD_NONE) m_pEwaldSphereNone->setChecked(1);
@@ -275,9 +279,9 @@ bool TazDlg::Load(const char* pcFile)
 
 
 	// sample definitions
-	if(xml.Exists((strXmlRoot + "sample").c_str()))
+	if(xml.Exists(strXmlRoot + "sample"))
 	{
-		std::string strSpaceGroup = xml.Query<std::string>((strXmlRoot + "sample/spacegroup").c_str(), "", &bOk);
+		std::string strSpaceGroup = xml.Query<std::string>(strXmlRoot + "sample/spacegroup", "", &bOk);
 		tl::trim(strSpaceGroup);
 		if(bOk)
 		{
@@ -293,23 +297,23 @@ bool TazDlg::Load(const char* pcFile)
 
 
 		m_vecAtoms.clear();
-		std::size_t iNumAtoms = xml.Query<std::size_t>((strXmlRoot + "sample/atoms/num").c_str(), 0, &bOk);
+		std::size_t iNumAtoms = xml.Query<std::size_t>(strXmlRoot + "sample/atoms/num", 0, &bOk);
 		if(bOk)
 		{
 			m_vecAtoms.reserve(iNumAtoms);
 
 			for(std::size_t iAtom=0; iAtom<iNumAtoms; ++iAtom)
 			{
-				xtl::AtomPos<t_real> atom;
-				atom.vecPos.resize(3,0);
+				xtl::AtomPos<t_real> theatom;
+				theatom.vecPos.resize(3,0);
 
 				std::string strNr = tl::var_to_str(iAtom);
-				atom.strAtomName = xml.Query<std::string>((strXmlRoot + "sample/atoms/" + strNr + "/name").c_str(), "");
-				atom.vecPos[0] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/x").c_str(), 0.);
-				atom.vecPos[1] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/y").c_str(), 0.);
-				atom.vecPos[2] = xml.Query<t_real>((strXmlRoot + "sample/atoms/" + strNr + "/z").c_str(), 0.);
+				theatom.strAtomName = xml.Query<std::string>(strXmlRoot + "sample/atoms/" + strNr + "/name", "");
+				theatom.vecPos[0] = xml.Query<t_real>(strXmlRoot + "sample/atoms/" + strNr + "/x", 0.);
+				theatom.vecPos[1] = xml.Query<t_real>(strXmlRoot + "sample/atoms/" + strNr + "/y", 0.);
+				theatom.vecPos[2] = xml.Query<t_real>(strXmlRoot + "sample/atoms/" + strNr + "/z", 0.);
 
-				m_vecAtoms.push_back(atom);
+				m_vecAtoms.emplace_back(std::move(theatom));
 			}
 
 			if(m_pAtomsDlg) m_pAtomsDlg->SetAtoms(m_vecAtoms);
@@ -319,7 +323,7 @@ bool TazDlg::Load(const char* pcFile)
 
 	// dead angles
 	m_vecDeadAngles.clear();
-	unsigned int iNumAngles = xml.Query<unsigned int>((strXmlRoot + "deadangles/num").c_str(), 0, &bOk);
+	unsigned int iNumAngles = xml.Query<unsigned int>(strXmlRoot + "deadangles/num", 0, &bOk);
 	if(bOk)
 	{
 		m_vecDeadAngles.reserve(iNumAngles);
@@ -329,13 +333,13 @@ bool TazDlg::Load(const char* pcFile)
 			DeadAngle<t_real> angle;
 
 			std::string strNr = tl::var_to_str(iAngle);
-			angle.dAngleStart = xml.Query<t_real>((strXmlRoot + "deadangles/" + strNr + "/start").c_str(), 0.);
-			angle.dAngleEnd = xml.Query<t_real>((strXmlRoot + "deadangles/" + strNr + "/end").c_str(), 0.);
-			angle.dAngleOffs = xml.Query<t_real>((strXmlRoot + "deadangles/" + strNr + "/offs").c_str(), 0.);
-			angle.iCentreOn = xml.Query<int>((strXmlRoot + "deadangles/" + strNr + "/centreon").c_str(), 1);
-			angle.iRelativeTo = xml.Query<int>((strXmlRoot + "deadangles/" + strNr + "/relativeto").c_str(), 0);
+			angle.dAngleStart = xml.Query<t_real>(strXmlRoot + "deadangles/" + strNr + "/start", 0.);
+			angle.dAngleEnd = xml.Query<t_real>(strXmlRoot + "deadangles/" + strNr + "/end", 0.);
+			angle.dAngleOffs = xml.Query<t_real>(strXmlRoot + "deadangles/" + strNr + "/offs", 0.);
+			angle.iCentreOn = xml.Query<int>(strXmlRoot + "deadangles/" + strNr + "/centreon", 1);
+			angle.iRelativeTo = xml.Query<int>(strXmlRoot + "deadangles/" + strNr + "/relativeto", 0);
 
-			m_vecDeadAngles.push_back(angle);
+			m_vecDeadAngles.emplace_back(std::move(angle));
 		}
 
 		if(m_pDeadAnglesDlg)
@@ -349,8 +353,8 @@ bool TazDlg::Load(const char* pcFile)
 	if(m_pGotoDlg)
 		m_pGotoDlg->ClearList();
 
-	if(xml.Exists((strXmlRoot + "goto_favlist").c_str()) ||
-		xml.Exists((strXmlRoot + "goto_pos").c_str()))
+	if(xml.Exists(strXmlRoot + "goto_favlist") ||
+		xml.Exists(strXmlRoot + "goto_pos"))
 	{
 		InitGoto();
 		m_pGotoDlg->Load(xml, strXmlRoot);
@@ -358,7 +362,7 @@ bool TazDlg::Load(const char* pcFile)
 
 
 	// reso dialog
-	if(xml.Exists((strXmlRoot + "reso").c_str()))
+	if(xml.Exists(strXmlRoot + "reso"))
 	{
 		InitReso();
 		m_pReso->SetUpdateOn(0,0);
@@ -367,7 +371,7 @@ bool TazDlg::Load(const char* pcFile)
 
 
 	// convo dialog
-	if(xml.Exists((strXmlRoot + "monteconvo").c_str()))
+	if(xml.Exists(strXmlRoot + "monteconvo"))
 	{
 		InitResoConv();
 		m_pConvoDlg->Load(xml, strXmlRoot);
@@ -591,6 +595,7 @@ bool TazDlg::Save()
 	return true;
 }
 
+
 bool TazDlg::SaveAs()
 {
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
@@ -667,21 +672,25 @@ bool TazDlg::Import()
 	return Import(strFile.toStdString().c_str());
 }
 
+
 bool TazDlg::ImportFile(const QString& strFile)
 {
 	return Import(strFile.toStdString().c_str());
 }
 
+
 bool TazDlg::Import(const char* pcFile)
 {
-	Disconnect();
-
-	std::string strFile1 = pcFile;
-	std::string strDir = tl::get_dir(strFile1);
-
-	std::size_t iScanNum = 0;
 	try
 	{
+		Disconnect();
+
+		std::string strFile1 = pcFile;
+		std::string strDir = tl::get_dir(strFile1);
+
+		std::size_t iScanNum = 0;
+
+
 		std::unique_ptr<tl::FileInstrBase<t_real>> ptrDat(
 			tl::FileInstrBase<t_real>::LoadInstr(pcFile));
 		tl::FileInstrBase<t_real>* pdat = ptrDat.get();
@@ -750,29 +759,29 @@ bool TazDlg::Import(const char* pcFile)
 				m_pGotoDlg->AddPosToList(arrScan[0],arrScan[1],arrScan[2],arrScan[3],arrScan[4]);
 			}
 		}
+
+
+		m_settings.setValue("main/last_import_dir", QString(strDir.c_str()));
+		m_strCurFile = /*strFile1*/ "";		// prevents overwriting imported file on saving
+		setWindowTitle((s_strTitle + " - " + strFile1).c_str());
+
+		RecentFiles recent(&m_settings, "main/recent_import");
+		recent.AddFile(strFile1.c_str());
+		recent.SaveList();
+		recent.FillMenu(m_pMenuRecentImport, m_pMapperRecentImport);
+
+		CalcPeaks();
+
+		if(iScanNum && m_pGotoDlg)
+		{
+			if(m_pGotoDlg->GotoPos(0))
+				focus_dlg(m_pGotoDlg);
+		}
 	}
 	catch(const std::exception& ex)
 	{
 		tl::log_err(ex.what());
 		return false;
-	}
-
-
-	m_settings.setValue("main/last_import_dir", QString(strDir.c_str()));
-	m_strCurFile = /*strFile1*/ "";		// prevents overwriting imported file on saving
-	setWindowTitle((s_strTitle + " - " + strFile1).c_str());
-
-	RecentFiles recent(&m_settings, "main/recent_import");
-	recent.AddFile(strFile1.c_str());
-	recent.SaveList();
-	recent.FillMenu(m_pMenuRecentImport, m_pMapperRecentImport);
-
-	CalcPeaks();
-
-	if(iScanNum && m_pGotoDlg)
-	{
-		if(m_pGotoDlg->GotoPos(0))
-			focus_dlg(m_pGotoDlg);
 	}
 
 	return true;
@@ -787,6 +796,9 @@ bool TazDlg::Import(const char* pcFile)
 
 #ifdef USE_CIF
 
+#include "libcrystal/libs/xtl_xml.h"
+#include "tlibs/helper/proc.h"
+
 bool TazDlg::ImportCIF()
 {
 	QFileDialog::Option fileopt = QFileDialog::Option(0);
@@ -796,11 +808,7 @@ bool TazDlg::ImportCIF()
 	const bool bShowPreview = m_settings.value("main/dlg_previews", true).toBool();
 	QString strDirLast = m_settings.value("main/last_import_cif_dir", ".").toString();
 
-	std::unique_ptr<QFileDialog> pdlg;
-	if(bShowPreview)
-		pdlg.reset(new FilePreviewDlg(this, "Import CIF...", &m_settings));
-	else
-		pdlg.reset(new QFileDialog(this, "Import CIF..."));
+	std::unique_ptr<QFileDialog> pdlg{new QFileDialog(this, "Import CIF...")};
 
 	pdlg->setOptions(fileopt);
 	pdlg->setDirectory(strDirLast);
@@ -824,31 +832,103 @@ bool TazDlg::ImportCIF()
 	return ImportCIF(strFile.toStdString().c_str());
 }
 
+
 bool TazDlg::ImportCIFFile(const QString& strFile)
 {
 	return ImportCIF(strFile.toStdString().c_str());
 }
 
+
 bool TazDlg::ImportCIF(const char* pcFile)
 {
 	Disconnect();
 
-	std::string strFile1 = pcFile;
-	std::string strDir = tl::get_dir(strFile1);
 
 	try
 	{
-		// TODO
-		t_real a = 5;
-		t_real b = 5;
-		t_real c = 5;
-		t_real alpha = M_PI/2;
-		t_real beta = M_PI/2;
-		t_real gamma = M_PI/2;
-		std::string strSpaceGroup = "P1";
-		tl::trim(strSpaceGroup);
-		std::string strDescr = "";
+		std::string strFile1 = pcFile;
+		std::string strDir = tl::get_dir(strFile1);
+		std::string strCifTool = g_strCifTool; //"/home/tw/tmp/cif2xml 2>/dev/null";
 
+		// open pipe to external cif2xml tool
+		tl::PipeProc<char> proc((strCifTool + " " + strFile1).c_str(), false);
+		if(!proc.IsReady())
+		{
+			QMessageBox::critical(this, "Error", "Cannot invoke cif2xml tool.");
+			return false;
+		}
+
+
+		// load xml representation of cif
+		using t_vec = ublas::vector<t_real>;
+		using t_mat = ublas::matrix<t_real>;
+
+		bool bOk = 0;
+		t_real a = 5, b = 5, c = 5;
+		t_real alpha = M_PI/2, beta = M_PI/2, gamma = M_PI/2;
+		std::vector<std::string> vecAtomNames;
+		std::vector<t_vec> vecAtomPos;
+		std::vector<std::vector<t_vec>> vecAllAtomPos;
+		std::string strSpaceGroup = "";
+
+		//std::ifstream istrCIF(strFile1);
+		std::basic_istream<char>& istrCIF = proc.GetIstr();
+		std::tie(bOk, a,b,c, alpha,beta,gamma, vecAtomNames, vecAtomPos, vecAllAtomPos, strSpaceGroup) = 
+			xtl::load_xml<t_real, t_vec, t_mat>(istrCIF);
+		tl::trim(strSpaceGroup);
+
+		if(!bOk)
+		{
+			QMessageBox::critical(this, "Error", "CIF import failed");
+			return false;
+		}
+
+
+		// TODO: clean up atom names
+		//for(const std::string& strAtom : vecAtomNames)
+		//{
+		//}
+
+
+		// update atomic positions
+		m_vecAtoms.clear();
+
+		if(strSpaceGroup == "")
+		{
+			QMessageBox::warning(this, "Warning", 
+				"No suitable space group could be found which matches the CIF, "
+				"using P1 instead and generating all atomic positions.");
+
+			strSpaceGroup = "P1";
+			for(std::size_t iAtomType=0; iAtomType<vecAllAtomPos.size(); ++iAtomType)
+			{
+				for(std::size_t iAtom=0; iAtom<vecAllAtomPos[iAtomType].size(); ++iAtom)
+				{
+					xtl::AtomPos<t_real> theatom;
+					theatom.vecPos = vecAllAtomPos[iAtomType][iAtom];
+					theatom.strAtomName = vecAtomNames[iAtomType];
+
+					m_vecAtoms.emplace_back(std::move(theatom));
+				}
+			}
+		}
+		else
+		{
+			for(std::size_t iAtom=0; iAtom<vecAtomPos.size(); ++iAtom)
+			{
+				xtl::AtomPos<t_real> theatom;
+				theatom.vecPos = vecAtomPos[iAtom];
+				theatom.strAtomName = vecAtomNames[iAtom];
+
+				m_vecAtoms.emplace_back(std::move(theatom));
+			}
+		}
+		
+		if(m_pAtomsDlg)
+			m_pAtomsDlg->SetAtoms(m_vecAtoms);
+
+
+		// lattice
 		editA->setText(tl::var_to_str(a).c_str());
 		editB->setText(tl::var_to_str(b).c_str());
 		editC->setText(tl::var_to_str(c).c_str());
@@ -856,6 +936,7 @@ bool TazDlg::ImportCIF(const char* pcFile)
 		editAlpha ->setText(tl::var_to_str(tl::r2d(alpha)).c_str());
 		editBeta->setText(tl::var_to_str(tl::r2d(beta)).c_str());
 		editGamma->setText(tl::var_to_str(tl::r2d(gamma)).c_str());
+
 
 		// spacegroup
 		editSpaceGroupsFilter->clear();
@@ -867,8 +948,21 @@ bool TazDlg::ImportCIF(const char* pcFile)
 		else
 			comboSpaceGroups->setCurrentIndex(0);
 
+
 		// descr
-		editDescr->setText(strDescr.c_str());
+		editDescr->setText("");
+
+
+		m_settings.setValue("main/last_import_cif_dir", QString(strDir.c_str()));
+		m_strCurFile = /*strFile1*/ "";		// prevents overwriting imported file on saving
+		setWindowTitle((s_strTitle + " - " + strFile1).c_str());
+
+		RecentFiles recent(&m_settings, "main/recent_import_cif");
+		recent.AddFile(strFile1.c_str());
+		recent.SaveList();
+		recent.FillMenu(m_pMenuRecentImportCIF, m_pMapperRecentImportCIF);
+
+		CalcPeaks();
 	}
 	catch(const std::exception& ex)
 	{
@@ -876,21 +970,12 @@ bool TazDlg::ImportCIF(const char* pcFile)
 		return false;
 	}
 
-
-	m_settings.setValue("main/last_import_cif_dir", QString(strDir.c_str()));
-	m_strCurFile = /*strFile1*/ "";		// prevents overwriting imported file on saving
-	setWindowTitle((s_strTitle + " - " + strFile1).c_str());
-
-	RecentFiles recent(&m_settings, "main/recent_import_cif");
-	recent.AddFile(strFile1.c_str());
-	recent.SaveList();
-	recent.FillMenu(m_pMenuRecentImportCIF, m_pMapperRecentImportCIF);
-
-	CalcPeaks();
 	return true;
 }
 
+
 #else
+
 
 bool TazDlg::ImportCIF() { return false; }
 bool TazDlg::ImportCIFFile(const QString&) { return false; }
@@ -909,6 +994,7 @@ void TazDlg::ShowScanViewer()
 	focus_dlg(m_pScanViewer);
 }
 
+
 void TazDlg::ShowScanPos()
 {
 	if(!m_pScanPos)
@@ -916,6 +1002,7 @@ void TazDlg::ShowScanPos()
 
 	focus_dlg(m_pScanPos);
 }
+
 
 void TazDlg::ShowPowderFit()
 {

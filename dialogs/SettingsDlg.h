@@ -58,9 +58,13 @@ class SettingsDlg : public QDialog, Ui::SettingsDlg
 
 	protected slots:
 		void ButtonBoxClicked(QAbstractButton* pBtn);
+
 		void SelectGLFont();
 		void SelectGfxFont();
 		void SelectGenFont();
+
+		void SelectCifTool();
+		void SelectGplTool();
 };
 
 #endif

@@ -91,7 +91,7 @@ message("Using Boost version ${Boost_VERSION}")
 message("Qt moc: ${QT_MOC_EXECUTABLE}\nQt uic: ${QT_UIC_EXECUTABLE}")
 
 add_definitions(-DNDEBUG)
-add_definitions(-DUSE_NET -DUSE_IOSTR -DUSE_GIL)
+add_definitions(-DUSE_NET -DUSE_IOSTR -DUSE_GIL -DUSE_CIF)
 add_definitions(-DQT_VER=4 -DQWT_VER=${QWT_MAJOR_VERSION})
 add_definitions(-DNO_LAPACK)
 add_definitions(-DNO_JPEG -DNO_TIFF)

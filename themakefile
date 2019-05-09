@@ -51,7 +51,7 @@ USE_PY = 1
 USE_JL = 0
 
 # enable CIF support
-USE_CIF = 0
+USE_CIF = 1
 
 # enable the plugin interface?
 USE_PLUGINS = 1
