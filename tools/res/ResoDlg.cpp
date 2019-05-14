@@ -191,7 +191,9 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	//Calc();
 }
 
+
 ResoDlg::~ResoDlg() {}
+
 
 void ResoDlg::setupAlgos()
 {
@@ -203,6 +205,7 @@ void ResoDlg::setupAlgos()
 	comboAlgo->insertSeparator(5);
 	comboAlgo->addItem("Simple", static_cast<int>(ResoAlgo::SIMPLE));
 }
+
 
 void ResoDlg::RefreshQEPos()
 {
@@ -748,6 +751,7 @@ void ResoDlg::SetSelectedAlgo(ResoAlgo algo)
 	tl::log_err("Unknown resolution algorithm set.");
 }
 
+
 ResoAlgo ResoDlg::GetSelectedAlgo() const
 {
 	ResoAlgo algoSel = ResoAlgo::UNKNOWN;
@@ -758,6 +762,7 @@ ResoAlgo ResoDlg::GetSelectedAlgo() const
 		algoSel = static_cast<ResoAlgo>(varAlgo.toInt());
 	return algoSel;
 }
+
 
 void ResoDlg::EmitResults()
 {
@@ -803,6 +808,7 @@ void ResoDlg::ResoParamsChanged(const ResoParams& params)
 	m_bDontCalc = bOldDontCalc;
 	Calc();
 }
+
 
 void ResoDlg::RecipParamsChanged(const RecipParams& parms)
 {
@@ -871,6 +877,7 @@ void ResoDlg::RecipParamsChanged(const RecipParams& parms)
 		Calc();
 }
 
+
 void ResoDlg::RealParamsChanged(const RealParams& parms)
 {
 	//tl::log_debug("real params changed");
@@ -892,6 +899,7 @@ void ResoDlg::RealParamsChanged(const RealParams& parms)
 	if(m_bUpdateOnRealEvent)
 		Calc();
 }
+
 
 void ResoDlg::SampleParamsChanged(const SampleParams& parms)
 {
@@ -943,6 +951,7 @@ void ResoDlg::checkAutoCalcElli4dChanged()
 	if(checkElli4dAutoCalc->isChecked() && !m_bEll4dCurrent)
 		CalcElli4d();
 }
+
 
 void ResoDlg::CalcElli4d()
 {
@@ -1161,6 +1170,26 @@ void ResoDlg::AlgoChanged()
 }
 
 
+/**
+ * quick hack to scan a variable
+ */
+void ResoDlg::DebugOutput()
+{
+	std::ostream &ostr = std::cout;
+
+	for(t_real_reso val : tl::linspace<t_real_reso, t_real_reso, std::vector>(1., 500., 128))
+	{
+		spinMonoCurvH->setValue(val);
+		//spinMonoCurvV->setValue(val);
+		//spinAnaCurvH->setValue(val);
+		//spinAnaCurvV->setValue(val);
+
+		//Calc();
+		ostr << val << "\t" << m_res.dR0 << "\t" << m_res.dResVol << std::endl;
+	}
+}
+
+
 // --------------------------------------------------------------------------------
 
 void ResoDlg::ShowTOFCalcDlg()
@@ -1179,6 +1208,7 @@ void ResoDlg::ButtonBoxClicked(QAbstractButton* pBtn)
 	if(buttonBox->buttonRole(pBtn) == QDialogButtonBox::ApplyRole ||
 	   buttonBox->buttonRole(pBtn) == QDialogButtonBox::AcceptRole)
 	{
+		//DebugOutput();
 		WriteLastConfig();
 	}
 	else if(buttonBox->buttonRole(pBtn) == QDialogButtonBox::RejectRole)

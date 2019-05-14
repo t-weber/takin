@@ -61,6 +61,8 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<ReflCurve<t_real_reso>>> m_mapRefl;
 	std::shared_ptr<ReflCurve<t_real_reso>> load_cache_refl(const std::string& strFile);
 
+	void DebugOutput();
+
 protected:
 	std::vector<QDoubleSpinBox*> m_vecSpinBoxes;
 	std::vector<std::string> m_vecSpinNames;
