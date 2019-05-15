@@ -1807,6 +1807,7 @@
     </hint>
    </hints>
   </connection>
+<!--
   <connection>
    <sender>checkScan</sender>
    <signal>toggled(bool)</signal>
@@ -1999,5 +2000,6 @@
     </hint>
    </hints>
   </connection>
+-->
  </connections>
 </ui>

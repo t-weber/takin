@@ -57,6 +57,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	const bool bCoordAxesVisible = 1;
 	const bool bBZVisible = 1;
 	const bool bWSVisible = 1;
+	const bool bAllPeaksVisible = 1;
 
 	this->setupUi(this);
 	this->setWindowTitle(s_strTitle.c_str());
@@ -404,6 +405,11 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	m_pBZ->setChecked(bBZVisible);
 	m_pMenuViewRecip->addAction(m_pBZ);
 
+	m_pAllPeaks = new QAction("Show Forbidden Peaks", this);
+	m_pAllPeaks->setCheckable(1);
+	m_pAllPeaks->setChecked(bAllPeaksVisible);
+	m_pMenuViewRecip->addAction(m_pAllPeaks);
+
 
 	QMenu *pMenuEwald = new QMenu("Ewald Sphere", this);
 	QActionGroup *pGroupEwald = new QActionGroup(this);
@@ -720,6 +726,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	QObject::connect(m_pCoordAxes, SIGNAL(toggled(bool)), this, SLOT(EnableCoordAxes(bool)));
 	QObject::connect(m_pBZ, SIGNAL(toggled(bool)), this, SLOT(EnableBZ(bool)));
 	QObject::connect(m_pWS, SIGNAL(toggled(bool)), this, SLOT(EnableWS(bool)));
+	QObject::connect(m_pAllPeaks, SIGNAL(toggled(bool)), this, SLOT(ShowAllPeaks(bool)));
 
 	for(QAction* pAct : {m_pEwaldSphereNone, m_pEwaldSphereKi, m_pEwaldSphereKf})
 		QObject::connect(pAct, SIGNAL(triggered()), this, SLOT(ShowEwaldSphere()));
@@ -904,6 +911,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 	m_sceneRecip.GetTriangle()->SetqVisible(bSmallqVisible);
 	m_sceneRecip.GetTriangle()->SetCoordAxesVisible(bCoordAxesVisible);
 	m_sceneRecip.GetTriangle()->SetBZVisible(bBZVisible);
+	m_sceneRecip.GetTriangle()->SetAllPeaksVisible(bAllPeaksVisible);
 	m_sceneRecip.GetTriangle()->SetEwaldSphereVisible(EWALD_KF);
 	m_sceneRealLattice.GetLattice()->SetWSVisible(bWSVisible);
 	m_sceneRecip.emitUpdate();
@@ -911,6 +919,7 @@ TazDlg::TazDlg(QWidget* pParent, const std::string& strLogFile)
 
 	setAcceptDrops(1);
 }
+
 
 TazDlg::~TazDlg()
 {
@@ -930,6 +939,7 @@ TazDlg::~TazDlg()
 
 	comboSpaceGroups->clear();
 }
+
 
 void TazDlg::DeleteDialogs()
 {
@@ -969,6 +979,7 @@ void TazDlg::DeleteDialogs()
 	if(m_pFormfactorDlg) { delete m_pFormfactorDlg; m_pFormfactorDlg = 0; }
 }
 
+
 void TazDlg::SettingsChanged()
 {
 	setFont(g_fontGen);
@@ -1003,6 +1014,7 @@ void TazDlg::keyPressEvent(QKeyEvent *pEvt)
 	QMainWindow::keyPressEvent(pEvt);
 }
 
+
 void TazDlg::keyReleaseEvent(QKeyEvent *pEvt)
 {
 	QMainWindow::keyReleaseEvent(pEvt);
@@ -1035,10 +1047,12 @@ void TazDlg::showEvent(QShowEvent *pEvt)
 	}
 }
 
+
 void TazDlg::dragEnterEvent(QDragEnterEvent *pEvt)
 {
 	if(pEvt) pEvt->accept();
 }
+
 
 void TazDlg::dropEvent(QDropEvent *pEvt)
 {
@@ -1065,6 +1079,7 @@ void TazDlg::dropEvent(QDropEvent *pEvt)
 		Load(strFile.c_str());
 	}
 }
+
 
 void TazDlg::closeEvent(QCloseEvent* pEvt)
 {
@@ -1093,6 +1108,7 @@ void TazDlg::ShowNeutronDlg()
 	focus_dlg(m_pNeutronDlg);
 }
 
+
 void TazDlg::ShowTofDlg()
 {
 	if(!m_pTofDlg)
@@ -1108,11 +1124,13 @@ void TazDlg::InitGoto()
 		m_pGotoDlg = new GotoDlg(this, &m_settings);
 }
 
+
 void TazDlg::ShowGotoDlg()
 {
 	InitGoto();
 	focus_dlg(m_pGotoDlg);
 }
+
 
 void TazDlg::ShowPowderDlg()
 {
@@ -1127,6 +1145,7 @@ void TazDlg::ShowPowderDlg()
 	focus_dlg(m_pPowderDlg);
 }
 
+
 void TazDlg::ShowDispDlg()
 {
 	if(!m_pDispDlg)
@@ -1134,6 +1153,7 @@ void TazDlg::ShowDispDlg()
 
 	focus_dlg(m_pDispDlg);
 }
+
 
 void TazDlg::ShowSettingsDlg()
 {
@@ -1143,6 +1163,7 @@ void TazDlg::ShowSettingsDlg()
 	focus_dlg(m_pSettingsDlg);
 }
 
+
 void TazDlg::ShowDWDlg()
 {
 	if(!m_pDWDlg)
@@ -1150,6 +1171,7 @@ void TazDlg::ShowDWDlg()
 
 	focus_dlg(m_pDWDlg);
 }
+
 
 void TazDlg::ShowDynPlaneDlg()
 {
@@ -1163,6 +1185,7 @@ void TazDlg::ShowDynPlaneDlg()
 
 	focus_dlg(m_pDynPlaneDlg);
 }
+
 
 void TazDlg::UpdateDs()
 {
@@ -1187,6 +1210,7 @@ void TazDlg::UpdateDs()
 	emit ResoParamsChanged(resoparams);
 }
 
+
 void TazDlg::UpdateSampleSense()
 {
 	const bool bSense = checkSenseS->isChecked();
@@ -1206,6 +1230,7 @@ void TazDlg::UpdateSampleSense()
 	m_sceneRecip.emitUpdate();
 }
 
+
 void TazDlg::UpdateMonoSense()
 {
 	const bool bSense = checkSenseM->isChecked();
@@ -1222,6 +1247,7 @@ void TazDlg::UpdateMonoSense()
 	params.bScatterSenses[0] = bSense;
 	emit ResoParamsChanged(params);
 }
+
 
 void TazDlg::UpdateAnaSense()
 {
@@ -1249,6 +1275,7 @@ void TazDlg::RecipNodeEvent(bool bStarted)
 			m_pReso->SetUpdateOn(!bStarted, 1);
 }
 
+
 void TazDlg::RealNodeEvent(bool bStarted)
 {
 	//tl::log_info("real node movement: ", bStarted);
@@ -1256,6 +1283,7 @@ void TazDlg::RealNodeEvent(bool bStarted)
 	if(m_pReso)
 		m_pReso->SetUpdateOn(1, !bStarted);
 }
+
 
 void TazDlg::TofNodeEvent(bool bStarted)
 {
@@ -1316,6 +1344,7 @@ void TazDlg::Show3D()
 	//CalcPeaks();
 }
 
+
 void TazDlg::Show3DReal()
 {
 #ifdef REINIT_3D_DLGS
@@ -1332,6 +1361,7 @@ void TazDlg::Show3DReal()
 	m_pReal3d->CalcPeaks(m_sceneRealLattice.GetLattice()->GetWS3D(), m_latticecommon);
 	//CalcPeaks();
 }
+
 
 void TazDlg::Show3DBZ()
 {
@@ -1360,6 +1390,7 @@ void TazDlg::Show3DBZ()
 	//CalcPeaks();
 }
 
+
 #else
 
 void TazDlg::Show3D() {}
@@ -1374,20 +1405,31 @@ void TazDlg::EnableSmallq(bool bEnable)
 	m_sceneRecip.GetTriangle()->SetqVisible(bEnable);
 }
 
+
 void TazDlg::EnableCoordAxes(bool bEnable)
 {
 	m_sceneRecip.GetTriangle()->SetCoordAxesVisible(bEnable);
 }
+
 
 void TazDlg::EnableBZ(bool bEnable)
 {
 	m_sceneRecip.GetTriangle()->SetBZVisible(bEnable);
 }
 
+
 void TazDlg::EnableWS(bool bEnable)
 {
 	m_sceneRealLattice.GetLattice()->SetWSVisible(bEnable);
 }
+
+
+void TazDlg::ShowAllPeaks(bool bShowAllPeaks)
+{
+	m_sceneRecip.GetTriangle()->SetAllPeaksVisible(bShowAllPeaks);
+	CalcPeaks();
+}
+
 
 void TazDlg::ShowEwaldSphere()
 {
@@ -1401,11 +1443,13 @@ void TazDlg::ShowEwaldSphere()
 	m_sceneRecip.GetTriangle()->SetEwaldSphereVisible(iEw);
 }
 
+
 void TazDlg::EnableRealQDir(bool bEnable)
 {
 	m_sceneReal.GetTasLayout()->SetRealQVisible(bEnable);
 	m_sceneTof.GetTofLayout()->SetRealQVisible(bEnable);
 }
+
 
 // Q position
 void TazDlg::recipParamsChanged(const RecipParams& params)
@@ -1429,6 +1473,7 @@ void TazDlg::recipParamsChanged(const RecipParams& params)
 	m_pCoordQStatusMsg->setText(ostrPos.str().c_str());
 }
 
+
 // cursor position
 void TazDlg::RecipCoordsChanged(t_real dh, t_real dk, t_real dl,
 	bool bHasNearest, t_real dNearestH, t_real dNearestK, t_real dNearestL)
@@ -1445,6 +1490,7 @@ void TazDlg::RecipCoordsChanged(t_real dh, t_real dk, t_real dl,
 
 	m_pCoordCursorStatusMsg->setText(ostrPos.str().c_str());
 }
+
 
 // cursor position
 void TazDlg::RealCoordsChanged(t_real dh, t_real dk, t_real dl,
@@ -1473,6 +1519,7 @@ void TazDlg::ShowRecipParams()
 	focus_dlg(&m_dlgRecipParam);
 }
 
+
 void TazDlg::ShowRealParams()
 {
 	focus_dlg(&m_dlgRealParam);
@@ -1491,6 +1538,7 @@ void TazDlg::RecipContextMenu(const QPoint& _pt)
 	QPoint pt = this->m_pviewRecip->mapToGlobal(_pt);
 	m_pMenuViewRecip->exec(pt);
 }
+
 
 void TazDlg::RealContextMenu(const QPoint& _pt)
 {
@@ -1518,6 +1566,7 @@ void TazDlg::ShowDeadAnglesDlg()
 	focus_dlg(m_pDeadAnglesDlg);
 }
 
+
 void TazDlg::ApplyDeadAngles(const std::vector<DeadAngle<t_real>>& vecAngles)
 {
 	m_vecDeadAngles = vecAngles;
@@ -1538,6 +1587,7 @@ void TazDlg::ShowAbout()
 	focus_dlg(m_pAboutDlg);
 }
 
+
 void TazDlg::ShowLog()
 {
 	if(!m_pLogDlg)
@@ -1545,6 +1595,7 @@ void TazDlg::ShowLog()
 
 	focus_dlg(m_pLogDlg);
 }
+
 
 void TazDlg::ShowHelp()
 {
@@ -1578,6 +1629,7 @@ void TazDlg::ShowHelp()
 
 	QMessageBox::critical(this, "Error", "Help could not be displayed.");
 }
+
 
 void TazDlg::ShowDevelDoc()
 {

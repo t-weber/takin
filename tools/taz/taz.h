@@ -84,6 +84,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		QAction *m_pCoordAxes = nullptr;
 		QAction *m_pGoto = nullptr;
 		QAction *m_pBZ = nullptr, *m_pWS = nullptr;
+		QAction *m_pAllPeaks = nullptr;
 		QAction *m_pEwaldSphereNone = nullptr,
 			*m_pEwaldSphereKi = nullptr, *m_pEwaldSphereKf = nullptr;
 		QAction *m_pShowRealQDir = nullptr;
@@ -237,6 +238,7 @@ class TazDlg : public QMainWindow, Ui::TazDlg
 		void EnableCoordAxes(bool bEnable);
 		void EnableBZ(bool bEnable);
 		void EnableWS(bool bEnable);
+		void ShowAllPeaks(bool bShow);
 		void EnableRealQDir(bool bEnable);
 		void ShowEwaldSphere();
 		void RecipProjChanged();

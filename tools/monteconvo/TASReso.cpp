@@ -453,6 +453,7 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 		// if only one sample position is requested, don't randomise
 		if(m_res.size() > 1)
 		{
+			// TODO: use selected sample geometry
 			/*m_reso.pos_x = tl::rand_real(-t_real(m_reso.sample_w_q*0.5/cm),
 				t_real(m_reso.sample_w_q*0.5/cm)) * cm;
 			m_reso.pos_y = tl::rand_real(-t_real(m_reso.sample_w_perpq*0.5/cm),
@@ -505,6 +506,9 @@ bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 			tl::log_debug("R0: ", resores_cur.dR0);
 			tl::log_debug("res: ", resores_cur.reso);
 		}
+
+		// reset values
+		m_reso.pos_x = m_reso.pos_y = m_reso.pos_z = t_real(0)*cm;
 	}
 
 	return resores.bOk;
@@ -527,7 +531,7 @@ Ellipsoid4d<t_real> TASReso::GenerateMC(std::size_t iNum, std::vector<t_vec>& ve
 		vecNeutrons.resize(iNum*iIter);
 
 	Ellipsoid4d<t_real> ell4dret;
-	for(std::size_t iCurIter = 0; iCurIter<iIter; ++iCurIter)
+	for(std::size_t iCurIter=0; iCurIter<iIter; ++iCurIter)
 	{
 		const ResoResults& resores = m_res[iCurIter];
 

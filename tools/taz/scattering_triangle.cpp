@@ -51,15 +51,18 @@ ScatteringTriangleNode::ScatteringTriangleNode(ScatteringTriangle* pSupItem)
 	setData(TRIANGLE_NODE_TYPE_KEY, NODE_OTHER);
 }
 
+
 QRectF ScatteringTriangleNode::boundingRect() const
 {
 	return QRectF(-0.5*g_dFontSize, -0.5*g_dFontSize, g_dFontSize, g_dFontSize);
 }
 
+
 void ScatteringTriangleNode::paint(QPainter *pPainter, const QStyleOptionGraphicsItem* popt, QWidget* pwid)
 {
 	pPainter->drawEllipse(QRectF(-2., -2., 4., 4.));
 }
+
 
 void ScatteringTriangleNode::mousePressEvent(QGraphicsSceneMouseEvent *pEvt)
 {
@@ -67,11 +70,13 @@ void ScatteringTriangleNode::mousePressEvent(QGraphicsSceneMouseEvent *pEvt)
 	QGraphicsItem::mousePressEvent(pEvt);
 }
 
+
 void ScatteringTriangleNode::mouseReleaseEvent(QGraphicsSceneMouseEvent *pEvt)
 {
 	//setCursor(Qt::OpenHandCursor);
 	QGraphicsItem::mouseReleaseEvent(pEvt);
 }
+
 
 QVariant ScatteringTriangleNode::itemChange(GraphicsItemChange change, const QVariant &val)
 {
@@ -86,6 +91,7 @@ QVariant ScatteringTriangleNode::itemChange(GraphicsItemChange change, const QVa
 
 // --------------------------------------------------------------------------------
 
+
 RecipPeak::RecipPeak()
 {
 	//setCursor(Qt::ArrowCursor);
@@ -93,11 +99,13 @@ RecipPeak::RecipPeak()
 	setFlag(QGraphicsItem::ItemIsMovable, false);
 }
 
+
 QRectF RecipPeak::boundingRect() const
 {
 	return QRectF(-3.5*g_dFontSize, -g_dFontSize,
 		7.*g_dFontSize, 5.*g_dFontSize);
 }
+
 
 void RecipPeak::paint(QPainter *pPainter, const QStyleOptionGraphicsItem* pOpt, QWidget* pWid)
 {
@@ -115,6 +123,7 @@ void RecipPeak::paint(QPainter *pPainter, const QStyleOptionGraphicsItem* pOpt, 
 		pPainter->drawText(rect, Qt::AlignHCenter|Qt::AlignTop, m_strLabel);
 	}
 }
+
 
 // --------------------------------------------------------------------------------
 
@@ -149,11 +158,13 @@ ScatteringTriangle::ScatteringTriangle(ScatteringTriangleScene& scene)
 	m_bReady = m_bUpdate = 1;
 }
 
+
 ScatteringTriangle::~ScatteringTriangle()
 {
 	m_bUpdate = m_bReady = 0;
 	ClearPeaks();
 }
+
 
 void ScatteringTriangle::AllowMouseMove(bool bAllow)
 {
@@ -161,6 +172,7 @@ void ScatteringTriangle::AllowMouseMove(bool bAllow)
 	m_pNodeKfQ->setFlag(QGraphicsItem::ItemIsMovable, bAllow);
 	m_pNodeGq->setFlag(QGraphicsItem::ItemIsMovable, bAllow);
 }
+
 
 void ScatteringTriangle::nodeMoved(const ScatteringTriangleNode* pNode)
 {
@@ -177,17 +189,20 @@ void ScatteringTriangle::nodeMoved(const ScatteringTriangleNode* pNode)
 	}
 }
 
+
 QRectF ScatteringTriangle::boundingRect() const
 {
 	return QRectF(-100.*m_dZoom*g_dFontSize, -100.*m_dZoom*g_dFontSize,
 		200.*m_dZoom*g_dFontSize, 200.*m_dZoom*g_dFontSize);
 }
 
+
 void ScatteringTriangle::SetZoom(t_real dZoom)
 {
 	m_dZoom = dZoom;
 	m_scene.update();
 }
+
 
 void ScatteringTriangle::SetqVisible(bool bVisible)
 {
@@ -196,11 +211,13 @@ void ScatteringTriangle::SetqVisible(bool bVisible)
 	this->update();
 }
 
+
 void ScatteringTriangle::SetCoordAxesVisible(bool bVisible)
 {
 	m_bCoordAxesVisible = bVisible;
 	this->update();
 }
+
 
 void ScatteringTriangle::SetBZVisible(bool bVisible)
 {
@@ -208,12 +225,21 @@ void ScatteringTriangle::SetBZVisible(bool bVisible)
 	this->update();
 }
 
+
+void ScatteringTriangle::SetAllPeaksVisible(bool bVisible)
+{
+	m_bShowAllPeaks = bVisible;
+	this->update();
+}
+
+
 void ScatteringTriangle::SetEwaldSphereVisible(EwaldSphere iEw)
 {
 	m_bShowEwaldSphere = (iEw != EWALD_NONE);
 	m_bEwaldAroundKi = (iEw == EWALD_KI);
 	this->update();
 }
+
 
 QPointF ScatteringTriangle::GetGfxMid() const
 {
@@ -652,6 +678,7 @@ t_real ScatteringTriangle::GetKi() const
 	return dKi;
 }
 
+
 t_real ScatteringTriangle::GetKf() const
 {
 	QPointF ptKfQ = mapFromItem(m_pNodeKfQ.get(), 0, 0);
@@ -662,6 +689,7 @@ t_real ScatteringTriangle::GetKf() const
 	return dKf;
 }
 
+
 t_real ScatteringTriangle::GetE() const
 {
 	const t_real dKi = GetKi();
@@ -669,6 +697,7 @@ t_real ScatteringTriangle::GetE() const
 	const t_real dE = tl::get_energy_transfer(dKi/angs, dKf/angs) / meV;
 	return dE;
 }
+
 
 t_real ScatteringTriangle::GetQ() const
 {
@@ -680,6 +709,7 @@ t_real ScatteringTriangle::GetQ() const
 	return dQ;
 }
 
+
 t_real ScatteringTriangle::Getq() const
 {
 	QPointF ptKfQ = mapFromItem(m_pNodeKfQ.get(), 0, 0) * m_dZoom;
@@ -689,6 +719,7 @@ t_real ScatteringTriangle::Getq() const
 	const t_real dq = lineq.length()/m_dScaleFactor/m_dZoom;
 	return dq;
 }
+
 
 t_real ScatteringTriangle::GetAngleQVec0() const
 {
@@ -700,6 +731,7 @@ t_real ScatteringTriangle::GetAngleQVec0() const
 	// TODO: Q is in rlu! check angle for non-cubic case!
 	return tl::vec_angle(vecQ);
 }
+
 
 t_real ScatteringTriangle::GetAngleKiQ(bool bPosSense) const
 {
@@ -727,6 +759,7 @@ t_real ScatteringTriangle::GetAngleKiQ(bool bPosSense) const
 	}
 }
 
+
 t_real ScatteringTriangle::GetAngleKfQ(bool bPosSense) const
 {
 	/*t_vec vecKf = qpoint_to_vec(mapFromItem(m_pNodeKfQ.get(),0,0))
@@ -752,6 +785,7 @@ t_real ScatteringTriangle::GetAngleKfQ(bool bPosSense) const
 	}
 }
 
+
 t_real ScatteringTriangle::GetTheta(bool bPosSense) const
 {
 	t_vec vecKi = qpoint_to_vec(mapFromItem(m_pNodeKiQ.get(),0,0))
@@ -766,6 +800,7 @@ t_real ScatteringTriangle::GetTheta(bool bPosSense) const
 	//tl::log_info("theta: ", dTh/M_PI*180.);
 	return dTh;
 }
+
 
 t_real ScatteringTriangle::GetTwoTheta(bool bPosSense) const
 {
@@ -788,6 +823,7 @@ t_real ScatteringTriangle::GetTwoTheta(bool bPosSense) const
 	return dTT;
 }
 
+
 t_real ScatteringTriangle::GetMonoTwoTheta(t_real dMonoD, bool bPosSense) const
 {
 	t_vec vecKi = qpoint_to_vec(mapFromItem(m_pNodeKiQ.get(), 0, 0))
@@ -797,6 +833,7 @@ t_real ScatteringTriangle::GetMonoTwoTheta(t_real dMonoD, bool bPosSense) const
 	return tl::get_mono_twotheta(dKi/angs, dMonoD*angs, bPosSense) / rads;
 }
 
+
 t_real ScatteringTriangle::GetAnaTwoTheta(t_real dAnaD, bool bPosSense) const
 {
 	t_vec vecKf = qpoint_to_vec(mapFromItem(m_pNodeKfQ.get(), 0, 0))
@@ -805,6 +842,7 @@ t_real ScatteringTriangle::GetAnaTwoTheta(t_real dAnaD, bool bPosSense) const
 
 	return tl::get_mono_twotheta(dKf/angs, dAnaD*angs, bPosSense) / rads;
 }
+
 
 void ScatteringTriangle::SetAnaTwoTheta(t_real dTT, t_real dAnaD)
 {
@@ -826,6 +864,7 @@ void ScatteringTriangle::SetAnaTwoTheta(t_real dTT, t_real dAnaD)
 
 	nodeMoved(m_pNodeKfQ.get());
 }
+
 
 void ScatteringTriangle::SetMonoTwoTheta(t_real dTT, t_real dMonoD)
 {
@@ -860,6 +899,7 @@ void ScatteringTriangle::SetMonoTwoTheta(t_real dTT, t_real dMonoD)
 	nodeMoved(m_pNodeKfQ.get());
 }
 
+
 void ScatteringTriangle::SetTwoTheta(t_real dTT)
 {
 	const t_vec vecNodeKiKf = qpoint_to_vec(mapFromItem(m_pNodeKiKf.get(),0,0));
@@ -879,6 +919,7 @@ void ScatteringTriangle::SetTwoTheta(t_real dTT)
 
 	nodeMoved(m_pNodeKfQ.get());
 }
+
 
 void ScatteringTriangle::RotateKiVec0To(bool bSense, t_real dAngle)
 {
@@ -925,6 +966,7 @@ static inline std::string print_complex(const std::complex<T>& c)
 		ostr << "(" << r << (i>=0. ? " +" : " -") << std::abs(i) << " i)";
 	return ostr.str();
 }
+
 
 void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon, bool bIsPowder)
 {
@@ -985,6 +1027,10 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 		tl::get_spec_char_utf8("sup1");
 	static const std::string strSup2 = tl::get_spec_char_utf8("sup2");
 
+	static const QColor colPeakAllowed = Qt::red;
+	static const QColor colPeakForbidden(0xaa, 0xaa, 0xaa);
+	static const QColor colPeakOrigin = Qt::darkGreen;
+
 	std::list<std::vector<t_real>> lstPeaksForKd;
 	t_real dMinF = std::numeric_limits<t_real>::max(), dMaxF = -1.;
 
@@ -1020,7 +1066,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 					{ vecPeak[0],vecPeak[1],vecPeak[2], h,k,l/*, dF*/ });
 
 				// add peaks for 3d calculation of 1st BZ
-				if(g_b3dBZ)
+				if(g_b3dBZ && bHasGenRefl)
 				{
 					if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
 						m_bz3.SetCentralReflex(vecPeak, &vecPeakHKL);
@@ -1063,11 +1109,14 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 					// (000), i.e. direct beam, also needed for powder
 					if(!bIsPowder || (ih==0 && ik==0 && il==0))
 					{
-						if(bHasRefl)
+						if(bHasRefl || m_bShowAllPeaks)
 						{
 							RecipPeak *pPeak = new RecipPeak();
 							if(ih==0 && ik==0 && il==0)
-								pPeak->SetColor(Qt::darkGreen);
+								pPeak->SetColor(bHasRefl ? colPeakOrigin : colPeakForbidden);
+							else
+								pPeak->SetColor(bHasRefl ? colPeakAllowed : colPeakForbidden);
+							
 							pPeak->setPos(dX * m_dScaleFactor, dY * m_dScaleFactor);
 							if(dF >= 0.) pPeak->SetRadius(dF);
 							pPeak->setData(TRIANGLE_NODE_TYPE_KEY, NODE_BRAGG);
@@ -1094,6 +1143,12 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 								ostrTip << "\nF = " << print_complex<t_real>(cF) << " fm";
 								ostrTip << "\nS = " << dFsq << " fm" << strSup2;
 							}
+							else if(!bHasRefl)
+							{
+								ostrLabel << "\nforbidden";
+								ostrTip << "\nStructurally forbidden reflection.";
+							}
+							
 
 							pPeak->SetLabel(ostrLabel.str().c_str());
 
@@ -1106,7 +1161,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 
 
 						// add peaks for 2d approximation of 1st BZ
-						if(!g_b3dBZ)
+						if(!g_b3dBZ && bHasGenRefl)
 						{
 							t_vec vecN = tl::make_vec({dX, dY});
 							if(ih==veciCent[0] && ik==veciCent[1] && il==veciCent[2])
@@ -1144,6 +1199,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 				tl::make_vec<t_vec>({1,1,1}), tl::make_vec<t_vec>({1,1,-1}), tl::make_vec<t_vec>({1,-1,-1}),
 				tl::make_vec<t_vec>({1,-1,1}),
 			};
+
 			for(const t_vec& vecSymmDir : vecSymmDirs)
 			{
 				const t_vec vecSymmDirInvA = m_recip.GetPos(vecSymmDir[0], vecSymmDir[1], vecSymmDir[2]);
@@ -1237,6 +1293,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 	this->update();
 }
 
+
 t_vec ScatteringTriangle::GetHKLFromPlanePos(t_real x, t_real y) const
 {
 	if(!HasPeaks())
@@ -1246,6 +1303,7 @@ t_vec ScatteringTriangle::GetHKLFromPlanePos(t_real x, t_real y) const
 		+ y*tl::get_column(m_matPlane, 1);
 	return m_recip.GetHKL(vec);
 }
+
 
 t_vec ScatteringTriangle::GetQVecPlane(bool bSmallQ) const
 {
@@ -1264,6 +1322,7 @@ t_vec ScatteringTriangle::GetQVecPlane(bool bSmallQ) const
 	return vecQPlane;
 }
 
+
 t_vec ScatteringTriangle::GetQVec(bool bSmallQ, bool bRLU) const
 {
 	t_vec vecQPlane = GetQVecPlane(bSmallQ);
@@ -1278,6 +1337,7 @@ t_vec ScatteringTriangle::GetQVec(bool bSmallQ, bool bRLU) const
 	return vecQ;
 }
 
+
 t_vec ScatteringTriangle::GetKiVecPlane() const
 {
 	t_vec vecKi = qpoint_to_vec(mapFromItem(m_pNodeKiQ.get(),0,0))
@@ -1287,6 +1347,7 @@ t_vec ScatteringTriangle::GetKiVecPlane() const
 	return vecKi;
 }
 
+
 t_vec ScatteringTriangle::GetKfVecPlane() const
 {
 	t_vec vecKf = qpoint_to_vec(mapFromItem(m_pNodeKfQ.get(),0,0))
@@ -1295,6 +1356,7 @@ t_vec ScatteringTriangle::GetKfVecPlane() const
 	vecKf /= m_dScaleFactor;
 	return vecKf;
 }
+
 
 void ScatteringTriangle::ClearPeaks()
 {
@@ -1323,6 +1385,7 @@ std::vector<ScatteringTriangleNode*> ScatteringTriangle::GetNodes()
 		{ m_pNodeKiQ.get(), m_pNodeKiKf.get(),
 		m_pNodeKfQ.get(), m_pNodeGq.get() };
 }
+
 
 std::vector<std::string> ScatteringTriangle::GetNodeNames() const
 {
@@ -1439,6 +1502,7 @@ get_nearest_node(const QPointF& pt,
 	}
 }
 
+
 // snap pNode to a peak near pNodeOrg
 void ScatteringTriangle::SnapToNearestPeak(ScatteringTriangleNode* pNode,
 	const ScatteringTriangleNode* pNodeOrg)
@@ -1454,6 +1518,7 @@ void ScatteringTriangle::SnapToNearestPeak(ScatteringTriangleNode* pNode,
 	if(std::get<0>(tupNearest))
 		pNode->setPos(std::get<2>(tupNearest));
 }
+
 
 bool ScatteringTriangle::KeepAbsKiKf(t_real dQx, t_real dQy)
 {
@@ -1509,7 +1574,9 @@ bool ScatteringTriangle::KeepAbsKiKf(t_real dQx, t_real dQy)
 	}
 }
 
+
 // --------------------------------------------------------------------------------
+
 
 
 ScatteringTriangleScene::ScatteringTriangleScene(QObject* pParent)
@@ -1519,8 +1586,10 @@ ScatteringTriangleScene::ScatteringTriangleScene(QObject* pParent)
 	this->addItem(m_pTri.get());
 }
 
+
 ScatteringTriangleScene::~ScatteringTriangleScene()
 {}
+
 
 void ScatteringTriangleScene::SetDs(t_real dMonoD, t_real dAnaD)
 {
@@ -1529,6 +1598,7 @@ void ScatteringTriangleScene::SetDs(t_real dMonoD, t_real dAnaD)
 
 	emitUpdate();
 }
+
 
 void ScatteringTriangleScene::emitUpdate()
 {
@@ -1572,6 +1642,7 @@ void ScatteringTriangleScene::emitUpdate()
 	//tl::log_debug("triangle: triangleChanged");
 	emit triangleChanged(opts);
 }
+
 
 void ScatteringTriangleScene::emitAllParams()
 {
@@ -1651,6 +1722,7 @@ void ScatteringTriangleScene::emitAllParams()
 	emit paramsChanged(parms);
 }
 
+
 // check for spurions
 void ScatteringTriangleScene::CheckForSpurions()
 {
@@ -1672,6 +1744,7 @@ void ScatteringTriangleScene::CheckForSpurions()
 
 	emit spurionInfo(spuris, vecInelCKI, vecInelCKF);
 }
+
 
 void ScatteringTriangleScene::tasChanged(const TriangleOptions& opts)
 {
@@ -1706,12 +1779,14 @@ void ScatteringTriangleScene::tasChanged(const TriangleOptions& opts)
 	m_bDontEmitChange = 0;
 }
 
+
 void ScatteringTriangleScene::SetSampleSense(bool bPos)
 {
 	m_bSamplePosSense = bPos;
 	emitUpdate();
 	emitAllParams();
 }
+
 
 void ScatteringTriangleScene::SetMonoSense(bool bPos)
 {
@@ -1720,6 +1795,7 @@ void ScatteringTriangleScene::SetMonoSense(bool bPos)
 	emitAllParams();
 }
 
+
 void ScatteringTriangleScene::SetAnaSense(bool bPos)
 {
 	m_bAnaPosSense = bPos;
@@ -1727,11 +1803,13 @@ void ScatteringTriangleScene::SetAnaSense(bool bPos)
 	emitAllParams();
 }
 
+
 void ScatteringTriangleScene::scaleChanged(t_real dTotalScale)
 {
 	if(!m_pTri) return;
 	m_pTri->SetZoom(dTotalScale);
 }
+
 
 void ScatteringTriangleScene::mousePressEvent(QGraphicsSceneMouseEvent *pEvt)
 {
@@ -1740,12 +1818,14 @@ void ScatteringTriangleScene::mousePressEvent(QGraphicsSceneMouseEvent *pEvt)
 	emit nodeEvent(1);
 }
 
+
 void ScatteringTriangleScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *pEvt)
 {
 	m_bMousePressed = 0;
 	QGraphicsScene::mouseReleaseEvent(pEvt);
 	emit nodeEvent(0);
 }
+
 
 void ScatteringTriangleScene::setSnapq(bool bSnap)
 {
@@ -1754,6 +1834,7 @@ void ScatteringTriangleScene::setSnapq(bool bSnap)
 	if(m_bSnapq && m_pTri)
 		m_pTri->SnapToNearestPeak(m_pTri->GetNodeGq(), m_pTri->GetNodeKfQ());
 }
+
 
 
 #ifdef USE_GIL
@@ -1941,6 +2022,7 @@ void ScatteringTriangleScene::mouseMoveEvent(QGraphicsSceneMouseEvent *pEvt)
 		QGraphicsScene::mouseMoveEvent(pEvt);
 }
 
+
 void ScatteringTriangleScene::keyPressEvent(QKeyEvent *pEvt)
 {
 	if(pEvt->key() == Qt::Key_Control)
@@ -1950,6 +2032,7 @@ void ScatteringTriangleScene::keyPressEvent(QKeyEvent *pEvt)
 
 	QGraphicsScene::keyPressEvent(pEvt);
 }
+
 
 void ScatteringTriangleScene::keyReleaseEvent(QKeyEvent *pEvt)
 {

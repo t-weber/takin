@@ -7,6 +7,8 @@
 
 MAKE=make
 GCC=$(which gcc 2>/dev/null)
+SKIP_PREBUILD=0
+
 
 if [ "$GCC" != "" ]	# don't check version if only e.g. clang is available
 then
@@ -34,11 +36,14 @@ fi
 
 
 
-echo -e "Prebuilding..."
-if ! ./prebuild.sh
+if [ "$SKIP_PREBUILD" == "0" ]
 then
-	echo -e "Error: Prebuild failed";
-	exit -1;
+	echo -e "Prebuilding..."
+	if ! ./prebuild.sh
+	then
+		echo -e "Error: Prebuild failed";
+		exit -1;
+	fi
 fi
 
 

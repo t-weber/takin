@@ -593,7 +593,7 @@
           <item row="1" column="0">
            <widget class="QCheckBox" name="checkUseResVol">
             <property name="toolTip">
-             <string>Normalise using the resolution volume.</string>
+             <string>Normalise R0 to the resolution volume. Leave unchecked for normal cases.</string>
             </property>
             <property name="text">
              <string>Use Resolution Volume</string>

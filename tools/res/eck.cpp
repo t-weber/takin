@@ -438,7 +438,7 @@ ResoResults calc_eck(const EckParams& eck)
 
 	// prefactor and volume
 	res.dResVol = tl::get_ellipsoid_volume(res.reso);
-	res.dR0 = Z * std::exp(-W) /*/ res.dResVol*/;
+	res.dR0 = Z * std::exp(-W);
 	res.dR0 *= dxsec;
 
 	// missing volume prefactor, cf. equ. 56 in [eck14] to  equ. 1 in [pop75] and equ. A.57 in [mit84]

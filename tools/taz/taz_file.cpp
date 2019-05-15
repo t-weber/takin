@@ -268,6 +268,10 @@ bool TazDlg::Load(const char* pcFile)
 		if(bOk)
 			m_pBZ->setChecked(bBZEnabled!=0);
 
+		int bAllPeaks = xml.Query<int>(strXmlRoot + "recip/show_all_peaks", 0, &bOk);
+		if(bOk)
+			m_pAllPeaks->setChecked(bAllPeaks!=0);
+
 		int iEwald = xml.Query<int>(strXmlRoot + "recip/ewald_sphere", 0, &bOk);
 		if(bOk)
 		{
@@ -503,6 +507,9 @@ bool TazDlg::Save()
 
 	bool bBZEnabled = m_pBZ->isChecked();
 	mapConf[strXmlRoot + "recip/enable_bz"] = (bBZEnabled ? "1" : "0");
+
+	bool bAllPeaks = m_pAllPeaks->isChecked();
+	mapConf[strXmlRoot + "recip/show_all_peaks"] = (bAllPeaks ? "1" : "0");
 
 	int iEw = EWALD_NONE;
 	if(m_pEwaldSphereKi->isChecked()) iEw = EWALD_KI;
