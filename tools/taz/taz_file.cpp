@@ -320,7 +320,11 @@ bool TazDlg::Load(const char* pcFile)
 				m_vecAtoms.emplace_back(std::move(theatom));
 			}
 
-			if(m_pAtomsDlg) m_pAtomsDlg->SetAtoms(m_vecAtoms);
+			if(m_pAtomsDlg)
+			{
+				m_pAtomsDlg->SetAtoms(m_vecAtoms);
+				m_pAtomsDlg->ShowPossibleErrorDlg();
+			}
 		}
 	}
 
@@ -958,7 +962,10 @@ bool TazDlg::ImportCIF(const char* pcFile)
 		}
 		
 		if(m_pAtomsDlg)
+		{
 			m_pAtomsDlg->SetAtoms(m_vecAtoms);
+			m_pAtomsDlg->ShowPossibleErrorDlg();
+		}
 
 
 		// lattice

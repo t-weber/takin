@@ -86,6 +86,7 @@ class RecipPeak : public QGraphicsItem
 		QColor m_color = Qt::red;
 		QString m_strLabel;
 		t_real_glob m_dRadius = 3.;
+		bool m_bPeakAllowed = 1;
 
 	protected:
 		virtual QRectF boundingRect() const override;
@@ -96,6 +97,7 @@ class RecipPeak : public QGraphicsItem
 
 		void SetLabel(const QString& str) { m_strLabel = str; }
 		void SetColor(const QColor& col) { m_color = col; }
+		void SetPeakAllowed(bool bAllowed) { m_bPeakAllowed = bAllowed; }
 
 		void SetRadius(t_real_glob dRad) { m_dRadius = dRad; }
 		t_real_glob GetRadius() const { return m_dRadius; }

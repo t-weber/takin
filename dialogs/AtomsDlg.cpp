@@ -8,6 +8,8 @@
 #include "AtomsDlg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/math/linalg.h"
+#include "libs/formfactors/formfact.h"
+#include <QMessageBox>
 
 using t_real = t_real_glob;
 
@@ -52,11 +54,13 @@ AtomsDlg::AtomsDlg(QWidget* pParent, QSettings *pSettings, bool bEnableSpin)
 	QObject::connect(btnAdd, &QAbstractButton::clicked, this, &AtomsDlg::AddAtom);
 	QObject::connect(btnDel, &QAbstractButton::clicked, this, &AtomsDlg::RemoveAtom);
 	QObject::connect(buttonBox, &QDialogButtonBox::clicked, this, &AtomsDlg::ButtonBoxClicked);
+	QObject::connect(tableAtoms, &QTableWidget::cellChanged, this, &AtomsDlg::AtomCellChanged);
 #else
 	QObject::connect(btnAdd, SIGNAL(clicked(bool)), this, SLOT(AddAtom()));
 	QObject::connect(btnDel, SIGNAL(clicked(bool)), this, SLOT(RemoveAtom()));
 	QObject::connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this,
 		SLOT(ButtonBoxClicked(QAbstractButton*)));
+	QObject::connect(tableAtoms, SIGNAL(cellChanged(int, int)), this, SLOT(AtomCellChanged(int, int)));
 #endif
 
 	if(m_pSettings && m_pSettings->contains("atoms/geo"))
@@ -110,6 +114,7 @@ void AtomsDlg::AddAtom()
 			tableAtoms->setItem(iRow, static_cast<int>(AtInfo::SPIN_X)+i, new QTableWidgetItem("0"));
 
 	tableAtoms->setSortingEnabled(bSort);
+	CheckAtoms();
 }
 
 
@@ -138,6 +143,52 @@ void AtomsDlg::SetAtoms(const std::vector<xtl::AtomPos<t_real>>& vecAtoms)
 	}
 
 	tableAtoms->setSortingEnabled(bSort);
+	CheckAtoms();
+}
+
+
+void AtomsDlg::AtomCellChanged(int iRow, int iCol)
+{
+	if(iCol == static_cast<int>(AtInfo::NAME))
+		CheckAtoms();
+}
+
+
+/**
+ * checks if atom names are in the scattering lenth table
+ */
+void AtomsDlg::CheckAtoms()
+{
+	std::ostringstream ostrErr;
+
+	std::shared_ptr<const xtl::FormfactList<t_real>> lstff = xtl::FormfactList<t_real>::GetInstance();
+
+	//QColor colOk = qApp->palette().color(QPalette::Base);
+	QColor colOk{0x00, 0x88, 0x00};
+	QColor colFail{0xff, 0x00, 0x00};
+
+	for(int iRow=0; iRow<tableAtoms->rowCount(); ++iRow)
+	{
+		QTableWidgetItem* pItem = tableAtoms->item(iRow, static_cast<int>(AtInfo::NAME));
+		if(!pItem)
+			continue;
+		std::string strAtomName = pItem->text().toStdString();
+		tl::trim(strAtomName);
+		bool bFound = (lstff && lstff->Find(strAtomName) != nullptr);
+		if(!bFound)
+			ostrErr << "\"" << strAtomName << "\" was not found, will be ignored in cross-section.\n";
+
+		tableAtoms->item(iRow, static_cast<int>(AtInfo::NAME))->setBackground(bFound ? colOk : colFail);
+	}
+
+	m_strErr = ostrErr.str();
+}
+
+
+void AtomsDlg::ShowPossibleErrorDlg()
+{
+	if(m_strErr != "")
+		QMessageBox::critical(this, "Error", m_strErr.c_str());
 }
 
 
@@ -176,6 +227,7 @@ void AtomsDlg::ButtonBoxClicked(QAbstractButton* pBtn)
 	if(buttonBox->buttonRole(pBtn) == QDialogButtonBox::ApplyRole ||
 		buttonBox->buttonRole(pBtn) == QDialogButtonBox::AcceptRole)
 	{
+		ShowPossibleErrorDlg();
 		SendApplyAtoms();
 	}
 	else if(buttonBox->buttonRole(pBtn) == QDialogButtonBox::RejectRole)

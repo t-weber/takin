@@ -29,15 +29,18 @@ class AtomsDlg : public QDialog, Ui::AtomsDlg
 protected:
 	QSettings *m_pSettings = nullptr;
 	bool m_bEnableSpin = 0;
+	std::string m_strErr;
 
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
 	void SendApplyAtoms();
+	void CheckAtoms();
 
 protected slots:
 	void ButtonBoxClicked(QAbstractButton* pBtn);
 	void RemoveAtom();
 	void AddAtom();
+	void AtomCellChanged(int iRow, int iCol);
 
 public:
 	AtomsDlg(QWidget* pParent = nullptr, QSettings *pSettings = nullptr,
@@ -45,6 +48,8 @@ public:
 	virtual ~AtomsDlg();
 
 	void SetAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);
+	std::string GetErrorString() const { return m_strErr; }
+	void ShowPossibleErrorDlg();
 
 signals:
 	void ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);

@@ -102,14 +102,17 @@ RecipPeak::RecipPeak()
 
 QRectF RecipPeak::boundingRect() const
 {
-	return QRectF(-3.5*g_dFontSize, -g_dFontSize,
-		7.*g_dFontSize, 5.*g_dFontSize);
+	return QRectF(-4*g_dFontSize, -g_dFontSize,	// l, t
+		8.*g_dFontSize, 5.*g_dFontSize);		// w, h
 }
 
 
 void RecipPeak::paint(QPainter *pPainter, const QStyleOptionGraphicsItem* pOpt, QWidget* pWid)
 {
-	pPainter->setFont(g_fontGfx);
+	QFont font = g_fontGfx;
+	font.setStrikeOut(!m_bPeakAllowed);
+
+	pPainter->setFont(font);
 	pPainter->setBrush(m_color);
 	pPainter->drawEllipse(QRectF(-m_dRadius*0.1*g_dFontSize, -m_dRadius*0.1*g_dFontSize,
 		m_dRadius*2.*0.1*g_dFontSize, m_dRadius*2.*0.1*g_dFontSize));
@@ -119,7 +122,7 @@ void RecipPeak::paint(QPainter *pPainter, const QStyleOptionGraphicsItem* pOpt, 
 		pPainter->setPen(m_color);
 		QRectF rect = boundingRect();
 		rect.setTop(rect.top()+1.65*g_dFontSize);
-		//pPainter->drawRect(rect);
+		rect.setBottom(rect.bottom()+1.65*g_dFontSize);
 		pPainter->drawText(rect, Qt::AlignHCenter|Qt::AlignTop, m_strLabel);
 	}
 }
@@ -1145,7 +1148,7 @@ void ScatteringTriangle::CalcPeaks(const xtl::LatticeCommon<t_real>& recipcommon
 							}
 							else if(!bHasRefl)
 							{
-								ostrLabel << "\nforbidden";
+								pPeak->SetPeakAllowed(0);
 								ostrTip << "\nStructurally forbidden reflection.";
 							}
 							
