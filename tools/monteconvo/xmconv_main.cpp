@@ -42,12 +42,31 @@ int main(int argc, char** argv)
 	ConvoDlg dlg(nullptr, &m_settings);
 	dlg.setWindowFlags(Qt::Window);
 
-	// load a given file
-	if(argc > 1)
+	// find arguments
+	int iNextValidOption = -1;
+	for(int iArg=1; iArg<argc; ++iArg)
 	{
+		std::string strArg = argv[iArg];
+
+		// max. number of threads
+		if(strArg == "-t" && iArg+1 < argc)
+		{
+			std::string strVal = argv[iArg+1];
+
+			g_iMaxThreads = tl::str_to_var<int>(strVal);
+			++iArg;
+			iNextValidOption = iArg+1;
+		}
+	}
+
+	// load a given file
+	if(iNextValidOption < argc)
+	{
+		tl::log_info("Loading \"", argv[iNextValidOption], "\".");
+
 		const std::string strXmlRoot("taz/");
 		tl::Prop<std::string> xml;
-		if(xml.Load(argv[1], tl::PropType::XML))
+		if(xml.Load(argv[iNextValidOption], tl::PropType::XML))
 			dlg.Load(xml, strXmlRoot);
 		else
 			QMessageBox::critical(nullptr, "Error", "Could not load convolution file.");
