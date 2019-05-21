@@ -49,7 +49,7 @@ public:
 
 	void SetAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);
 	std::string GetErrorString() const { return m_strErr; }
-	void ShowPossibleErrorDlg();
+	bool ShowPossibleErrorDlg();
 
 signals:
 	void ApplyAtoms(const std::vector<xtl::AtomPos<t_real_glob>>& vecAtoms);

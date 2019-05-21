@@ -782,7 +782,8 @@ void TazDlg::ShowFormfactorDlg()
 	focus_dlg(m_pFormfactorDlg);
 }
 
-void TazDlg::ShowAtomsDlg()
+
+void TazDlg::ShowAtomsDlg(bool bOnlyCreate)
 {
 	if(!m_pAtomsDlg)
 	{
@@ -792,14 +793,18 @@ void TazDlg::ShowAtomsDlg()
 	}
 
 	m_pAtomsDlg->SetAtoms(m_vecAtoms);
-	focus_dlg(m_pAtomsDlg);
+
+	if(!bOnlyCreate)
+		focus_dlg(m_pAtomsDlg);
 }
+
 
 void TazDlg::ApplyAtoms(const std::vector<xtl::AtomPos<t_real>>& vecAtoms)
 {
 	m_vecAtoms = vecAtoms;
 	CalcPeaks();
 }
+
 
 void TazDlg::ShowSgListDlg()
 {

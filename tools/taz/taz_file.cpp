@@ -320,10 +320,12 @@ bool TazDlg::Load(const char* pcFile)
 				m_vecAtoms.emplace_back(std::move(theatom));
 			}
 
+			ShowAtomsDlg(1);
 			if(m_pAtomsDlg)
 			{
 				m_pAtomsDlg->SetAtoms(m_vecAtoms);
-				m_pAtomsDlg->ShowPossibleErrorDlg();
+				if(!m_pAtomsDlg->ShowPossibleErrorDlg())
+					ShowAtomsDlg(0);
 			}
 		}
 	}
@@ -961,10 +963,12 @@ bool TazDlg::ImportCIF(const char* pcFile)
 			}
 		}
 		
+		ShowAtomsDlg(1);
 		if(m_pAtomsDlg)
 		{
 			m_pAtomsDlg->SetAtoms(m_vecAtoms);
-			m_pAtomsDlg->ShowPossibleErrorDlg();
+			if(!m_pAtomsDlg->ShowPossibleErrorDlg())
+				ShowAtomsDlg(0);
 		}
 
 

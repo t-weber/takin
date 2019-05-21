@@ -159,14 +159,14 @@ void AtomsDlg::AtomCellChanged(int iRow, int iCol)
  */
 void AtomsDlg::CheckAtoms()
 {
-	std::ostringstream ostrErr;
-
-	std::shared_ptr<const xtl::FormfactList<t_real>> lstff = xtl::FormfactList<t_real>::GetInstance();
+	std::shared_ptr<const xtl::ScatlenList<t_real>> lstff = xtl::ScatlenList<t_real>::GetInstance();
+	m_strErr = "";
 
 	//QColor colOk = qApp->palette().color(QPalette::Base);
 	QColor colOk{0x00, 0x88, 0x00};
 	QColor colFail{0xff, 0x00, 0x00};
 
+	std::string strAtomsNotFound;
 	for(int iRow=0; iRow<tableAtoms->rowCount(); ++iRow)
 	{
 		QTableWidgetItem* pItem = tableAtoms->item(iRow, static_cast<int>(AtInfo::NAME));
@@ -176,19 +176,31 @@ void AtomsDlg::CheckAtoms()
 		tl::trim(strAtomName);
 		bool bFound = (lstff && lstff->Find(strAtomName) != nullptr);
 		if(!bFound)
-			ostrErr << "\"" << strAtomName << "\" was not found, will be ignored in cross-section.\n";
+		{
+			if(strAtomsNotFound != "")
+				strAtomsNotFound += ", ";
+			strAtomsNotFound += strAtomName;
+		}
 
 		tableAtoms->item(iRow, static_cast<int>(AtInfo::NAME))->setBackground(bFound ? colOk : colFail);
 	}
 
-	m_strErr = ostrErr.str();
+	if(strAtomsNotFound != "")
+	{
+		m_strErr = "The following atoms were not found in the scattering length database, "
+			"their contribution to the cross-section will be ignored: " + strAtomsNotFound + ".";
+	}
 }
 
 
-void AtomsDlg::ShowPossibleErrorDlg()
+bool AtomsDlg::ShowPossibleErrorDlg()
 {
 	if(m_strErr != "")
+	{
 		QMessageBox::critical(this, "Error", m_strErr.c_str());
+		return 0;
+	}
+	return 1;
 }
 
 

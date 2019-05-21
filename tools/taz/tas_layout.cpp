@@ -400,6 +400,7 @@ void TasLayout::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*, QWidg
 	// ------------------------------------------------------------------------
 	// dashed extended lines
 	QPen penDash(Qt::DashLine);
+	penDash.setColor(qApp->palette().color(QPalette::WindowText));
 	penDash.setWidthF(g_dFontSize*0.1);
 
 	pPainter->setPen(penDash);
