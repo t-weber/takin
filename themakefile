@@ -517,7 +517,7 @@ OBJ_TAZ = obj/taz_main.o obj/taz.o obj/taz_crys.o \
 	obj/FilePreviewDlg.o obj/AtomsDlg.o \
 	obj/SpurionDlg.o obj/NeutronDlg.o obj/TOFDlg.o \
 	obj/crystalsys.o obj/formfact.o \
-	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
+	obj/r0.o obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
 	obj/ResoDlg.o obj/ResoDlg_file.o obj/loadinstr.o obj/recent.o obj/globals.o \
 	obj/globals_qt.o obj/qthelper.o obj/qwthelper.o \
 	obj/sqw.o obj/sqwbase.o obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} \
@@ -532,7 +532,7 @@ OBJ_MONTERESO = obj/montereso_res.o obj/montereso_res_main.o \
 	obj/qthelper.o obj/qwthelper.o obj/globals.o obj/globals_qt.o
 
 OBJ_MONTECONVO = obj/log.o obj/debug.o obj/sqw.o obj/sqwbase.o \
-	obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} obj/cn.o obj/pop.o obj/eck.o obj/viol.o \
+	obj/sqwfact.o ${PY_OBJS} ${JL_OBJS} obj/r0.o obj/cn.o obj/pop.o obj/eck.o obj/viol.o \
 	obj/rand.o obj/tasreso.o obj/eval.o \
 	obj/linalg2.o
 
@@ -544,7 +544,7 @@ OBJ_CONVOSERIES = obj/scanseries.o obj/log.o obj/debug.o
 
 OBJ_RESO = obj/log.o obj/debug.o obj/rand.o \
 	obj/spec_char.o obj/reso_res_main.o \
-	obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
+	obj/r0.o obj/cn.o obj/pop.o obj/eck.o obj/viol.o obj/simple.o \
 	obj/ResoDlg.o obj/ResoDlg_file.o obj/TOFDlg.o \
 	obj/linalg2.o obj/globals.o obj/globals_qt.o obj/eval.o \
 	obj/qthelper.o
@@ -800,6 +800,8 @@ obj/tmp.o: tlibs/file/tmp.cpp tlibs/file/tmp.h
 obj/eval.o: tlibs/string/eval.cpp tlibs/string/eval.h tlibs/string/eval_impl.h
 	${CC} ${FLAGS} -c -o $@ $<
 
+obj/r0.o: tools/res/r0.cpp tools/res/r0.h
+	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/cn.o: tools/res/cn.cpp tools/res/cn.h
 	${CC} ${FLAGS} -DNO_QT -c -o $@ $<
 obj/pop.o: tools/res/pop.cpp tools/res/pop.h

@@ -172,6 +172,7 @@ add_executable(takin
 	tools/taz/real_lattice.cpp tools/taz/proj_lattice.cpp
 	tools/taz/nicos.cpp tools/taz/sics.cpp tools/taz/taz_net.cpp
 
+	tools/res/r0.cpp
 	tools/res/cn.cpp tools/res/pop.cpp tools/res/eck.cpp tools/res/viol.cpp tools/res/simple.cpp
 	tools/res/ResoDlg.cpp tools/res/ResoDlg_file.cpp
 
@@ -250,6 +251,7 @@ add_dependencies(takin gentab)
 # convofit, convoseries
 # -----------------------------------------------------------------------------
 add_executable(convofit 
+	tools/res/r0.cpp
 	tools/res/cn.cpp tools/res/pop.cpp tools/res/eck.cpp tools/res/viol.cpp 
 	#tools/res/simple.cpp
 

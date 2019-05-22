@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 	}
 
 	// load a given file
-	if(iNextValidOption < argc)
+	if(argc > 1 && iNextValidOption < argc)
 	{
 		tl::log_info("Loading \"", argv[iNextValidOption], "\".");
 

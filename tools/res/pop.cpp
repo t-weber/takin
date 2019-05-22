@@ -12,6 +12,7 @@
  */
 
 #include "pop.h"
+#include "r0.h"
 #include "helper.h"
 
 #include "tlibs/math/linalg.h"
@@ -375,6 +376,8 @@ ResoResults calc_pop(const PopParams& pop)
 
 		// rest of the prefactors, equ. 1 in [pop75], together with the mono and and ana reflectivities
 		// (defining the resolution volume) these give the same correction as in [mit84] equ. A.57
+		// NOTE: these factors are not needed, because the normalisation of the 4d gaussian distribution
+		// is already taken care of in the MC step by the employed std::normal_distribution function
 		//res.dR0 *= std::sqrt(std::abs(tl::determinant(res.reso))) / (2.*pi*2.*pi);
 		// except for the (unimportant) prefactors this is the same as dividing by the resolution volume
 		//res.dR0 /= res.dResVol * pi * t_real(3.);
