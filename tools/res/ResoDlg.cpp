@@ -131,8 +131,8 @@ ResoDlg::ResoDlg(QWidget *pParent, QSettings* pSettings)
 	m_vecPosEditBoxes = {editE, editQ, editKi, editKf};
 	m_vecPosEditNames = {"reso/E", "reso/Q", "reso/ki", "reso/kf"};
 
-	m_vecCheckBoxes = {checkUseR0, checkUseResVol, checkUseKi3, checkUseKf3, checkUseKfKi};
-	m_vecCheckNames = {"reso/use_R0", "reso/use_resvol", "reso/use_ki3", "reso/use_kf3", "reso/use_kfki"};
+	m_vecCheckBoxes = {checkUseR0, checkUseGeneralR0, checkUseKi3, checkUseKf3, checkUseKfKi};
+	m_vecCheckNames = {"reso/use_R0", "reso/use_general_R0", "reso/use_ki3", "reso/use_kf3", "reso/use_kfki"};
 
 
 	m_vecRadioPlus = {radioMonoScatterPlus, radioAnaScatterPlus,
@@ -342,10 +342,10 @@ void ResoDlg::Calc()
 			cn.flags |= CALC_R0;
 		else
 			cn.flags &= ~CALC_R0;
-		if(checkUseResVol->isChecked())
-			cn.flags |= CALC_RESVOL;
+		if(checkUseGeneralR0->isChecked())
+			cn.flags |= CALC_GENERAL_R0;
 		else
-			cn.flags &= ~CALC_RESVOL;
+			cn.flags &= ~CALC_GENERAL_R0;
 		if(checkUseKi3->isChecked())
 			cn.flags |= CALC_KI3;
 		else
@@ -358,6 +358,11 @@ void ResoDlg::Calc()
 			cn.flags |= CALC_KFKI;
 		else
 			cn.flags &= ~CALC_KFKI;
+		//if(checkUseResVol->isChecked())
+		//	cn.flags |= CALC_RESVOL;
+		//else
+		//	cn.flags &= ~CALC_RESVOL;
+		cn.flags &= ~CALC_RESVOL;	// not used anymore
 
 
 		// Position

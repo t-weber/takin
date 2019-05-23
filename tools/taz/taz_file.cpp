@@ -876,7 +876,7 @@ bool TazDlg::ImportCIF(const char* pcFile)
 
 
 		// check cif tool
-		const std::string strToolNotFound = 
+		const std::string strToolNotFound =
 			"The external Cif2Xml tool is not correctly installed. "
 			"Please specify its path in the program settings.";
 
@@ -912,7 +912,7 @@ bool TazDlg::ImportCIF(const char* pcFile)
 
 		//std::ifstream istrCIF(strFile1);
 		std::basic_istream<char>& istrCIF = proc.GetIstr();
-		std::tie(bOk, a,b,c, alpha,beta,gamma, vecAtomNames, vecAtomPos, vecAllAtomPos, strSpaceGroup) = 
+		std::tie(bOk, a,b,c, alpha,beta,gamma, vecAtomNames, vecAtomPos, vecAllAtomPos, strSpaceGroup) =
 			xtl::load_xml<t_real, t_vec, t_mat>(istrCIF);
 		tl::trim(strSpaceGroup);
 

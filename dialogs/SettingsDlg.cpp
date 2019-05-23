@@ -122,7 +122,7 @@ SettingsDlg::SettingsDlg(QWidget* pParent, QSettings* pSett)
 		t_tupEdit("gl/font", "", editGLFont),
 		t_tupEdit("main/font_gfx", g_fontGfx.toString().toStdString().c_str(), editGfxFont),
 		t_tupEdit("main/font_gen", g_fontGen.toString().toStdString().c_str(), editGenFont),
-	
+
 		// external tools
 		t_tupEdit("tools/cif2xml", "cif2xml", editCif),
 		t_tupEdit("tools/gpl", "gnuplot", editGpl)
@@ -323,12 +323,22 @@ static inline std::string find_program_binary(const std::string& strExe)
 		return strExe;
 	}
 
-	// try prefixing it with the application path
-	std::string strPath = g_strApp + "/" + strExe;
-	if(tl::file_exists(strPath.c_str()))
+	// try prefixing it with possible application paths
+	std::vector<std::string> vecPaths =
 	{
-		tl::log_info("Found external tool in program path: \"", strPath, "\".");
-		return strPath;
+		g_strApp + "/" + strExe,
+		g_strApp + "/externals/" + strExe,
+		g_strApp + "/../externals/" + strExe,
+	};
+
+	for(const std::string& strPath : vecPaths)
+	{
+		//tl::log_debug("Trying to find ", strPath, "...");
+		if(tl::file_exists(strPath.c_str()))
+		{
+			tl::log_info("Found external tool in program path: \"", strPath, "\".");
+			return strPath;
+		}
 	}
 
 	return strExe;

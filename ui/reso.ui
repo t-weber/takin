@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>760</width>
-    <height>458</height>
+    <width>817</width>
+    <height>493</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -591,12 +591,12 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="checkUseResVol">
+           <widget class="QCheckBox" name="checkUseGeneralR0">
             <property name="toolTip">
-             <string>Normalise R0 to the resolution volume. Should be left unchecked.</string>
+             <string>Use generalised R0 calculation method via the ki and kf resolution volumes instead. Should normally be left unchecked.</string>
             </property>
             <property name="text">
-             <string>Normalise to Resolution Volume</string>
+             <string>Use Generalised R0 Factor</string>
             </property>
             <property name="checked">
              <bool>false</bool>
@@ -3560,7 +3560,7 @@
   <tabstop>spinVCollASample</tabstop>
   <tabstop>spinVCollAna</tabstop>
   <tabstop>checkUseR0</tabstop>
-  <tabstop>checkUseResVol</tabstop>
+  <tabstop>checkUseGeneralR0</tabstop>
   <tabstop>checkUseKi3</tabstop>
   <tabstop>checkUseKf3</tabstop>
   <tabstop>spinMonoW</tabstop>

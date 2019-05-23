@@ -8,6 +8,8 @@
 ui/*.h
 bin/*
 !bin/.dir
+externals/*
+!externals/.dir
 obj/*
 !obj/.dir
 plugins/*

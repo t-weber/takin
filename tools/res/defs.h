@@ -15,9 +15,11 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+
 namespace ublas = boost::numeric::ublas;
 
 using t_real_reso = ::t_real_glob;
+
 
 enum ResoFlags : std::size_t
 {
@@ -28,7 +30,10 @@ enum ResoFlags : std::size_t
 	CALC_KF3    = 1<<3,
 
 	CALC_KFKI   = 1<<4,
+
+	CALC_GENERAL_R0	= 1<<5,
 };
+
 
 struct ResoResults
 {
