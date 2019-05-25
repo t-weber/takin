@@ -16,7 +16,7 @@ set(BUILD_FOR_MINGW FALSE)
 #set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_CXX_STANDARD 11)
-
+#set(BUILD_SHARED_LIBS TRUE)
 set(USE_TR1_FUNCS FALSE)
 
 
@@ -25,10 +25,12 @@ if(BUILD_FOR_MINGW)
 	set(SOCK2 "ws2_32")
 	set(USE_GENTAB FALSE)
 	set(USE_RtMp FALSE)
+	set(SEARCH_PY FALSE)
 else()
 	set(SOCK2 "")
 	set(USE_GENTAB TRUE)
 	set(USE_RtMp TRUE)
+	set(SEARCH_PY TRUE)
 endif()
 
 
@@ -36,18 +38,20 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}" "." "${PROJECT_SOURCE_DIR}
 set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
-
-
-set(BOOST_COMPS iostreams system filesystem program_options)
+set(Boost_DEBUG FALSE)
+set(Boost_FIND_QUIETLY FALSE)
+set(BOOST_COMPS program_options iostreams filesystem system)
 
 if(USE_TR1_FUNCS)
 	list(APPEND BOOST_COMPS regex)
 endif()
 
-find_package(PythonInterp 2.7)
-find_package(PythonLibs 2.7)
-#find_package(PythonInterp 3.7)
-#find_package(PythonLibs 3.7)
+if(SEARCH_PY)
+	find_package(PythonInterp 2.7)
+	find_package(PythonLibs 2.7)
+	#find_package(PythonInterp 3.7)
+	#find_package(PythonLibs 3.7)
+endif()
 
 if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
 	list(APPEND BOOST_COMPS python)
@@ -56,13 +60,14 @@ if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
 endif()
 
 
-
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPS} REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Qt4 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Qwt REQUIRED)
 find_package(Minuit2)
+find_package(ZLIB)
+find_package(BZip2)
 
 if(USE_RtMp)
 	find_package(Rt REQUIRED)
@@ -82,13 +87,28 @@ find_package(X11)
 
 
 
+# boost provides its own FindBoost substitute which does not set Boost_LIBRARIES!
+if("${Boost_LIBRARIES}" STREQUAL "")
+	message("Boost libraries not set, attempting to do it manually...")
+
+	foreach(comp ${BOOST_COMPS})
+		list(APPEND Boost_LIBRARIES Boost::${comp})
+	endforeach(comp)
+
+	message("Boost libraries: ${Boost_LIBRARIES}")
+endif()
+
+
 #message("Project source dir: ${PROJECT_SOURCE_DIR}")
 #message("CMake source dir: ${CMAKE_SOURCE_DIR}")
 #message("Binary dir: ${CMAKE_BINARY_DIR}")
 message("Install path prefix: ${CMAKE_INSTALL_PREFIX}")
-message("Using qwt version ${QWT_MAJOR_VERSION}")
+message("Using Qwt version ${QWT_MAJOR_VERSION}")
 message("Using Boost version ${Boost_VERSION}")
+message("Using Zlib version ${ZLIB_VERSION_STRING}")
+message("Using Bzip2 version ${BZIP2_VERSION_STRING}")
 message("Qt moc: ${QT_MOC_EXECUTABLE}\nQt uic: ${QT_UIC_EXECUTABLE}")
+
 
 add_definitions(-DNDEBUG)
 add_definitions(-DUSE_NET -DUSE_IOSTR -DUSE_GIL -DUSE_CIF)
@@ -96,7 +116,7 @@ add_definitions(-DQT_VER=4 -DQWT_VER=${QWT_MAJOR_VERSION})
 add_definitions(-DNO_LAPACK)
 add_definitions(-DNO_JPEG -DNO_TIFF)
 add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
-add_definitions(${Boost_CXX_FLAGS})
+#add_definitions(${Boost_CXX_FLAGS} -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_ERROR_CODE_HEADER_ONLY)
 add_definitions(-DTLIBS_INC_HDR_IMPLS)
 
 if(USE_TR1_FUNCS)
@@ -111,7 +131,7 @@ else()
 endif()
 
 # hack to prevent math_fwd.h inclusion
-#add_definitions(-DBOOST_MATH_FWD_HPP)
+add_definitions(-DBOOST_MATH_FWD_HPP)
 
 
 include_directories("${PROJECT_SOURCE_DIR}" ".")
@@ -120,6 +140,8 @@ include_directories("${PNG_INCLUDE_DIRS}")
 #include_directories("${JPEG_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS}")
 include_directories("${QT_INCLUDE_DIR}")
 include_directories("${QWT_INCLUDE_DIRS}")
+include_directories("${ZLIB_INCLUDE_DIRS}")
+include_directories("${BZIP2_INCLUDE_DIR}")
 
 
 
@@ -150,11 +172,13 @@ else()
 endif()
 
 
+
 if(X11_FOUND)
 	include_directories(${X11_X11_INCLUDE_PATH})
 else()
 	set(X11_X11_LIB "")
 endif()
+
 
 
 # 3d support
@@ -203,15 +227,17 @@ add_definitions(-std=c++11)
 # gentab
 # -----------------------------------------------------------------------------
 if(USE_GENTAB)
-	add_executable(gentab 
+	add_executable(gentab
 		tools/gentab/gentab.cpp
 		libs/spacegroups/spacegroup_clp.cpp libs/spacegroups/crystalsys.cpp
 		tlibs/log/log.cpp
 	)
 
-	target_link_libraries(gentab 
-		${Boost_LIBRARIES} ${LIBS_PY} ${Clipper_LIBRARIES}
+	target_link_libraries(gentab
+		${LIBS_PY} ${Clipper_LIBRARIES}
 		Qt4::QtCore Qt4::QtGui
+		${Boost_LIBRARIES}
+#		${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
 	)
 
 	add_custom_command(TARGET gentab POST_BUILD
@@ -225,7 +251,7 @@ endif()
 # -----------------------------------------------------------------------------
 # takin
 # -----------------------------------------------------------------------------
-add_executable(takin 
+add_executable(takin
 	tools/taz/taz_main.cpp
 	tools/taz/taz.cpp tools/taz/tas_layout.cpp tools/taz/tof_layout.cpp
 	tools/taz/taz_crys.cpp
@@ -280,13 +306,15 @@ add_executable(takin
 
 target_link_libraries(takin
 	${LIBS_FIT}
-	${Boost_LIBRARIES} ${SOCK2}
+	${SOCK2}
 	${LIBS_3D}
 	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
 	${QWT_LIBRARIES}
 	Qt4::QtCore Qt4::QtGui Qt4::QtSvg
 	${LIBS_PY}
 	${PNG_LIBRARIES}
+	${Boost_LIBRARIES}
+#	${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
 )
 
 
@@ -351,7 +379,9 @@ set_target_properties(convofit PROPERTIES COMPILE_FLAGS "-DNO_QT")
 target_link_libraries(convofit
 	${LIBS_FIT} ${SOCK2}
 	Threads::Threads ${Mp_LIBRARIES} ${Rt_LIBRARIES}
-	${Boost_LIBRARIES} ${LIBS_PY}
+	${LIBS_PY}
+	${Boost_LIBRARIES}
+#	${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -373,7 +403,9 @@ add_executable(convoseries
 set_target_properties(convoseries PROPERTIES COMPILE_FLAGS "-DNO_QT")
 
 target_link_libraries(convoseries
-	${Boost_LIBRARIES} ${LIBS_PY}
+	${LIBS_PY}
+	${Boost_LIBRARIES}
+#	${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

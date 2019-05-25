@@ -369,7 +369,7 @@ int main(int argc, char** argv)
 			}
 #endif
 
-			// Warnings due to version changes
+		/*// Warnings due to version changes
 			if(settings.value("debug/last_warning_shown", 0).toInt() < 1)
 			{
 				QMessageBox::warning(0, "Takin", "Please beware that in this version "
@@ -377,7 +377,7 @@ int main(int argc, char** argv)
 					"Any global scaling factors will have changed.");
 				settings.setValue("debug/last_warning_shown", 1);
 			}
-		}
+		}*/
 
 
 		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nLoading 1/2 ...");
