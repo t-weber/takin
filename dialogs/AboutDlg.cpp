@@ -23,6 +23,10 @@
 //#define PRIVATE_SRC_VERSION
 
 
+#define __STR__(VAR) #VAR				// string of macro
+#define __STR_DEREF__(VAR) __STR__(VAR)	// expand macro
+
+
 AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 	: QDialog(pParent), m_pSettings(pSett)
 {
@@ -171,7 +175,7 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 #endif
 	ostrFeat << " support for Python scripting";
 #if defined USE_PY && defined PY_VER
-	ostrFeat << " (version " << PY_VER << ")";
+	ostrFeat << " (version " << __STR_DEREF__(PY_VER) << ")";
 #endif
 	ostrFeat << ".";
 	ostrFeat << "</li>";

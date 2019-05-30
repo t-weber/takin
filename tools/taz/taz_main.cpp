@@ -376,8 +376,8 @@ int main(int argc, char** argv)
 					"the correction factors for the resolution convolution have been re-worked. "
 					"Any global scaling factors will have changed.");
 				settings.setValue("debug/last_warning_shown", 1);
-			}
-		}*/
+			}*/
+		}
 
 
 		show_splash_msg(app.get(), pSplash.get(), strStarting + "\nLoading 1/2 ...");

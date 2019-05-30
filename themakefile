@@ -20,16 +20,17 @@ IS_UNSTABLE = 0
 NATIVE_OPTS = 1
 
 # which Qt and Qwt versions? Qt: 4 or 5, Qwt: 5 or 6
-QT_VER = 4
+QT_VER = 5
 QWT_VER = 6
 
 # which Py version to use for scripting
-PY_INC_VER = 2.7
-#PY_INC_VER = 3.7
+#PY_INC_VER = 2.7
+PY_INC_VER = 3.7m
 
 PY_LIB_VER = ${PY_INC_VER}
-PY_BOOSTLIB_VER = $(subst .,,${PY_LIB_VER})
-#$(info Py boost lib: ${PY_BOOSTLIB_VER})
+#PY_BOOSTLIB_VER = $(subst .,,${PY_LIB_VER})
+PY_BOOSTLIB_VER = $(word 1, $(subst ., ,${PY_LIB_VER}))
+$(info Py boost lib: ${PY_BOOSTLIB_VER})
 
 # use Lapack instead of internal linalg routines?
 USE_LAPACK = 0
