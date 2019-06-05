@@ -8,6 +8,7 @@
 #include "taz.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
+#include "tlibs/helper/exception.h"
 #include <boost/algorithm/string.hpp>
 
 
@@ -138,10 +139,14 @@ void TazDlg::CalcPeaks()
 		const t_real alpha = tl::d2r(editAlpha->text().toDouble());
 		const t_real beta = tl::d2r(editBeta->text().toDouble());
 		const t_real gamma = tl::d2r(editGamma->text().toDouble());
+
 #ifndef NDEBUG
 		tl::log_debug("lattice consts = ", a, ", ", b, ", ", c);
 		tl::log_debug("lattice angles = ", alpha, ", ", beta, ", ", gamma);
 #endif
+
+		if(a<=0. || b<=0. || c<=0. || alpha<=0. || beta<=0. || gamma<=0.)
+			throw tl::Err("Invalid lattice definition.");
 
 		tl::Lattice<t_real> lattice(a,b,c, alpha,beta,gamma);
 		tl::Lattice<t_real> recip_unrot = lattice.GetRecip();

@@ -12,6 +12,7 @@
 #include "tlibs/math/linalg.h"
 #include "tlibs/string/string.h"
 #include "tlibs/string/spec_char.h"
+#include "tlibs/helper/exception.h"
 #include "libs/formfactors/formfact.h"
 
 #include <iostream>
@@ -322,7 +323,6 @@ void PowderDlg::CalcPeaks()
 	try
 	{
 		if(m_bDontCalc) return;
-		static const unsigned int iPrec = g_iPrec;
 		const bool bWantUniquePeaks = checkUniquePeaks->isChecked();
 
 		const t_real dA = editA->text().toDouble();
@@ -331,6 +331,9 @@ void PowderDlg::CalcPeaks()
 		const t_real dAlpha = tl::d2r(editAlpha->text().toDouble());
 		const t_real dBeta = tl::d2r(editBeta->text().toDouble());
 		const t_real dGamma = tl::d2r(editGamma->text().toDouble());
+
+		if(dA<=0. || dB<=0. || dC<=0. || dAlpha<=0. || dBeta<=0. || dGamma<=0.)
+			throw tl::Err("Invalid lattice definition.");
 
 		const t_real dLam = spinLam->value();
 		const int iOrder = spinOrder->value();
@@ -485,7 +488,7 @@ void PowderDlg::CalcPeaks()
 
 					// using angle and F as hash for the set
 					std::ostringstream ostrAngle;
-					ostrAngle.precision(iPrec);
+					ostrAngle.precision(g_iPrec);
 					ostrAngle << tl::r2d(dAngle) << " " << dF;
 					std::string strAngle = ostrAngle.str();
 					//std::cout << strAngle << std::endl;
@@ -518,8 +521,8 @@ void PowderDlg::CalcPeaks()
 
 		for(auto& pair : mapPeaks)
 		{
-			pair.second.strAngle = tl::var_to_str<t_real>(tl::r2d(pair.second.dAngle), iPrec);
-			pair.second.strQ = tl::var_to_str<t_real>(pair.second.dQ, iPrec);
+			pair.second.strAngle = tl::var_to_str<t_real>(tl::r2d(pair.second.dAngle), g_iPrec);
+			pair.second.strQ = tl::var_to_str<t_real>(pair.second.dQ, g_iPrec);
 			pair.second.iMult = powder.GetMultiplicity(pair.second.h, pair.second.k, pair.second.l, pair.second.dFn);
 
 			pair.second.dIn *= t_real(pair.second.iMult);
@@ -555,16 +558,16 @@ void PowderDlg::CalcPeaks()
 				}
 			}
 
-			std::string strMult = tl::var_to_str(vecPowderLines[iRow]->iMult, iPrec);
+			std::string strMult = tl::var_to_str(vecPowderLines[iRow]->iMult, g_iPrec);
 			std::string strFn, strIn, strFx, strIx;
 			if(vecPowderLines[iRow]->dFn >= 0.)
-				strFn = tl::var_to_str(vecPowderLines[iRow]->dFn, iPrec);
+				strFn = tl::var_to_str(vecPowderLines[iRow]->dFn, g_iPrec);
 			if(vecPowderLines[iRow]->dIn >= 0.)
-				strIn = tl::var_to_str(vecPowderLines[iRow]->dIn, iPrec);
+				strIn = tl::var_to_str(vecPowderLines[iRow]->dIn, g_iPrec);
 			if(vecPowderLines[iRow]->dFx >= 0.)
-				strFx = tl::var_to_str(vecPowderLines[iRow]->dFx, iPrec);
+				strFx = tl::var_to_str(vecPowderLines[iRow]->dFx, g_iPrec);
 			if(vecPowderLines[iRow]->dIx >= 0.)
-				strIx = tl::var_to_str(vecPowderLines[iRow]->dIx, iPrec);
+				strIx = tl::var_to_str(vecPowderLines[iRow]->dIx, g_iPrec);
 
 			tablePowderLines->item(iRow, TABLE_PEAK)->setText(vecPowderLines[iRow]->strPeaks.c_str());
 			dynamic_cast<QTableWidgetItemWrapper<t_real>*>(tablePowderLines->item(iRow, TABLE_ANGLE))->
