@@ -9,8 +9,9 @@
 #include "tlibs/log/log.h"
 #include "tlibs/file/file.h"
 #include "tlibs/string/string.h"
-#include <thread>
+#include "tlibs/helper/proc.h"
 
+#include <thread>
 
 // -----------------------------------------------------------------------------
 
@@ -177,3 +178,17 @@ void clear_global_paths()
 }
 
 // -----------------------------------------------------------------------------
+
+
+
+std::string get_gpltool_version()
+{
+	tl::PipeProc<char> proc((g_strGplTool + " 2>/dev/null --version").c_str(), false);
+	if(!proc.IsReady())
+		return "";
+
+	std::string strVer;
+	std::getline(proc.GetIstr(), strVer);
+	tl::trim(strVer);
+	return strVer;
+}

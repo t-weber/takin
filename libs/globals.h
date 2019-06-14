@@ -55,4 +55,6 @@ extern std::string find_file_in_global_paths(const std::string& strFile, bool bA
 
 extern unsigned int get_max_threads();
 
+extern std::string get_gpltool_version();
+
 #endif

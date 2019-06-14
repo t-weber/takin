@@ -118,7 +118,7 @@ void PowderFitDlg::Calc()
 		tl::get_tokens<t_real, std::string>(strTTErrs, ",;", vecTTErrs);
 
 		for(t_real& dTT : vecTTs) dTT = tl::d2r(dTT);
-		for(t_real& dTT : vecTTErrs) dTT = tl::d2r(dTT);
+		for(t_real& dTTErr : vecTTErrs) dTTErr = tl::d2r(dTTErr);
 
 		if(vecGs.size()!=vecTTs.size() || vecTTs.size()!=vecTTErrs.size())
 		{
@@ -198,16 +198,17 @@ void PowderFitDlg::Calc()
 
 void PowderFitDlg::Plot()
 {
-	QString strErr = "Gnuplot cannot be invoked.";
-
 	try
 	{
-		if(!m_pPlotProc)
-			m_pPlotProc.reset(new tl::PipeProc<char>("gnuplot -p 2>/dev/null 1>/dev/null", 1));
+		std::string strVer = get_gpltool_version();
+		tl::log_info("Invoking ", strVer, ".");
 
-		if(!m_pPlotProc || !m_pPlotProc->IsReady())
+		if(!m_pPlotProc)
+			m_pPlotProc.reset(new tl::PipeProc<char>((g_strGplTool + " -p 2>/dev/null 1>/dev/null").c_str(), 1));
+
+		if(strVer == "" || !m_pPlotProc || !m_pPlotProc->IsReady())
 		{
-			QMessageBox::critical(this, "Error", strErr);
+			QMessageBox::critical(this, "Error", "Gnuplot cannot be invoked.");
 			return;
 		}
 
@@ -216,7 +217,7 @@ void PowderFitDlg::Plot()
 	}
 	catch(const std::exception& ex)
 	{
-		QMessageBox::critical(this, "Critical Error", strErr + " Error: " + ex.what() + ".");
+		QMessageBox::critical(this, "Critical Error", ex.what());
 	}
 }
 

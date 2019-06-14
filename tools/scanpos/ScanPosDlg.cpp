@@ -299,35 +299,29 @@ void ScanPosDlg::UpdatePlot()
 }
 
 
-static inline std::string get_gpltool_version()
-{
-	tl::PipeProc<char> proc((g_strGplTool + " 2>/dev/null --version").c_str(), false);
-	if(!proc.IsReady())
-		return "";
-
-	std::string strVer;
-	std::getline(proc.GetIstr(), strVer);
-	tl::trim(strVer);
-	return strVer;
-}
-
-
 void ScanPosDlg::Plot()
 {
-	std::string strVer = get_gpltool_version();
-	tl::log_info("Invoking ", strVer, ".");
-
-	if(!m_pPlotProc)
-		m_pPlotProc.reset(new tl::PipeProc<char>((g_strGplTool + " -p 2>/dev/null 1>/dev/null").c_str(), 1));
-
-	if(strVer == "" || !m_pPlotProc || !m_pPlotProc->IsReady())
+	try
 	{
-		QMessageBox::critical(this, "Error", "Gnuplot cannot be invoked.");
-		return;
-	}
+		std::string strVer = get_gpltool_version();
+		tl::log_info("Invoking ", strVer, ".");
 
-	(*m_pPlotProc) << editScript->toPlainText().toStdString();
-	m_pPlotProc->flush();
+		if(!m_pPlotProc)
+			m_pPlotProc.reset(new tl::PipeProc<char>((g_strGplTool + " -p 2>/dev/null 1>/dev/null").c_str(), 1));
+
+		if(strVer == "" || !m_pPlotProc || !m_pPlotProc->IsReady())
+		{
+			QMessageBox::critical(this, "Error", "Gnuplot cannot be invoked.");
+			return;
+		}
+
+		(*m_pPlotProc) << editScript->toPlainText().toStdString();
+		m_pPlotProc->flush();
+	}
+	catch(const std::exception& ex)
+	{
+		QMessageBox::critical(this, "Critical Error", ex.what());
+	}
 }
 
 

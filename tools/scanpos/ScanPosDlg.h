@@ -10,6 +10,7 @@
 
 #include <QDialog>
 #include <QSettings>
+
 #include "ui/ui_scanpos.h"
 #include "tlibs/helper/proc.h"
 
