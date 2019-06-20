@@ -1936,6 +1936,7 @@
     </hint>
    </hints>
   </connection>
+-->
   <connection>
    <sender>check2dMap</sender>
    <signal>toggled(bool)</signal>
@@ -2000,6 +2001,5 @@
     </hint>
    </hints>
   </connection>
--->
  </connections>
 </ui>

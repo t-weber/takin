@@ -20,7 +20,7 @@ IS_UNSTABLE = 0
 NATIVE_OPTS = 1
 
 # which Qt and Qwt versions? Qt: 4 or 5, Qwt: 5 or 6
-QT_VER = 5
+QT_VER = 4
 QWT_VER = 6
 
 # which Py version to use for scripting

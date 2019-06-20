@@ -38,10 +38,12 @@ TASReso::TASReso()
 	m_opts.coords = McNeutronCoords::RLU;
 }
 
+
 TASReso::TASReso(const TASReso& res)
 {
 	operator=(res);
 }
+
 
 const TASReso& TASReso::operator=(const TASReso& res)
 {
@@ -59,6 +61,9 @@ const TASReso& TASReso::operator=(const TASReso& res)
 }
 
 
+/**
+ * loads a crystal definition file
+ */
 bool TASReso::LoadLattice(const char* pcXmlFile)
 {
 	const std::string strXmlRoot("taz/");
@@ -94,6 +99,9 @@ bool TASReso::LoadLattice(const char* pcXmlFile)
 }
 
 
+/**
+ * loads an instrument definition file
+ */
 bool TASReso::LoadRes(const char* pcXmlFile)
 {
 	const std::string strXmlRoot("taz/");
@@ -316,7 +324,7 @@ bool TASReso::SetLattice(t_real a, t_real b, t_real c,
 	m_opts.matBinv = matBinv;
 	m_opts.matUBinv = matUBinv;
 
-	ublas::matrix<t_real>* pMats[] = {&m_opts.matU, &m_opts.matB, &m_opts.matUB, 
+	ublas::matrix<t_real>* pMats[] = {&m_opts.matU, &m_opts.matB, &m_opts.matUB,
 		&m_opts.matUinv, &m_opts.matBinv, &m_opts.matUBinv};
 
 	for(ublas::matrix<t_real> *pMat : pMats)
@@ -330,6 +338,7 @@ bool TASReso::SetLattice(t_real a, t_real b, t_real c,
 
 	return true;
 }
+
 
 bool TASReso::SetHKLE(t_real h, t_real k, t_real l, t_real E)
 {

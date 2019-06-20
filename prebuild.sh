@@ -13,11 +13,11 @@ if [[ $# -ge 3 ]]; then
 	TAKINROOT="$3"
 	FORCE=0
 else
-#	UIC="$(which uic-qt4)"
-#	MOC="$(which moc-qt4)"
+	UIC="$(which uic-qt4)"
+	MOC="$(which moc-qt4)"
 
-	UIC="$(which uic-qt5)"
-	MOC="$(which moc-qt5)"
+#	UIC="$(which uic-qt5)"
+#	MOC="$(which moc-qt5)"
 
 	if [ $? -ne 0 ]; then
 		UIC="$(which uic)"
