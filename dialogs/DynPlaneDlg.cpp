@@ -14,6 +14,7 @@ using t_real = t_real_glob;
 static const tl::t_length_si<t_real> angs = tl::get_one_angstrom<t_real>();
 static const tl::t_energy_si<t_real> meV = tl::get_one_meV<t_real>();
 static const tl::t_angle_si<t_real> rads = tl::get_one_radian<t_real>();
+static const tl::t_angle_si<t_real> degs = tl::get_one_deg<t_real>();
 
 
 DynPlaneDlg::DynPlaneDlg(QWidget* pParent, QSettings *pSettings)
@@ -82,7 +83,7 @@ void DynPlaneDlg::Calc()
 	vecQ[0].reserve(GFX_NUM_POINTS); vecE[0].reserve(GFX_NUM_POINTS);
 	vecQ[1].reserve(GFX_NUM_POINTS); vecE[1].reserve(GFX_NUM_POINTS);
 
-	tl::t_angle_si<t_real> twotheta = dAngle * rads;
+	tl::t_angle_si<t_real> twotheta = dAngle * degs;
 
 	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{

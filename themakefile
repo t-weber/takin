@@ -28,8 +28,9 @@ QWT_VER = 6
 PY_INC_VER = 3.7m
 
 PY_LIB_VER = ${PY_INC_VER}
-#PY_BOOSTLIB_VER = $(subst .,,${PY_LIB_VER})
-PY_BOOSTLIB_VER = $(word 1, $(subst ., ,${PY_LIB_VER}))
+#PY_BOOSTLIB_VER = $(word 1, $(subst ., ,${PY_LIB_VER}))
+PY_BOOSTLIB_VER0 = $(subst .,,${PY_LIB_VER})
+PY_BOOSTLIB_VER = $(subst m,,${PY_BOOSTLIB_VER0})
 $(info Py boost lib: ${PY_BOOSTLIB_VER})
 
 # use Lapack instead of internal linalg routines?
