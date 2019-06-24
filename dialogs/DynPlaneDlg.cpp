@@ -69,7 +69,6 @@ void DynPlaneDlg::Calc()
 {
 	const t_real dMinQ = spinMinQ->value();
 	const t_real dMaxQ = spinMaxQ->value();
-	const t_real dAngle = tl::d2r(spinAngle->value());
 	const bool bFixedKi = (comboFixedE->currentIndex()==0);
 
 	if(btnSync->isChecked())
@@ -83,7 +82,7 @@ void DynPlaneDlg::Calc()
 	vecQ[0].reserve(GFX_NUM_POINTS); vecE[0].reserve(GFX_NUM_POINTS);
 	vecQ[1].reserve(GFX_NUM_POINTS); vecE[1].reserve(GFX_NUM_POINTS);
 
-	tl::t_angle_si<t_real> twotheta = dAngle * degs;
+	tl::t_angle_si<t_real> twotheta = spinAngle->value() * degs;
 
 	for(unsigned int iPt=0; iPt<GFX_NUM_POINTS; ++iPt)
 	{
@@ -95,7 +94,9 @@ void DynPlaneDlg::Calc()
 			t_real _dQ = Q * angs;
 			t_real _dE = dE / meV;
 
-			if(!std::isnan(_dQ) && !std::isnan(_dE) && !std::isinf(_dQ) && !std::isinf(_dE))
+			// with the -ffast-math flag the compiler may let NaNs through here!
+			if(!std::isnan(_dQ) && !std::isnan(_dE) &&
+				!std::isinf(_dQ) && !std::isinf(_dE))
 			{
 				vecQ[iSign].push_back(Q * angs);
 				vecE[iSign].push_back(dE / meV);
