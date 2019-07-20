@@ -641,7 +641,7 @@ convoseries: ${OBJ_CONVOSERIES}
 	${CC} ${FLAGS} ${LIB_DIRS} -o bin/convoseries $+ ${BASIC_LIBS} ${STD_LIBS}
 
 posextract: obj/posextract.o obj/loadinstr.o obj/log.o obj/debug.o
-	${CC} ${FLAGS} ${LIB_DIRS} -o bin/posextract $+ ${BASIC_LIBS} ${STD_LIBS}
+	${CC} ${FLAGS} ${LIB_DIRS} -o bin/posextract $+ ${BASIC_LIBS} -lboost_program_options ${STD_LIBS}
 	${STRIP} posextract
 
 reso: ${OBJ_RESO}

@@ -112,7 +112,7 @@ protected:
 protected:
 
 public:
-	TakAppl(int argc, char** argv) : QApplication(argc, argv, 1) {}
+	TakAppl(int argc, char** argv) : QApplication(argc, argv) {}
 	virtual ~TakAppl() {}
 
 	void SetTakDlg(std::shared_ptr<TazDlg> pDlg) { m_pTakDlg = pDlg; }
