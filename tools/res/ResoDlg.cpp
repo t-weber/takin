@@ -518,10 +518,8 @@ void ResoDlg::Calc()
 		{
 			// --------------------------------------------------------------------------------
 			// Vanadium width
-			t_real_reso dVanadiumFWHM_Q, dVanadiumFWHM_E;
-			std::tie(dVanadiumFWHM_Q, dVanadiumFWHM_E) =
-				calc_vanadium_fwhms<t_real_reso>(
-					res.reso, res.reso_v, res.reso_s, res.Q_avg);
+			t_real_reso dVanadiumFWHM_E = calc_vanadium_fwhm<t_real_reso>(
+				res.reso, res.reso_v, res.reso_s, res.Q_avg);
 			// --------------------------------------------------------------------------------
 
 			const std::string& strAA_1 = tl::get_spec_char_utf8("AA")
@@ -599,9 +597,7 @@ void ResoDlg::Calc()
 			}
 			ostrRes << "\t<li>E: " << res.dBraggFWHMs[3] << " meV</li></ul></p>\n\n";
 
-			ostrRes << "<p><b>Incoherent (Vanadium) FWHMs:</b>\n";
-			ostrRes << "\t<ul><li>Q: " << dVanadiumFWHM_Q << " " << strAA_1 << "</li>\n";
-			ostrRes << "\t<li>E: " << dVanadiumFWHM_E << " meV</li></ul></p>\n\n";
+			ostrRes << "<p><b>Incoherent (Vanadium) energy FWHM</b>: " << dVanadiumFWHM_E << " meV</p>\n\n";
 
 
 			ostrRes << "<p><b>Resolution Matrix (Q_para, Q_ortho, Q_z, E) in 1/A, meV:</b>\n\n";

@@ -31,7 +31,7 @@ struct Resolution
 	std::vector<t_real_reso> dQ;	// in 1/A and meV
 
 	// full-widths (inc)
-	std::tuple<t_real_reso, t_real_reso> dQinc;
+	t_real_reso dEinc;		// meV
 
 	// ellipse origin
 	ublas::vector<t_real_reso> Q_avg, Q_avg_notrafo;
@@ -40,7 +40,7 @@ struct Resolution
 	std::vector<ublas::vector<t_real_reso>> vecQ;
 };
 
-std::tuple<t_real_reso, t_real_reso> get_vanadium_fwhms(const Resolution& reso);
+t_real_reso get_vanadium_fwhm(const Resolution& reso);
 
 Resolution calc_res(const std::vector<ublas::vector<t_real_reso>>& Q_vec,
 	const std::vector<t_real_reso>* pp_vec = nullptr);

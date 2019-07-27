@@ -201,8 +201,8 @@ ResoResults calc_cn(const CNParams& cn)
 
 	t_mat N = tl::transform(M, V, 1);
 
-	N = ellipsoid_gauss_int(N, 5);
-	N = ellipsoid_gauss_int(N, 4);
+	N = quadric_proj(N, 5);
+	N = quadric_proj(N, 4);
 
 	t_vec vec1 = tl::get_column<t_vec>(N, 1);
 	res.reso = N - ublas::outer_prod(vec1,vec1)

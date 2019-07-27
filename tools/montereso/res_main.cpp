@@ -96,15 +96,14 @@ static bool load_mat(const char* pcFile, Resolution& reso, FileType ft)
 	{
 		std::vector<t_real>& dQ = reso.dQ;
 		reso.dQ = calc_bragg_fwhms(reso.res);
-		reso.dQinc = get_vanadium_fwhms(reso);
+		reso.dEinc = get_vanadium_fwhm(reso);
 
 		std::ostringstream ostrVals;
 		ostrVals << "Coherent / Bragg FWHM values (Qx, Qy, Qz, E): ";
 		std::copy(reso.dQ.begin(), reso.dQ.end(), std::ostream_iterator<t_real>(ostrVals, ", "));
 
 		std::ostringstream ostrIncVals;
-		ostrIncVals << "Incoherent / Vanadium FWHM values (Qy, E): "
-			<< std::get<0>(reso.dQinc) << ", " << std::get<1>(reso.dQinc);
+		ostrIncVals << "Incoherent / Vanadium FWHM value (E in meV): " << reso.dEinc;
 
 		tl::log_info(ostrVals.str());
 		tl::log_info(ostrIncVals.str());

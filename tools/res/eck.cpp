@@ -404,11 +404,11 @@ ResoResults calc_eck(const EckParams& eck)
 	//--------------------------------------------------------------------------
 	// integrate last 2 vars -> equs 57 & 58 in [eck14]
 
-	t_mat U2 = ellipsoid_gauss_int(U1, 5);
-	t_mat U = ellipsoid_gauss_int(U2, 4);
+	t_mat U2 = quadric_proj(U1, 5);
+	t_mat U = quadric_proj(U2, 4);
 
-	t_vec V2 = ellipsoid_gauss_int(V1, U1, 5);
-	t_vec V = ellipsoid_gauss_int(V2, U2, 4);
+	t_vec V2 = quadric_proj(V1, U1, 5);
+	t_vec V = quadric_proj(V2, U2, 4);
 
 	t_real W = (C + D + G + H) - 0.25*V1[5]/U1(5,5) - 0.25*V2[4]/U2(4,4);
 
