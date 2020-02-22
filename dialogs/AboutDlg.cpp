@@ -43,7 +43,7 @@ AboutDlg::AboutDlg(QWidget* pParent, QSettings *pSett)
 
 	labelVersion->setText("Version " TAKIN_VER ".");
 	labelWritten->setText("Written by Tobias Weber <tobias.weber@tum.de>.");
-	labelYears->setText("Years: 2014 - 2019.");
+	labelYears->setText("Years: 2014 - 2020.");
 
 #ifdef PRIVATE_SRC_VERSION
 	labelRepo->setText("Source repo: <a href=\"https://github.com/t-weber/takin\">https://github.com/t-weber/takin</a>.");
