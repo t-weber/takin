@@ -46,7 +46,7 @@ USE_NET = 1
 # use boost's iostreams/regex/image lib?
 USE_IOSTR = 1
 USE_BOOST_REGEX = 0
-USE_GIL = 1
+USE_GIL = 0
 
 # compile the python or julia interfaces?
 USE_PY = 1
