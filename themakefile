@@ -46,6 +46,7 @@ USE_NET = 1
 # use boost's iostreams/regex/image lib?
 USE_IOSTR = 1
 USE_BOOST_REGEX = 0
+USE_BOOST_THREADPOOL = 0
 USE_GIL = 0
 
 # compile the python or julia interfaces?
@@ -159,6 +160,10 @@ endif
 
 ifeq ($(USE_BOOST_REGEX), 1)
 	DEFINES += -DUSE_BOOST_REX
+endif
+
+ifeq ($(USE_BOOST_THREADPOOL), 1)
+	DEFINES += -DUSE_BOOST_THREADPOOL
 endif
 
 ifeq ($(USE_PY), 1)
