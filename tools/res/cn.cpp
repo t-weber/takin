@@ -7,9 +7,9 @@
  * @desc This is a reimplementation in C++ of the file rc_cnmat.m of the
  *		rescal5 package by Zinkin, McMorrow, Tennant, Farhi, and Wildes:
  *		http://www.ill.eu/en/instruments-support/computing-for-science/cs-software/all-software/matlab-ill/rescal-for-matlab/
- * @desc see: [cn67] M. J. Cooper and R. Nathans, Acta Cryst. 23, 357 (1967)
- *		[ch73] N. J. Chesser and J. D. Axe, Acta Cryst. A 29, 160 (1973)
- *		[mit84] P. W. Mitchell, R. A. Cowley and S. A. Higgins, Acta Cryst. Sec A, 40(2), 152-160 (1984)
+ * @desc see: [cn67] M. J. Cooper and R. Nathans, Acta Cryst. 23, 357 (1967), doi: 10.1107/S0365110X67002816
+ *		[ch73] N. J. Chesser and J. D. Axe, Acta Cryst. A 29, 160 (1973), doi: 10.1107/S0567739473000422
+ *		[mit84] P. W. Mitchell, R. A. Cowley and S. A. Higgins, Acta Cryst. Sec A, 40(2), 152-160 (1984), doi: 10.1107/S0108767384000325
  */
 
 #include "cn.h"
