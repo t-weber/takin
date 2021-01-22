@@ -4,7 +4,7 @@
  * @date apr-2016
  * @license GPLv2
  *
- * @desc for used algo, see: [viol14] N. Violini et al., NIM A 736 (2014) pp. 31-39
+ * @desc for used algo, see: [viol14] N. Violini et al., NIM A 736 (2014) pp. 31-39, doi: 10.1016/j.nima.2013.10.042
  * @desc results checked with: [ehl11] G. Ehlers et al., http://arxiv.org/abs/1109.1482 (2011)
  */
 
