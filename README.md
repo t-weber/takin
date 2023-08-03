@@ -6,7 +6,5 @@ An inelastic neutron scattering software package.
 Clone with:
 git clone -v --recurse-submodules https://github.com/t-weber/takin.git
 
-**Note: This is Takin version 1.
-Takin version 2 can be found here here:  
-[https://github.com/t-weber/takin2](https://github.com/t-weber/takin2),  
-[https://code.ill.fr/scientific-software/takin](https://code.ill.fr/scientific-software/takin)**.
+**Note: This is the old version 1 of *Takin*.
+*Takin 2* can be found [here](https://github.com/ILLGrenoble/takin).**
