@@ -7,4 +7,4 @@ Clone with: `git clone -v --recurse-submodules https://github.com/t-weber/takin.
 
 ***
 
-**This is the old version 1 of *Takin* used for a paper, please go to the [main repository](https://github.com/ILLGrenoble/takin) for the current one.** 
+## Note: This is the very old version 1 of *Takin* used for a paper, please go to the [main repository](https://github.com/ILLGrenoble/takin) for the current one.
