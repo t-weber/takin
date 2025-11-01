@@ -149,7 +149,7 @@ std::tuple<std::vector<t_real>, std::vector<t_real>>
 		for(std::size_t iElem=0; iElem<std::min(iSizeE, iSizeW); ++iElem)
 		{
 			t_real dE = tl::jl_traits<t_real>::unbox(jl_arrayref(parrE, iElem));
-			t_real dW = tl::jl_traits<t_real>::unbox(jl_arrayref(parrE, iElem));
+			t_real dW = tl::jl_traits<t_real>::unbox(jl_arrayref(parrW, iElem));
 
 			vecE.push_back(dE);
 			vecW.push_back(dW);
